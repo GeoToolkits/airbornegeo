@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 2025.01.22-28-g6e176d3
+_src_path: gh:scientific-python/cookie
+backend: hatch
+email: matt.d.tankersley@gmail.com
+full_name: Matt Tankersley
+license: MIT
+org: mdtanker
+project_name: airbornegeo
+project_short_description: Tools for processing airborne geophysics data.
+url: https://github.com/mdtanker/airbornegeo
+vcs: true
