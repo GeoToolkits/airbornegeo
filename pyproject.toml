@@ -29,7 +29,25 @@ classifiers = [
   "Typing :: Typed",
 ]
 dynamic = ["version"]
-dependencies = []
+dependencies = [
+  "polartoolkit",
+  "invert4geom",
+  "geopandas<1.0",
+  "numpy",
+  "pandas",
+  "pygmt",
+  "scipy",
+  "shapely",
+  "verde",
+  "scikit-learn",
+  "tqdm",
+  # visualization
+  "ipython",
+  "ipykernel",
+  "seaborn",
+  "plotly",
+  "matplotlib",
+]
 
 [project.optional-dependencies]
 test = [

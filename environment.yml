@@ -1,0 +1,29 @@
+name: airbornegeo
+channels:
+  - conda-forge
+  - pytorch
+  - nodefaults
+dependencies:
+  - python=3.12
+  - polartoolkit
+  - invert4geom
+  - geopandas<1.0
+  - plotly
+  - pygmt
+  - seaborn
+  - shapely
+  - verde
+  - pandas
+  - ipython
+  - scikit-learn
+  - tqdm
+  - ipykernel
+  - numpy
+  - scipy
+  - matplotlib
+  - nbformat # mime type issue
+  - pip
+  - pip:
+    - ../invert4geom -e .
+    - ../polartoolkit -e .
+
