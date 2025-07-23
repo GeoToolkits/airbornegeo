@@ -46,6 +46,7 @@ dependencies = [
   "ipykernel",
   "seaborn",
   "plotly",
+  "nbformat",
   "matplotlib",
 ]
 

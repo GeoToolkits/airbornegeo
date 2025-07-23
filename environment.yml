@@ -9,6 +9,7 @@ dependencies:
   - invert4geom
   - geopandas<1.0
   - plotly
+  - nbformat
   - pygmt
   - seaborn
   - shapely
