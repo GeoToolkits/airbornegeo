@@ -85,101 +85,6 @@ def detect_outliers(df):
 
 #     return outliers
 
-def filter_flight_lines(
-    df: gpd.GeoDataFrame | pd.DataFrame,
-    filt_type: str,
-    data_column: str,
-    distance_column: str = "dist_along_line",
-    line_column: str = "line",
-    pad_width_percentage: float = 10,
-) -> gpd.GeoDataFrame | pd.DataFrame:
-    """
-    _summary_
-
-    Parameters
-    ----------
-    df : gpd.GeoDataFrame | pd.DataFrame
-        _description_
-    filt_type : str
-        a string with format "<type><width>+h" where type is GMT filter type, width is
-        the filter width in same units as distance column, and optional +h switches from
-        low-pass to high-pass filter; e.g. "g10+h" is a 10m high-pass Gaussian filter.
-    data_column : str
-        _description_
-    distance_column : str, optional
-        _description_, by default "dist_along_line"
-    line_column : str, optional
-        _description_, by default "line"
-    pad_width_percentage : float, optional
-        _description_, by default 10
-
-    Returns
-    -------
-    gpd.GeoDataFrame | pd.DataFrame
-        _description_
-    """
-
-    df = df.copy()
-
-    for i in df[line_column].unique():
-        # subset data from 1 line
-        line = df[df[line_column] == i]
-        line = line[[distance_column, data_column]]
-
-        # get data spacing
-        distance = line[distance_column].values
-        data_spacing = np.median(np.diff(distance))
-
-        # pad distance of 10% of line distance
-        pad_dist = (distance.max() - distance.min()) * (pad_width_percentage / 100)
-        pad_dist = round(pad_dist / data_spacing) * data_spacing
-
-        # get the number of points to pad
-        # n_pad = int(pad_dist / data_spacing)
-
-        # add pad points to distance values
-        lower_pad = np.arange(
-            distance.min() - pad_dist,
-            distance.min(),
-            data_spacing,
-        )
-        upper_pad = np.arange(
-            distance.max(),
-            distance.max() + pad_dist,
-            data_spacing,
-        )
-        vals = np.concatenate((lower_pad, upper_pad))
-        new_dist = pd.DataFrame({distance_column: vals})
-
-        # pad the line, fill padded values in data with nearest value
-        padded = (
-            pd.concat(
-                [line.reset_index(), new_dist],
-            )
-            .sort_values(by=distance_column)
-            .set_index("index")
-        )
-        padded = padded.fillna(method="ffill").fillna(method="bfill").reset_index()
-        padded = padded.rename(columns={"index": "true_index"})
-
-        # filter the padded data
-        filtered = pygmt.filter1d(
-            padded[[distance_column, data_column]],
-            end=True,
-            time_col=0,
-            filter_type=filt_type,
-        ).rename(columns={0: distance_column, 1: data_column})
-
-        # un-pad the data
-        filtered["index"] = padded.true_index
-        filtered = filtered.set_index("index")
-        filtered = filtered[filtered.index.isin(line.index)]
-
-        # replace original data with filtered data
-        df.loc[df[line_column] == i, data_column] = filtered[data_column]
-
-    return df[data_column]
-
 
 def normalize_values(
     x: NDArray,
@@ -627,6 +532,71 @@ def plot_levelling_convergence(
     return fig
 
 
+def relative_distance(
+    df: pd.DataFrame,
+    reverse: bool = False,
+) -> pd.DataFrame:
+    """
+    calculate distance between x,y points in a dataframe, relative to the previous row.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataframe containing columns x and y in meters.
+    reverse : bool, optional,
+        choose whether to reverse the profile, by default is False
+
+    Returns
+    -------
+    pandas.DataFrame
+        Returns original dataframe with additional column rel_dist
+    """
+    df = df.copy()
+    if reverse is True:
+        df1 = df[::-1].reset_index(drop=True)
+    elif reverse is False:
+        df1 = df.copy()#.reset_index(drop=True)
+
+    # from https://stackoverflow.com/a/75824992/18686384
+    df1["x_lag"] = df1.easting.shift(1)  # pylint: disable=used-before-assignment
+    df1["y_lag"] = df1.northing.shift(1)
+    df1["rel_dist"] = np.sqrt(
+        (df1.easting - df1["x_lag"]) ** 2 + (df1.northing - df1["y_lag"]) ** 2
+    )
+    # set first row distance to 0
+    df1.loc[0, "rel_dist"] = 0
+    df1 = df1.drop(["x_lag", "y_lag"], axis=1)
+    return df1.dropna(subset=["rel_dist"])
+
+
+def distance_along_flight(
+    df: pd.DataFrame,
+    flight_col_name: str = "flight",
+    time_col_name: str | None = "unixtime",
+    **kwargs: typing.Any
+) -> pd.Series:
+    """
+    """
+    reverse = kwargs.get("reverse", False)
+    df = df.copy()
+
+    df = df.groupby(flight_col_name)
+
+    dfs = []
+    for name, flight in df:
+        flight = flight.sort_values(by=[time_col_name]).reset_index(drop=True)
+        flight = relative_distance(flight, reverse=reverse)
+        dist = flight.rel_dist.cumsum()
+        flight["dist_along_flight"] = dist
+        # df.loc[df[flight_col_name] == i, "dist_along_flight"] = dist
+        dfs.append(flight)
+
+    df = pd.concat(dfs).reset_index(drop=True).sort_values(by=[flight_col_name])
+
+    return df.dist_along_flight
+
+
+
 def distance_along_line(
     gdf: gpd.GeoDataFrame,
     line_col_name: str = "line",
@@ -671,7 +641,7 @@ def distance_along_line(
         rect = line.iloc[0].minimum_rotated_rectangle
 
         # get angle of rotation
-        angle = azimuth(rect)
+        angle = _azimuth(rect)
         if angle > 90 and angle <= 180:
             angle = angle - 180
         # print(angle)
@@ -1085,7 +1055,7 @@ def add_intersections(
     return gdf, inters
 
 
-def _azimuth(point1, point2):
+def _azimuth_between_points(point1, point2):
     """azimuth between 2 points (interval 0 - 180)"""
 
     angle = np.arctan2(point2[1] - point1[1], point2[0] - point1[0])
@@ -1097,16 +1067,16 @@ def _dist(a, b):
     return math.hypot(b[0] - a[0], b[1] - a[1])
 
 
-def azimuth(mrr):
+def _azimuth(mrr):
     """azimuth of minimum_rotated_rectangle"""
     bbox = list(mrr.exterior.coords)
     axis1 = _dist(bbox[0], bbox[3])
     axis2 = _dist(bbox[0], bbox[1])
 
     if axis1 <= axis2:
-        az = _azimuth(bbox[0], bbox[1])
+        az = _azimuth_between_points(bbox[0], bbox[1])
     else:
-        az = _azimuth(bbox[0], bbox[3])
+        az = _azimuth_between_points(bbox[0], bbox[3])
 
     return az
 
@@ -1115,7 +1085,7 @@ def extend_line(line, distance, plot=False):
     """extend line in either direction by distance"""
     # find minimum rotated rectangle around line
     rect = line.minimum_rotated_rectangle
-    angle = azimuth(rect)
+    angle = _azimuth(rect)
     # logger.debug("rotated angle:", angle)
 
     rect_center = shapely.centroid(rect).x, shapely.centroid(rect).y
