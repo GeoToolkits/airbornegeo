@@ -1,0 +1,65 @@
+name: Docs Preview
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - closed
+    branches:
+      - "main"
+  workflow_dispatch:
+
+concurrency: preview-${{github.ref}}
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    # only run if from the same repository, not a fork
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+      pull-requests: write
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      # Checkout current git repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # setup python env
+      - uses: actions/setup-python@v5
+        if: github.event.action != 'closed' # Skip the build if the PR has been closed; just run the clean up steps
+        with:
+          python-version: "3.x"
+
+      - uses: astral-sh/setup-uv@v6
+
+      - id: install_pandoc
+        run: sudo apt-get install pandoc
+
+      # Make API docs
+      - name: Make API docs
+        if: github.event.action != 'closed'
+        run: uvx nox -s build_api_docs
+
+      # Build the documentation
+      - name: Build the documentation
+        if: github.event.action != 'closed'
+        run: uvx nox -s docs --non-interactive -- docs/_build/html
+
+      # Deploy the preview of the docs
+      - name: Deploy Preview
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: docs/_build/html
+          preview-branch: gh-pages
+          # custom-url:
+          umbrella-dir: pr-preview
+          action: auto
+          deploy-repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}

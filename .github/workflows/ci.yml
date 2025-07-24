@@ -12,13 +12,14 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Many color libraries just need this to be set to any value, but at least
-  # one distinguishes color depth, where "3" -> "256-bit color".
+  # Many color libraries just need this variable to be set to any value.
+  # Set it to 3 to support 8-bit color graphics (256 colors per channel)
+  # for libraries that care about the value set.
   FORCE_COLOR: 3
 
 jobs:
-  pre-commit:
-    name: Format
+  lint:
+    name: Pylint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,20 +28,23 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: --hook-stage manual --all-files
-      - name: Run PyLint
-        run: pipx run nox -s pylint -- --output-format=github
+      - uses: astral-sh/setup-uv@v6
+
+      # comment out the below 3 lines if your set up pre-commit in pre-commit.ci
+      # - uses: pre-commit/action@v3.0.1
+      #   with:
+      #     extra_args: --hook-stage manual --all-files
+
+      - name: Run Pylint
+        run: uvx nox -s pylint -- --output-format=github
 
   checks:
     name: Check Python ${{ matrix.python-version }} on ${{ matrix.runs-on }}
     runs-on: ${{ matrix.runs-on }}
-    needs: [pre-commit]
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.13"]
+        python-version: ["3.10", "3.13"]
         runs-on: [ubuntu-latest, windows-latest, macos-14]
 
         include:
@@ -57,15 +61,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
 
-      - name: Install package
-        run: python -m pip install .[test]
+      - uses: astral-sh/setup-uv@v6
 
-      - name: Test package
+      - name: Install package
+        run: uv sync
+
+      - name: Run the tests
         run: >-
-          python -m pytest -ra --cov --cov-report=xml --cov-report=term
+          uv run pytest -ra --cov --cov-report=xml --cov-report=term
           --durations=20
 
       - name: Upload coverage report
-        uses: codecov/codecov-action@v5.4.2
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
