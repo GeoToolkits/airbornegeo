@@ -1,0 +1,51 @@
+name: documentation
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# This job installs dependencies, builds the html, and pushes it to gh-pages
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }} # only run one of these jobs at a time
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      # Checkout current git repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # setup python env
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - uses: astral-sh/setup-uv@v6
+
+      - id: install_pandoc
+        run: sudo apt-get install pandoc
+
+      # Make API docs
+      - name: Make API docs
+        run: uvx nox -s build_api_docs
+
+      # Build the documentation
+      - name: Build the documentation
+        run: uvx nox -s docs --non-interactive -- docs/_build/html
+
+      # Deploy the HTML to gh-pages branch
+      - name: GitHub Pages action
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/html
+          publish_branch: gh-pages
+          force_orphan: true

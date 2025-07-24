@@ -1,7 +1,8 @@
-# airbornegeo
+# AirborneGeo
+
 
 [![Actions Status][actions-badge]][actions-link]
-[![Documentation Status][rtd-badge]][rtd-link]
+[![Documentation Status][website-badge]][website-link]
 
 [![PyPI version][pypi-version]][pypi-link]
 [![Conda-Forge][conda-badge]][conda-link]
@@ -9,7 +10,7 @@
 
 [![GitHub Discussion][github-discussions-badge]][github-discussions-link]
 
-<!-- SPHINX-START -->
+<!-- SPHINX-START-badges -->
 
 <!-- prettier-ignore-start -->
 [actions-badge]:            https://github.com/mdtanker/airbornegeo/workflows/CI/badge.svg
@@ -21,7 +22,9 @@
 [pypi-link]:                https://pypi.org/project/airbornegeo/
 [pypi-platforms]:           https://img.shields.io/pypi/pyversions/airbornegeo
 [pypi-version]:             https://img.shields.io/pypi/v/airbornegeo
-[rtd-badge]:                https://readthedocs.org/projects/airbornegeo/badge/?version=latest
-[rtd-link]:                 https://airbornegeo.readthedocs.io/en/latest/?badge=latest
+[website-badge]:            https://github.com/mdtanker/airbornegeo/actions/workflows/pages/pages-build-deployment/badge.svg
+[website-link]:             https://mdtanker.github.io/airbornegeo/
 
 <!-- prettier-ignore-end -->
+
+<!-- SPHINX-END-badges -->
