@@ -8,7 +8,7 @@ dependencies:
   # Required dependencies
   - polartoolkit
   - invert4geom
-  - geopandas<1.0
+  - geopandas
   - plotly
   - pygmt
   - seaborn

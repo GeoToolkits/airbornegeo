@@ -33,7 +33,7 @@ dynamic = ["version"]
 dependencies = [
   "polartoolkit",
   "invert4geom",
-  "geopandas<1.0",
+  "geopandas",
   "numpy",
   "pandas",
   "pygmt",
