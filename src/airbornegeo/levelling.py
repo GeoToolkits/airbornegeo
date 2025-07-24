@@ -1,6 +1,7 @@
 import copy
 import itertools
 import math
+import typing
 import warnings
 
 import geopandas as gpd
@@ -225,6 +226,67 @@ def normalize_values(
     norm = (x - min_val) / (max_val - min_val)
 
     return norm * (high - low) + low
+
+
+def relative_distance(
+    df: pd.DataFrame,
+    reverse: bool = False,
+) -> pd.DataFrame:
+    """
+    calculate distance between x,y points in a dataframe, relative to the previous row.
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataframe containing columns x and y in meters.
+    reverse : bool, optional,
+        choose whether to reverse the profile, by default is False
+    Returns
+    -------
+    pandas.DataFrame
+        Returns original dataframe with additional column rel_dist
+    """
+    df = df.copy()
+    if reverse is True:
+        df1 = df[::-1].reset_index(drop=True)
+    elif reverse is False:
+        df1 = df.copy()  # .reset_index(drop=True)
+
+    # from https://stackoverflow.com/a/75824992/18686384
+    df1["x_lag"] = df1.easting.shift(1)  # pylint: disable=used-before-assignment
+    df1["y_lag"] = df1.northing.shift(1)
+    df1["rel_dist"] = np.sqrt(
+        (df1.easting - df1["x_lag"]) ** 2 + (df1.northing - df1["y_lag"]) ** 2
+    )
+    # set first row distance to 0
+    df1.loc[0, "rel_dist"] = 0
+    df1 = df1.drop(["x_lag", "y_lag"], axis=1)
+    return df1.dropna(subset=["rel_dist"])
+
+
+def distance_along_flight(
+    df: pd.DataFrame,
+    flight_col_name: str = "flight",
+    time_col_name: str | None = "unixtime",
+    **kwargs: typing.Any,
+) -> pd.Series:
+    """ """
+    reverse = kwargs.get("reverse", False)
+    df = df.copy()
+
+    df = df.groupby(flight_col_name)
+
+    dfs = []
+    for _name, flight in df:
+        flight_df = flight.sort_values(by=[time_col_name]).reset_index(drop=True)
+        flight_df = relative_distance(flight_df, reverse=reverse)
+        dist = flight_df.rel_dist.cumsum()
+        flight_df["dist_along_flight"] = dist
+        # df.loc[df[flight_col_name] == i, "dist_along_flight"] = dist
+        dfs.append(flight_df)
+
+    df = pd.concat(dfs).reset_index(drop=True).sort_values(by=[flight_col_name])
+
+    return df.dist_along_flight
 
 
 def calculate_intersection_weights(
