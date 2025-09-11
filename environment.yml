@@ -5,10 +5,9 @@ channels:
   - nodefaults
 dependencies:
   - python=3.12
-  # Required dependencies
   - polartoolkit
   - invert4geom
-  - geopandas
+  - geopandas<1.0
   - plotly
   - pygmt
   - seaborn
@@ -18,25 +17,13 @@ dependencies:
   - ipython
   - scikit-learn
   - tqdm
+  - ipykernel
   - numpy
   - scipy
   - matplotlib
   - nbformat # mime type issue
-  # Optional dependencies
-  # test
-  - pytest>=6
-  - pytest-cov>=3
-  # docs
-  - sphinx>=7.0
-  - myst-parser>=0.13
-  - sphinx-copybutton
-  - sphinx-autodoc-typehints
-  - furo>=2023.08.17
-  - nbsphinx
-  - ipykernel
-  # dev
-  - jupyterlab
-  # below packages need to be installed with pip (aren't available in conda-forge)
-  # - pip
-  # - pip:
-  #     -
+  - pip
+  - pip:
+    - ../invert4geom -e .
+    - ../polartoolkit -e .
+
