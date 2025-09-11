@@ -1,3 +1,6 @@
+# Ignore the virtual environment
+**uv.lock
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -107,7 +110,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
-env/
+# env/
 venv/
 ENV/
 env.bak/
@@ -137,9 +140,11 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# git changes
+changes.md
+
 # setuptools_scm
 src/*/_version.py
-
 
 # ruff
 .ruff_cache/
