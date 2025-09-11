@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v5
 
       # setup python env
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         if: github.event.action != 'closed' # Skip the build if the PR has been closed; just run the clean up steps
         with:
           python-version: "3.x"
