@@ -92,9 +92,10 @@ Tools for processing airborne geophysics data.
 [pypi-link]:                https://pypi.org/project/airbornegeo/
 [pypi-platforms]:           https://img.shields.io/pypi/pyversions/airbornegeo
 [pypi-version]:             https://img.shields.io/pypi/v/airbornegeo
-[website-badge]:                https://readthedocs.org/projects/airbornegeo/badge/?version=latest
-[website-link]:                 https://airbornegeo.readthedocs.io/en/latest/?badge=latest
-
+[website-badge]:            https://github.com/mdtanker/airbornegeo/actions/workflows/pages/pages-build-deployment/badge.svg
+[website-link]:             https://mdtanker.github.io/airbornegeo/
+[zenodo-badge]:            https://zenodo.org/badge/DOI/10.5281/zenodo.zenodo_DOI.svg
+[zenodo-link]:             https://doi.org/10.5281/zenodo.zenodo_DOI
 <!-- prettier-ignore-end -->
 
 <!-- SPHINX-END-badges -->
