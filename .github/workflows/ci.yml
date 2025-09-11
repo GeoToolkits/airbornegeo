@@ -17,6 +17,10 @@ env:
   # for libraries that care about the value set.
   FORCE_COLOR: 3
 
+defaults:
+  run:
+    shell: bash -el {0}
+
 jobs:
   lint:
     name: Pylint
