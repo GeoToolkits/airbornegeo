@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import importlib.metadata
 
-import airbornegeo
+import airbornegeo as m
 
 
 def test_version():
-    assert importlib.metadata.version("airbornegeo") == airbornegeo.__version__
+    assert importlib.metadata.version("airbornegeo") == m.__version__

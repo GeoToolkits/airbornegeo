@@ -2,10 +2,7 @@ ci:
   autoupdate_commit_msg: "chore: update pre-commit hooks"
   autofix_commit_msg: "style: pre-commit fixes"
 
-exclude: |
-  (?x)(
-    ^.github/config.yml
-  )
+exclude: ^.cruft.json|.copier-answers.yml$
 
 repos:
   - repo: https://github.com/adamchainz/blacken-docs
@@ -38,38 +35,32 @@ repos:
       - id: rst-inline-touching-normal
 
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: "v3.6.2"
+    rev: "v3.5.3"
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
         args: [--prose-wrap=always]
-        exclude: \.md
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.12.4"
+    rev: "v0.11.2"
     hooks:
-      - id: ruff-check
+      - id: ruff
         args: ["--fix", "--show-fixes"]
       - id: ruff-format
 
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: "v1.17.0"
-  #   hooks:
-  #     - id: mypy
-  #       files: src|tests
-  #       args: []
-  #       additional_dependencies:
-  #         - pytest
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.15.0"
+    hooks:
+      - id: mypy
+        files: src|tests
+        args: []
+        additional_dependencies:
+          - pytest
 
   - repo: https://github.com/codespell-project/codespell
     rev: "v2.4.1"
     hooks:
       - id: codespell
-        additional_dependencies:
-          - tomli; python_version<'3.11'
-        entry:
-          codespell --ignore-regex='[A-Za-z0-9+/]{100,}'
-          --skip="*.js,*.html,*.css,*.svg"
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: "v0.10.0.1"
@@ -91,7 +82,8 @@ repos:
         additional_dependencies: ["validate-pyproject-schema-store[all]"]
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: "0.33.2"
+    rev: "0.31.3"
     hooks:
       - id: check-dependabot
       - id: check-github-workflows
+      - id: check-readthedocs
