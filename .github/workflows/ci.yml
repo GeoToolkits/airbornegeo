@@ -26,13 +26,13 @@ jobs:
     name: Pylint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
 
       # comment out the below 3 lines if your set up pre-commit in pre-commit.ci
       # - uses: pre-commit/action@v3.0.1
@@ -52,7 +52,7 @@ jobs:
         runs-on: [ubuntu-latest, windows-latest, macos-14]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
