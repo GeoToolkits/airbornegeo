@@ -7,8 +7,6 @@ dependencies:
   - python=3.12
   # Required dependencies
   - geopandas
-  - invert4geom
-  - polartoolkit
   - numpy>=1.25.0
   - pandas>=2.0.0
   - pygmt
@@ -17,6 +15,7 @@ dependencies:
   - shapely
   - tqdm
   - verde
+  - harmonica
   # visualization
   - ipykernel
   - ipython>=8.13.0
@@ -35,6 +34,8 @@ dependencies:
   - furo>=2023.08.17
   - nbsphinx
   - ipykernel
+  - polartoolkit>=1.5
+  - invert4geom
   # dev
   - jupyterlab
   # below packages need to be installed with pip (aren't available in conda-forge)

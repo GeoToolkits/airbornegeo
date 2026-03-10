@@ -13,7 +13,8 @@ assignees: ''
 
 ## Update dependencies
 
-- [ ] Check all the dependency changes since the last release are  reflected in `environment.yml`
+- [ ] Check all the dependency changes since the last release are  reflected in `environment.yml`, `pyproject.toml`, and the Scooby list in `__init__.py`
+- [ ] Check any new function are added to `__init__.py` and `docs/api/airbornegeo.rst`
 
 
 ## Update the changelog

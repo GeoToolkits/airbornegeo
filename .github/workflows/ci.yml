@@ -31,13 +31,13 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.x"
+          python-version: "3.13"
       - uses: astral-sh/setup-uv@v7
 
       # comment out the below 3 lines if your set up pre-commit in pre-commit.ci
-      # - uses: pre-commit/action@v3.0.1
-      #   with:
-      #     extra_args: --hook-stage manual --all-files
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --hook-stage manual --all-files
 
       - name: Run Pylint
         run: uvx nox -s pylint -- --output-format=github
