@@ -1,3 +1,6 @@
+docs/data/*
+!docs/data/.gitkeep
+
 # Ignore the virtual environment
 **uv.lock
 
