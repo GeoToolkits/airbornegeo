@@ -14,7 +14,23 @@ class Report(scooby.Report):  # type: ignore[misc] # pylint: disable=missing-cla
         """Initiate a scooby.Report instance."""
 
         # Mandatory packages.
-        core = []
+        core = [
+            "numpy",
+            "scipy",
+            "matplotlib",
+            "pandas",
+            "scikit-learn",
+            "ipython",
+            "harmonica",
+            "geopandas",
+            "pygmt",
+            "shapely",
+            "tqdm",
+            "verde",
+            "ipykernel",
+            "plotly",
+            "seaborn",
+        ]
 
         # Optional packages.
         optional = []
