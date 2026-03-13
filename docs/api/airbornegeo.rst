@@ -18,6 +18,7 @@ Functions for working with entire surveys of data.
 
     along_track_distance
     relative_distance
+    split_into_segments
 
 
 Quality Control (QC)

@@ -18,86 +18,69 @@ from airbornegeo import logger
 sns.set_theme()
 
 
-def eq_sources_by_line(
-    df: pd.DataFrame,
-    data_column: str,
-    damping: float,
-    depth: float | str = "default",
-    block_size: float | None = None,
+def split_into_segments(
+    data: pd.DataFrame,
+    threshold: float,
+    column_name: str,
+    min_points_per_segment: int = 0,
 ) -> pd.Series:
     """
-    For each light line in a dataframe, fit a set of equivalent sources to them. These
-    can then be used to predict the data at the intersection points, on a regular line
-    spacing, or to upward continue the line.
+    Split dataframe into segments where there is a gap in the supplied values greater
+    than the threshold. Data are sorted by column 'unixtime'. The values are chosen
+    with column_name, and could be quantities such as time in seconds, cumulative
+    distances, or aircraft bearings.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        _description_
+    threshold : float
+        _description_, by default None
+    column_name: str
+        Name of column supplying to data.
+    min_points_per_segment: int or None
+        Segments with fewer points are giving a segment id of NaN, by default 0
+
+    Returns
+    -------
+    pd.Series
+        A series with new new segments identified with integers
     """
+    df = data.copy()
 
-    df = df.copy()
+    col_list = ["unixtime", column_name]
+    assert all(x in df.columns for x in col_list), (
+        f"dataframe must contain columns {col_list} "
+    )
 
-    assert "line" in df.columns, "line column must be in dataframe"
+    # save index, sort by time and reset index
+    df = df.reset_index(names="tmp_index")
+    df = df.sort_values(by="unixtime").reset_index(drop=True)
 
-    df["tmp"] = 0
+    # Calculate difference between each point
+    df["diff"] = df[column_name].diff()
 
-    fitted_eqs = {}
-    for name, line_df in tqdm(df.groupby("line"), desc="Lines"):
-        coords = (
-            line_df.distance_along_line,
-            line_df.tmp,
-            line_df.height,
+    # Create new segment when gap > distance_threshold
+    df["segment"] = (df["diff"] > threshold).cumsum()
+
+    # remove segments which are less than specified number of points
+    if min_points_per_segment > 0:
+        groups = df.groupby("segment")
+        prior_len = len(df.segment.unique())
+        # make segment ID nan for small segments
+        small_segments = groups.filter(lambda x: len(x) < min_points_per_segment)
+        df.loc[small_segments.index, "segment"] = np.nan
+        post_len = len(df.segment.unique())
+        logger.info(
+            "dropped %s segments which contained less than %s points.",
+            prior_len - post_len,
+            min_points_per_segment,
         )
 
-        # define equivalent source parameters
-        eqs_line = hm.EquivalentSources(
-            damping=damping,
-            depth=depth,
-            block_size=block_size,
-        )
+    # Reset index and sort
+    df = df.set_index("tmp_index").sort_values("tmp_index")
 
-        eqs_line.fit(coords, line_df[data_column])
-
-        fitted_eqs[name] = eqs_line
-
-    return fitted_eqs
-
-
-def upward_continue_by_line(
-    df: pd.DataFrame,
-    fitted_equivalent_sources: dict,
-    height: float,
-    no_downward_continuation: bool = True,
-) -> pd.Series:
-    """
-    For each light line in a dataframe, fit a set of equivalent sources and then upward
-    continue to data to a specified height and return the upward continued data.
-    """
-
-    df = df.copy()
-
-    assert "line" in df.columns, "line column must be in dataframe"
-    assert "height" in df.columns, "height column must be in dataframe"
-
-    df["tmp"] = 0
-
-    for name, line_df in tqdm(df.groupby("line"), desc="Lines"):
-        eqs = fitted_equivalent_sources[name]
-
-        upward = np.full_like(line_df.tmp, height)
-
-        if no_downward_continuation is True:
-            upward = np.where(
-                upward > line_df.height.to_numpy(), upward, line_df.height.to_numpy()
-            )
-
-        upward_continued = eqs.predict(
-            (
-                line_df.distance_along_line,
-                line_df.tmp,
-                upward,
-            )
-        )
-
-        df.loc[df.line == name, "upward_continued"] = upward_continued
-
-    return df.upward_continued
+    return df.segment
 
 
 def reduce_by_line(

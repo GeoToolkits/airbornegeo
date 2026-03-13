@@ -11,4 +11,5 @@ You should follow these in order, then refer to the [how-to guides](../how_to/in
 "numbered":
 ---
 along_track_distance
+split_survey_into_lines
 ```
