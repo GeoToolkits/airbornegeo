@@ -14,6 +14,12 @@ on:
 
 concurrency: preview-${{github.ref}}
 
+env:
+  # Many color libraries just need this variable to be set to any value.
+  # Set it to 3 to support 8-bit color graphics (256 colors per channel)
+  # for libraries that care about the value set.
+  FORCE_COLOR: 3
+
 jobs:
   preview:
     runs-on: ubuntu-latest
@@ -34,22 +40,24 @@ jobs:
       # Install Micromamba with conda-forge dependencies
       - name: Setup Micromamba
         uses: mamba-org/setup-micromamba@v2
-
-      # setup python env
-      - uses: actions/setup-python@v6
-        if: github.event.action != 'closed' # Skip the build if the PR has been closed; just run the clean up steps
         with:
-          python-version: "3.x"
-
-      - uses: astral-sh/setup-uv@v7
+          environment-file: environment.yml
+          post-cleanup: "all"
+          cache-downloads: false
+          # environment cache is persistent for one week.
+          cache-environment-key:
+            micromamba-environment-${{ steps.date.outputs.date }}
 
       - id: install_pandoc
         run: sudo apt-get install pandoc
 
+      - name: Install package
+        run: pip install --no-deps -e . sphinx-autobuild
+
       # Build the documentation
       - name: Build the documentation
         if: github.event.action != 'closed'
-        run: uvx nox -s docs --non-interactive -- docs/_build/html
+        run: sphinx-autobuild -n -T -b="html" docs -- docs/_build/html
 
       # Deploy the preview of the docs
       - name: Deploy Preview
