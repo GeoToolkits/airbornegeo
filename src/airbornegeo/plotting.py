@@ -196,7 +196,7 @@ def plotly_points(
     geopandas geometry column, or from user specified columns given by 'coord_names'.
     """
     data = df[df[color_col].notna()].copy()
-
+    assert len(data) > 0, "supplied column of data has no non nan values!"
     if coord_names is None:
         try:
             x = data.geometry.x
