@@ -289,10 +289,6 @@ The Docs are build with [Sphinx](https://www.sphinx-doc.org/en/master/) and host
 
 You can build the docs using:
 ```bash
-    nox -s build_api_docs
-```
-
-```bash
     nox -s docs
 ```
 

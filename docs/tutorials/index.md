@@ -5,13 +5,11 @@ They expect you to be familiar with Python and have the package [successfully in
 You should follow these in order, then refer to the [how-to guides](../how_to/index.md) for more in-depth guides for specific features.
 
 
-<!--
+
 ```{nbgallery}
 ---
 "numbered":
 ---
-notebook1
-notebook2
-notebook3
+along_track_distance
+split_survey_into_lines
 ```
--->

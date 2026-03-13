@@ -1,7 +1,6 @@
 # pylint: disable=too-many-lines
 import copy
 import itertools
-import math
 import typing
 import warnings
 
@@ -10,132 +9,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly
-import plotly.express as px
 import plotly.graph_objects as go
-import pygmt
 import scipy
 import seaborn as sns
 import shapely
-import verde as vd
-from invert4geom import utils as invert4geom_utils
 from IPython.display import clear_output
-from numpy.typing import NDArray
-from polartoolkit import utils
 from shapely.geometry import LineString, Point
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PolynomialFeatures
 from tqdm.autonotebook import tqdm
 
-from airbornegeo import logger
+import airbornegeo
+from airbornegeo import logger, processing
 
 sns.set_theme()
-
-# Any functions or classes defined here which you want to be available when to users
-# with `import airbornegeo` should be added to the list in `__init__.py`.
-
-# def points_in_polygon(
-#     df: pd.DataFrame | gpd.GeoDataFrame,
-#     polygon: gpd.GeoDataFrame,
-#     coord_cols: tuple[str, str] = ('easting', 'northing')
-# ):
-#      df = df.copy()
-#     if isinstance(df, pd.DataFrame):
-#         df = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df[[coord_cols]]))
-
-
-def detect_outliers(df: pd.DataFrame) -> None:
-    """
-    Detects outliers in each column of a Pandas DataFrame using the IQR method
-    and visualizes them using box plots.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        The input DataFrame.
-    """
-    for column in df.columns:
-        if pd.api.types.is_numeric_dtype(df[column]):
-            q1 = df[column].quantile(0.25)
-            q3 = df[column].quantile(0.75)
-            iqr = q3 - q1
-            lower_bound = q1 - 1.5 * iqr
-            upper_bound = q3 + 1.5 * iqr
-            outliers = (df[column] < lower_bound) | (df[column] > upper_bound)
-
-            if outliers.any():
-                plt.figure(figsize=(8, 6))
-                sns.boxplot(x=df[column])
-                plt.title(f"Boxplot of {column} (Outliers Detected)")
-                plt.show()
-            else:
-                logger.info("No outliers detected in column: %s", column)
-
-
-# def detect_outliers(
-#     df,
-#     zscore_threshold: float = 4,
-# ):
-#     df = df.copy()
-
-#     # df['index'] = df.index
-#     df = df.dropna(axis=1, how="any")
-
-#     stats_df = df.apply(scipy.stats.zscore)
-
-#     outliers = stats_df[(stats_df > zscore_threshold).any(axis=1)]
-#     # cols = outliers.columns.tolist()
-#     # outliers = outliers.merge(df[['index']], left_index=True, right_index=True, how="left")
-#     # outliers = outliers[["index"]+cols]
-
-#     return outliers
-
-
-def normalize_values(
-    x: NDArray,
-    low: float = 0,
-    high: float = 1,
-    quantiles: tuple[float, float] = (0, 1),
-) -> NDArray:
-    """
-    Normalize a list of numbers by scaling the min and max values to  be between low and
-    high. The min and max values can changed to be any quatile of the data.
-
-    Parameters
-    ----------
-    x : NDArray
-        numbers to normalize
-    low : float, optional
-        lower value for normalization, by default 0
-    high : float, optional
-        higher value for normalization, by default 1
-    quantiles : tuple[float, float], optional
-        quantiles to use for min and max values, by default (0, 1)
-
-    Returns
-    -------
-    NDArray
-        a normalized list of numbers
-    """
-    x = copy.deepcopy(x)
-    x = np.array(x)
-
-    floor = np.nanquantile(x, quantiles[0])
-    ciel = np.nanquantile(x, quantiles[1])
-
-    x = np.where(x < floor, floor, x)
-    x = np.where(x > ciel, ciel, x)
-
-    min_val = np.min(x)
-    max_val = np.max(x)
-
-    if min_val == max_val:
-        logger.warning("min and max values are equal, returning list of low values")
-        return np.full_like(x, low)
-
-    norm = (x - min_val) / (max_val - min_val)
-
-    return norm * (high - low) + low
 
 
 def calculate_intersection_weights(
@@ -159,7 +47,6 @@ def calculate_intersection_weights(
     height_2nd_derive_weight: float | None = None,
     height_2nd_derive_floor: float | None = None,
     height_2nd_derive_col_name: str | None = None,
-    line_col_name: str = "line",
     height_col_name: str = "height",
     plot: bool = False,
 ) -> gpd.GeoDataFrame:
@@ -170,12 +57,13 @@ def calculate_intersection_weights(
     inters = inters.copy()
     gdf = gdf.copy()
 
+    assert "line" in gdf.columns, "gdf must have column 'line'"
+
     # get list of lines from inters
     lines = [*inters.line.unique(), *inters.tie.unique()]
 
     # subset data based on lines
-    gdf = gdf[gdf[line_col_name].isin(lines)]
-
+    gdf = gdf[gdf.line.isin(lines)]
     if weight_by in ("line", "tie", "all"):
         pass
     else:
@@ -196,7 +84,7 @@ def calculate_intersection_weights(
         inters["max_dist_weight"] = weight_vals
 
         if weight_by == "all":
-            inters["max_dist_weight"] = normalize_values(
+            inters["max_dist_weight"] = airbornegeo.normalize_values(
                 inters["max_dist_weight"],
                 low=1,
                 high=0.001,  # reversed so large distances are bad
@@ -206,7 +94,7 @@ def calculate_intersection_weights(
             inters["max_dist_weight"] = inters.groupby(weight_by)[
                 "max_dist_weight"
             ].transform(
-                lambda x: normalize_values(
+                lambda x: airbornegeo.normalize_values(
                     x,
                     low=1,
                     high=0.001,  # reversed so large distances are bad
@@ -223,10 +111,10 @@ def calculate_intersection_weights(
         for ind, row in inters.iterrows():
             # search data for values at intersecting lines
             line_value = gdf[
-                (gdf[line_col_name] == row.line) & (gdf.intersecting_line == row.tie)
+                (gdf.line == row.line) & (gdf.intersecting_line == row.tie)
             ][height_col_name].to_numpy()[0]
             tie_value = gdf[
-                (gdf[line_col_name] == row.tie) & (gdf.intersecting_line == row.line)
+                (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
             ][height_col_name].to_numpy()[0]
             inters.loc[ind, "flight_height"] = line_value
             inters.loc[ind, "tie_height"] = tie_value
@@ -243,7 +131,7 @@ def calculate_intersection_weights(
         inters["height_difference_weight"] = weight_vals
 
         if weight_by == "all":
-            inters["height_difference_weight"] = normalize_values(
+            inters["height_difference_weight"] = airbornegeo.normalize_values(
                 inters["height_difference_weight"],
                 low=1,
                 high=0.001,  # reversed so large differences are bad
@@ -253,7 +141,7 @@ def calculate_intersection_weights(
             inters["height_difference_weight"] = inters.groupby(weight_by)[
                 "height_difference_weight"
             ].transform(
-                lambda x: normalize_values(
+                lambda x: airbornegeo.normalize_values(
                     x,
                     low=1,
                     high=0.001,  # reversed so large differences are bad
@@ -271,7 +159,7 @@ def calculate_intersection_weights(
         inters["interpolation_type_weight"] = inters.number_of_extrapolations
 
         if weight_by == "all":
-            inters["interpolation_type_weight"] = normalize_values(
+            inters["interpolation_type_weight"] = airbornegeo.normalize_values(
                 inters["interpolation_type_weight"],
                 low=1,
                 high=0.001,  # reversed so large numbers of extrapolations are bad
@@ -281,7 +169,7 @@ def calculate_intersection_weights(
             inters["interpolation_type_weight"] = inters.groupby(weight_by)[
                 "interpolation_type_weight"
             ].transform(
-                lambda x: normalize_values(
+                lambda x: airbornegeo.normalize_values(
                     x,
                     low=1,
                     high=0.001,  # reversed so large numbers of extrapolations are bad
@@ -301,10 +189,10 @@ def calculate_intersection_weights(
         for ind, row in inters.iterrows():
             # search data for values at intersecting lines
             line_value = gdf[
-                (gdf[line_col_name] == row.line) & (gdf.intersecting_line == row.tie)
+                (gdf.line == row.line) & (gdf.intersecting_line == row.tie)
             ][data_1st_derive_col_name].to_numpy()[0]
             tie_value = gdf[
-                (gdf[line_col_name] == row.tie) & (gdf.intersecting_line == row.line)
+                (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
             ][data_1st_derive_col_name].to_numpy()[0]
             inters.loc[ind, "data_1st_derive"] = np.mean(
                 np.abs([line_value, tie_value])
@@ -319,7 +207,7 @@ def calculate_intersection_weights(
         inters["data_1st_derive_weight"] = weight_vals
 
         if weight_by == "all":
-            inters["data_1st_derive_weight"] = normalize_values(
+            inters["data_1st_derive_weight"] = airbornegeo.normalize_values(
                 inters["data_1st_derive_weight"],
                 low=1,
                 high=0.001,  # reversed so large gradients are bad
@@ -329,7 +217,7 @@ def calculate_intersection_weights(
             inters["data_1st_derive_weight"] = inters.groupby(weight_by)[
                 "data_1st_derive_weight"
             ].transform(
-                lambda x: normalize_values(
+                lambda x: airbornegeo.normalize_values(
                     x,
                     low=1,
                     high=0.001,  # reversed so large gradients are bad
@@ -349,10 +237,10 @@ def calculate_intersection_weights(
         for ind, row in inters.iterrows():
             # search data for values at intersecting lines
             line_value = gdf[
-                (gdf[line_col_name] == row.line) & (gdf.intersecting_line == row.tie)
+                (gdf.line == row.line) & (gdf.intersecting_line == row.tie)
             ][data_2nd_derive_col_name].to_numpy()[0]
             tie_value = gdf[
-                (gdf[line_col_name] == row.tie) & (gdf.intersecting_line == row.line)
+                (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
             ][data_2nd_derive_col_name].to_numpy()[0]
             inters.loc[ind, "data_2nd_derive"] = np.mean(
                 np.abs([line_value, tie_value])
@@ -367,7 +255,7 @@ def calculate_intersection_weights(
         inters["data_2nd_derive_weight"] = weight_vals
 
         if weight_by == "all":
-            inters["data_2nd_derive_weight"] = normalize_values(
+            inters["data_2nd_derive_weight"] = airbornegeo.normalize_values(
                 inters["data_2nd_derive_weight"],
                 low=1,
                 high=0.001,  # reversed so large gradients are bad
@@ -377,7 +265,7 @@ def calculate_intersection_weights(
             inters["data_2nd_derive_weight"] = inters.groupby(weight_by)[
                 "data_2nd_derive_weight"
             ].transform(
-                lambda x: normalize_values(
+                lambda x: airbornegeo.normalize_values(
                     x,
                     low=1,
                     high=0.001,  # reversed so large gradients are bad
@@ -397,10 +285,10 @@ def calculate_intersection_weights(
         for ind, row in inters.iterrows():
             # search data for values at intersecting lines
             line_value = gdf[
-                (gdf[line_col_name] == row.line) & (gdf.intersecting_line == row.tie)
+                (gdf.line == row.line) & (gdf.intersecting_line == row.tie)
             ][height_1st_derive_col_name].to_numpy()[0]
             tie_value = gdf[
-                (gdf[line_col_name] == row.tie) & (gdf.intersecting_line == row.line)
+                (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
             ][height_1st_derive_col_name].to_numpy()[0]
             inters.loc[ind, "height_1st_derive"] = np.mean(
                 np.abs([line_value, tie_value])
@@ -415,7 +303,7 @@ def calculate_intersection_weights(
         inters["height_1st_derive_weight"] = weight_vals
 
         if weight_by == "all":
-            inters["height_1st_derive_weight"] = normalize_values(
+            inters["height_1st_derive_weight"] = airbornegeo.normalize_values(
                 inters["height_1st_derive_weight"],
                 low=1,
                 high=0.001,  # reversed so large gradients are bad
@@ -425,7 +313,7 @@ def calculate_intersection_weights(
             inters["height_1st_derive_weight"] = inters.groupby(weight_by)[
                 "height_1st_derive_weight"
             ].transform(
-                lambda x: normalize_values(
+                lambda x: airbornegeo.normalize_values(
                     x,
                     low=1,
                     high=0.001,  # reversed so large gradients are bad
@@ -445,10 +333,10 @@ def calculate_intersection_weights(
         for ind, row in inters.iterrows():
             # search data for values at intersecting lines
             line_value = gdf[
-                (gdf[line_col_name] == row.line) & (gdf.intersecting_line == row.tie)
+                (gdf.line == row.line) & (gdf.intersecting_line == row.tie)
             ][height_2nd_derive_col_name].to_numpy()[0]
             tie_value = gdf[
-                (gdf[line_col_name] == row.tie) & (gdf.intersecting_line == row.line)
+                (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
             ][height_2nd_derive_col_name].to_numpy()[0]
             inters.loc[ind, "height_2nd_derive"] = np.mean(
                 np.abs([line_value, tie_value])
@@ -463,7 +351,7 @@ def calculate_intersection_weights(
         inters["height_2nd_derive_weight"] = weight_vals
 
         if weight_by == "all":
-            inters["height_2nd_derive_weight"] = normalize_values(
+            inters["height_2nd_derive_weight"] = airbornegeo.normalize_values(
                 inters["height_2nd_derive_weight"],
                 low=1,
                 high=0.001,  # reversed so large gradients are bad
@@ -473,7 +361,7 @@ def calculate_intersection_weights(
             inters["height_2nd_derive_weight"] = inters.groupby(weight_by)[
                 "height_2nd_derive_weight"
             ].transform(
-                lambda x: normalize_values(
+                lambda x: airbornegeo.normalize_values(
                     x,
                     low=1,
                     high=0.001,  # reversed so large gradients are bad
@@ -500,7 +388,7 @@ def calculate_intersection_weights(
 
     if weight_by == "all":
         inters["mistie_weight"] = weighted_average(inters, weights_dict)
-        inters["mistie_weight"] = normalize_values(
+        inters["mistie_weight"] = airbornegeo.normalize_values(
             inters["mistie_weight"],
             low=0.001,
             high=1,
@@ -518,7 +406,7 @@ def calculate_intersection_weights(
         #     lambda x: weighted_average(x, weights_dict),
         # )
         inters["mistie_weight"] = inters.groupby(weight_by)["mistie_weight"].transform(
-            lambda x: normalize_values(
+            lambda x: airbornegeo.normalize_values(
                 x,
                 low=0.001,
                 high=1,
@@ -526,7 +414,7 @@ def calculate_intersection_weights(
         )
 
     if plot:
-        plotly_points(
+        airbornegeo.plotly_points(
             inters,
             color_col="mistie_weight",
             hover_cols=[
@@ -539,8 +427,8 @@ def calculate_intersection_weights(
             cmap="matter_r",
             # robust=False,
             cmap_lims=(0, 1),
-            # point_width=0,
-            point_size=6,
+            # edge_width=0,
+            size=6,
             theme=None,
         )
     return inters
@@ -561,7 +449,7 @@ def plot_levelling_convergence(
     iters = len(cols)
 
     mistie_rmses = [
-        utils.rmse(
+        airbornegeo.rmse(
             results[i],
             as_median=as_median,
         )
@@ -574,256 +462,20 @@ def plot_levelling_convergence(
     ax1.set_xlabel("Iteration")
     if logy:
         ax1.set_yscale("log")
-    if as_median:
-        label = "Cross-over root median squared error (mGal)"
-    else:
-        label = "Cross-over root mean squared error (mGal)"
-    ax1.set_ylabel(label, color="k")
+    ax1.set_ylabel("Cross-over RMSE", color="k")
     ax1.tick_params(axis="y", colors="k", which="both")
 
     ax1.set_xticks(range(iters))
-    # plt.tight_layout()
 
     return fig
 
 
-def relative_distance(
-    df: pd.DataFrame,
-    reverse: bool = False,
-) -> pd.DataFrame:
-    """
-    calculate distance between x,y points in a dataframe, relative to the previous row.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Dataframe containing columns x and y in meters.
-    reverse : bool, optional,
-        choose whether to reverse the profile, by default is False
-
-    Returns
-    -------
-    pandas.DataFrame
-        Returns original dataframe with additional column rel_dist
-    """
-    df = df.copy()
-    if reverse is True:
-        df1 = df[::-1].reset_index(drop=True)
-    elif reverse is False:
-        df1 = df.copy()  # .reset_index(drop=True)
-
-    # from https://stackoverflow.com/a/75824992/18686384
-    df1["x_lag"] = df1.easting.shift(1)  # pylint: disable=used-before-assignment
-    df1["y_lag"] = df1.northing.shift(1)
-    df1["rel_dist"] = np.sqrt(
-        (df1.easting - df1["x_lag"]) ** 2 + (df1.northing - df1["y_lag"]) ** 2
-    )
-    # set first row distance to 0
-    df1.loc[0, "rel_dist"] = 0
-    df1 = df1.drop(["x_lag", "y_lag"], axis=1)
-    return df1.dropna(subset=["rel_dist"])
-
-
-def distance_along_flight(
-    df: pd.DataFrame,
-    flight_col_name: str = "flight",
-    time_col_name: str | None = "unixtime",
-    **kwargs: typing.Any,
-) -> pd.Series:
-    """
-    Calculate the distance along each flight in meters using the time column to sort the
-    data points.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Dataframe containing the flight data.
-    flight_col_name : str, optional
-        Column name for the flight, by default "flight"
-    time_col_name : str | None, optional
-        Column name for the time, by default "unixtime"
-
-    Returns
-    -------
-    pd.Series
-        Series containing the distance along each flight in meters
-    """
-    reverse = kwargs.get("reverse", False)
-    df = df.copy()
-
-    groups = df.groupby(flight_col_name)
-
-    dfs = []
-    for _name, flight in groups:
-        flight_sorted = flight.sort_values(by=[time_col_name]).reset_index(drop=True)
-        flight_sorted = relative_distance(flight_sorted, reverse=reverse)
-        dist = flight_sorted.rel_dist.cumsum()
-        flight_sorted["dist_along_flight"] = dist
-        # df.loc[df[flight_col_name] == i, "dist_along_flight"] = dist
-        dfs.append(flight_sorted)
-
-    df = pd.concat(dfs).reset_index(drop=True).sort_values(by=[flight_col_name])
-
-    return df.dist_along_flight
-
-
-def distance_along_line(
-    gdf: gpd.GeoDataFrame,
-    line_col_name: str = "line",
-    time_col_name: str | None = "unixtime",
-) -> pd.Series:
-    """
-    Calculate the distances along each flight line in meters. If 'time_col_name' is
-    provided, this will inform which end of the line is the beginning. If not, the line
-    will be rotate horizontally, and the left-most side will be used as the start.
-
-    Parameters
-    ----------
-    data : gpd.GeoDataFrame
-        Dataframe containing the data points to calculate the distance along each line,
-        must have a set geometry column.
-    line_col_name : str, optional
-        Column name specifying the line number, by default "line"
-    time_col_name : str | None, optional
-        Column name containing time in seconds for each datapoint, by default "unixtime"
-
-    Returns
-    -------
-    pd.Series
-        The distance along each line in meters
-    """
-
-    gdf = gdf.copy()
-
-    grouped = gdf.groupby([line_col_name])
-
-    gdf["dist_along_line"] = np.nan
-
-    for name, data in grouped:
-        # turn point data into line
-        line = gpd.GeoSeries(LineString(data.geometry.tolist()))
-        df = line.get_coordinates(
-            index_parts=True,
-            ignore_index=True,
-        )
-
-        # find minimum rotated rectangle around line
-        rect = line.iloc[0].minimum_rotated_rectangle
-
-        # get angle of rotation
-        angle = _azimuth(rect)
-        if 90 < angle <= 180:
-            angle = angle - 180
-        # print(angle)
-
-        # rotate the line to be horizontal
-        line_horizontal = line.rotate(angle, origin=shapely.centroid(rect))
-        horizontal_df = line_horizontal.get_coordinates(
-            index_parts=True,
-            ignore_index=True,
-        )
-        horizontal_df["original_index"] = horizontal_df.index
-        horizontal_df = horizontal_df.sort_values("x").reset_index(drop=True)
-
-        # print(df)
-        # print(horizontal_df)
-        # it time provided, use to determine which side is start of line
-        # if not, use minimum x (left) as start
-        if time_col_name is not None:
-            start_arg = data[time_col_name].argmin()
-            end_arg = data[time_col_name].argmax()
-            start_coords = shapely.get_coordinates(data.iloc[start_arg].geometry)[0]
-            end_coords = shapely.get_coordinates(data.iloc[end_arg].geometry)[0]
-            logger.debug(
-                "From time column, line starts at %s and ends at %s",
-                start_coords,
-                end_coords,
-            )
-            # determine which side of rotated line is the start
-            start_arg = df[(df.x == start_coords[0]) & (df.y == start_coords[1])].index[
-                0
-            ]
-            # print(start_arg)
-            # print(df.iloc[start_arg])
-            # print(horizontal_df[horizontal_df.original_index==start_arg])
-            horizontal_start_arg = horizontal_df[
-                horizontal_df.original_index == start_arg
-            ].index
-            # print(horizontal_start_arg)
-            # if start_arg < len(df) / 2:
-            #     start_arg = horizontal_df.x.argmax()
-            #     end_arg = horizontal_df.x.argmin()
-            # else:
-            #     start_arg = horizontal_df.x.argmin()
-            #     end_arg = horizontal_df.x.argmax()
-            # start_coords = df.iloc[start_arg][["x","y"]].to_numpy()
-            # end_coords = df.iloc[end_arg][["x","y"]].to_numpy()
-
-            if horizontal_start_arg > len(df) / 2:
-                h_start_arg = horizontal_df.x.argmax()
-                h_end_arg = horizontal_df.x.argmin()
-            else:
-                h_start_arg = horizontal_df.x.argmin()
-                h_end_arg = horizontal_df.x.argmax()
-            start_arg = int(horizontal_df.iloc[h_start_arg].original_index)
-            end_arg = int(horizontal_df.iloc[h_end_arg].original_index)
-            start_coords = df.iloc[start_arg][["x", "y"]].to_numpy()
-            end_coords = df.iloc[end_arg][["x", "y"]].to_numpy()
-
-            logger.debug("Line starts at %s and ends at %s", start_coords, end_coords)
-        else:
-            # get start and end points of line
-            start_arg = horizontal_df.x.argmin()
-            end_arg = horizontal_df.x.argmax()
-            start_coords = df.iloc[start_arg][["x", "y"]].to_numpy()
-            end_coords = df.iloc[end_arg][["x", "y"]].to_numpy()
-            logger.debug(
-                "Assuming line starts at %s and ends at %s", start_coords, end_coords
-            )
-
-        # calculate distance along line from starting point
-        dist = data.distance(Point(*start_coords))
-
-        gdf.loc[gdf[line_col_name] == name, "dist_along_line"] = dist
-
-    if time_col_name is not None:
-        grouped = gdf.groupby([line_col_name])
-        for name, data in grouped:
-            df = (
-                data.sort_values(by=[time_col_name])
-                .dropna(subset=[time_col_name])
-                .reset_index(drop=True)
-            )
-            assert df.iloc[0].dist_along_line < df.iloc[-1].dist_along_line, (
-                f"line {name} is not in order; {df}"
-            )
-            df = (
-                data.sort_values(by="dist_along_line")
-                .dropna(subset=[time_col_name])
-                .reset_index(drop=True)
-            )
-            assert df.iloc[0][time_col_name] < df.iloc[-1][time_col_name]
-
-    # gdf["dist_along_line"] = np.nan
-    # for i in gdf[line_col_name].unique():
-    #     line = gdf[gdf[line_col_name] == i]
-    #     dist = line.distance(line.sort_values(
-    #         by=time_col_name,
-    #         na_position='last',
-    #     ).geometry.iloc[0]).to_numpy()
-    #     gdf.loc[gdf[line_col_name] == i, "dist_along_line"] = dist
-
-    return gdf.dist_along_line
-
-
 def create_intersection_table(
-    flight_lines: gpd.GeoDataFrame,
-    tie_lines: gpd.GeoDataFrame,
-    line_col_name: str = "line",
+    data: gpd.GeoDataFrame,
     exclude_ints: tuple[tuple[int]] | None = None,
     cutoff_dist: float | None = None,
     buffer_dist: float | None = None,
-    grid_size: float = 100,
+    grid_size: float = 1,
     plot: bool = True,
 ) -> gpd.GeoDataFrame:
     """
@@ -840,14 +492,8 @@ def create_intersection_table(
 
     Parameters
     ----------
-    flight_lines : gpd.GeoDataFrame
-        Flight line data which must be a geodataframe with a registered geometry column
-        and a column set by `line_col_name` specifying the line number.
-    tie_lines : gpd.GeoDataFrame
-        Tie line data which must be a geodataframe with a registered geometry column
-        and a column set by `line_col_name` specifying the line number.
-    line_col_name : str, optional
-        Column name specifying the line numbers, by default "line"
+    data : gpd.GeoDataFrame
+        Dataframe with both tie lines and flight lines.
     exclude_ints : list[tuple[int]] | None, optional
         List of tuples where each tuple is either a single line number to exclude from
         all intersections, or a pair of line numbers specifying specific intersections
@@ -858,6 +504,8 @@ def create_intersection_table(
     buffer_dist : float, optional
         The distance to extend the line representation of the data points, useful for
         creating intersection which are just beyond the end of a line, by default None
+    grid_size : float, optional
+        The resolution to snap the intersection coordinates to.  by default 1
     plot : bool, optional
         Plot a map of the resulting intersection points colored by distance to the
         further of the two nearest data points, by default True
@@ -869,9 +517,17 @@ def create_intersection_table(
         the line and tie numbers, and the distance to the further of the two nearest
         datapoints of each line, and a geometry column.
     """
+    data = data.copy()
 
-    lines_df = flight_lines.copy()
-    ties_df = tie_lines.copy()
+    assert "tie" in data.columns, "data must have column of booleans named 'tie'"
+    assert isinstance(data, gpd.GeoDataFrame), "data must be a GeoDataFrame"
+    assert data.geometry.geom_type.isin(["Point"]).all(), "geometry must be points"
+
+    lines_df = data[~data.tie]
+    ties_df = data[data.tie]
+
+    assert "line" in lines_df.columns, "flight_lines must have column 'line'"
+    assert "line" in ties_df.columns, "tie_lines must have column 'line'"
 
     # if is_intersection column exists, delete it and rows where it's true
     if "is_intersection" in lines_df.columns:
@@ -889,23 +545,11 @@ def create_intersection_table(
         ties_gdf=ties_df,
         grid_size=grid_size,
         buffer_dist=buffer_dist,
-        line_col_name=line_col_name,
     )
-    # redo with buffer_dist to get extrapolated points
-    # if buffer_dist is not None:
-    #     inters_buffer = get_line_tie_intersections(
-    #         lines_gdf=lines_df,
-    #         ties_gdf=ties_df,
-    #         grid_size=grid_size,
-    #         buffer_dist=buffer_dist,
-    #         line_col_name=line_col_name,
-    #     )
 
     # get the largest of the two distance to each lines' nearest data point to the
     # theoretical intersection
     inters["max_dist"] = inters[["line_dist", "tie_dist"]].max(axis=1)
-    # if buffer_dist is not None:
-    #     inters_buffer["max_dist"] = inters_buffer[["line_dist", "tie_dist"]].max(axis=1)
 
     # keep only the closest of duplicated intersections
     a = len(inters)
@@ -923,37 +567,7 @@ def create_intersection_table(
     b = len(inters)
     if a != b:
         logger.info("Dropped %s duplicate intersections", a - b)
-    # if buffer_dist is not None:
-    #     inters_buffer = (
-    #     inters_buffer.sort_values(
-    #             "max_dist",
-    #             ascending=False,
-    #         )
-    #         .drop_duplicates(
-    #             subset=["line", "tie"],
-    #             keep="last",
-    #         )
-    #         .sort_index()
-    #     )
 
-    # # get points which were extrapolated
-    # inters["interpolation_type"] = "interpolated"
-    # if buffer_dist is not None:
-    #     inters_buffer["interpolation_type"] = 'extrapolated'
-    #     df = inters_buffer[
-    #         inters_buffer.set_index(['line', 'tie']).index.isin(list(zip(inters.line, inters.tie)))
-    #     ].copy()
-    #     inters_buffer.loc[df.index, "interpolation_type"] = "interpolated"
-    #     inters = inters_buffer.copy()
-
-    # if buffer_dist is not None:
-    #     logger.info(
-    #         "found %s intersections, of which %s were extrapolated",
-    #         len(inters),
-    #         len(inters[inters.interpolation_type == "extrapolated"]),
-    #     )
-    # else:
-    #     logger.info("found %s intersections", len(inters))
     logger.info("found %s intersections", len(inters))
 
     # if intersection is not within cutoff_dist, remove rows
@@ -1004,33 +618,34 @@ def create_intersection_table(
         )
 
     if plot is True:
-        plotly_points(
+        airbornegeo.plotly_points(
             inters,
             color_col="max_dist",
-            hover_cols=["line", "tie", "max_dist", "line_dist", "tie_dist"],
+            hover_cols=["line", "tie", "line_dist", "tie_dist"],
             robust=True,
-            point_size=10,
+            size=10,
             theme=None,
             cmap="matter",
             title="Distance from intersection to nearest data point",
         )
-        plt.hist(inters.max_dist)
+        plt.hist(
+            inters.max_dist,
+            bins=20,
+        )
         plt.xlabel("Max distance between intersection and line/tie data (m)")
 
-    return inters.drop(columns=["line_dist", "tie_dist"])
+    return inters.drop(columns=["line_dist", "tie_dist"]).reset_index(drop=True)
 
 
 def add_intersections(
-    df: gpd.GeoDataFrame,
+    data: gpd.GeoDataFrame,
     intersections: gpd.GeoDataFrame,
-    line_col_name: str = "line",
-    time_col_name: str = "unixtime",
 ) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Add new rows to the dataframe for each intersection point and columns
     `is_intersection` and `intersection_line` to identify these intersections. All of
     the data column for these rows will have NaNs and should be filled with the
-    function `interp1d_all_lines()`. Add columns to the intersections table for the
+    function `interpolate_intersections()`. Add columns to the intersections table for the
     distance along each line (flight and tie) to the intersection point. During
     levelling, levelling corrections are calculated using mistie values at intersections
     and interpolated along the entire lines based on these distances. Distances are
@@ -1039,127 +654,136 @@ def add_intersections(
 
     Parameters
     ----------
-    df : gpd.GeoDataFrame
+    data : gpd.GeoDataFrame
         Flight survey dataframe containing the data points to add intersections to.
-        Must contain a geometry column and columns set by `line_col_name` and
-        `time_col_name`
+        Must contain a geometry column and columns 'line' and `time_col_name`
     intersections : gpd.GeoDataFrame
         Intersections table created by `create_intersection_table()`
-    line_col_name : str, optional
-        Column name specifying the line and tie names, by default "line"
-    time_col_name : str, optional
-        Column name specifying the time of each datapoints collection, by default
-        "unixtime"
 
     Returns
     -------
     tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]
         The updated flight survey dataframe and intersections table.
     """
-    gdf = df.copy()
+    data = data.copy()
     inters = intersections.copy()
 
+    assert "line" in data.columns, "data must have column 'line'"
+
     # if is_intersection column exists, delete it and rows where it's true
-    if "is_intersection" in gdf.columns:
-        rows_to_drop = gdf[gdf.is_intersection]
-        gdf = gdf.drop(index=rows_to_drop.index)
-    gdf = gdf.drop(
+    if "is_intersection" in data.columns:
+        rows_to_drop = data[data.is_intersection]
+        data = data.drop(index=rows_to_drop.index)
+    data = data.drop(
         columns=["is_intersection", "intersecting_line", "interpolation_type"],
         errors="ignore",
     )
 
-    prior_length = len(gdf)
+    prior_length = len(data)
 
     # add boolean column for whether point is an intersection
-    gdf["is_intersection"] = False
-    gdf["intersecting_line"] = np.nan
+    data["is_intersection"] = False
+    data["intersecting_line"] = np.nan
 
     # collect intersections to be added
     dfs = []
     for _, row in inters.iterrows():
-        for i in list(gdf[line_col_name].unique()):
+        for i in list(data.line.unique()):
             if i in (row.line, row.tie):
-                df = pd.DataFrame(
+                new_row = pd.DataFrame(
                     {
-                        line_col_name: [i],
-                        "easting": row.geometry.x,
-                        "northing": row.geometry.y,
+                        "line": [i],
+                        "easting": row.easting,
+                        "northing": row.northing,
                         "is_intersection": True,
                     }
                 )
                 if i == row.line:
-                    df["intersecting_line"] = row.tie
+                    new_row["intersecting_line"] = row.tie
                 else:
-                    df["intersecting_line"] = row.line
-                df["geometry"] = gpd.points_from_xy(df.easting, df.northing)
-                dfs.append(df)
+                    new_row["intersecting_line"] = row.line
+                new_row["geometry"] = gpd.points_from_xy(
+                    new_row.easting, new_row.northing
+                )
+                # print(new_row)
+                # for each intersection row, find the closest 2 two points, then take
+                # the one with the lower `distance_along_line` value, then calculate the
+                # cumulative distance from that point to the intersection point.
+                line_points = data[data.line == i]
+                nearest_two_points = (
+                    line_points.distance(new_row.geometry.iloc[0])
+                    .sort_values(ascending=True)
+                    .iloc[0:2]
+                )
+                nearest_two_points = line_points.loc[nearest_two_points.index]
+                # print(nearest_two_points)
+                min_dist_point = nearest_two_points.sort_values(
+                    by="distance_along_line", ascending=True
+                ).iloc[0]
+                # print(min_dist_point)
 
-    # add intersections
-    gdf = pd.concat([gdf, *dfs])
+                # calculate cumulative distance to the min_dist_point
+                inter_and_nearest_point = pd.DataFrame(
+                    {
+                        "easting": [
+                            *new_row.easting.to_numpy(),
+                            min_dist_point.easting,
+                        ],
+                        "northing": [
+                            *new_row.northing.to_numpy(),
+                            min_dist_point.northing,
+                        ],
+                    }
+                )
+
+                # inter_and_nearest_point = pd.concat([new_row, min_dist_point])[["easting", "northing"]]
+                # print(inter_and_nearest_point)
+                dist_between = airbornegeo.relative_distance(inter_and_nearest_point)[
+                    -1
+                ]
+                # print(dist_between)
+                # print(min_dist_point.distance_along_line)
+                new_row["distance_along_line"] = (
+                    min_dist_point.distance_along_line + dist_between
+                )
+                # print(new_row)
+                # return
+                dfs.append(new_row)
+
+    # add intersections as new rows to dataframe
+    # note that they are not placed in the correct position
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="CRS not set for some of the concatenation inputs.",
+        )
+        data = pd.concat([data, *dfs])
+
+    data = data.sort_values(["line", "distance_along_line"]).reset_index(drop=True)
 
     # check correct number of intersections were added
-    assert len(gdf) == prior_length + (2 * len(inters))
+    assert len(data) == prior_length + (2 * len(inters))
 
-    # sort by lines
-    gdf = gdf.sort_values(by=line_col_name)
-
-    # print(gdf[(gdf.line==1070) & (gdf.intersecting_line==160)])
-    # get distance along each line
-    gdf["dist_along_line"] = distance_along_line(
-        gdf,
-        line_col_name=line_col_name,
-        time_col_name=time_col_name,
-    )
-    # print(gdf[(gdf.line==1070) & (gdf.intersecting_line==160)])
-
-    # sort by distance and reset index
-    gdf = gdf.sort_values(by=[line_col_name, "dist_along_line"])
-    gdf = gdf.reset_index(drop=True)
+    # recalculate distance along each line now that intersections are included
+    # TODO do we really need to recalculate distance for every point? Or just for the
+    # new intersection points?
+    # data = data.sort_values(['easting', 'northing'])
+    # data["distance_along_line"] = airbornegeo.along_track_distance(data, groupby_column="line", guess_start_position=True)
 
     # add dist along line to intersections dataframe
-    # iterate through intersections
     for ind, row in inters.iterrows():
         # search data for values at intersecting lines
-        line_value = gdf[
-            (gdf[line_col_name] == row.line) & (gdf.intersecting_line == row.tie)
-        ].dist_along_line.to_numpy()[0]
-        tie_value = gdf[
-            (gdf[line_col_name] == row.tie) & (gdf.intersecting_line == row.line)
-        ].dist_along_line.to_numpy()[0]
+        line_value = data[
+            (data.line == row.line) & (data.intersecting_line == row.tie)
+        ].distance_along_line.to_numpy()[0]
+        tie_value = data[
+            (data.line == row.tie) & (data.intersecting_line == row.line)
+        ].distance_along_line.to_numpy()[0]
 
         inters.loc[ind, "dist_along_flight_line"] = line_value
         inters.loc[ind, "dist_along_flight_tie"] = tie_value
 
-    return gdf, inters
-
-
-def _azimuth_between_points(
-    point1: tuple[float, float],
-    point2: tuple[float, float],
-) -> float:
-    """azimuth between 2 points (interval 0 - 180)"""
-
-    angle = np.arctan2(point2[1] - point1[1], point2[0] - point1[0])
-    return np.degrees(angle) if angle > 0 else np.degrees(angle) + 180  # type: ignore[no-any-return]
-
-
-def _dist(a: tuple[float, float], b: tuple[float, float]) -> float:
-    """distance between points"""
-    return math.hypot(b[0] - a[0], b[1] - a[1])
-
-
-def _azimuth(mrr) -> float:  # type: ignore[no-untyped-def]
-    """azimuth of minimum_rotated_rectangle"""
-    bbox = list(mrr.exterior.coords)
-    axis1 = _dist(bbox[0], bbox[3])
-    axis2 = _dist(bbox[0], bbox[1])
-
-    if axis1 <= axis2:
-        az = _azimuth_between_points(bbox[0], bbox[1])
-    else:
-        az = _azimuth_between_points(bbox[0], bbox[3])
-
-    return az
+    return data, inters
 
 
 def extend_line(
@@ -1170,11 +794,9 @@ def extend_line(
     """extend line in either direction by distance"""
     # find minimum rotated rectangle around line
     rect = line.minimum_rotated_rectangle
-    angle = _azimuth(rect)
-    # logger.debug("rotated angle:", angle)
+    angle = processing.azimuth(rect)
 
     rect_center = shapely.centroid(rect).x, shapely.centroid(rect).y
-    # print("rectangle center:", rect_center)
 
     # get length of long edge
     x, y = rect.exterior.coords.xy
@@ -1184,7 +806,6 @@ def extend_line(
             Point(x[1], y[1]).distance(Point(x[2], y[2])),
         )
     )
-    # print("length:", length)
 
     # make new start and end points extended by distance
     start = Point(rect_center[0] - (length / 2) - distance, rect_center[1])
@@ -1303,16 +924,23 @@ def extend_line(
 def get_line_tie_intersections(
     lines_gdf: gpd.GeoSeries,
     ties_gdf: gpd.GeoSeries,
-    grid_size: float = 100,
+    grid_size: float = 1,
     buffer_dist: float | None = None,
-    line_col_name: str = "line",
 ) -> gpd.GeoDataFrame:
     """
     adapted from https://gis.stackexchange.com/questions/137909/intersecting-lines-to-get-crossings-using-python-with-qgis
+
+    grid_size : float, optional
+        round the coordinates of the resulting intersection points to this resolution,
+        by default 1
     """
+
+    assert "line" in lines_gdf.columns, "lines_gdf must have column 'line'"
+    assert "line" in ties_gdf.columns, "ties_gdf must have column 'line'"
+
     # group by lines/ties
-    grouped_lines = lines_gdf.groupby([line_col_name], as_index=False)["geometry"]
-    grouped_ties = ties_gdf.groupby([line_col_name], as_index=False)["geometry"]
+    grouped_lines = lines_gdf.groupby(["line"], as_index=False)["geometry"]
+    grouped_ties = ties_gdf.groupby(["line"], as_index=False)["geometry"]
 
     # from points to lines
     grouped_lines = grouped_lines.apply(lambda x: LineString(x.tolist()))
@@ -1345,47 +973,17 @@ def get_line_tie_intersections(
     tie_names = []
     for (line, tie), (l_name, t_name) in pbar:
         # determine intersection of line and tie
-        # inter = line.intersection(tie)
         inter = shapely.intersection(line, tie, grid_size=grid_size)
-        # inter = line.unary_union.intersection(tie)
         points = [Point(i) for i in shapely.get_coordinates(inter)]
-        inters.extend(points)
 
+        # add each intersection and their names to lists
+        inters.extend(points)
         line_names.extend([l_name] * len(points))
         tie_names.extend([t_name] * len(points))
 
-        # # if intersection is a point, add to list
-        # if inter.type == "Point":
-        #     inters.append(inter)
-        # elif inter.type == "MultiPoint":
-        #     inters.extend(list(inter.geoms))
-        # elif inter.type == "MultiLineString":
-        #     inters.extend(shapely.get_coordinates(inter))
-        #     # multi_line = list(inter.geoms)
-        #     # first_coords = multi_line[0].coords[0]
-        #     # last_coords = multi_line[len(multi_line) - 1].coords[1]
-        #     # inters.append(Point(first_coords[0], first_coords[1]))
-        #     # inters.append(Point(last_coords[0], last_coords[1]))
-        # elif inter.type == "LineString":
-        #     inters.extend(shapely.get_coordinates(inter))
-        #     # first_coords = inter.coords[0]
-        #     # last_coords = inter.coords[1]
-        #     # inters.append(Point(first_coords[0], first_coords[1]))
-        #     # inters.append(Point(last_coords[0], last_coords[1]))
-        # elif inter.type == "GeometryCollection":
-        #     for geom in inter.geoms:
-        #         if geom.type == "Point":
-        #             inters.append(geom)
-        #         elif geom.type == "MultiPoint":
-        #             inters.extend(list(geom))
-        #         elif geom.type == "multi_lineString":
-        #             multi_line = list(geom)
-        #             first_coords = multi_line[0].coords[0]
-        #             last_coords = multi_line[len(multi_line) - 1].coords[1]
-        #             inters.append(Point(first_coords[0], first_coords[1]))
-        #             inters.append(Point(last_coords[0], last_coords[1]))
-
-    gdf = gpd.GeoDataFrame(geometry=inters, data={"line": line_names, "tie": tie_names})
+    inters = gpd.GeoDataFrame(
+        geometry=inters, data={"line": line_names, "tie": tie_names}
+    )
 
     # get nearest 2 lines to each intersection point
     # and nearest data point on each line to the intersection point
@@ -1395,9 +993,9 @@ def get_line_tie_intersections(
     tie_dists = []
 
     pbar = tqdm(
-        gdf.geometry,
+        inters.geometry,
         desc="Potential intersections",
-        total=len(gdf.geometry),
+        total=len(inters.geometry),
     )
     for p in pbar:
         # for _i, p in enumerate(inters.geometry):
@@ -1410,20 +1008,20 @@ def get_line_tie_intersections(
         # find nearest line/tie to intersection point using LineString's
         grouped_lines["dist"] = grouped_lines.geometry.distance(p)
         grouped_ties["dist"] = grouped_ties.geometry.distance(p)
-        nearest_line = grouped_lines.sort_values(by="dist")[[line_col_name]].iloc[0]
-        nearest_tie = grouped_ties.sort_values(by="dist")[[line_col_name]].iloc[0]
+        nearest_line = grouped_lines.sort_values(by="dist")[["line"]].iloc[0]
+        nearest_tie = grouped_ties.sort_values(by="dist")[["line"]].iloc[0]
 
         # get line/tie names
-        line = nearest_line[line_col_name]
-        tie = nearest_tie[line_col_name]
+        line = nearest_line.line
+        tie = nearest_tie.line
 
         # append names to lists
         line_names.append(line)
         tie_names.append(tie)
 
         # get actual datapoints for each line (not LineString representation)
-        line_points = lines_gdf[lines_gdf[line_col_name] == line]
-        tie_points = ties_gdf[ties_gdf[line_col_name] == tie]
+        line_points = lines_gdf[lines_gdf.line == line]
+        tie_points = ties_gdf[ties_gdf.line == tie]
 
         # get nearest data point on each line/tie to intersection point
         nearest_datapoint_line = line_points.geometry.distance(p).sort_values().iloc[0]
@@ -1434,12 +1032,15 @@ def get_line_tie_intersections(
         tie_dists.append(nearest_datapoint_tie)
 
     # add names and distances as columns
-    gdf["line"] = line_names
-    gdf["tie"] = tie_names
-    gdf["line_dist"] = line_dists
-    gdf["tie_dist"] = tie_dists
+    inters["line"] = line_names
+    inters["tie"] = tie_names
+    inters["line_dist"] = line_dists
+    inters["tie_dist"] = tie_dists
 
-    return gdf
+    # set CRS from supplied data
+    inters.crs = lines_gdf.crs
+
+    return inters
 
 
 def get_line_intersections(
@@ -1479,7 +1080,7 @@ def get_line_intersections(
     return inters
 
 
-def scipy_interp1d(
+def scipy_interp(
     df: pd.DataFrame,
     to_interp: str,
     interp_on: str,
@@ -1509,18 +1110,23 @@ def scipy_interp1d(
             fill_value = (np.nanmean(df[to_interp]), np.nanmean(df[to_interp]))
         logger.debug("extrapolating with fill_value: %s", fill_value)
     else:
-        bounds_error = True
+        bounds_error = False
         fill_value = np.nan
 
-    # print(df_no_nans)
     # define interpolation function
-    f = scipy.interpolate.interp1d(
-        df_no_nans[interp_on],
-        df_no_nans[to_interp],
-        kind=method,
-        bounds_error=bounds_error,
-        fill_value=fill_value,
-    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="The number of derivatives at boundaries does not match:",
+        )
+        # this is legacy! Info here https://docs.scipy.org/doc/scipy/tutorial/interpolate/1D.html#tutorial-interpolate-1dsection
+        f = scipy.interpolate.interp1d(
+            df_no_nans[interp_on],
+            df_no_nans[to_interp],
+            kind=method,
+            bounds_error=bounds_error,
+            fill_value=fill_value,
+        )
 
     # get interpolated values at points with NaN's
     values = f(df[df[to_interp].isna()][interp_on])
@@ -1531,62 +1137,25 @@ def scipy_interp1d(
     return df
 
 
-def verde_interp1d(
-    df: pd.DataFrame,
-    method: typing.Any,
-    to_interp: str,
-    interp_on: list[str],
-) -> pd.DataFrame:
-    """
-    interpolate NaN's in "to_interp" column, based on coordinates from "interp_on"
-    columns,
-    method: vd.Spline(), vd.SplineCV(), vd.KNeighbors(), vd.Linear(), vd.Cubic()
-    """
-    df1 = df.copy()
-
-    # drop NaN's
-    df_no_nans = df1.dropna(subset=[to_interp, *interp_on], how="any")
-
-    # fit interpolator to data
-    method.fit(
-        (df_no_nans[interp_on[0]], df_no_nans[interp_on[1]]), df_no_nans[to_interp]
-    )
-
-    # predict at NaN's
-    values = method.predict(
-        (
-            df1[df1[to_interp].isna()][interp_on[0]],
-            df1[df1[to_interp].isna()][interp_on[1]],
-        ),
-    )
-
-    # fill NaN's  with values
-    df1.loc[df1[to_interp].isna(), to_interp] = values
-
-    return df1
-
-
-def interp1d_single_col(
+def interp_single_col(
     df: pd.DataFrame,
     to_interp: str,
     interp_on: str,
-    engine: str = "scipy",
     method: str = "cubic",
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
     plot: bool = False,
-    line_col_name: str = "line",
 ) -> pd.DataFrame:
     """
     interpolate NaN's in "to_interp" column, based on value(s) from "interp_on"
     column(s).
-    engine: "verde" or "scipy"
     method:
-        for "verde": vd.Spline(), vd.SplineCV(), vd.KNeighbors(), vd.Linear(),
-        vd.Cubic()
-        for "scipy": 'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic',
+        'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic',
         'cubic', 'previous', 'next'
     """
+
+    assert "line" in df.columns, "df must have column 'line'"
+
     args = {
         "df": df,
         "to_interp": to_interp,
@@ -1596,24 +1165,16 @@ def interp1d_single_col(
         "fill_value": fill_value,
     }
 
-    if engine == "verde":
-        args = args.pop("extrapolate")
-        args = args.pop("fill_value")
-        filled = verde_interp1d(**args)
-    elif engine == "scipy":
-        # try:
-        filled = scipy_interp1d(**args)
-        # except ValueError as e:
-        #     # logger.error(args)
-        #     filled = np.nan
-    else:
-        msg = "invalid string for engine type"
-        raise ValueError(msg)
+    # try:
+    filled = scipy_interp(**args)
+    # except ValueError as e:
+    #     # logger.error(args)
+    #     filled = np.nan
 
     if plot is True:
         plot_line_and_crosses(
             filled,
-            line=filled[line_col_name].iloc[0],
+            line=filled.line.iloc[0],
             x=interp_on[0],
             y=[to_interp],
             y_axes=[str(i + 1) for i in range(len([to_interp]))],
@@ -1622,85 +1183,60 @@ def interp1d_single_col(
     return filled
 
 
-def interp1d_windows_single_col(
+def interp_windows_single_col(
     df: pd.DataFrame,
     window_width: float,
     to_interp: str,
-    dist_col_name: str = "dist_along_line",
-    line_col_name: str = "line",
     plot_windows: bool = False,
     plot_line: bool = False,
     **kwargs: typing.Any,
 ) -> pd.DataFrame:
     """
-    Create a window of data either side of NaN's based on "dist_along_line" column and
+    Create a window of data either side of NaN's based on "distance_along_line" column and
     interpolate the value. Useful when NaN's are sparse, or lines are long. All kwargs
-    are based to function "interp1d"
+    are based to function "interp"
     """
     df = df.copy()
     kwargs = copy.deepcopy(kwargs)
 
+    assert "line" in df.columns, "df must have column 'line'"
+
+    assert "distance_along_line" in df.columns, (
+        "df must have column 'distance_along_line'"
+    )
     extrapolate = kwargs.pop("extrapolate", False)
 
+    df["interpolation_type"] = "none"
+
     # iterate through NaNs
-    # values = []
     for i in df[df[to_interp].isna()].index:  # pylint: disable=too-many-nested-blocks
         # get distance along line of NaN
-        dist_at_nan = df[dist_col_name].loc[i]
+        dist_at_nan = df.distance_along_line.loc[i]
 
         # try interpolation with set window width, if there's not enough data (bounds
-        # error), double the width up to 4 times.
-        # if 4 attempts fail and extrapolate is True, allow extrapolation, if False, return NaN
-        # if extrapolating, start with original window width and double up to 4 times, if fails, return NaN
+        # error), double the width up to 2 times.
+        # if 2 attempts fail and extrapolate is True, allow extrapolation, if False, return NaN
+        # if extrapolating, start with original window width and double up to 2 times, if fails, return NaN
         win = window_width
-        while win <= window_width * (2**4):
-            # logger.info(
-            #     "trying interpolation with increase window widths for intersection %s/%s",
-            #     df.intersecting_line.loc[i],
-            #     df[line_col_name].loc[i],
-            # )
+        while win <= window_width * 2:
             try:
                 # get data inside window
                 llim, ulim = dist_at_nan - win, dist_at_nan + win
-                df_inside = df[df[dist_col_name].between(llim, ulim)]
-                # allow extrapolation if nan to fill is at limit of data and extrapolate is True
-                # else keep expanding window
-                # if (dist_at_nan <= df[dist_col_name].min()) or (dist_at_nan+1 >= df[dist_col_name].max()):
-                #     if extrapolate is False:
-                #         extrap = False
-                #     if extrapolate is True:
-                #         logger.info(
-                #             "Line/Tie: %s/%s; NaN at limit of data, extrapolating",
-                #             df.intersecting_line.loc[i], df[line_col_name].loc[i])
-                #         extrap = True
-                # else:
-                #     extrap = False
-                # extrap=True
-                # print(df.intersecting_line.loc[i], df[line_col_name].loc[i])
-                # if (df.intersecting_line.loc[i] == 410) and (df[line_col_name].loc[i] == 1080):
-                #     print("YES")
-                #     print(dist_at_nan)
-                #     print(df[dist_col_name].min(), df[dist_col_name].max())
-                #     # extrap=True
-                #     print("extrapolate:", extrap)
-                #     print(df_inside[df_inside[to_interp].isna()])
-                #     print(to_interp)
+                df_inside = df[df.distance_along_line.between(llim, ulim)]
 
                 if len(df_inside) <= 1:
                     win += win
-                    logger.warning(
+                    logger.debug(
                         "Error with inter: %s/%s doubling window size to %s",
                         df.intersecting_line.loc[i],
-                        df[line_col_name].loc[i],
+                        df.line.loc[i],
                         win,
                     )
                     continue
 
-                # if (df.intersecting_line.loc[i],df[line_col_name].loc[i]) == (160, 1040):
-
                 # may be multiple NaN's within window (some outside of bounds)
                 # but we only extract the fill value for loc[i]
-                filled = interp1d(
+                filled = interp(
                     df_inside,
                     to_interp=[to_interp],
                     extrapolate=False,
@@ -1711,19 +1247,16 @@ def interp1d_windows_single_col(
                 if np.isnan(value):
                     msg = "filled value is NaN"
                     raise ValueError(msg)
-                # if (df.intersecting_line.loc[i],df[line_col_name].loc[i]) == (160, 1040):
-                #     print(f"here {value}")
-                # save value to a list
-                # values.append(value)
+
                 interp_type = "interpolated"
 
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                logger.error(e)
+            except Exception:  # pylint: disable=broad-exception-caught
+                # logger.error(e)
                 win += win
-                logger.warning(
+                logger.debug(
                     "Error with inter: %s/%s doubling window size to %s",
                     df.intersecting_line.loc[i],
-                    df[line_col_name].loc[i],
+                    df.line.loc[i],
                     win,
                 )
                 # # error messages for too few points in window
@@ -1743,7 +1276,7 @@ def interp1d_windows_single_col(
                 #         "too few points in window for intersection of lines %s & %s "
                 #         "doubling window size to %s",
                 #         df.intersecting_line.loc[i],
-                #         df[line_col_name].loc[i],
+                #         df.line.loc[i],
                 #         win,
                 #     )
                 # elif any(item in str(e) for item in bounds_errors):
@@ -1752,7 +1285,7 @@ def interp1d_windows_single_col(
                 #         "bounds error for interpolation of intersection of lines %s "
                 #         "and %s, doubling window size to %s",
                 #         df.intersecting_line.loc[i],
-                #         df[line_col_name].loc[i],
+                #         df.line.loc[i],
                 #         win,
                 #     )
                 # else:  # raise other errors
@@ -1762,38 +1295,34 @@ def interp1d_windows_single_col(
                 #         "Error for interpolation of intersection of lines %s and %s, "
                 #         "doubling window size to %s",
                 #         df.intersecting_line.loc[i],
-                #         df[line_col_name].loc[i],
+                #         df.line.loc[i],
                 #         win,
                 #     )
                 continue
             break
         else:
             if extrapolate:
-                # try extrapolation with set window width, if there's not enough data, double the width up to 4 times.
+                # try extrapolation with set window width, if there's not enough data, double the width up to 2 times.
                 win = window_width
-                while win <= window_width * (2**4):
-                    # logger.info(
-                    #     "trying extrapolation with increase window widths for intersection %s/%s",
-                    #     df.intersecting_line.loc[i],
-                    #     df[line_col_name].loc[i],)
+                while win <= window_width * (2):
                     try:
                         # get data inside window
                         llim, ulim = dist_at_nan - win, dist_at_nan + win
-                        df_inside = df[df[dist_col_name].between(llim, ulim)]
+                        df_inside = df[df.distance_along_line.between(llim, ulim)]
 
                         if len(df_inside) <= 1:
                             win += win
-                            logger.warning(
+                            logger.debug(
                                 "Error with inter: %s/%s doubling window size to %s",
                                 df.intersecting_line.loc[i],
-                                df[line_col_name].loc[i],
+                                df.line.loc[i],
                                 win,
                             )
                             continue
 
                         # may be multiple NaN's within window (some outside of bounds)
                         # but we only extract the fill value for loc[i]
-                        filled = interp1d(
+                        filled = interp(
                             df_inside,
                             to_interp=[to_interp],
                             extrapolate=True,
@@ -1805,65 +1334,57 @@ def interp1d_windows_single_col(
                             msg = "filled value is NaN"
                             raise ValueError(msg)
 
-                        # save value to a list
-                        # values.append(value)
                         interp_type = "extrapolated"
 
-                    except Exception as e:  # pylint: disable=broad-exception-caught
-                        logger.error(e)
+                    except Exception:  # pylint: disable=broad-exception-caught
                         win += win
-                        logger.warning(
+                        logger.debug(
                             "Error with inter: %s/%s doubling window size to %s",
                             df.intersecting_line.loc[i],
-                            df[line_col_name].loc[i],
+                            df.line.loc[i],
                             win,
                         )
                         continue
                     logger.info(
                         "Extrapolated value for inter: %s/%s",
                         df.intersecting_line.loc[i],
-                        df[line_col_name].loc[i],
+                        df.line.loc[i],
                     )
                     break
                 else:
-                    logger.error(
-                        "Extrapolation failed after window expanded 4 times, to %s "
+                    logger.info(
+                        "Extrapolation failed after window expanded 2 times, to %s "
                         "returning NaN for intersection values",
                         win,
                     )
-                    # values.append(np.nan)
                     value = np.nan
-                    interp_type = None
+                    interp_type = "none"
             else:
-                logger.error(
-                    "Window expanded 4 times, to %s, without success and `extrapolate` "
+                logger.info(
+                    "Window expanded 2 times, to %s, without success and `extrapolate` "
                     "set to False, returning NaN for intersection values",
                     win,
                 )
-                # values.append(np.nan)
                 value = np.nan
-                interp_type = None
+                interp_type = "none"
 
             if plot_windows is True:
                 plot_line_and_crosses(
                     filled,
-                    line=filled[line_col_name].iloc[0],
-                    x=dist_col_name,
+                    line=filled.line.iloc[0],
+                    x="distance_along_line",
                     y=[to_interp],
                     y_axes=[str(i + 1) for i in range(len([to_interp]))],
                 )
         # add values into dataframe
-        df.loc[i, to_interp] = value
-        df.loc[i, "interpolation_type"] = interp_type
-
-    # # add values into dataframe
-    # df.loc[df[to_interp].isna(), to_interp] = values
+        df.at[i, to_interp] = value  # noqa: PD008
+        df.at[i, "interpolation_type"] = interp_type  # noqa: PD008
 
     if plot_line is True:
         plot_line_and_crosses(
             df,
-            line=df[line_col_name].iloc[0],
-            x=dist_col_name,
+            line=df.line.iloc[0],
+            x="distance_along_line",
             y=[to_interp],
             y_axes=[str(i + 1) for i in range(len([to_interp]))],
         )
@@ -1871,18 +1392,18 @@ def interp1d_windows_single_col(
     return df
 
 
-def interp1d_windows(
+def interp_windows(
     df: pd.DataFrame,
     to_interp: str | list[str],
     plot_line: bool = False,
-    line_col_name: str = "line",
-    dist_col_name: str = "dist_along_line",
     **kwargs: typing.Any,
 ) -> pd.DataFrame:
-    if line_col_name is not None:
-        assert len(df[line_col_name].unique()) <= 1, (
-            "Warning: provided more than 1 flight line"
-        )
+    assert "distance_along_line" in df.columns, (
+        "df must have column 'distance_along_line'"
+    )
+    assert "line" in df.columns, "df must have column 'line'"
+
+    assert len(df.line.unique()) <= 1, "Warning: provided more than 1 flight line"
 
     if isinstance(to_interp, str):
         to_interp = [to_interp]
@@ -1891,13 +1412,12 @@ def interp1d_windows(
     kwargs = copy.deepcopy(kwargs)
 
     # iterate through columns
-    with invert4geom_utils.DuplicateFilter(logger):
+    with airbornegeo.utils.DuplicateFilter(logger):
         for col in to_interp:
             logger.debug("Interpolating column: %s", col)
-            filled = interp1d_windows_single_col(
+            filled = interp_windows_single_col(
                 df,
                 to_interp=col,
-                line_col_name=line_col_name,
                 **kwargs,
             )
             df = filled
@@ -1906,8 +1426,8 @@ def interp1d_windows(
     if plot_line is True:
         plot_line_and_crosses(
             df,
-            line=df[line_col_name].iloc[0],
-            x=dist_col_name,
+            line=df.line.iloc[0],
+            x="distance_along_line",
             y=to_interp,
             y_axes=[str(i + 1) for i in range(len(to_interp))],
         )
@@ -1915,16 +1435,14 @@ def interp1d_windows(
     return df
 
 
-def interp1d(
+def interp(
     df: pd.DataFrame | gpd.GeoDataFrame,
     to_interp: list[str],
     interp_on: str,
-    engine: str = "scipy",
     method: str = "cubic",
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
     plot_line: bool = False,
-    line_col_name: str = "line",
 ) -> pd.DataFrame | gpd.GeoDataFrame:
     """
     Interpolate NaN's in "to_interp" column(s), based on value(s) from "interp_on"
@@ -1937,8 +1455,6 @@ def interp1d(
         Column(s) to interpolate
     interp_on : str
         Column to interpolate on
-    engine : str, optional
-        Interpolation engine to use, by default "scipy"
     method : str, optional
         Interpolation method to use, by default "cubic"
     extrapolate : bool, optional
@@ -1947,32 +1463,27 @@ def interp1d(
         Value to use for filling gaps, by default None
     plot_line : bool, optional
         Whether to plot the interpolation line, by default False
-    line_col_name : str, optional
-        Column name for the line, by default "line"
 
     Returns
     -------
     pd.DataFrame | gpd.GeoDataFrame
         Interpolated dataframe
     """
-    if line_col_name is not None:
-        assert len(df[line_col_name].unique()) <= 1, (
-            "Warning: provided more than 1 flight line"
-        )
 
+    assert "line" in df.columns, "df must have column 'line'"
+
+    assert len(df.line.unique()) <= 1, "Warning: provided more than 1 flight line"
     if isinstance(to_interp, str):  # type: ignore [unreachable]
         to_interp = [to_interp]  # type: ignore [unreachable]
 
     df1 = df.copy()
 
     # iterate through columns
-    # with invert4geom_utils.DuplicateFilter(logger):
     for col in to_interp:
-        filled = interp1d_single_col(
+        filled = interp_single_col(
             df1,
             to_interp=col,
             interp_on=interp_on,
-            engine=engine,
             method=method,
             extrapolate=extrapolate,
             fill_value=fill_value,
@@ -1985,7 +1496,7 @@ def interp1d(
     if plot_line is True:
         plot_line_and_crosses(
             df1,
-            line=df1[line_col_name].iloc[0],
+            line=df1.line.iloc[0],
             x=interp_on,
             y=to_interp,
             y_axes=[str(i + 1) for i in range(len(to_interp))],
@@ -1994,21 +1505,15 @@ def interp1d(
     return df1
 
 
-def interp1d_all_lines(
+def interpolate_intersections(
     df: pd.DataFrame | gpd.GeoDataFrame,
     intersections: pd.DataFrame | gpd.GeoDataFrame,
-    to_interp: list[str] | None = None,
-    interp_on: str = "dist_along_line",
+    to_interp: list[str] | str,
+    interp_on: str = "distance_along_line",
     method: str = "cubic",
-    engine: str = "scipy",
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
-    line_col_name: str = "line",
-    time_col_name: str = "unixtime",
     window_width: float | None = None,
-    plot: bool = False,
-    plot_variable: str | None = None,
-    wait_for_input: bool = False,
 ) -> pd.DataFrame | gpd.GeoDataFrame:
     """
     _summary_
@@ -2019,29 +1524,16 @@ def interp1d_all_lines(
         Dataframe containing the data to interpolate
     intersections : pd.DataFrame | gpd.GeoDataFrame
         Dataframe containing the intersection points
-    to_interp : list[str] | None, optional
-        specify which column to interpolate NaNs for, by default is all columns except
-        "is_intersection" and "intersecting_line"
+    to_interp : list[str] | None,
+        specify which column to interpolate NaNs for
     interp_on : str, optional
-        Decide which column interpolation is based on, by default "dist_along_line"
+        Decide which column interpolation is based on, by default "distance_along_line"
     method : str, optional
         Decide between interpolation methods of 'linear', 'nearest', 'nearest-up',
-        'zero', 'slinear', 'quadratic','cubic', 'previous', or 'next' if engine is
-        "scipy", or vd.Spline(), vd.SplineCV(), vd.KNeighbors(), vd.Linear(), or
-        vd.Cubic() if engine is "verde", by default "cubic"
-    engine : str, optional
-        Decide between "scipy" and "verde" for performing the interpolation, by default
-        "scipy"
-    line_col_name : str, optional
-        Column name specifying the line numbers, by default "line"
-    time_col_name : str, optional
-        Column name specifying the time values, by default "unixtime"
+        'zero', 'slinear', 'quadratic','cubic', 'previous', or 'next', by default
+        "cubic"
     window_width : float, optional
         window width around each NaN to use for interpolation fitting, by default None
-    plot : bool, optional
-        plot the lines and interpolated points at intersections, by default False
-    wait_for_input : bool, optional
-        if true, will pause after each plot to allow inspection, by default False
 
     Returns
     -------
@@ -2051,90 +1543,145 @@ def interp1d_all_lines(
     df = df.copy()
     inters = intersections.copy()
 
+    assert "line" in df.columns, "df must have column 'line'"
+
+    if isinstance(to_interp, str):
+        to_interp = [to_interp]
+
+    # drop rows with NaNs in all rows to interp
+    df = df.dropna(subset=to_interp, how="all")
+
     # add empty rows at each intersection to the df
-    df, inters = add_intersections(
-        df,
-        inters,
-        line_col_name=line_col_name,
-        time_col_name=time_col_name,
-    )
+    df, inters = add_intersections(df, inters)
 
-    if to_interp is None:
-        to_interp = df.columns.drop(["is_intersection", "intersecting_line"])
-
-    lines = df.groupby(line_col_name)
+    lines = df.groupby("line")
     filled_lines = []
     pbar = tqdm(lines, desc="Lines")
     for line, line_df in pbar:
         pbar.set_description(f"Line {line}")
 
         if window_width is None:
-            filled = interp1d(
+            filled = interp(
                 line_df,
                 to_interp=to_interp,
                 interp_on=interp_on,
-                engine=engine,
                 method=method,
                 extrapolate=extrapolate,
                 fill_value=fill_value,
             )
         else:
-            filled = interp1d_windows(
+            filled = interp_windows(
                 line_df,
                 to_interp=to_interp,
                 window_width=window_width,
                 interp_on=interp_on,
-                engine=engine,
                 method=method,
                 extrapolate=extrapolate,
                 fill_value=fill_value,
             )
+
         filled_lines.append(filled)
 
     filled_lines = pd.concat(filled_lines)
 
+    inters["flight_interpolation_type"] = "none"
+    inters["tie_interpolation_type"] = "none"
+    inters["flight_height"] = np.nan
+    inters["tie_height"] = np.nan
     # add whether intersection was interpolated or extrapolated with respect to both lines and ties
     for ind, row in inters.iterrows():
         # search data for values at intersecting lines
-        flight_interp_type = filled_lines[
-            (filled_lines[line_col_name] == row.line)
+        line_values = filled_lines[
+            (filled_lines.line == row.line)
             & (filled_lines.intersecting_line == row.tie)
-        ].interpolation_type.to_numpy()[0]
-        inters.loc[ind, "flight_interpolation_type"] = flight_interp_type
-        tie_interp_type = filled_lines[
-            (filled_lines[line_col_name] == row.tie)
+        ]
+        tie_values = filled_lines[
+            (filled_lines.line == row.tie)
             & (filled_lines.intersecting_line == row.line)
-        ].interpolation_type.to_numpy()[0]
+        ]
+        # get interpolation type
+        flight_interp_type = line_values.interpolation_type.to_numpy()[0]
+        tie_interp_type = tie_values.interpolation_type.to_numpy()[0]
+        # get heights
+        line_height = line_values.height.to_numpy()[0]
+        tie_height = tie_values.height.to_numpy()[0]
+        # add to intersection table
+        inters.loc[ind, "flight_interpolation_type"] = flight_interp_type
         inters.loc[ind, "tie_interpolation_type"] = tie_interp_type
+        inters.loc[ind, "flight_height"] = line_height
+        inters.loc[ind, "tie_height"] = tie_height
 
-    if plot is True:
-        for line in filled_lines.line.unique():
-            if plot_variable is None:
-                msg = "need to supply variable name to plot"
-                raise ValueError(msg)
-            fig = plot_line_and_crosses(
-                filled_lines,
-                line=line,
-                x=interp_on,
-                y=[plot_variable],
-                y_axes=[str(i + 1) for i in range(len([plot_variable]))],
-                # plot_inters=[True]+[False for i in range(len(plot_variable)-1)],
-                plot_inters=True,
-            )
-            fig.show()
-            if wait_for_input is True:
-                input("Press key to continue...")
-                clear_output(wait=True)
+    # drop inters rows if the interpolation didn't work for either line or tie
+    inters_to_drop = inters[
+        (inters.flight_interpolation_type == "none")
+        | (inters.tie_interpolation_type == "none")
+    ]
+    inters = inters.drop(index=inters_to_drop.index)
 
+    # drop the corresponding rows from filled_lines
+    inters_to_drop_list = (
+        inters_to_drop.line.to_numpy(),
+        inters_to_drop.tie.to_numpy(),
+    )
+    rows_to_drop = []
+    for line_name, tie_name in zip(*inters_to_drop_list, strict=True):
+        rows_to_drop.append(
+            filled_lines[
+                (filled_lines.is_intersection)
+                & (filled_lines.line == line_name)
+                & (filled_lines.intersecting_line == tie_name)
+            ]
+        )
+        rows_to_drop.append(
+            filled_lines[
+                (filled_lines.is_intersection)
+                & (filled_lines.line == tie_name)
+                & (filled_lines.intersecting_line == line_name)
+            ]
+        )
+    if len(rows_to_drop) > 0:
+        rows_to_drop = pd.concat(rows_to_drop)
+        filled_lines = filled_lines.drop(index=rows_to_drop.index)
+
+    filled_lines = filled_lines.sort_values(["line", "unixtime"]).reset_index(drop=True)
+
+    assert len(inters) * 2 == len(filled_lines[filled_lines.is_intersection]), (
+        "Number of intersection rows in the dataframe should be twice the number of rows in intersection table"
+    )
     return filled_lines, inters
 
 
+def inspect_intersections(
+    data: pd.DataFrame | gpd.GeoDataFrame,
+    plot_variable: str | list[str],
+    interp_on: str = "distance_along_line",
+) -> None:
+    if isinstance(plot_variable, str):
+        plot_variable = [plot_variable]
+
+    for line, line_df in data.groupby("line"):
+        if len(line_df[line_df.is_intersection]) == 0:
+            continue
+
+        fig = plot_line_and_crosses(
+            data,
+            line=line,
+            x=interp_on,
+            y=plot_variable,
+            y_axes=[str(i + 1) for i in range(len(plot_variable))],
+            plot_inters=True,
+        )
+        fig.show()
+        input("Press key to continue...")
+        clear_output(wait=True)
+
+
 def calculate_misties(
-    intersections: gpd.GeoDataFrame,
     data: gpd.GeoDataFrame,
+    intersections: gpd.GeoDataFrame,
     data_col: str,
-    line_col_name: str = "line",
-    plot: bool = False,
+    plot_map: bool = False,
+    plot_hist: bool = True,
     robust: bool = True,
 ) -> gpd.GeoDataFrame:
     """
@@ -2154,13 +1701,13 @@ def calculate_misties(
         `add_intersections()`.
     data : gpd.GeoDataFrame
         Survey dataframe with intersection rows added by `add_intersections()` and
-        interpolated with `interp1d_all_lines()`.
+        interpolated with `interpolate_intersections()`.
     data_col : str
         Column name for data values to calculate misties for
-    line_col_name : str, optional
-        Column name specifying the line numbers, by default "line"
-    plot : bool, optional
+    plot_map : bool, optional
         Plot the resulting mistie points on a map, by default False
+    plot_hist : bool, optional
+        Plot the resulting mistie histogram, by default True
     robust : bool, optional
         Use robust color limits for the map, by default True
 
@@ -2174,65 +1721,26 @@ def calculate_misties(
     inters = intersections.copy()
     df = data.copy()
 
-    # save previous mistie columns by adding an integer to the end
-    # if "mistie" in inters.columns:
-    #     version = 0
-    #     col_name = f"mistie_{0}"
-    #     while col_name in inters.columns:
-    #         version += 1
-    #         col_name = f"mistie_{version}"
-    #     inters = inters.rename(columns={"mistie": col_name})
-    # get list of columns starting with "mistie"
+    assert "line" in df.columns, "df must have column 'line'"
 
     # iterate through intersections
     misties = []
     for _ind, row in inters.iterrows():
         # search data for values at intersecting lines
-        line_value = df[
-            (df[line_col_name] == row.line) & (df.intersecting_line == row.tie)
-        ][data_col].to_numpy()[0]
-        tie_value = df[
-            (df[line_col_name] == row.tie) & (df.intersecting_line == row.line)
-        ][data_col].to_numpy()[0]
-
+        line_value = df[(df.line == row.line) & (df.intersecting_line == row.tie)][
+            data_col
+        ].to_numpy()[0]
+        tie_value = df[(df.line == row.tie) & (df.intersecting_line == row.line)][
+            data_col
+        ].to_numpy()[0]
         assert not np.isnan(line_value)
         assert not np.isnan(tie_value)
 
         # mistie is line - tie
         misties.append(line_value - tie_value)
-        # inters.loc[ind, "line_value"] = line_value
-        # inters.loc[ind, "tie_value"] = tie_value
 
-        # add misties to rows of data df which are intersection points
-        # conditions = (df[line_col_name] == row.line) & (df.intersecting_line == row.tie)
-        # df.loc[conditions, "mistie"] = line_value - tie_value
-
-        # conditions = (df[line_col_name] == row.tie) & (df.intersecting_line == row.line)
-        # df.loc[conditions, "mistie"] = line_value - tie_value
-
-    # misties are defined as line - tie
-    # misties = inters.line_value - inters.tie_value
-    misties = pd.Series(misties)
-    logger.info("mistie RMSE: %s", utils.rmse(misties))
-
-    # if len(cols) == 0:
-    #     mistie_col = "mistie_0"
-    #     past_mistie_col = None
-    #     logger.info("Created initial mistie column: %s", past_mistie_col)
-    # else:
-    #     mistie_col = f"mistie_{len(cols)}"
-    #     past_mistie_col = f"mistie_{len(cols)-1}"
-    # if len(cols) == 0:
-    #     logger.info("Created initial mistie column: `mistie")
-    # else:
-    #     mistie_col = f"mistie_{len(cols)}"
-    #     past_mistie_col = f"mistie_{len(cols)-1}"
-
-    # get the latest mistie column
-    # mistie_col = [int(col.split("_")[-1]) for col in inters.columns if "mistie" in col]
-    # mistie_col = f"mistie_{max(mistie_col)}"
-
-    # print("1",inters.mistie - misties)
+    misties = pd.Series(misties).to_numpy()
+    logger.info("mistie RMSE: %s", airbornegeo.rmse(misties))
 
     cols = [c for c in inters.columns if "mistie_" in c]
     cols = [c for c in cols if c[-1].isdigit()]
@@ -2247,7 +1755,7 @@ def calculate_misties(
         try:
             pd.testing.assert_series_equal(
                 inters.mistie,
-                misties,
+                pd.Series(misties),
                 check_names=False,
             )
 
@@ -2260,69 +1768,25 @@ def calculate_misties(
             inters = inters.rename(columns={"mistie": next_mistie_col})
             inters["mistie"] = misties
 
-        # try:
-        #     pd.testing.assert_series_equal(
-        #         inters.mistie,
-        #         inters[next_mistie_col],
-        #         check_names=False,
-        #     )
-        #     logger.info("Mistie values are unchanged, using past mistie column: %s", past_mistie_col)
-        #     mistie_col = past_mistie_col
-        # except AssertionError:
-        #     inters[mistie_col] = misties
-        #     logger.info("Previous mistie column: %s", past_mistie_col)
-        #     logger.info("New mistie column: %s", mistie_col)
-
-    if plot is True:
-        plotly_points(
+    if plot_map:
+        airbornegeo.plotly_points(
             inters,
             color_col="mistie",
             hover_cols=["line", "tie"],
             robust=robust,
             absolute=True,
             cmap="balance",
-            point_size=10,
+            size=10,
         )
-        plt.hist(inters.mistie)
+    if plot_hist:
+        plt.hist(
+            inters.mistie,
+            bins=20,
+        )
         plt.xlabel("Mistie value")
-        plt.title("Histogram of misties")
+        plt.title(f"Histogram of misties; RMSE: {round(airbornegeo.rmse(misties), 2)}")
 
     return inters
-
-
-def verde_predict_trend(
-    data_to_fit: pd.DataFrame,
-    cols_to_fit: list[str],
-    data_to_predict: pd.DataFrame,
-    cols_to_predict: list[str],
-    degree: int,
-) -> pd.DataFrame:
-    """
-    data_to_fit: pd.DataFrame with at least 3 columns: x, y, and data
-    cols_to_fit: column names representing x, y, and data
-    data_to_predict: pd.DataFrame with at least 2 columns: x, y
-    cols_to_predict: column names representing x and y, and 3rd value for new column
-        with predicted data
-    """
-    fit_df = data_to_fit.copy()
-    predict_df = data_to_predict.copy()
-
-    # fit a polynomial trend through the lines mistie values
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Under-determined problem")
-        # fit a trend to the data values
-        fit_coords = (fit_df[cols_to_fit[0]], fit_df[cols_to_fit[1]])
-        trend = vd.Trend(degree=degree).fit(fit_coords, fit_df[cols_to_fit[2]])
-
-        # predict the trend on the new values
-        predict_coords = (
-            predict_df[cols_to_predict[0]],
-            predict_df[cols_to_predict[1]],
-        )
-        predicted = trend.predict(predict_coords)
-        predict_df[cols_to_predict[2]] = predicted
-
-    return predict_df
 
 
 def skl_predict_trend(
@@ -2331,7 +1795,7 @@ def skl_predict_trend(
     data_to_predict: pd.DataFrame,
     cols_to_predict: list[str],
     degree: int,
-    sample_weight_col: str | None = None,
+    intersection_weight_col: str | None = None,
 ) -> pd.DataFrame:
     """
     data_to_fit: pd.DataFrame with at least 2 columns: distance, and data
@@ -2339,7 +1803,7 @@ def skl_predict_trend(
     data_to_predict: pd.DataFrame with at least 1 columns: distance
     cols_to_predict: column names representing distance and new column
         with predicted data
-    sample_weight_col: column name for sample weights
+    intersection_weight_col: column name for sample weights
     """
     fit_df = data_to_fit.copy()
     predict_df = data_to_predict.copy()
@@ -2351,8 +1815,8 @@ def skl_predict_trend(
     )
     linear_regression = LinearRegression()
 
-    if sample_weight_col is not None:
-        sample_weight = fit_df[sample_weight_col].to_numpy()
+    if intersection_weight_col is not None:
+        sample_weight = fit_df[intersection_weight_col].to_numpy()
     else:
         sample_weight = None
 
@@ -2388,15 +1852,11 @@ def skl_predict_trend(
 
 
 def level_survey_lines_to_grid(
-    data: pd.DataFrame | gpd.GeoDataFrame,
-    grid_col: str,
+    data: gpd.GeoDataFrame | pd.DataFrame,
     degree: int,
+    grid_col: str,
     data_col: str,
-    line_col_name: str = "line",
-    distance_col: str = "dist_along_line",
-    levelled_col: str = "levelled",
-    plot: bool = False,
-) -> pd.DataFrame | gpd.GeoDataFrame:
+) -> pd.Series:
     """
     With grid values sampled along survey flight lines (grid_col), fit a trend
     or specified order to the misfit values (data_col - grid_col) and
@@ -2405,98 +1865,49 @@ def level_survey_lines_to_grid(
 
     Parameters
     ----------
-    df : pd.DataFrame | gpd.GeoDataFrame
-        _description_
-    grid_col : str
+    data : pd.DataFrame | gpd.GeoDataFrame
         _description_
     degree : int
         _description_
+    grid_col : str
+        _description_
     data_col : str
         _description_
-    line_col_name : str, optional
-        _description_, by default "line"
-    distance_col : str, optional
-        _description_, by default "dist_along_line"
-    levelled_col : str, optional
-        _description_, by default "levelled"
 
     Returns
     -------
-    pd.DataFrame | gpd.GeoDataFrame
-        _description_
-
-    Raises
-    ------
-    ValueError
+    pd.Series
         _description_
     """
     df = data.copy()
 
-    # calculate misfit survey data and sampled grid values
-    if "misfit" in df.columns:
-        msg = "Column 'misfit' already exists in dataframe, dropping it"
-        # raise ValueError(msg)
-        logger.warning(msg)
-        df = df.drop(columns="misfit")
+    assert "distance_along_line" in df.columns, (
+        "df must have column 'distance_along_line'"
+    )
+    assert "line" in df.columns, "df must have column 'line'"
 
-    if levelled_col in df.columns:
-        logger.info("supplied levelled_col already in dataframe")
-
-    df["misfit"] = df[data_col] - df[grid_col]
+    df["tmp_misfit"] = df[data_col] - df[grid_col]
 
     # fit a trend to the misfits on line-by-line basis
-    for line in df[line_col_name].unique():
+    for line in df.line.unique():
         # subset a line
-        line_df = df[df[line_col_name] == line]
+        line_df = df[df.line == line]
 
         # calculate correction by fitting trend to misfit values
         correction = skl_predict_trend(
             data_to_fit=line_df,
-            cols_to_fit=[distance_col, "misfit"],
+            cols_to_fit=["distance_along_line", "tmp_misfit"],
             data_to_predict=line_df,
-            cols_to_predict=[distance_col, "correction"],
+            cols_to_predict=["distance_along_line", "correction"],
             degree=degree,
         ).correction
 
         # add correction values to the main dataframe
-        df.loc[df[line_col_name] == line, "levelling_correction"] = correction
+        df.loc[df.line == line, "levelling_correction"] = correction
 
-        # apply correction to the data
-        # df.loc[df[line_col_name]==line, levelled_col] = line_df[data_col] - correction
-    logger.info("RMS of correction: %s", utils.rmse(correction))
-    # apply correction to the data
-    df[levelled_col] = df[data_col] - df.levelling_correction
+    logger.info("RMS of correction: %s", airbornegeo.rmse(correction))
 
-    # # add correction to existing correction column if it exists
-    # if correction_column_name in df.columns:
-    #     df[correction_column_name] += df[f"trend_{degree}_correction"]
-    # else:
-    #     df[correction_column_name] = df[f"trend_{degree}_correction"]
-
-    if plot:
-        # plot old misties
-        plotly_points(
-            df,
-            color_col="misfit",
-            hover_cols=[line_col_name, data_col, "misfit"],
-            cmap="balance",
-            robust=False,
-            absolute=True,
-            point_width=0,
-            point_size=5,
-        )
-
-        plotly_points(
-            df,
-            color_col="levelling_correction",
-            hover_cols=[line_col_name, data_col, levelled_col],
-            cmap="balance",
-            robust=True,
-            absolute=True,
-            point_width=0,
-            point_size=5,
-        )
-    return df.drop(columns=["misfit", "levelling_correction"])
+    return df[data_col] - df.levelling_correction
 
 
 def level_lines(
@@ -2506,10 +1917,7 @@ def level_lines(
     data_col: str,
     levelled_col: str,
     degree: int,
-    cols_to_fit: str | list[str] | None = None,
-    cols_to_predict: str = "dist_along_line",
-    line_col_name: str = "line",
-    sample_weight_col: str | None = None,
+    intersection_weight_col: str | None = None,
     plot: bool = False,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     """
@@ -2518,6 +1926,11 @@ def level_lines(
     """
     df = data.copy()
     inters = inters.copy()
+
+    assert "line" in df.columns, "df must have column 'line'"
+    assert "distance_along_line" in df.columns, (
+        "df must have column 'distance_along_line'"
+    )
 
     # check if levelling lines to ties or vice versa
     levelling_ties = False
@@ -2535,25 +1948,16 @@ def level_lines(
     elif levelling_ties is True:
         logger.debug("Levelling ties to lines")
 
-    if cols_to_fit is None:
-        # if levelling to ties, fit to dist_along_flight_tie
-        # if lines_to_level[0] in inters.tie.unique():
-        if levelling_ties is True:
-            cols_to_fit = "dist_along_flight_tie"
-            logger.debug("using column: %s", cols_to_fit)
-        # elif lines_to_level[0] in inters.line.unique():
-        elif levelling_lines is True:
-            cols_to_fit = "dist_along_flight_line"
-            logger.debug("using column: %s", cols_to_fit)
-
-    # convert columns to fit on into a list if its a string
-    if isinstance(cols_to_fit, str):
-        cols_to_fit = [cols_to_fit]
-
-    cols_to_fit = typing.cast(
-        list[str],
-        cols_to_fit,
-    )
+    # if levelling to ties, fit to dist_along_flight_tie
+    # if lines_to_level[0] in inters.tie.unique():
+    if levelling_ties is True:
+        cols_to_fit = ["dist_along_flight_tie"]
+    # elif lines_to_level[0] in inters.line.unique():
+    elif levelling_lines is True:
+        cols_to_fit = ["dist_along_flight_line"]
+    else:
+        msg = "need to supplied either tie lines or flight lines"
+        raise ValueError(msg)
 
     # df levelled_col = f"{data_col}_levelled"
     # df[levelled_col] = np.nan
@@ -2561,12 +1965,13 @@ def level_lines(
 
     # get the latest mistie column
     inters2 = calculate_misties(
-        inters,
         df,
+        inters,
         data_col=data_col,
-        plot=False,
+        plot_map=False,
+        plot_hist=False,
     )
-    logger.info("mistie before levelling: %s mGal", utils.rmse(inters2.mistie))
+    logger.info("mistie before levelling: %s mGal", airbornegeo.rmse(inters2.mistie))
     # mistie_col = [int(col.split("_")[-1]) for col in inters.columns if "mistie" in col]
     # mistie_col = f"mistie_{max(mistie_col)}"
     # logger.debug("most recent mistie column: %s", mistie_col)
@@ -2576,53 +1981,31 @@ def level_lines(
     logger.debug("levelling the data")
     for line in lines_to_level:
         # subset a line
-        line_df = df[df[line_col_name] == line].copy()
+        line_df = df[df.line == line].copy()
 
         # get intersections of line of interest
         ints = inters2[(inters2.line == line) | (inters2.tie == line)]
 
-        # fit a polynomial trend through the lines mistie values
-        # if predicting on 2 variables (easting and northing) use verde
-        if len(cols_to_fit) > 1:
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", message="Under-determined problem")
-                try:
-                    line_df = verde_predict_trend(
-                        data_to_fit=ints,
-                        cols_to_fit=cols_to_fit + ["mistie"],  # noqa: RUF005
-                        data_to_predict=line_df,
-                        cols_to_predict=[cols_to_predict] + ["levelling_correction"],  # noqa: RUF005
-                        degree=degree,
-                    )
-                except ValueError as e:
-                    if "zero-size array to reduction operation minimum which" in str(e):
-                        logger.error("Issue with line %s, skipping", line)
-                        # if issues, correction is 0
-                        line_df["levelling_correction"] = 0
-                    else:
-                        raise e
-        # if predicting on 1 variable (distance along line) use scikitlearn
-        elif len(cols_to_fit) == 1:
-            try:
-                line_df = skl_predict_trend(
-                    data_to_fit=ints,  # df with mistie values
-                    cols_to_fit=cols_to_fit  # noqa: RUF005
-                    + ["mistie"],  # column names for distance/mistie
-                    data_to_predict=line_df,  # df with line data
-                    cols_to_predict=[cols_to_predict]  # noqa: RUF005
-                    + [
-                        "levelling_correction"
-                    ],  # column names for distance/ levelling correction
-                    degree=degree,  # degree order for fitting line to misties
-                    sample_weight_col=sample_weight_col,
-                )
-            except ValueError as e:
-                if "Found array with " in str(e):
-                    logger.error("Issue with line %s, skipping", line)
-                    # if issues, correction is 0
-                    line_df["levelling_correction"] = 0
-                else:
-                    raise e
+        try:
+            line_df = skl_predict_trend(
+                data_to_fit=ints,  # df with mistie values
+                cols_to_fit=cols_to_fit  # noqa: RUF005
+                + ["mistie"],  # column names for distance/mistie
+                data_to_predict=line_df,  # df with line data
+                cols_to_predict=["distance_along_line"]  # noqa: RUF005
+                + [
+                    "levelling_correction"
+                ],  # column names for distance/ levelling correction
+                degree=degree,  # degree order for fitting line to misties
+                intersection_weight_col=intersection_weight_col,
+            )
+        except ValueError as e:
+            if "Found array with " in str(e):
+                logger.error("Issue with line %s, skipping", line)
+                # if issues, correction is 0
+                line_df["levelling_correction"] = 0
+            else:
+                raise e
 
         # if levelling tie lines, negate the correction
         if levelling_ties is True:
@@ -2634,17 +2017,13 @@ def level_lines(
         values = line_df[data_col] - line_df.levelling_correction
 
         # update main df
-        df.loc[df[line_col_name] == line, levelled_col] = values
-        df.loc[df[line_col_name] == line, "levelling_correction"] = (
-            line_df.levelling_correction
-        )
+        df.loc[df.line == line, levelled_col] = values
+        df.loc[df.line == line, "levelling_correction"] = line_df.levelling_correction
 
     # add unchanged values for lines not included
-    for line in df[line_col_name].unique():
+    for line in df.line.unique():
         if line not in lines_to_level:
-            df.loc[df[line_col_name] == line, levelled_col] = df.loc[
-                df[line_col_name] == line, data_col
-            ]
+            df.loc[df.line == line, levelled_col] = df.loc[df.line == line, data_col]
     # print(df)
     # try:
     #     pd.testing.assert_series_equal(
@@ -2659,19 +2038,20 @@ def level_lines(
 
     # update mistie with levelled data
     inters = calculate_misties(
-        inters,
         df,
+        inters,
         data_col=levelled_col,
-        plot=False,
+        plot_map=False,
+        plot_hist=False,
     )
-    logger.info("mistie after levelling: %s mGal", utils.rmse(inters.mistie))
+    logger.info("mistie after levelling: %s mGal", airbornegeo.rmse(inters.mistie))
 
     if plot is True:
         # plot old misties
         ints = inters2[
             inters2.line.isin(lines_to_level) | inters2.tie.isin(lines_to_level)
         ]
-        plotly_points(
+        airbornegeo.plotly_points(
             ints,
             color_col="mistie",
             hover_cols=[
@@ -2681,14 +2061,14 @@ def level_lines(
             ],
             cmap="balance",
             absolute=True,
-            # point_width=0,
-            point_size=10,
+            # edge_width=0,
+            size=10,
             theme=None,
         )
-        # plotly_points(
+        # airbornegeo.plotly_points(
         #     ints,
         #     color_col=mistie_col,
-        #     point_size=4,
+        #     size=4,
         #     hover_cols=[
         #         "line",
         #         "tie",
@@ -2698,14 +2078,14 @@ def level_lines(
         #     ],
         # )
 
-        plotly_points(
-            df[df[line_col_name].isin(lines_to_level)],
+        airbornegeo.plotly_points(
+            df[df.line.isin(lines_to_level)],
             color_col="levelling_correction",
-            hover_cols=[line_col_name, data_col, levelled_col],
+            hover_cols=["line", data_col, levelled_col],
             cmap="balance",
             absolute=True,
-            point_width=0,
-            point_size=5,
+            edge_width=0,
+            size=5,
             theme=None,
             robust=True,
         )
@@ -2713,17 +2093,14 @@ def level_lines(
     return df.drop(columns=["levelling_correction"]), inters
 
 
-def iterative_line_levelling(
+def iterative_levelling(
     inters: gpd.GeoDataFrame | pd.DataFrame,
     data: gpd.GeoDataFrame | pd.DataFrame,
     lines_to_level: list[float],
     data_col: str,
     levelled_col: str,
     degree: int,
-    cols_to_fit: str | None = None,
-    cols_to_predict: str = "dist_along_line",
-    line_col_name: str = "line",
-    sample_weight_col: str | None = None,
+    intersection_weight_col: str | None = None,
     iterations: int = 5,
     plot_results: bool = False,
     plot_convergence: bool = False,
@@ -2732,18 +2109,17 @@ def iterative_line_levelling(
     df = data.copy()
     ints = inters.copy()
 
+    assert "line" in df.columns, "df must have column 'line'"
+
     for _i in range(1, iterations + 1):
         df, ints = level_lines(
             ints,
             df,
             lines_to_level=lines_to_level,
-            cols_to_fit=cols_to_fit,
-            cols_to_predict=cols_to_predict,
             degree=degree,
             data_col=data_col,
             levelled_col=levelled_col,
-            line_col_name=line_col_name,
-            sample_weight_col=sample_weight_col,
+            intersection_weight_col=intersection_weight_col,
         )
         data_col = levelled_col
 
@@ -2756,123 +2132,25 @@ def iterative_line_levelling(
         )
     if plot_results is True:
         # plot flight lines
-        plotly_points(
+        airbornegeo.plotly_points(
             df[df.line.isin(lines_to_level)],
             color_col="levelling_correction",
-            point_size=4,
+            size=4,
             hover_cols=[
-                line_col_name,
+                "line",
             ],
         )
 
     return df, ints
 
 
-# def iterative_line_levelling(
-#     inters: gpd.GeoDataFrame | pd.DataFrame,
-#     data: gpd.GeoDataFrame | pd.DataFrame,
-#     lines_to_level: list[float],
-#     data_col: str,
-#     levelled_col: str,
-#     cols_to_fit: str | None = None,
-#     cols_to_predict: str = "dist_along_line",
-#     degree: int | None = None,
-#     line_col_name: str = "line",
-#     iterations : int = 5,
-#     plot_iterations=False,
-#     plot_results=False,
-#     plot_convergence=False,
-#     **kwargs,
-# ):
-#     df = data.copy()
-#     ints = inters.copy()
-
-#     if mistie_prefix is None:
-#         mistie_prefix = f"mistie_trend{degree}"
-#     if levelled_data_prefix is None:
-#         levelled_data_prefix = f"levelled_data_trend{degree}"
-
-#     rmse = utils.rmse(ints[starting_mistie_col])
-#     logger.info("Starting RMS mistie: %s mGal", rmse)
-
-#     for i in range(1, iterations + 1):
-#         if i == 1:
-#             data_col = starting_data_col
-#             mistie_col = starting_mistie_col
-#         else:
-#             data_col = f"{levelled_data_prefix}_{i-1}"
-#             mistie_col = f"{mistie_prefix}_{i-1}"
-
-#         # with inv_utils.HiddenPrints():
-#         df, ints = level_lines(
-#             ints,
-#             df,
-#             lines_to_level=lines_to_level,
-#             cols_to_fit=cols_to_fit,
-#             cols_to_predict=cols_to_predict,
-#             degree=degree,
-#             data_col=data_col,
-#             levelled_col=f"{levelled_data_prefix}_{i}",
-#             mistie_col=mistie_col,
-#             new_mistie_col=f"{mistie_prefix}_{i}",
-#             line_col_name=line_col_name,
-#         )
-#         rmse = utils.rmse(ints[f"{mistie_prefix}_{i}"])
-#         logger.info("RMS mistie after iteration %s: %s mGal", i, rmse)
-#         rmse_corr = utils.rmse(df[(df.line.isin(lines_to_level))].levelling_correction)
-#         logger.info("RMS correction to lines: %s mGal", rmse_corr)
-
-#         if plot_iterations is True:
-#             # plot flight lines
-#             plotly_points(
-#                 df[df.line.isin(lines_to_level)],
-#                 color_col="levelling_correction",
-#                 point_size=2,
-#                 hover_cols=[
-#                     line_col_name,
-#                     f"{levelled_data_prefix}_{i}",
-#                 ],
-#             )
-
-#     levelled_col = list(df.columns)[-1]
-
-#     df["levelling_correction"] = df[starting_data_col] - df[levelled_col]
-#     if plot_convergence is True:
-#         plot_levelling_convergence(
-#             ints,
-#             mistie_prefix=mistie_prefix,
-#             logy=kwargs.get("logy", False),
-#         )
-#     if plot_results is True:
-#         # plot flight lines
-#         plotly_points(
-#             df[df.line.isin(lines_to_level)],
-#             color_col="levelling_correction",
-#             point_size=4,
-#             hover_cols=[
-#                 line_col_name,
-#                 f"{levelled_data_prefix}_{i}",
-#             ],
-#         )
-
-#     return (
-#         df,
-#         ints,
-#     )
-
-
 def iterative_levelling_alternate(
     inters: gpd.GeoDataFrame | pd.DataFrame,
     data: gpd.GeoDataFrame | pd.DataFrame,
-    tie_line_names: list[float],
-    flight_line_names: list[float],
     data_col: str,
     levelled_col: str,
     degree: int,
-    cols_to_fit: str | None = None,
-    cols_to_predict: str = "dist_along_line",
-    line_col_name: str = "line",
-    sample_weight_col: str | None = None,
+    intersection_weight_col: str | None = None,
     iterations: int = 5,
     # plot_results=False,
     plot_convergence: bool = False,
@@ -2881,41 +2159,39 @@ def iterative_levelling_alternate(
     df = data.copy()
     ints = inters.copy()
 
+    assert "tie" in df.columns, "df must have column 'tie'"
+    assert "line" in df.columns, "df must have column 'line'"
+    assert "distance_along_line" in df.columns, (
+        "df must have column 'distance_along_line'"
+    )
+
+    lines_to_level = df[~df.tie].line.unique()
+    ties_to_level = df[df.tie].line.unique()
+
     for _i in range(1, iterations + 1):
         # level lines to ties
-        ints = calculate_misties(
-            ints,
-            df,
-            data_col=data_col,
-        )
-        prior_mistie = utils.rmse(ints.mistie)
+        prior_mistie = airbornegeo.rmse(ints.mistie)
         df, ints = level_lines(
             ints,
             df,
-            lines_to_level=flight_line_names,
-            cols_to_fit=cols_to_fit,
-            cols_to_predict=cols_to_predict,
+            lines_to_level=lines_to_level,
             degree=degree,
             data_col=data_col,
             levelled_col=levelled_col,
-            line_col_name=line_col_name,
-            sample_weight_col=sample_weight_col,
+            intersection_weight_col=intersection_weight_col,
         )
         # level ties to lines
         df, ints = level_lines(
             ints,
             df,
-            lines_to_level=tie_line_names,
-            cols_to_fit=cols_to_fit,
-            cols_to_predict=cols_to_predict,
+            lines_to_level=ties_to_level,
             degree=degree,
             data_col=levelled_col,
             levelled_col=levelled_col,
-            line_col_name=line_col_name,
-            sample_weight_col=sample_weight_col,
+            intersection_weight_col=intersection_weight_col,
         )
         data_col = levelled_col
-        post_mistie = utils.rmse(ints.mistie)
+        post_mistie = airbornegeo.rmse(ints.mistie)
         if post_mistie > prior_mistie:
             logger.warning("Mistie increased, ending iterations")
             break
@@ -2929,20 +2205,20 @@ def iterative_levelling_alternate(
         )
     # if plot_results is True:
     #     # plot flight lines
-    #     plotly_points(
+    #     airbornegeo.plotly_points(
     #         df[df.line.isin(flight_line_names)],
     #         color_col="levelling_correction",
-    #         point_size=2,
+    #         size=2,
     #         hover_cols=[
     #             "line",
     #             f"{levelled_data_prefix}_{i}l",
     #         ],
     #     )
     #     # plot tie lines
-    #     plotly_points(
+    #     airbornegeo.plotly_points(
     #         df[df.line.isin(tie_line_names)],
     #         color_col="levelling_correction",
-    #         point_size=4,
+    #         size=4,
     #         hover_cols=[
     #             "line",
     #             f"{levelled_data_prefix}_{i}t",
@@ -2952,218 +2228,11 @@ def iterative_levelling_alternate(
     return df, ints
 
 
-def plotly_points(
-    df: pd.DataFrame | gpd.GeoDataFrame,
-    coord_names: tuple[str, str] | None = None,
-    color_col: str | None = None,
-    hover_cols: list[str] | None = None,
-    point_size: int = 4,
-    point_width: int = 1,
-    cmap: str | None = None,
-    cmap_middle: float | None = None,
-    cmap_lims: tuple[float, float] | None = None,
-    robust: bool = True,
-    absolute: bool = False,
-    theme: str | None = None,
-    title: str | None = None,
-) -> None:
-    """
-    Create a scatterplot of spatial data. By default, coordinates are extracted from
-    geopandas geometry column, or from user specified columns given by 'coord_names'.
-    """
-    data = df[df[color_col].notna()].copy()
-
-    if coord_names is None:
-        try:
-            x = data.geometry.x
-            y = data.geometry.y
-        except AttributeError:
-            try:
-                x = data["easting"]
-                y = data["northing"]
-            except AttributeError:
-                try:
-                    x = data["x"]
-                    y = data["y"]
-                except AttributeError:
-                    pass
-        coord_names = (x, y)
-
-    # either
-    if cmap_lims is None:
-        vmin, vmax = utils.get_min_max(
-            data[color_col],
-            robust=robust,
-            absolute=absolute,
-        )
-        cmap_lims = (vmin, vmax)
-    else:
-        vmin, vmax = cmap_lims
-
-    if cmap is None:
-        if (cmap_lims[0] < 0) and (cmap_lims[1] > 0):  # pylint: disable=R1716
-            cmap = "balance"
-            cmap_middle = 0
-        else:
-            cmap = None
-            cmap_middle = None
-    else:
-        cmap_middle = None
-
-    if cmap_middle == 0:
-        max_abs = vd.maxabs((vmin, vmax))
-        cmap_lims = (-max_abs, max_abs)
-
-    fig = px.scatter(
-        data,
-        x=coord_names[0],
-        y=coord_names[1],
-        color=data[color_col],
-        color_continuous_scale=cmap,
-        color_continuous_midpoint=cmap_middle,
-        range_color=cmap_lims,
-        hover_data=hover_cols,
-        template=theme,
-    )
-    fig.update_yaxes(
-        scaleanchor="x",
-        scaleratio=1,
-    )
-
-    fig.update_layout(
-        title_text=title,
-        autosize=False,
-        width=800,
-        height=800,
-    )
-
-    fig.update_traces(
-        marker={"size": point_size, "line": {"color": "black", "width": point_width}}
-    )
-
-    fig.show()
-
-
-def plotly_profiles(
-    data: pd.DataFrame,
-    y: list[str] | str,
-    x: str = "dist_along_line",
-    y_axes: list[str] | None = None,
-    x_lims: tuple[float, float] | None = None,
-    y_lims: tuple[float, float] | None = None,
-    **kwargs: typing.Any,
-) -> go.Figure:
-    """
-    plot data profiles with plotly
-    currently only allows 3 separate y axes, set with "y_axes", starting with 1
-    """
-    df = data.copy()
-
-    # turn y column name into list
-    if isinstance(y, str):
-        y = [y]
-
-    # list of y axes to use, if none, all will be same
-    y_axes = ["" for _ in y] if y_axes is None else [str(x) for x in y_axes]
-    assert "0" not in y_axes, "No '0' or 0 allowed, axes start with 1"
-    # convert y axes to plotly expected format: "y", "y2", "y3" ...
-    y_axes = [s.replace("1", "") for s in y_axes]
-    y_axes = [f"y{x}" for x in y_axes]
-
-    # # lim x and y ranges
-    # if xlims is not None:
-    #     df = df[df[x].between(*xlims)]
-    # if ylims is not None:
-    #     df = df[df[y].between(*ylims)]
-
-    if y_lims is not None:
-        for i in y_lims:
-            if isinstance(i, list | tuple):  # type: ignore [unreachable]
-                assert len(y_lims) == len(y), "y_lims must be same length as y"  # type: ignore [unreachable]
-            elif isinstance(i, int | float):
-                y_lims = tuple([y_lims for _ in y])  # type: ignore [assignment] # pylint: disable=R1728
-
-    # set plotting mode
-    modes = kwargs.get("modes")
-    if modes is None:
-        modes = ["markers" for _ in y]
-
-    # set marker properties
-    marker_sizes = kwargs.get("marker_sizes")
-    marker_symbols = kwargs.get("marker_symbols")
-    if marker_sizes is None:
-        marker_sizes = [2 for _ in y]
-    if marker_symbols is None:
-        marker_symbols = ["circle" for _ in y]
-
-    fig = go.Figure()
-
-    # iterate through data columns
-    for i, col in enumerate(y):
-        fig.add_trace(
-            go.Scatter(
-                mode=modes[i],
-                x=df[x],
-                y=df[col],
-                name=col,
-                marker_size=marker_sizes[i],
-                marker_symbol=marker_symbols[i],
-                marker_color=plotly.colors.DEFAULT_PLOTLY_COLORS[i],
-                yaxis=y_axes[i],
-            )
-        )
-
-    unique_axes = len(pd.Series(y_axes).unique())
-    x_domain = [0.0, 1.0]
-    if unique_axes >= 1:
-        y_axes_args = {"yaxis": {"title": y[y_axes.index("y")]}}
-    if unique_axes >= 2:
-        y_axes_args["yaxis2"] = {  # pylint: disable=E0606
-            "title": y[y_axes.index("y2")],
-            "overlaying": "y",
-            "side": "right",
-        }  # pylint: disable=E0606
-    if unique_axes >= 3:
-        y_axes_args["yaxis3"] = {
-            "title": y[y_axes.index("y3")],
-            "anchor": "free",
-            "overlaying": "y",
-        }
-        x_domain = [0.15, 1.0]
-    else:
-        pass
-
-    if x_lims is not None:
-        fig.update_layout(xaxis={"range": x_lims})
-    for i, _col in enumerate(y):
-        if y_lims is not None:
-            if y_axes[i] == "y":
-                y_axes_args["yaxis"]["range"] = y_lims[i]  # type: ignore [assignment]
-            elif y_axes[i] == "y2":
-                y_axes_args["yaxis2"]["range"] = y_lims[i]  # type: ignore [assignment]
-            elif y_axes[i] == "y3":
-                y_axes_args["yaxis3"]["range"] = y_lims[i]  # type: ignore [assignment]
-            else:
-                y_axes_args["yaxis3"]["range"] = y_lims[i]  # type: ignore [assignment]
-
-    fig.update_layout(
-        title_text=kwargs.get("title"),
-        xaxis={
-            "title": x,
-            "domain": x_domain,
-        },
-        **y_axes_args,
-    )
-
-    return fig
-
-
 def plot_line_and_crosses(
     df: pd.DataFrame | gpd.GeoDataFrame,
     y: list[str],
     line: float | None = None,
-    line_col_name: str = "line",
-    x: str = "dist_along_line",
+    x: str = "distance_along_line",
     plot_inters: bool | list[bool] = False,
     use_intersection_y: bool = True,
     y_axes: list[str] | None = None,
@@ -3174,6 +2243,7 @@ def plot_line_and_crosses(
     """
     plot lines and crosses
     """
+    assert "line" in df.columns, "df must have column 'line'"
 
     # turn y column name into list
     if isinstance(y, str):  # type: ignore [unreachable]
@@ -3183,15 +2253,13 @@ def plot_line_and_crosses(
     if y_axes is None:
         y_axes = ["1" for _ in y]
 
-    if len(df[line_col_name].unique()) <= 1:
-        line = df[line_col_name].iloc[0]
+    if len(df.line.unique()) <= 1:
+        line = df.line.iloc[0]
 
     try:
-        line_df = df[df[line_col_name] == line].sort_values(
-            by=["line", "intersecting_line"]
-        )
+        line_df = df[df.line == line].sort_values(by=["line", "intersecting_line"])
     except KeyError:
-        line_df = df[df[line_col_name] == line].sort_values(by=["line"])
+        line_df = df[df.line == line].sort_values(by=["line"])
 
     # if xlims is not None:
     #     line_df = line_df[line_df[x].between(*xlims)]
@@ -3210,7 +2278,7 @@ def plot_line_and_crosses(
     if isinstance(plot_inters, list):
         inters_to_plot = plot_inters
 
-    fig = plotly_profiles(
+    fig = airbornegeo.plotly_profiles(
         line_df,
         x=x,
         y=y,
@@ -3267,83 +2335,12 @@ def plot_line_and_crosses(
     return fig
 
 
-def plot_flightlines(
-    fig: pygmt.Figure,
-    df: pd.DataFrame,
-    direction: str = "EW",
-    plot_labels: bool = True,
-    plot_lines: bool = True,
-    **kwargs: typing.Any,
-) -> None:
-    # group lines by their line number
-    lines = [v for _, v in df.groupby("line")]
-
-    # plot lines
-    if plot_lines is True:
-        for i in list(range(len(lines))):
-            fig.plot(
-                x=lines[i].easting,
-                y=lines[i].northing,
-                # pen=kwargs.get("pen", "0.3p,white"),
-                style=kwargs.get("style", "p.5p"),
-                fill=kwargs.get("fill", "gray"),
-            )
-
-    # plot labels
-    if plot_labels is True:
-        for i in list(range(len(lines))):
-            # switch label locations for every other line
-            if (i % 2) == 0:
-                if direction == "EW":
-                    offset = "0.25c/0c"
-                    # plot label at max value of x-coord
-                    x_or_y = "easting"
-                    # angle of label
-                    angle = 0
-                elif direction == "NS":
-                    offset = "0c/0.25c"
-                    # plot label at max value of y-coord
-                    x_or_y = "northing"
-                    # angle of label
-                    angle = 90
-                else:
-                    msg = "invalid direction string"
-                    raise ValueError(msg)
-                # plot label
-                fig.text(
-                    x=lines[i].easting.loc[lines[i][x_or_y].idxmax()],
-                    y=lines[i].northing.loc[lines[i][x_or_y].idxmax()],
-                    text=str(int(lines[i].line.iloc[0])),
-                    justify="CM",
-                    font=kwargs.get("font", "5p,black"),
-                    fill="white",
-                    offset=offset,
-                    angle=angle,
-                )
-            else:
-                if direction == "EW":
-                    offset = "-0.25c/0c"
-                    # plot label at max value of x-coord
-                    x_or_y = "easting"
-                    # angle of label
-                    angle = 0
-                elif direction == "NS":
-                    offset = "0c/-0.25c"
-                    # plot label at max value of y-coord
-                    x_or_y = "northing"
-                    # angle of label
-                    angle = 90
-                else:
-                    msg = "invalid direction string"
-                    raise ValueError(msg)
-                # plot label
-                fig.text(
-                    x=lines[i].easting.loc[lines[i][x_or_y].idxmin()],
-                    y=lines[i].northing.loc[lines[i][x_or_y].idxmin()],
-                    text=str(int(lines[i].line.iloc[0])),
-                    justify="CM",
-                    font=kwargs.get("font", "5p,black"),
-                    fill="white",
-                    offset=offset,
-                    angle=angle,
-                )
+def lines_without_intersections(
+    data: pd.DataFrame,
+    intersections: pd.DataFrame,
+) -> list[float]:
+    return [
+        i
+        for i in data.line.unique()
+        if i not in [*intersections.line.unique(), *intersections.tie.unique()]
+    ]

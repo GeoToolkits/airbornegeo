@@ -2,11 +2,11 @@
 
 ## Install Python
 
-Before installing _airbornegeo_, ensure you have Python 3.11 or greater downloaded.
+Before installing _airbornegeo_, ensure you have Python 3.12 or greater downloaded.
 If you don't, we recommend setting up Python with Miniforge.
 See the install instructions [here](https://github.com/conda-forge/miniforge).
 
-## Install _airbornegeo_ Locally
+## Install _airbornegeo_ locally
 
 There are 3 main ways to install `airbornegeo`. We show them here in order of simplest to hardest.
 
@@ -18,11 +18,11 @@ There are 3 main ways to install `airbornegeo`. We show them here in order of si
 
 The easiest way to install this package and it's dependencies is with conda or mamba into a new virtual environment:
 
-    mamba create --name airbornegeo --yes --force airbornegeo --channel conda-forge
+    conda create --name airbornegeo --yes --force airbornegeo --channel conda-forge
 
 Activate the environment:
 
-    mamba activate airbornegeo
+    conda activate airbornegeo
 
 ### Pip
 
@@ -32,7 +32,7 @@ This is because a few dependencies rely on C packages, which can only be install
 Create a new virtual environment:
 
 ```
-mamba create --name airbornegeo --yes --force <<add conda packages here>> --channel conda-forge
+conda create --name airbornegeo --yes --force pygmt geopandas --channel conda-forge
 ```
 
 activate the environment and use `pip` to install `airbornegeo`:
@@ -40,11 +40,6 @@ activate the environment and use `pip` to install `airbornegeo`:
 ```
 conda activate airbornegeo
 pip install airbornegeo
-```
-
-```{note}
-to install the optional dependencies, use this instead:
-`pip install airbornegeo[all]`
 ```
 
 ### Development version

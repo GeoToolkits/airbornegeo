@@ -1,5 +1,5 @@
 # AirborneGeo
-Tools for processing airborne geophysics data.
+Tools for processing airborne geophysical survey data
 
 ```{include} ../README.md
 :start-after: <!-- SPHINX-START-badges -->
@@ -62,3 +62,51 @@ contributing.md
 changelog.md
 Source code on GitHub <https://github.com/mdtanker/airbornegeo>
 ```
+
+
+::::{grid} 2
+:::{grid-item-card} {octicon}`rocket` Getting started?
+:text-align: center
+New to AirborneGeo? Start here!
+```{button-ref} quickstart
+    :click-parent:
+    :color: primary
+    :outline:
+    :expand:
+```
+:::
+
+:::{grid-item-card} {octicon}`comment-discussion` Need help?
+:text-align: center
+Start a discussion on GitHub!
+```{button-link} https://github.com/mdtanker/airbornegeo/discussions
+    :click-parent:
+    :color: primary
+    :outline:
+    :expand:
+    Discussions
+```
+:::
+
+:::{grid-item-card} {octicon}`file-badge` Reference documentation
+:text-align: center
+A list of modules and functions
+```{button-ref} api/airbornegeo
+    :click-parent:
+    :color: primary
+    :outline:
+    :expand:
+```
+:::
+
+:::{grid-item-card} {octicon}`bookmark` Using AirborneGeo for research?
+:text-align: center
+Citations help support our work
+```{button-ref} citing
+    :click-parent:
+    :color: primary
+    :outline:
+    :expand:
+```
+:::
+::::
