@@ -48,16 +48,13 @@ jobs:
           cache-environment-key:
             micromamba-environment-${{ steps.date.outputs.date }}
 
-      # - id: install_pandoc
-      #   run: sudo apt-get install pandoc
-
       - name: Install package
-        run: pip install --no-deps -e . sphinx-autobuild uvicorn
+        run: pip install --no-deps -e .
 
       # Build the documentation
       - name: Build the documentation
         if: github.event.action != 'closed'
-        run: sphinx-autobuild -n -T -b="html" docs -- docs/_build/html
+        run: sphinx -n -T -b="html" docs docs/_build/html
 
       # Deploy the preview of the docs
       - name: Deploy Preview
