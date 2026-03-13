@@ -50,7 +50,5 @@ Functions for levelling airborne geophysical survey data.
 .. autosummary::
     :toctree: generated/
 
-    add_intersections
-    calculate_intersection_weights
     calculate_misties
     update_intersections_with_eq_sources

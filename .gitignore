@@ -1,5 +1,6 @@
 docs/data/*
 !docs/data/.gitkeep
+docs/api/generated/
 
 # Ignore the virtual environment
 **uv.lock

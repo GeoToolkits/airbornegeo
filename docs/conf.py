@@ -8,14 +8,16 @@ version = release = importlib.metadata.version("airbornegeo")
 
 extensions = [
     "myst_parser",
-    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
-    # "sphinx.ext.viewcode",
+    "sphinx.ext.viewcode",
     "nbsphinx",
+    # "sphinxcontrib.bibtex",
+    "sphinx_design",
     # githubpages just adds a .nojekyll file
     "sphinx.ext.githubpages",
 ]
@@ -59,11 +61,11 @@ nitpick_ignore = [
 ]
 
 always_document_param_types = True
-# add_module_names = False
-# add_function_parentheses = False
+add_module_names = False
+add_function_parentheses = False
 
 
-nbsphinx_execute = "auto"
+nbsphinx_execute = "never"
 
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'png2x'}",
@@ -95,5 +97,4 @@ html_theme_options: dict[str, Any] = {
     "use_repository_button": True,
     "use_download_button": True,
     "home_page_in_toc": False,
-    "version_selector": True,
 }
