@@ -42,11 +42,6 @@ jobs:
       - id: install_pandoc
         run: sudo apt-get install pandoc
 
-      # Make API docs
-      - name: Make API docs
-        if: github.event.action != 'closed'
-        run: uvx nox -s build_api_docs
-
       # Build the documentation
       - name: Build the documentation
         if: github.event.action != 'closed'
