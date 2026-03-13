@@ -46,6 +46,10 @@ class Report(scooby.Report):  # type: ignore[misc] # pylint: disable=missing-cla
         )
 
 
+from .distances import (  # noqa: E402
+    along_track_distance,
+    relative_distance,
+)
 from .filtering import (  # noqa: E402
     filter_by_line,
 )

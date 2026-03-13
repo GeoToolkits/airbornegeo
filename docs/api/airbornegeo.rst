@@ -9,6 +9,17 @@ API Reference
 .. currentmodule:: airbornegeo
 
 
+Handling survey data
+--------------------
+Functions for working with entire surveys of data.
+
+.. autosummary::
+    :toctree: generated/
+
+    along_track_distance
+    relative_distance
+
+
 Quality Control (QC)
 --------------------
 Functions for automated and manual quality control of airborne geophysical survey data.
@@ -27,8 +38,6 @@ Functions for processing airborne geophysical survey data.
     :toctree: generated/
 
     vertical_acceleration
-    relative_distance
-    distance_along_flight
     upward_continue_by_line
 
 
