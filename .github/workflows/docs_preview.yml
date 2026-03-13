@@ -54,7 +54,7 @@ jobs:
       # Build the documentation
       - name: Build the documentation
         if: github.event.action != 'closed'
-        run: sphinx -n -T -b="html" docs docs/_build/html
+        run: sphinx-build -n -T -b="html" docs docs/_build/html
 
       # Deploy the preview of the docs
       - name: Deploy Preview
