@@ -6,6 +6,12 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  # Many color libraries just need this variable to be set to any value.
+  # Set it to 3 to support 8-bit color graphics (256 colors per channel)
+  # for libraries that care about the value set.
+  FORCE_COLOR: 3
+
 # This job installs dependencies, builds the html, and pushes it to gh-pages
 jobs:
   docs:
@@ -23,20 +29,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # setup python env
-      - uses: actions/setup-python@v6
+      # Install Micromamba with conda-forge dependencies
+      - name: Setup Micromamba
+        uses: mamba-org/setup-micromamba@v2
         with:
-          python-version: "3.x"
+          environment-file: environment.yml
+          post-cleanup: "all"
+          cache-downloads: false
+          # environment cache is persistent for one week.
+          cache-environment-key:
+            micromamba-environment-${{ steps.date.outputs.date }}
 
-      - uses: astral-sh/setup-uv@v7
-
-      - id: install_pandoc
-        run: sudo apt-get install pandoc
+      - name: Install package
+        run: pip install --no-deps -e .
 
       # Build the documentation
       - name: Build the documentation
-        run: uvx nox -s docs --non-interactive -- docs/_build/html
-
+        if: github.event.action != 'closed'
+        run: sphinx-build -n -T -b="html" docs docs/_build/html
+        
       # Deploy the HTML to gh-pages branch
       - name: GitHub Pages action
         uses: peaceiris/actions-gh-pages@v4
