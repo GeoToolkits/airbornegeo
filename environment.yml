@@ -35,7 +35,7 @@ dependencies:
   - nbsphinx
   - nbconvert
   - sphinxcontrib-bibtex
-  - shpinx_design
+  - sphinx-design
   - polartoolkit>=1.5
   - invert4geom
   # below packages need to be installed with pip (aren't available in conda-forge)
