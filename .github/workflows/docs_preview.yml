@@ -31,6 +31,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # Install Micromamba with conda-forge dependencies
+      - name: Setup Micromamba
+        uses: mamba-org/setup-micromamba@v2
+
       # setup python env
       - uses: actions/setup-python@v6
         if: github.event.action != 'closed' # Skip the build if the PR has been closed; just run the clean up steps
