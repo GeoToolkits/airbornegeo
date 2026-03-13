@@ -84,20 +84,22 @@ from .plotting import (  # noqa: E402
     plotly_points,
     plotly_profiles,
 )
-from .processing import (  # noqa: E402
-    detect_outliers,
-    distance_along_flight,
-    distance_along_line,
-    eastward_velocity,
+from .potential_fields import (  # noqa: E402
     eotvos_correction,
     eotvos_correction_full,
     eq_sources_by_line,
+    update_intersections_with_eq_sources,
+    upward_continue_by_line,
+)
+from .processing import (  # noqa: E402
+    bearing,
+    detect_outliers,
+    eastward_velocity,
     line_bearing,
     northward_velocity,
     reduce_by_line,
-    relative_distance,
+    split_into_segments,
     unique_line_id,
-    upward_continue_by_line,
     vertical_acceleration,
 )
 from .utils import (  # noqa: E402

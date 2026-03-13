@@ -2,15 +2,12 @@ import math
 import typing
 
 import geopandas as gpd
-import harmonica as hm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import shapely
 import verde as vd
-from numpy.typing import NDArray
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 from tqdm.autonotebook import tqdm
 
 from airbornegeo import logger
@@ -227,7 +224,7 @@ def vertical_acceleration(
         df.groupby(flight_col_name)[time_col_name].diff(), unit="s"
     )
 
-    # Create new subline when gap > 1 minute
+    # Create new subline when gap > time_threshold
     df["new_group"] = (df["time_diff"] > pd.Timedelta(seconds=time_threshold)).astype(
         int
     )
@@ -303,103 +300,6 @@ def vertical_acceleration(
     # return df.dist_along_flight
 
 
-def eotvos_correction_full(
-    coordinates: tuple[NDArray, NDArray, NDArray],
-    time: NDArray,
-) -> pd.Series:
-    # ell = bl.WGS84
-    # angular_velocity = ell.angular_velocity # radians per second
-    # semi_major_axis = ell.semimajor_axis
-    # flattening = ell.flattening
-    a = 6378137.0
-    b = 6356752.3142
-
-    lon, lat, ht = coordinates
-
-    omega = 0.00007292115  # siderial rotation rate, radians/sec
-    ecc = (a - b) / a
-
-    latr = np.deg2rad(lat)
-    lonr = np.deg2rad(lon)
-    lonr = np.unwrap(lonr)
-
-    # get time derivatives of position
-    dt = np.diff(time, prepend=np.nan)
-    dlat = np.diff(latr, prepend=np.nan) / dt
-    dlon = np.diff(lonr, prepend=np.nan) / dt
-    dht = np.diff(ht, prepend=np.nan) / dt
-    ddlat = np.diff(dlat, prepend=np.nan) / dt
-    ddlon = np.diff(dlon, prepend=np.nan) / dt
-    ddht = np.diff(dht, prepend=np.nan) / dt
-
-    # sines and cosines etc
-    slat = np.sin(latr)
-    clat = np.cos(latr)
-    s2lat = np.sin(2 * latr)
-    c2lat = np.cos(2 * latr)
-
-    # calculate r' and its derivatives
-    rp = a * (1 - ecc * slat * slat)
-    drp = -a * dlat * ecc * s2lat
-    ddrp = -a * ddlat * ecc * s2lat - 2 * a * dlat * dlat * ecc * c2lat
-
-    # calculate deviation from normal and derivatives
-    d = np.arctan(ecc * s2lat)
-    dd = 2 * dlat * ecc * c2lat
-    ddd = 2 * ddlat * ecc * c2lat - 4 * dlat * dlat * ecc * s2lat
-
-    # define r and its derivatives
-    r = np.vstack((-rp * np.sin(d), np.zeros(len(rp)), -rp * np.cos(d) - ht)).T
-    rdot = np.vstack(
-        (
-            -drp * np.sin(d) - rp * dd * np.cos(d),
-            np.zeros(len(rp)),
-            -drp * np.cos(d) + rp * dd * np.sin(d) - dht,
-        )
-    ).T
-    ci = (
-        -ddrp * np.sin(d)
-        - 2.0 * drp * dd * np.cos(d)
-        - rp * (ddd * np.cos(d) - dd * dd * np.sin(d))
-    )
-    ck = (
-        -ddrp * np.cos(d)
-        + 2.0 * drp * dd * np.sin(d)
-        + rp * (ddd * np.sin(d) + dd * dd * np.cos(d) - ddht)
-    )
-    rdotdot = np.vstack((ci, np.zeros(len(ci)), ck)).T
-
-    # define w and derivative
-    w = np.vstack(((dlon + omega) * clat, -dlat, -(dlon + omega) * slat)).T
-    wdot = np.vstack(
-        (
-            dlon * clat - (dlon + omega) * dlat * slat,
-            -ddlat,
-            -ddlon * slat - (dlon + omega) * dlat * clat,
-        )
-    ).T
-
-    w2xrdot = np.cross(2 * w, rdot)
-    wdotxr = np.cross(wdot, r)
-    wxr = np.cross(w, r)
-    wxwxr = np.cross(w, wxr)
-
-    # calculate wexwexre, centrifugal acceleration due to the Earth
-    re = np.vstack((-rp * np.sin(d), np.zeros(len(rp)), -rp * np.cos(d))).T
-    we = np.vstack((omega * clat, np.zeros(len(slat)), -omega * slat)).T
-    wexre = np.cross(we, re)
-    _wexwexre = np.cross(we, wexre)
-    wexr = np.cross(we, r)
-    wexwexr = np.cross(we, wexr)
-
-    # calculate total acceleration for the aircraft
-    accel = rdotdot + w2xrdot + wdotxr + wxwxr
-
-    # Eotvos correction is the vertical component of the total acceleration of
-    # the aircraft minus the centrifugal acceleration of the Earth, convert to mGal
-    return (accel[:, 2] - wexwexr[:, 2]) * 100e3
-
-
 def eastward_velocity(lat_deg, lon_deg, time):
     """
     Compute eastward velocity (m/s) from latitude, longitude, and time.
@@ -460,117 +360,6 @@ def northward_velocity(lat_deg, lon_deg, time):
 
     r = 6371000  # Earth radius in meters
     return r * dlat / dt
-
-
-def eotvos_correction(lat_deg, lon_deg, time):
-    """
-    Compute simple Eötvös correction (mGal) from latitude, longitude, and time.
-
-    Parameters
-    ----------
-    lat_deg : array-like
-        Latitude in degrees
-    lon_deg : array-like
-        Longitude in degrees
-    time : array-like
-        Time in seconds
-
-    Returns
-    -------
-    E : ndarray
-        Eötvös correction in mGal
-    """
-    v_east = eastward_velocity(lat_deg, lon_deg, time)
-    lat_rad = np.radians(lat_deg)
-
-    omega = 7.292115e-5  # Earth's rotation rate, rad/s
-    r = 6371000  # Earth radius in meters
-
-    # Classical Eötvös formula
-    e = 2 * omega * v_east * np.cos(lat_rad) + (v_east**2) / r
-
-    # Convert to mGal
-    return e * 1e5
-
-
-def relative_distance(
-    df: pd.DataFrame,
-    reverse: bool = False,
-) -> pd.DataFrame:
-    """
-    calculate distance between x,y points in a dataframe, relative to the previous row.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Dataframe containing columns x and y in meters.
-    reverse : bool, optional,
-        choose whether to reverse the profile, by default is False
-
-    Returns
-    -------
-    pandas.DataFrame
-        Returns original dataframe with additional column rel_dist
-    """
-    df = df.copy()
-    if reverse is True:
-        df1 = df[::-1].reset_index(drop=True)
-    elif reverse is False:
-        df1 = df.copy()  # .reset_index(drop=True)
-
-    # from https://stackoverflow.com/a/75824992/18686384
-    df1["x_lag"] = df1.easting.shift(1)  # pylint: disable=used-before-assignment
-    df1["y_lag"] = df1.northing.shift(1)
-    df1["rel_dist"] = np.sqrt(
-        (df1.easting - df1["x_lag"]) ** 2 + (df1.northing - df1["y_lag"]) ** 2
-    )
-    # set first row distance to 0
-    df1.loc[0, "rel_dist"] = 0
-    df1 = df1.drop(["x_lag", "y_lag"], axis=1)
-    return df1.dropna(subset=["rel_dist"])
-
-
-def distance_along_flight(
-    df: pd.DataFrame,
-    flight_col_name: str = "flight",
-    time_col_name: str | None = "unixtime",
-    **kwargs: typing.Any,
-) -> pd.Series:
-    """
-    Calculate the distance along each flight in meters using the time column to sort the
-    data points.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Dataframe containing the flight data.
-    flight_col_name : str, optional
-        Column name for the flight, by default "flight"
-    time_col_name : str | None, optional
-        Column name for the time, by default "unixtime"
-
-    Returns
-    -------
-    pd.Series
-        Series containing the distance along each flight in meters
-    """
-    reverse = kwargs.get("reverse", False)
-    df = df.copy()
-
-    groups = df.groupby(flight_col_name)
-
-    dfs = []
-    for _name, flight in groups:
-        flight_sorted = flight.sort_values(by=[time_col_name]).reset_index(drop=True)
-        flight_sorted = relative_distance(flight_sorted, reverse=reverse)
-        dist = flight_sorted.rel_dist.cumsum()
-        flight_sorted["dist_along_flight"] = dist
-        # df.loc[df[flight_col_name] == i, "dist_along_flight"] = dist
-        dfs.append(flight_sorted)
-
-    df = pd.concat(dfs).reset_index(drop=True).sort_values(by=[flight_col_name])
-
-    return df.dist_along_flight
 
 
 def unique_line_id(
@@ -644,137 +433,73 @@ def line_bearing(
         rect = line.iloc[0].minimum_rotated_rectangle
 
         # get angle of rotation
-        bearing = azimuth(rect)
-        if 90 < bearing <= 180:
-            bearing = bearing - 180
-
-        gdf.loc[gdf.line == name, "bearing"] = bearing
-
-    return gdf.bearing
-
-
-def distance_along_line(
-    gdf: gpd.GeoDataFrame,
-    time_col_name: str | None = None,
-) -> pd.Series:
-    """
-    Calculate the distances along each flight line in meters. If 'time_col_name' is
-    provided, this will inform which end of the line is the beginning. If not, the line
-    will be rotate horizontally, and the left-most side will be used as the start.
-
-    Parameters
-    ----------
-    gdf : gpd.GeoDataFrame
-        Dataframe containing the data points to calculate the distance along each line,
-        must have a set geometry column.
-    time_col_name : str | None, optional
-        Column name containing time in seconds for each datapoint, by default None
-
-    Returns
-    -------
-    pd.Series
-        The distance along each line in meters
-    """
-
-    gdf = gdf.copy()
-
-    assert "line" in gdf.columns, "line column must be in dataframe"
-
-    grouped = gdf.groupby("line")
-
-    gdf["dist_along_line"] = np.nan
-
-    for name, data in grouped:
-        # turn point data into line
-        line = gpd.GeoSeries(LineString(data.geometry.tolist()))
-        df = line.get_coordinates(
-            index_parts=True,
-            ignore_index=True,
-        )
-
-        # find minimum rotated rectangle around line
-        rect = line.iloc[0].minimum_rotated_rectangle
-
-        # get angle of rotation
         angle = azimuth(rect)
         if 90 < angle <= 180:
             angle = angle - 180
 
-        # rotate the line to be horizontal
-        line_horizontal = line.rotate(angle, origin=shapely.centroid(rect))
-        horizontal_df = line_horizontal.get_coordinates(
-            index_parts=True,
-            ignore_index=True,
-        )
-        horizontal_df["original_index"] = horizontal_df.index
-        horizontal_df = horizontal_df.sort_values("x").reset_index(drop=True)
+        gdf.loc[gdf.line == name, "bearing"] = angle
 
-        # it time provided, use to determine which side is start of line
-        # if not, use minimum x (left) as start
-        if time_col_name is not None:
-            start_arg = data[time_col_name].argmin()
-            end_arg = data[time_col_name].argmax()
-            start_coords = shapely.get_coordinates(data.iloc[start_arg].geometry)[0]
-            end_coords = shapely.get_coordinates(data.iloc[end_arg].geometry)[0]
-            logger.debug(
-                "From time column, line starts at %s and ends at %s",
-                start_coords,
-                end_coords,
-            )
-            # determine which side of rotated line is the start
-            start_arg = df[(df.x == start_coords[0]) & (df.y == start_coords[1])].index[
-                0
-            ]
+    return gdf.bearing
 
-            horizontal_start_arg = horizontal_df[
-                horizontal_df.original_index == start_arg
-            ].index
 
-            if horizontal_start_arg > len(df) / 2:
-                h_start_arg = horizontal_df.x.argmax()
-                h_end_arg = horizontal_df.x.argmin()
-            else:
-                h_start_arg = horizontal_df.x.argmin()
-                h_end_arg = horizontal_df.x.argmax()
-            start_arg = int(horizontal_df.iloc[h_start_arg].original_index)
-            end_arg = int(horizontal_df.iloc[h_end_arg].original_index)
-            start_coords = df.iloc[start_arg][["x", "y"]].to_numpy()
-            end_coords = df.iloc[end_arg][["x", "y"]].to_numpy()
+def bearing(data: gpd.GeoDataFrame, window_width: float) -> pd.Series:
+    """
+    Calculate the average bearing of a moving window in a GeoDataFrame. The bearing is
+    calculated by finding the minimum rotated rectangle around the window, and then
+    calculating the angle of the rectangle.
 
-            logger.debug("Line starts at %s and ends at %s", start_coords, end_coords)
-        else:
-            # get start and end points of line
-            start_arg = horizontal_df.x.argmin()
-            end_arg = horizontal_df.x.argmax()
-            start_coords = df.iloc[start_arg][["x", "y"]].to_numpy()
-            end_coords = df.iloc[end_arg][["x", "y"]].to_numpy()
-            logger.debug(
-                "Assuming line starts at %s and ends at %s", start_coords, end_coords
-            )
+    Parameters
+    ----------
+    gdf : gpd.GeoDataFrame
+        Dataframe containing the data points and must have a set geometry column.
 
-        # calculate distance along line from starting point
-        dist = data.distance(Point(*start_coords))
-        gdf.loc[gdf.line == name, "dist_along_line"] = dist
+    Returns
+    -------
+    pd.Series
+        The bearing in degrees
+    """
+    data = data.copy()
 
-    if time_col_name is not None:
-        grouped = gdf.groupby(["line"])
-        for name, data in grouped:
-            df = (
-                data.sort_values(by=[time_col_name])
-                .dropna(subset=[time_col_name])
-                .reset_index(drop=True)
-            )
-            assert df.iloc[0].dist_along_line < df.iloc[-1].dist_along_line, (
-                f"line {name} is not in order; {df}"
-            )
-            df = (
-                data.sort_values(by="dist_along_line")
-                .dropna(subset=[time_col_name])
-                .reset_index(drop=True)
-            )
-            assert df.iloc[0][time_col_name] < df.iloc[-1][time_col_name]
+    # save index, sort by time and reset index
+    data = data.reset_index(names="tmp_index")
 
-    return gdf.dist_along_line
+    # # do with pandas, much slower
+    # def angle(series):
+    #     view = data.iloc[series.index]
+    #     delta_x = view.easting.iloc[-1] - view.easting.iloc[0]
+    #     delta_y = view.northing.iloc[-1] - view.northing.iloc[0]
+    #     return np.rad2deg(np.arctan2(delta_y, delta_x))
+    # return data[['easting','northing']].rolling(window_width).apply(angle)['easting']
+
+    # do with numpy, much faster
+    # create sliding windows of data
+    windows = np.lib.stride_tricks.sliding_window_view(
+        data[["easting", "northing"]].values,
+        window_width,
+        axis=0,
+    )
+
+    def angle(window):
+        delta_x = window[0][-1] - window[0][0]
+        delta_y = window[1][-1] - window[1][0]
+        return np.rad2deg(np.arctan2(delta_y, delta_x))
+
+    angles = []
+    for x in windows:
+        # get angle of rotation
+        ang = angle(x)
+        # if 90 < ang <= 180:
+        #     ang = ang - 180
+        angles.append(ang)
+
+    data["tmp_bearing"] = np.pad(
+        angles, (0, len(data) - len(windows)), constant_values=np.nan
+    )
+
+    # Reset index and sort
+    data = data.set_index("tmp_index").sort_values("tmp_index")
+
+    return data.tmp_bearing
 
 
 def detect_outliers(df: pd.DataFrame) -> None:

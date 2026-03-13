@@ -1527,85 +1527,7 @@ def interp(
     return df1
 
 
-def update_intersections_with_eq_sources(
-    df: pd.DataFrame | gpd.GeoDataFrame,
-    fitted_equivalent_sources: dict,
-    data_column: str,
-) -> pd.Series:
-    """
-    At each theoretical intersection point, replace the interpolated field value with a
-    value predected by the fitted equivalent sources for the line, at the x,y coordinate
-    of the intersection point, and the higher of the two lines' elevations. This allows
-    the cross-over mistie value to be comparing the field values at the same point in 3D
-    space, not 2D space, due to different flight heights.
-
-    Parameters
-    ----------
-    df : pd.DataFrame | gpd.GeoDataFrame
-        dataframe containing the data to update
-    fitted_equivalent_sources : dict
-        a dictionary with keys of line names and values of fitted equivalent sources for
-        each line, which can be created using the function `eq_sources_by_line`
-    data_column : str
-        name of the column containing the field values to update at the intersection
-        points, this should be the same as the column that use used as 'data_column'
-        when fitting the equivalent sources for each line with `eq_sources_by_line`.
-
-    Returns
-    -------
-    pd.Series
-        the updated field values at the intersection points, which can be added to the
-        dataframe as a new column or used to replace the existing values in the
-        dataframe.
-    """
-
-    df = df.copy()
-
-    assert "line" in df.columns, "df must have column 'line'"
-
-    pbar = tqdm(df.groupby("line"), desc="Lines")
-    for line, line_df in pbar:
-        pbar.set_description(f"Line {line}")
-
-        # get fitted equivalent sources for this line
-        eqs = fitted_equivalent_sources[line]
-
-        # get intersection points for this line
-        line_inters = line_df[line_df.is_intersection]
-
-        for i, row in line_inters.iterrows():
-            # get height of intersection point for the cross line
-            cross_inter = df[
-                (df.line == row.intersecting_line) & (df.intersecting_line == line)
-            ]
-
-            assert len(cross_inter) == 1, (
-                df[df.intersecting_line == line],
-                row.intersecting_line,
-                line,
-            )
-
-            cross_height = cross_inter.height.to_numpy()[0]
-            # assert len(cross_height)==1, f"{cross_height}"
-            # assert isinstance(cross_height, (int, float)), f"{cross_inter}"
-
-            coords = (
-                np.array([row.distance_along_line]),
-                np.array([0]),
-                np.array([np.max([cross_height, row.height])]),
-            )
-            # predict the field value at the x,y coordinate of the intersection point,
-            # and the higher of the two lines' elevations, using the supplied fitted
-            # equivalent sources for each line
-            up_cont_value = eqs.predict(coords)
-
-            # add predicted value to dataframe at intersection point
-            df.at[i, data_column] = up_cont_value  # noqa: PD008
-
-    return df[data_column]
-
-
-def interp_all_lines(
+def interpolate_intersections(
     df: pd.DataFrame | gpd.GeoDataFrame,
     intersections: pd.DataFrame | gpd.GeoDataFrame,
     to_interp: list[str] | str,
@@ -1613,7 +1535,6 @@ def interp_all_lines(
     method: str = "cubic",
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
-    time_col_name: str = "unixtime",
     window_width: float | None = None,
 ) -> pd.DataFrame | gpd.GeoDataFrame:
     """
