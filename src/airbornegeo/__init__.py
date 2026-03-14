@@ -59,7 +59,6 @@ from .filtering import (  # noqa: E402
 from .levelling import (  # noqa: E402
     calculate_misties,
     # calculate_intersection_weights,
-    # level_survey_lines_to_grid,
     # iterative_levelling,
     # iterative_levelling_alternate,
     # level_lines,
@@ -67,6 +66,7 @@ from .levelling import (  # noqa: E402
     create_intersection_table,
     inspect_intersections,
     interpolate_intersections,
+    level_to_grid,
     lines_without_intersections,
     plot_line_and_crosses,
 )

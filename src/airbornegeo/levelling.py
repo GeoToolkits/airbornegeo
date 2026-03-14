@@ -13,6 +13,7 @@ import plotly.graph_objects as go
 import scipy
 import seaborn as sns
 import shapely
+import verde as vd
 from IPython.display import clear_output
 from shapely.geometry import LineString, Point
 from sklearn.linear_model import LinearRegression
@@ -1862,64 +1863,79 @@ def skl_predict_trend(
     return predict_df
 
 
-def level_survey_lines_to_grid(
-    data: gpd.GeoDataFrame | pd.DataFrame,
+def level_to_grid(
+    data: pd.DataFrame,
     *,
     degree: int,
-    grid_col: str,
-    data_col: str,
+    data_column: str,
+    grid_column: str,
+    groupby_column: str | None = None,
 ) -> pd.Series:
     """
-    With grid values sampled along survey flight lines (grid_col), fit a trend
-    or specified order to the misfit values (data_col - grid_col) and
-    apply the correction to the data. The levelled data is saved in a new column
-    specified by levelled_col.
+    Fit a trend to the misfit between the data_column and grid_column values and
+    subtract the fitted trend from the data to level it to the grid values. The grid
+    values can be sampled into the dataframe with ::func`sample_grid`. If groupby_column
+    is provided, the trend will be fit a line-by-line basis in 1D using the column
+    distance_along_line. If groupby_column is not provided, the trend will be fit to the
+    entire survey in 2D using the columns "easting" and "northing".
 
     Parameters
     ----------
-    data : pd.DataFrame | gpd.GeoDataFrame
-        _description_
+    data : pd.DataFrame
+        dataframe with the data and grid values.
     degree : int
-        _description_
-    grid_col : str
-        _description_
-    data_col : str
-        _description_
+        the degree order to fit to the misfit values.
+    data_column : str
+        the column name for the data to fit.
+    grid_column : str
+        the column name with the sample grid values.
+    groupby_column : str | None
+        Column name to group by, by default None
 
     Returns
     -------
     pd.Series
-        _description_
+        The levelled data
     """
-    df = data.copy()
+    data = data.copy()
 
-    assert "distance_along_line" in df.columns, (
-        "df must have column 'distance_along_line'"
-    )
-    assert "line" in df.columns, "df must have column 'line'"
+    data = data.dropna(subset=grid_column)
 
-    df["tmp_misfit"] = df[data_col] - df[grid_col]
+    data["tmp_misfit"] = data[data_column] - data[grid_column]
+
+    if groupby_column is None:
+        cols = ["easting", "northing"]
+        assert all(col in data.columns for col in cols), (
+            f"{cols} must be in the dataframe"
+        )
+        # calculate correction by fitting trend to misfit values
+        vdtrend = vd.Trend(degree=degree).fit(
+            (data.easting, data.northing),
+            data.tmp_misfit,
+        )
+
+        correction = vdtrend.predict(coordinates=((data.easting, data.northing)))
+
+        return data[data_column] - correction
+
+    cols = [groupby_column, "distance_along_line"]
+    assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
     # fit a trend to the misfits on line-by-line basis
-    for line in df.line.unique():
-        # subset a line
-        line_df = df[df.line == line]
-
+    for _segment_name, segment_data in data.groupby(groupby_column):
         # calculate correction by fitting trend to misfit values
         correction = skl_predict_trend(
-            data_to_fit=line_df,
+            data_to_fit=segment_data,
             cols_to_fit=["distance_along_line", "tmp_misfit"],
-            data_to_predict=line_df,
+            data_to_predict=segment_data,
             cols_to_predict=["distance_along_line", "correction"],
             degree=degree,
         ).correction
 
         # add correction values to the main dataframe
-        df.loc[df.line == line, "levelling_correction"] = correction
+        data.loc[data.line == _segment_name, "levelling_correction"] = correction
 
-    logger.info("RMS of correction: %s", airbornegeo.rmse(correction))
-
-    return df[data_col] - df.levelling_correction
+    return data[data_column] - data.levelling_correction
 
 
 def level_lines(
