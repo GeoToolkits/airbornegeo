@@ -39,15 +39,13 @@ jobs:
       - run: pixi run style
 
   test:
-    name: Tests
+    name: Python Tests ${{ matrix.python-version }} on ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.12', '3.13']
+        python-version: ['3.11', '3.12', '3.13']
         runs-on: [ubuntu-latest, windows-latest, macos-14]
-
-    name: Python ${{ matrix.os }} ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v6
