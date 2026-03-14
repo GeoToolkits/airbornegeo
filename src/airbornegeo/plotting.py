@@ -17,6 +17,7 @@ sns.set_theme()
 
 def inspect_lines(
     df: pd.DataFrame | gpd.GeoDataFrame,
+    *,
     plot_variable: str | list[str],
     interp_on: str = "distance_along_line",
 ) -> None:
@@ -40,6 +41,7 @@ def inspect_lines(
 def plot_flightlines(
     fig: pygmt.Figure,
     df: pd.DataFrame,
+    *,
     plot_labels: bool = True,
     plot_lines: bool = True,
     line_color: str = "gray",
@@ -96,10 +98,13 @@ def plot_flightlines(
 def plot_flightlines_grids(
     fig: pygmt.Figure,
     df: pd.DataFrame,
+    *,
     direction: str = "EW",
     plot_labels: bool = True,
     plot_lines: bool = True,
-    **kwargs: typing.Any,
+    font: str = "5p,black",
+    fill: str = "gray",
+    style: str = "p.5p",
 ) -> None:
     # group lines by their line number
     lines = [v for _, v in df.groupby("line")]
@@ -110,9 +115,8 @@ def plot_flightlines_grids(
             fig.plot(
                 x=lines[i].easting,
                 y=lines[i].northing,
-                # pen=kwargs.get("pen", "0.3p,white"),
-                style=kwargs.get("style", "p.5p"),
-                fill=kwargs.get("fill", "gray"),
+                style=style,
+                fill=fill,
             )
 
     # plot labels
@@ -141,7 +145,7 @@ def plot_flightlines_grids(
                     y=lines[i].northing.loc[lines[i][x_or_y].idxmax()],
                     text=str(int(lines[i].line.iloc[0])),
                     justify="CM",
-                    font=kwargs.get("font", "5p,black"),
+                    font=font,
                     fill="white",
                     offset=offset,
                     angle=angle,
@@ -168,7 +172,7 @@ def plot_flightlines_grids(
                     y=lines[i].northing.loc[lines[i][x_or_y].idxmin()],
                     text=str(int(lines[i].line.iloc[0])),
                     justify="CM",
-                    font=kwargs.get("font", "5p,black"),
+                    font=font,
                     fill="white",
                     offset=offset,
                     angle=angle,
@@ -177,6 +181,7 @@ def plot_flightlines_grids(
 
 def plotly_points(
     df: pd.DataFrame | gpd.GeoDataFrame,
+    *,
     color_col: str,
     coord_names: tuple[str, str] | None = None,
     hover_cols: list[str] | None = None,
@@ -270,12 +275,16 @@ def plotly_points(
 
 def plotly_profiles(
     data: pd.DataFrame,
+    *,
     y: list[str] | str,
     x: str = "dist_along_line",
     y_axes: list[str] | None = None,
     x_lims: tuple[float, float] | None = None,
     y_lims: tuple[float, float] | None = None,
-    **kwargs: typing.Any,
+    title: str | None = None,
+    modes: typing.Any = None,
+    marker_sizes: typing.Any = None,
+    marker_symbols: typing.Any = None,
 ) -> go.Figure:
     """
     plot data profiles with plotly
@@ -294,27 +303,17 @@ def plotly_profiles(
     y_axes = [s.replace("1", "") for s in y_axes]
     y_axes = [f"y{x}" for x in y_axes]
 
-    # # lim x and y ranges
-    # if xlims is not None:
-    #     df = df[df[x].between(*xlims)]
-    # if ylims is not None:
-    #     df = df[df[y].between(*ylims)]
-
     if y_lims is not None:
-        for i in y_lims:
-            if isinstance(i, list | tuple):  # type: ignore [unreachable]
-                assert len(y_lims) == len(y), "y_lims must be same length as y"  # type: ignore [unreachable]
-            elif isinstance(i, int | float):
-                y_lims = tuple([y_lims for _ in y])  # type: ignore [assignment] # pylint: disable=R1728
+        if isinstance(y_lims[0], list | tuple):  # type: ignore [unreachable]
+            assert len(y_lims) == len(y), "y_lims must be same length as y"  # type: ignore [unreachable]
+        elif isinstance(y_lims[0], int | float):
+            y_lims = tuple(y_lims for _ in y)  # type: ignore [assignment] # pylint: disable=R1728
 
     # set plotting mode
-    modes = kwargs.get("modes")
     if modes is None:
         modes = ["markers" for _ in y]
 
     # set marker properties
-    marker_sizes = kwargs.get("marker_sizes")
-    marker_symbols = kwargs.get("marker_symbols")
     if marker_sizes is None:
         marker_sizes = [2 for _ in y]
     if marker_symbols is None:
@@ -371,7 +370,7 @@ def plotly_profiles(
                 y_axes_args["yaxis3"]["range"] = y_lims[i]  # type: ignore [assignment]
 
     fig.update_layout(
-        title_text=kwargs.get("title"),
+        title_text=title,
         xaxis={
             "title": x,
             "domain": x_domain,

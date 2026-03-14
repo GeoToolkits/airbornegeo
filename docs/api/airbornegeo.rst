@@ -39,6 +39,7 @@ Functions for processing airborne geophysical survey data.
 .. autosummary::
     :toctree: generated/
 
+    filter1d
     vertical_acceleration
     upward_continue_by_line
 

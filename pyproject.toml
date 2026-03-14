@@ -48,6 +48,7 @@ dependencies = [
   "seaborn",
   "scooby",
   "nbformat>=4.2.0", # needed for plotly
+  "iprogress", # need for progressbars
 ]
 
 [dependency-groups]
@@ -246,6 +247,7 @@ ipykernel = ">=7.2.0,<8"
 plotly = ">=6.6.0,<7"
 seaborn = ">=0.13.2,<0.14"
 scooby = ">=0.11.0,<0.12"
+iprogress = ">=0.4,<0.5"
 
 [tool.pixi.feature.test.tasks.test]
 cmd = "pytest {{ target }} -ra --cov --cov-report=xml --cov-report=term --durations=20"
