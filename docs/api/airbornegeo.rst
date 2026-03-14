@@ -9,15 +9,26 @@ API Reference
 .. currentmodule:: airbornegeo
 
 
-Handling survey data
---------------------
-Functions for working with entire surveys of data.
+Geospatial data operations
+--------------------------
+Functions for performing geospatial operations.
 
 .. autosummary::
     :toctree: generated/
 
+    reproject
+    block_reduce
     along_track_distance
     relative_distance
+
+
+Organizing survey data
+----------------------
+Functions for working with and organize survey flights.
+
+.. autosummary::
+    :toctree: generated/
+
     split_into_segments
     unique_line_id
 

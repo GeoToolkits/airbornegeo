@@ -5,9 +5,6 @@ import numpy as np
 import pandas as pd
 import pygmt
 
-# Any functions or classes defined here which you want to be available when to users
-# with `import airbornegeo` should be added to the list in `__init__.py`.
-
 
 def pad1d(
     data: pd.DataFrame,

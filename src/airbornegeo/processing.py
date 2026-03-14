@@ -1,14 +1,11 @@
 import math
-import typing
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import verde as vd
 from shapely.geometry import LineString
-from tqdm.autonotebook import tqdm
 
 from airbornegeo import logger
 
@@ -78,106 +75,6 @@ def split_into_segments(
     df = df.set_index("tmp_index").sort_values("tmp_index")
 
     return df.segment
-
-
-def reduce_by_line(
-    df: gpd.GeoDataFrame | pd.DataFrame,
-    reduction: typing.Callable[..., float | int],
-    spacing: float,
-    reduce_by: str | tuple[str, str],
-    **kwargs,
-) -> pd.DataFrame:
-    """
-    Reduce data by line based on the column(s) provided by reduce_by and the reduction
-    function. For example, if 'reduce_by' is 'distance_along_line', 'spacing' is 1000,
-    and 'reduction' is np.mean', then the data will be reduced by taking the mean value
-    along every 1 km. If 'reduce_by' is 'unixtime', this would take the mean of every
-    1000 seconds. If 'reduce_by' is ('easting', 'northing'), this would take the mean of
-    every point in a 1x1 km block. The reduction function can be any function that takes
-    an array of values and  returns a single value, such as np.mean, np.median, np.max,
-    etc. The function will return a new dataframe with the reduced data.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame containing the data to be reduced.
-    reduction : typing.Callable
-        function to use in reduction, e.g. np.mean
-    spacing : float,
-        The spacing to reduce the data by, in the same units as whatever
-        column is specified by reduce_by
-    reduce_by : str or tuple of str
-        Column name(s) to reduce by. If a single column name is provided, the data will
-        be reduced by only column. If a tuple of two column names are provided, the data
-        will be reduced by both columns, e.g. in 1x1 km blocks if the columns are
-        'easting' and 'northing'.
-    kwargs : typing.Any
-        Any additional keyword arguments to pass to verde.BlockReduce.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with reduced data.
-    """
-
-    df = df.copy()
-
-    # get only numeric columns
-    df = df.select_dtypes(include="number")
-
-    if isinstance(reduce_by, str):
-        reduce_by = (reduce_by,)
-
-    if len(reduce_by) == 1:
-        reduce_by = (reduce_by[0], "tmp")  # add dummy column for second coordinate
-        df["tmp"] = 0.0
-
-    assert "line" in df.columns, "'line' column must be in the dataframe"
-    assert all(col in df.columns for col in reduce_by), (
-        f"{reduce_by} must be in the dataframe"
-    )
-
-    # define verde reducer function
-    reducer = vd.BlockReduce(
-        reduction,
-        spacing=spacing,
-        **kwargs,
-    )
-
-    # get list of data columns to reduce
-    input_data_names = tuple(
-        df.columns.drop([*list(reduce_by), "line", "geometry"], errors="ignore")
-    )
-
-    blocked_dfs = []
-    for name, line_df in tqdm(df.groupby("line"), desc="Lines"):
-        # get tuples of pd.Series
-        input_coords = tuple([line_df[col].to_numpy() for col in reduce_by])  # pylint: disable=consider-using-generator
-        input_data = tuple([line_df[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator
-
-        # apply reduction
-        coordinates, data = reducer.filter(
-            coordinates=input_coords,
-            data=input_data,
-        )
-
-        # add reduced coordinates to a dictionary
-        coord_cols = dict(zip(reduce_by, coordinates, strict=False))
-
-        # add reduced data to a dictionary
-        if len(input_data_names) < 2:
-            data_cols = {input_data_names[0]: data}
-        else:
-            data_cols = dict(zip(input_data_names, data, strict=False))
-
-        # merge dicts and create dataframe
-        blocked = pd.DataFrame(data=coord_cols | data_cols)
-
-        blocked["line"] = name
-        blocked = blocked.drop(columns=["tmp"], errors="ignore")
-        blocked_dfs.append(blocked)
-
-    return pd.concat(blocked_dfs).reset_index(drop=True)
 
 
 def vertical_acceleration(
