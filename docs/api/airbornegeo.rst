@@ -65,5 +65,8 @@ Functions for levelling airborne geophysical survey data.
     eq_sources_1d
     level_to_grid
     sample_grid
+    create_intersection_table
+    interpolate_intersections
+    inspect_intersections
+    lines_without_intersections
     calculate_misties
-    update_intersections_with_eq_sources

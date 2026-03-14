@@ -479,7 +479,9 @@ def create_intersection_table(
     cutoff_dist: float | None = None,
     buffer_dist: float | None = None,
     grid_size: float = 1,
-    plot: bool = True,
+    plot_map: bool = True,
+    plot_hist: bool = True,
+    size: float = 10,
 ) -> gpd.GeoDataFrame:
     """
     create a dataframe which contains the intersections between provided flight and tie
@@ -509,9 +511,13 @@ def create_intersection_table(
         creating intersection which are just beyond the end of a line, by default None
     grid_size : float, optional
         The resolution to snap the intersection coordinates to.  by default 1
-    plot : bool, optional
+    plot_map : bool, optional
         Plot a map of the resulting intersection points colored by distance to the
         further of the two nearest data points, by default True
+    plot_hist : bool, optional
+        Plot a histogram of the max distances to the nearest points, by default True,
+    size : float, optional
+        Size of the points for plotting, by default 10
 
     Returns
     -------
@@ -620,17 +626,19 @@ def create_intersection_table(
             prior_len - len(inters),
         )
 
-    if plot is True:
+    if plot_map:
         airbornegeo.plotly_points(
             inters,
             color_col="max_dist",
             hover_cols=["line", "tie", "line_dist", "tie_dist"],
             robust=True,
-            size=10,
+            size=size,
+            edge_width=1,
             theme=None,
             cmap="matter",
             title="Distance from intersection to nearest data point",
         )
+    if plot_hist:
         plt.hist(
             inters.max_dist,
             bins=20,
@@ -1665,6 +1673,7 @@ def inspect_intersections(
     *,
     plot_variable: str | list[str],
     interp_on: str = "distance_along_line",
+    plot_all: bool = False,
 ) -> None:
     if isinstance(plot_variable, str):
         plot_variable = [plot_variable]
@@ -1682,6 +1691,8 @@ def inspect_intersections(
             plot_inters=True,
         )
         fig.show()
+        if plot_all:
+            continue
         input("Press key to continue...")
         clear_output(wait=True)
 
@@ -1788,6 +1799,7 @@ def calculate_misties(
             absolute=True,
             cmap="balance",
             size=10,
+            edge_width=1,
         )
     if plot_hist:
         plt.hist(
