@@ -247,3 +247,16 @@ ipykernel = ">=7.2.0,<8"
 plotly = ">=6.6.0,<7"
 seaborn = ">=0.13.2,<0.14"
 scooby = ">=0.11.0,<0.12"
+
+[tool.pixi.feature.test.tasks.test]
+cmd = "pytest {{ target }} -ra --cov --cov-report=xml --cov-report=term --durations=20"
+args = [{ arg = "target", default = "tests/" }]
+
+[tool.pixi.feature.dev.tasks.format]
+cmd = "pre-commit run --all-files"
+
+[tool.pixi.feature.dev.tasks.lint]
+cmd = "pylint airbornegeo"
+
+[tool.pixi.feature.dev.tasks.style]
+cmd = "pre-commit run --all-files ; pylint airbornegeo"

@@ -4,8 +4,9 @@
 * [fork](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project) the [repository](https://github.com/mdtanker/airbornegeo) using the `Fork` button on GitHub.
 * clone your forked repository on your computer: `git clone https://github.com/mdtanker/airbornegeo`.
 * [create a branch](https://docs.github.com/en/get-started/using-github/github-flow#create-a-branch) for your edits: `git checkout -b new-branch`
+* set up your environment: `pixi install`
 * make your changes
-* run the style checkers: `nox -s style`
+* run the style checkers: `pixi run style`
 * add your changed files: `git add .`
 * once the style checks pass, commit your changes: `git commit -m "a short description of your changes"`
 * push your changes: `git push -u origin new-branch`
@@ -43,7 +44,6 @@ contributions.
   - [General guidelines](#general-guidelines)
   - [Fork the repository](#fork-the-repository)
   - [Clone the repository](#clone-the-repository)
-  - [Setting up nox](#setting-up-nox)
   - [Setting up your environment](#setting-up-your-environment)
   - [Make a branch](#make-a-branch)
   - [Make your changes](#make-your-changes)
@@ -164,13 +164,6 @@ Now we need to configure Git to sync this fork to the main repository, not your 
 git remote add upstream https://github.com/mdtanker/airbornegeo.git
 ```
 
-### Setting up `nox`
-
-Most of the commands used in the development of `airbornegeo` use the tool `nox`.
-The `nox` commands are defined in the file [`noxfile.py`](https://github.com/mdtanker/airbornegeo/blob/main/noxfile.py), and are run in the terminal / command prompt with the format ```nox -s <<command name>>```.
-
-You can install nox with `pip install nox`.
-
 ### Setting up your environment
 
 We use `pixi` to manage our dependencies and to run certain workflows, like style-checking the code and building the documentation.
@@ -197,7 +190,7 @@ Now your ready to make your changes! Make sure to read the below sections to see
 
 We use [pre-commit](https://pre-commit.com/) to check code style. This can be used locally, by installing pre-commit, or can be used as a pre-commit hook, where it is automatically run by git for each commit to the repository. This pre-commit hook won't add or commit any changes, but will just inform your of what should be changed. Pre-commit is setup within the `.pre-commit-config.yaml` file. There are lots of hooks (processes) which run for each pre-commit call, including [Ruff](https://docs.astral.sh/ruff/) to format and lint the code. This allows you to not think about proper indentation, line length, or aligning your code during development. Before committing, or periodically while you code, run the following to automatically format your code:
 ```
-nox -s lint
+pixi run format
 ```
 
 To have `pre-commit` run automatically on commits, install it with `pre-commit install`.
@@ -207,13 +200,13 @@ Go through the output of this and try to change the code based on the errors. Se
 
 We also use [Pylint](https://pylint.readthedocs.io/en/latest/), which performs static-linting on the code. This checks the code and catches many common bugs and errors, without running any of the code. This check is slightly slower the the `Ruff` check. Run it with the following:
 ```
-nox -s pylint
+pixi run lint
 ```
 Similar to using `Ruff`, go through the output of this, search the error codes on the [Pylint documentation](https://pylint.readthedocs.io/en/latest/) for help, and try and fix all the errors and warnings. If there are false-positives, or your confident you don't agree with the warning, add ` # pylint: disable=` at the end of the lines, with the warning code following the `=`.
 
 To run both pre-commit and pylint together use:
 ```
-nox -s style
+pixi run style
 ```
 
 #### Docstrings
@@ -258,12 +251,17 @@ We will help you create the tests and sort out any kind of problem during code r
 
 Run the tests and calculate test coverage using:
 ```
-nox -s test
+pixi run test
 ```
-To run a specific test by name:
+To run only the tests in one file:
 ```
-pytest --cov=. -k "test_name"
+pixi run test tests/test_levelling.py
 ```
+To run only an individual test:
+```
+pixi run test tests/test_levelling.py::test_name
+```
+
 The coverage report will let you know which lines of code are touched by the tests.
 **Strive to get 100% coverage for the lines you changed.**
 It's OK if you can't or don't know how to test something.

@@ -11,47 +11,6 @@ nox.needs_version = ">=2025.2.9"
 nox.options.default_venv_backend = "uv|virtualenv"
 
 
-@nox.session
-def lint(session: nox.Session) -> None:
-    """
-    Run the linter.
-    """
-    session.install("pre-commit")
-    session.run("pre-commit", "run", "--all-files", *session.posargs)
-
-
-@nox.session
-def pylint(session: nox.Session) -> None:
-    """
-    Run PyLint.
-    """
-    # This needs to be installed into the package environment, and is slower
-    # than a pre-commit check
-    session.install("-e.", "pylint>=3.2")
-    session.run("pylint", "airbornegeo", *session.posargs)
-
-
-@nox.session
-def style(session: nox.Session) -> None:
-    """
-    Run the linter and Pylint.
-    """
-    session.notify("lint")
-    session.notify("pylint")
-
-
-@nox.session(venv_backend="mamba", python="3.12")
-@nox.session
-def tests(session: nox.Session) -> None:
-    """
-    Run the unit and regular tests.
-    """
-    session.conda_install("geopandas")
-    test_deps = nox.project.dependency_groups(PROJECT, "test")
-    session.install("-e.", *test_deps)
-    session.run("pytest", "--cov", *session.posargs)
-
-
 @nox.session(venv_backend="mamba", python="3.12", reuse_venv=True, default=False)
 def docs(session: nox.Session) -> None:
     """
