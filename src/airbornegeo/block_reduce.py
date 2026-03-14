@@ -108,10 +108,12 @@ def block_reduce(
     assert groupby_column in data.columns, "groupby_column must be in the dataframe"
 
     blocked_dfs = []
-    for name, line_df in tqdm(data.groupby(groupby_column), desc="Groups"):
+    for segment_name, segment_data in tqdm(
+        data.groupby(groupby_column), desc="Segments"
+    ):
         # get tuples of pd.Series
-        input_coords = tuple([line_df[col].to_numpy() for col in reduce_by])  # pylint: disable=consider-using-generator
-        input_data = tuple([line_df[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator
+        input_coords = tuple([segment_data[col].to_numpy() for col in reduce_by])  # pylint: disable=consider-using-generator
+        input_data = tuple([segment_data[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator
 
         # apply reduction
         coordinates, blocked_data = reducer.filter(
@@ -131,7 +133,7 @@ def block_reduce(
         # merge dicts and create dataframe
         blocked = pd.DataFrame(data=coord_cols | data_cols)
 
-        blocked[groupby_column] = name
+        blocked[groupby_column] = segment_name
         blocked = blocked.drop(columns=["tmp"], errors="ignore")
         blocked_dfs.append(blocked)
 

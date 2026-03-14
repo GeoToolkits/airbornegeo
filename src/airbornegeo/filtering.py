@@ -4,6 +4,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pygmt
+from tqdm.autonotebook import tqdm
 
 
 def pad1d(
@@ -186,13 +187,12 @@ def filter1d(
 
         return filtered[data_column]
 
-    for i in data[groupby_column].unique():
-        # subset data from 1 line
-        line = data[data[groupby_column] == i]
-
+    for segment_name, segment_data in tqdm(
+        data.groupby(groupby_column), desc="Segments"
+    ):
         # pad the data with pad_mode, and the filter_by_column by extrapolation
         padded = pad1d(
-            line,
+            segment_data,
             data_column=data_column,
             independent_column=filter_by_column,
             width_percentage=pad_width_percentage,
@@ -211,9 +211,11 @@ def filter1d(
         # un-pad the data
         filtered["original_index"] = padded.true_index
         filtered = filtered.set_index("original_index")
-        filtered = filtered[filtered.index.isin(line.index)]
+        filtered = filtered[filtered.index.isin(segment_data.index)]
 
         # replace original data with filtered data
-        data.loc[data[groupby_column] == i, data_column] = filtered[data_column]
+        data.loc[data[groupby_column] == segment_name, data_column] = filtered[
+            data_column
+        ]
 
     return data[data_column]

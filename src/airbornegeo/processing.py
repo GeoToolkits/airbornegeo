@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from shapely.geometry import LineString
+from tqdm.autonotebook import tqdm
 
 from airbornegeo import logger
 
@@ -293,7 +294,8 @@ def unique_line_id(
 
 
 def line_bearing(
-    gdf: gpd.GeoDataFrame,
+    data: gpd.GeoDataFrame,
+    groupby_column: str = "line",
 ) -> pd.Series:
     """
     Calculate the average bearing of each line in a GeoDataFrame. The bearing is
@@ -302,9 +304,11 @@ def line_bearing(
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    data : gpd.GeoDataFrame
         Dataframe containing the data points and the line labels.
         must have a set geometry column.
+    groupby_column: str, optional
+        Column to group the dataframe by, by default "line"
 
     Returns
     -------
@@ -312,19 +316,19 @@ def line_bearing(
         The bearing of each line in degrees
     """
 
-    gdf = gdf.copy()
+    data = data.copy()
 
-    assert isinstance(gdf, gpd.GeoDataFrame), "gdf must be a GeoDataFrame"
-    assert gdf.geometry.geom_type.isin(["Point"]).all(), "geometry must be points"
-    assert "line" in gdf.columns, "line column must be in dataframe"
+    assert isinstance(data, gpd.GeoDataFrame), "gdf must be a GeoDataFrame"
+    assert data.geometry.geom_type.isin(["Point"]).all(), "geometry must be points"
+    assert groupby_column in data.columns, "line column must be in dataframe"
 
-    grouped = gdf.groupby("line")
+    data["bearing"] = np.nan
 
-    gdf["bearing"] = np.nan
-
-    for name, data in grouped:
+    for segment_name, segment_data in tqdm(
+        data.groupby(groupby_column), desc="Segments"
+    ):
         # turn point data into line
-        line = gpd.GeoSeries(LineString(data.geometry.tolist()))
+        line = gpd.GeoSeries(LineString(segment_data.geometry.tolist()))
 
         # find minimum rotated rectangle around line
         rect = line.iloc[0].minimum_rotated_rectangle
@@ -334,9 +338,9 @@ def line_bearing(
         if 90 < angle <= 180:
             angle = angle - 180
 
-        gdf.loc[gdf.line == name, "bearing"] = angle
+        data.loc[data[groupby_column] == segment_name, "bearing"] = angle
 
-    return gdf.bearing
+    return data.bearing
 
 
 def bearing(data: gpd.GeoDataFrame, window_width: float) -> pd.Series:
