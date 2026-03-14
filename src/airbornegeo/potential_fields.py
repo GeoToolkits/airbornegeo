@@ -11,19 +11,20 @@ import airbornegeo
 sns.set_theme()
 
 
-def eq_sources_by_line(
+def eq_sources_1d(
     data: pd.DataFrame,
     *,
     data_column: str,
     damping: float,
     depth: float | str = "default",
     block_size: float | None = None,
-    groupby_column: str = "line",
-) -> dict:
+    groupby_column: str | None = None,
+) -> dict | hm.EquivalentSources:
     """
-    Fit a set of equivalent sources to each group of a dataframe. These fitted sources
+    Fit a set of equivalent sources along 1 dimension. These fitted sources
     can then be used to predict the  data at the intersection points, on a regular line
-    spacing, or to upward continue  the line.
+    spacing, or to upward continue  the line. If groupby_column is provided, the source
+    will be fit individually for each group,
 
     Parameters
     ----------
@@ -44,14 +45,33 @@ def eq_sources_by_line(
 
     Returns
     -------
-    dict
+    dict | hm.EquivalentSources
         a dictionary with a keys of each group name and a values of fitted equivalent
-        sources
+        sources, or if groupby_column is not provided, just a single fitted set of
+        equivalent sources.
     """
 
     data = data.copy()
 
     data["tmp"] = 0
+
+    if groupby_column is None:
+        coords = (
+            data.distance_along_line,
+            data.tmp,
+            data.height,
+        )
+
+        # define equivalent source parameters
+        eqs_line = hm.EquivalentSources(
+            damping=damping,
+            depth=depth,
+            block_size=block_size,
+        )
+
+        eqs_line.fit(coords, data[data_column])
+
+        return eqs_line
 
     assert groupby_column in data.columns, "groupby_column must be in dataframe"
 
@@ -271,11 +291,11 @@ def update_intersections_with_eq_sources(
         dataframe containing the data to update
     fitted_equivalent_sources : dict
         a dictionary with keys of line names and values of fitted equivalent sources for
-        each line, which can be created using the function `eq_sources_by_line`
+        each line, which can be created using the function `eq_sources_1d`
     data_column : str
         name of the column containing the field values to update at the intersection
         points, this should be the same as the column that use used as 'data_column'
-        when fitting the equivalent sources for each line with `eq_sources_by_line`.
+        when fitting the equivalent sources for each line with `eq_sources_1d`.
 
     Returns
     -------

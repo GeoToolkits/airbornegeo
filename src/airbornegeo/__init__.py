@@ -80,7 +80,7 @@ from .plotting import (  # noqa: E402
 from .potential_fields import (  # noqa: E402
     eotvos_correction,
     eotvos_correction_full,
-    eq_sources_by_line,
+    eq_sources_1d,
     update_intersections_with_eq_sources,
     upward_continue_by_line,
 )
