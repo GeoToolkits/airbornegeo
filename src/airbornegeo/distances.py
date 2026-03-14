@@ -98,7 +98,8 @@ def cumulative_distance(
 
 
 def along_track_distance(
-    data: gpd.GeoDataFrame,
+    data: pd.DataFrame | gpd.GeoDataFrame,
+    *,
     groupby_column: str | None = None,
     guess_start_position: bool = False,
 ) -> pd.Series:
@@ -112,7 +113,7 @@ def along_track_distance(
 
     Parameters
     ----------
-    data : gpd.GeoDataFrame
+    data : pd.DataFrame | gpd.GeoDataFrame
         Dataframe containing the data points to calculate the distance along each line,
         must have a set geometry column.
     groupby_column : str | None, optional
@@ -128,6 +129,7 @@ def along_track_distance(
         The along track distance in meters
     """
     if guess_start_position:
+        assert isinstance(data, gpd.GeoDataFrame)
         if groupby_column is None:
             # turn point data into line
             line = gpd.GeoSeries(LineString(data.geometry.tolist()))

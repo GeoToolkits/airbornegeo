@@ -13,6 +13,7 @@ sns.set_theme()
 
 def eq_sources_by_line(
     df: pd.DataFrame,
+    *,
     data_column: str,
     damping: float,
     depth: float | str = "default",
@@ -54,6 +55,7 @@ def eq_sources_by_line(
 
 def upward_continue_by_line(
     df: pd.DataFrame,
+    *,
     fitted_equivalent_sources: dict,
     height: float,
     no_downward_continuation: bool = True,
@@ -223,6 +225,7 @@ def eotvos_correction_full(
 
 def update_intersections_with_eq_sources(
     data: pd.DataFrame | gpd.GeoDataFrame,
+    *,
     fitted_equivalent_sources: dict,
     data_column: str,
 ) -> pd.Series:

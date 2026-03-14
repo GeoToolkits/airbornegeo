@@ -27,8 +27,9 @@ sns.set_theme()
 
 
 def calculate_intersection_weights(
-    inters: gpd.GeoDataFrame,
     gdf: gpd.GeoDataFrame,
+    inters: gpd.GeoDataFrame,
+    *,
     weight_by: str,
     max_dist_weight: float | None = None,
     max_dist_floor: float | None = None,
@@ -436,6 +437,7 @@ def calculate_intersection_weights(
 
 def plot_levelling_convergence(
     results: gpd.GeoDataFrame | pd.DataFrame,
+    *,
     logy: bool = False,
     title: str = "Levelling convergence",
     as_median: bool = False,
@@ -472,6 +474,7 @@ def plot_levelling_convergence(
 
 def create_intersection_table(
     data: gpd.GeoDataFrame,
+    *,
     exclude_ints: tuple[tuple[int]] | None = None,
     cutoff_dist: float | None = None,
     buffer_dist: float | None = None,
@@ -924,6 +927,7 @@ def extend_line(
 def get_line_tie_intersections(
     lines_gdf: gpd.GeoSeries,
     ties_gdf: gpd.GeoSeries,
+    *,
     grid_size: float = 1,
     buffer_dist: float | None = None,
 ) -> gpd.GeoDataFrame:
@@ -1082,6 +1086,7 @@ def get_line_intersections(
 
 def scipy_interp(
     df: pd.DataFrame,
+    *,
     to_interp: str,
     interp_on: str,
     method: str = "linear",
@@ -1093,7 +1098,6 @@ def scipy_interp(
     method:
         'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic',
         'previous', 'next'
-    use kwargs to pass other arguments to scipy.interpolate.interp1d()
     """
     df = df.copy()
 
@@ -1139,6 +1143,7 @@ def scipy_interp(
 
 def interp_single_col(
     df: pd.DataFrame,
+    *,
     to_interp: str,
     interp_on: str,
     method: str = "cubic",
@@ -1185,6 +1190,7 @@ def interp_single_col(
 
 def interp_windows_single_col(
     df: pd.DataFrame,
+    *,
     window_width: float,
     to_interp: str,
     plot_windows: bool = False,
@@ -1394,6 +1400,7 @@ def interp_windows_single_col(
 
 def interp_windows(
     df: pd.DataFrame,
+    *,
     to_interp: str | list[str],
     plot_line: bool = False,
     **kwargs: typing.Any,
@@ -1437,6 +1444,7 @@ def interp_windows(
 
 def interp(
     df: pd.DataFrame | gpd.GeoDataFrame,
+    *,
     to_interp: list[str],
     interp_on: str,
     method: str = "cubic",
@@ -1508,6 +1516,7 @@ def interp(
 def interpolate_intersections(
     df: pd.DataFrame | gpd.GeoDataFrame,
     intersections: pd.DataFrame | gpd.GeoDataFrame,
+    *,
     to_interp: list[str] | str,
     interp_on: str = "distance_along_line",
     method: str = "cubic",
@@ -1653,6 +1662,7 @@ def interpolate_intersections(
 
 def inspect_intersections(
     data: pd.DataFrame | gpd.GeoDataFrame,
+    *,
     plot_variable: str | list[str],
     interp_on: str = "distance_along_line",
 ) -> None:
@@ -1679,6 +1689,7 @@ def inspect_intersections(
 def calculate_misties(
     data: gpd.GeoDataFrame,
     intersections: gpd.GeoDataFrame,
+    *,
     data_col: str,
     plot_map: bool = False,
     plot_hist: bool = True,
@@ -1853,6 +1864,7 @@ def skl_predict_trend(
 
 def level_survey_lines_to_grid(
     data: gpd.GeoDataFrame | pd.DataFrame,
+    *,
     degree: int,
     grid_col: str,
     data_col: str,
@@ -1911,8 +1923,9 @@ def level_survey_lines_to_grid(
 
 
 def level_lines(
-    inters: gpd.GeoDataFrame | pd.DataFrame,
     data: gpd.GeoDataFrame | pd.DataFrame,
+    inters: gpd.GeoDataFrame | pd.DataFrame,
+    *,
     lines_to_level: list[float],
     data_col: str,
     levelled_col: str,
@@ -2094,8 +2107,9 @@ def level_lines(
 
 
 def iterative_levelling(
-    inters: gpd.GeoDataFrame | pd.DataFrame,
     data: gpd.GeoDataFrame | pd.DataFrame,
+    inters: gpd.GeoDataFrame | pd.DataFrame,
+    *,
     lines_to_level: list[float],
     data_col: str,
     levelled_col: str,
@@ -2104,7 +2118,9 @@ def iterative_levelling(
     iterations: int = 5,
     plot_results: bool = False,
     plot_convergence: bool = False,
-    **kwargs: typing.Any,
+    logy: bool = False,
+    title: str = "Levelling convergence",
+    as_median: bool = False,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     df = data.copy()
     ints = inters.copy()
@@ -2126,9 +2142,9 @@ def iterative_levelling(
     if plot_convergence is True:
         plot_levelling_convergence(
             ints,
-            logy=kwargs.get("logy", False),
-            title=kwargs.get("title", "Levelling convergence"),
-            as_median=kwargs.get("as_median", False),
+            logy=logy,
+            title=title,
+            as_median=as_median,
         )
     if plot_results is True:
         # plot flight lines
@@ -2145,8 +2161,9 @@ def iterative_levelling(
 
 
 def iterative_levelling_alternate(
-    inters: gpd.GeoDataFrame | pd.DataFrame,
     data: gpd.GeoDataFrame | pd.DataFrame,
+    inters: gpd.GeoDataFrame | pd.DataFrame,
+    *,
     data_col: str,
     levelled_col: str,
     degree: int,
@@ -2154,7 +2171,9 @@ def iterative_levelling_alternate(
     iterations: int = 5,
     # plot_results=False,
     plot_convergence: bool = False,
-    **kwargs: typing.Any,
+    logy: bool = False,
+    title: str = "Levelling convergence",
+    as_median: bool = False,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     df = data.copy()
     ints = inters.copy()
@@ -2199,37 +2218,17 @@ def iterative_levelling_alternate(
     if plot_convergence is True:
         plot_levelling_convergence(
             ints,
-            logy=kwargs.get("logy", False),
-            title=kwargs.get("title", "Levelling convergence"),
-            as_median=kwargs.get("as_median", False),
+            logy=logy,
+            title=title,
+            as_median=as_median,
         )
-    # if plot_results is True:
-    #     # plot flight lines
-    #     airbornegeo.plotly_points(
-    #         df[df.line.isin(flight_line_names)],
-    #         color_col="levelling_correction",
-    #         size=2,
-    #         hover_cols=[
-    #             "line",
-    #             f"{levelled_data_prefix}_{i}l",
-    #         ],
-    #     )
-    #     # plot tie lines
-    #     airbornegeo.plotly_points(
-    #         df[df.line.isin(tie_line_names)],
-    #         color_col="levelling_correction",
-    #         size=4,
-    #         hover_cols=[
-    #             "line",
-    #             f"{levelled_data_prefix}_{i}t",
-    #         ],
-    #     )
 
     return df, ints
 
 
 def plot_line_and_crosses(
     df: pd.DataFrame | gpd.GeoDataFrame,
+    *,
     y: list[str],
     line: float | None = None,
     x: str = "distance_along_line",
