@@ -62,5 +62,6 @@ Functions for levelling airborne geophysical survey data.
 .. autosummary::
     :toctree: generated/
 
+    sample_grid
     calculate_misties
     update_intersections_with_eq_sources

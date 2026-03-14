@@ -101,4 +101,5 @@ from .utils import (  # noqa: E402
     get_min_max,
     normalize_values,
     rmse,
+    sample_grid,
 )
