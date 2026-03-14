@@ -594,7 +594,7 @@ def create_intersection_table(
                     "exclude_ints must be a list of tuples of individual or pairs of "
                     "line numbers"
                 )
-                raise ValueError(msg)
+                raise TypeError(msg)
             # if pair of lines numbers given, get those indices
             if len(i) == 2:
                 ind = inters[  # type: ignore[unreachable]
@@ -1246,11 +1246,11 @@ def interp_windows_single_col(
                 value = filled[to_interp].loc[i]
                 if np.isnan(value):
                     msg = "filled value is NaN"
-                    raise ValueError(msg)
+                    raise ValueError(msg)  # noqa: TRY301
 
                 interp_type = "interpolated"
 
-            except Exception:  # pylint: disable=broad-exception-caught
+            except Exception:  # noqa: BLE001 pylint: disable=broad-exception-caught
                 # logger.error(e)
                 win += win
                 logger.debug(
@@ -1332,11 +1332,11 @@ def interp_windows_single_col(
                         value = filled[to_interp].loc[i]
                         if np.isnan(value):
                             msg = "filled value is NaN"
-                            raise ValueError(msg)
+                            raise ValueError(msg)  # noqa: TRY301
 
                         interp_type = "extrapolated"
 
-                    except Exception:  # pylint: disable=broad-exception-caught
+                    except Exception:  # noqa: BLE001 pylint: disable=broad-exception-caught
                         win += win
                         logger.debug(
                             "Error with inter: %s/%s doubling window size to %s",
@@ -2005,7 +2005,7 @@ def level_lines(
                 # if issues, correction is 0
                 line_df["levelling_correction"] = 0
             else:
-                raise e
+                raise ValueError from e
 
         # if levelling tie lines, negate the correction
         if levelling_ties is True:

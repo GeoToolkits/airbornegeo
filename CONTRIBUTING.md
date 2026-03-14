@@ -4,8 +4,9 @@
 * [fork](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project) the [repository](https://github.com/mdtanker/airbornegeo) using the `Fork` button on GitHub.
 * clone your forked repository on your computer: `git clone https://github.com/mdtanker/airbornegeo`.
 * [create a branch](https://docs.github.com/en/get-started/using-github/github-flow#create-a-branch) for your edits: `git checkout -b new-branch`
+* set up your environment: `pixi install`
 * make your changes
-* run the style checkers: `nox -s style`
+* run the style checkers: `pixi run style`
 * add your changed files: `git add .`
 * once the style checks pass, commit your changes: `git commit -m "a short description of your changes"`
 * push your changes: `git push -u origin new-branch`
@@ -43,7 +44,6 @@ contributions.
   - [General guidelines](#general-guidelines)
   - [Fork the repository](#fork-the-repository)
   - [Clone the repository](#clone-the-repository)
-  - [Setting up nox](#setting-up-nox)
   - [Setting up your environment](#setting-up-your-environment)
   - [Make a branch](#make-a-branch)
   - [Make your changes](#make-your-changes)
@@ -164,31 +164,14 @@ Now we need to configure Git to sync this fork to the main repository, not your 
 git remote add upstream https://github.com/mdtanker/airbornegeo.git
 ```
 
-### Setting up `nox`
-
-Most of the commands used in the development of `airbornegeo` use the tool `nox`.
-The `nox` commands are defined in the file [`noxfile.py`](https://github.com/mdtanker/airbornegeo/blob/main/noxfile.py), and are run in the terminal / command prompt with the format ```nox -s <<command name>>```.
-
-You can install nox with `pip install nox`.
-
 ### Setting up your environment
 
-Run the following `make` commands to create a new environment and install the package dependencies. If you don't have / want to install make, just copy the commands from the Makefile file and run them in the terminal.
+We use `pixi` to manage our dependencies and to run certain workflows, like style-checking the code and building the documentation.
+If you don't have `pixi`, see the install instructions [here](https://pixi.prefix.dev/latest/installation/).
 
-```
-make create
-```
-Activate the environment:
-```
-mamba activate airbornegeo
-```
-Install your local version:
-```
-make install
-```
-This environment now contains your local, editable version of airbornegeo, meaning if you alter code in the package, it will automatically include those changes in your environment (you may need to restart your kernel if using Jupyter). If you need to update the dependencies, see the [update the dependencies](#update-the-dependencies) section below.
+Run `pixi install` to set up your environments.
 
-> **Note:** You'll need to activate the environment every time you start a new terminal.
+This contains your local, editable version of airbornegeo, meaning if you alter code in the package, it will automatically include those changes in your environment (you may need to restart your kernel if using Jupyter). If you need to update the dependencies, see the [update the dependencies](#update-the-dependencies) section below.
 
 ### Make a branch
 
@@ -207,7 +190,7 @@ Now your ready to make your changes! Make sure to read the below sections to see
 
 We use [pre-commit](https://pre-commit.com/) to check code style. This can be used locally, by installing pre-commit, or can be used as a pre-commit hook, where it is automatically run by git for each commit to the repository. This pre-commit hook won't add or commit any changes, but will just inform your of what should be changed. Pre-commit is setup within the `.pre-commit-config.yaml` file. There are lots of hooks (processes) which run for each pre-commit call, including [Ruff](https://docs.astral.sh/ruff/) to format and lint the code. This allows you to not think about proper indentation, line length, or aligning your code during development. Before committing, or periodically while you code, run the following to automatically format your code:
 ```
-nox -s lint
+pixi run format
 ```
 
 To have `pre-commit` run automatically on commits, install it with `pre-commit install`.
@@ -217,13 +200,13 @@ Go through the output of this and try to change the code based on the errors. Se
 
 We also use [Pylint](https://pylint.readthedocs.io/en/latest/), which performs static-linting on the code. This checks the code and catches many common bugs and errors, without running any of the code. This check is slightly slower the the `Ruff` check. Run it with the following:
 ```
-nox -s pylint
+pixi run lint
 ```
 Similar to using `Ruff`, go through the output of this, search the error codes on the [Pylint documentation](https://pylint.readthedocs.io/en/latest/) for help, and try and fix all the errors and warnings. If there are false-positives, or your confident you don't agree with the warning, add ` # pylint: disable=` at the end of the lines, with the warning code following the `=`.
 
 To run both pre-commit and pylint together use:
 ```
-nox -s style
+pixi run style
 ```
 
 #### Docstrings
@@ -268,12 +251,17 @@ We will help you create the tests and sort out any kind of problem during code r
 
 Run the tests and calculate test coverage using:
 ```
-nox -s test
+pixi run test
 ```
-To run a specific test by name:
+To run only the tests in one file:
 ```
-pytest --cov=. -k "test_name"
+pixi run test tests/test_levelling.py
 ```
+To run only an individual test:
+```
+pixi run test tests/test_levelling.py::test_name
+```
+
 The coverage report will let you know which lines of code are touched by the tests.
 **Strive to get 100% coverage for the lines you changed.**
 It's OK if you can't or don't know how to test something.
@@ -289,10 +277,10 @@ The Docs are build with [Sphinx](https://www.sphinx-doc.org/en/master/) and host
 
 You can build the docs using:
 ```bash
-    nox -s docs
+    pixi run docs
 ```
 
-Click the link to open your docs in a website which will automatically update as you make edits.
+This should open a webpage showing your local version of the docs. If you make a change to the content of the docs, it should automatically update.
 
 #### Automatically build the docs
 
@@ -391,6 +379,6 @@ Once the new version is on PyPI, within a few hours a bot will automatically ope
 
 ## Update the dependencies
 
-To add or update a dependencies, add it to `pyproject.toml` either under `dependencies` or `optional-dependencies`. This will be included in the next build uploaded to PyPI.
+To add or update a dependencies, add it to `pyproject.toml` either under `[dependencies]` or `[optional-dependencies]`. This will be included in the next build uploaded to PyPI. You also need to add it to pixi, with `pixi add PACKAGE`.
 
-If you add a dependency necessary for using the package, make sure to update the `environment.yml` file in the repository. See below.
+If you just want to add a package to your environment temporarily, but not included it as a dependencies of `airbornegeo`, use can use `pixi add PACKAGE`. The package will be added to the pixi portion of the pyproject.toml, but not to the packages dependencies. When a user installs `airbornegeo`, they will only get the dependencies list in the [project][dependencies] section, not those listed in the [tool.pixi.dependencies] section.

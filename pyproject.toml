@@ -47,16 +47,18 @@ dependencies = [
   "plotly",
   "seaborn",
   "scooby",
+  "nbformat>=4.2.0", # needed for plotly
 ]
 
 [dependency-groups]
 test = [
-  "pytest >=6",
-  "pytest-cov >=3",
+  "pytest >=9",
+  "pytest-cov >=7",
 ]
 dev = [
-  { include-group = "test" },
   "jupyterlab",
+  "pre-commit",
+  "pylint>=3.2",
 ]
 docs = [
   "sphinx>=7.0",
@@ -68,6 +70,7 @@ docs = [
   "nbconvert",
   "sphinxcontrib-bibtex",
   "sphinx_design",
+  "sphinx-autobuild",
   "polartoolkit>=1.5",
   "invert4geom",
 ]
@@ -90,17 +93,19 @@ version.source = "vcs"
 build.hooks.vcs.version-file = "src/airbornegeo/_version.py"
 
 [tool.hatch.envs.default]
-# duplicate for now since hatch doesn't support groups yet
 dependencies = []
-scripts.test = "pytest {args}"
+
+[tool.hatch.envs.hatch-test]
+dependency-groups = ["test"]
+env-vars.PYTHONWARNDEFAULTENCODING = "1"
 
 [tool.hatch.build.targets.sdist]
 only-include = ["src"]
 
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
-xfail_strict = true
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "--showlocals"]
+strict = true
 filterwarnings = [
   "error",
   "ignore::SyntaxWarning",
@@ -142,25 +147,40 @@ disallow_incomplete_defs = true
 extend-select = [
   "ARG",      # flake8-unused-arguments
   "B",        # flake8-bugbear
+  "BLE",    # flake8-blind-except
   "C4",       # flake8-comprehensions
+  "DTZ",    # flake8-datetimez
   "EM",       # flake8-errmsg
   "EXE",      # flake8-executable
+  "FA",     # flake8-future-annotations
+  "FLY",    # flynt
+  "FURB",   # refurb
   "G",        # flake8-logging-format
   "I",        # isort
-  "ICN",      # flake8-import-conventions
-  "NPY",      # NumPy specific rules
-  "PD",       # pandas-vet
-  "PGH",      # pygrep-hooks
-  "PIE",      # flake8-pie
-  "PL",       # pylint
-  "PT",       # flake8-pytest-style
-  "PTH",      # flake8-use-pathlib
-  "RET",      # flake8-return
-  "RUF",      # Ruff-specific
-  "SIM",      # flake8-simplify
-  "T20",      # flake8-print
-  "UP",       # pyupgrade
-  "YTT",      # flake8-2020
+  "ICN",    # flake8-import-conventions
+  "ISC",    # flake8-implicit-str-concat
+  "LOG",    # flake8-logging
+  "NPY",    # NumPy specific rules
+  "PD",     # pandas-vet
+  "PERF",   # perflint
+  "PGH",    # pygrep-hooks
+  "PIE",    # flake8-pie
+  "PL",     # pylint
+  "PT",     # flake8-pytest-style
+  "PTH",    # flake8-use-pathlib
+  "PYI",    # flake8-pyi
+  "Q",      # flake8-quotes
+  "RET",    # flake8-return
+  "RSE",    # flake8-raise
+  "RUF",    # Ruff-specific
+  "SIM",    # flake8-simplify
+  "SLOT",   # flake8-slots
+  "T10",    # flake8-debugger
+  "T20",    # flake8-print
+  "TC",     # flake8-type-checking
+  "TRY",    # tryceratops
+  "UP",     # pyupgrade
+  "YTT",    # flake8-2020
 ]
 ignore = [
   "PLR09",    # Too many <...>
@@ -171,10 +191,9 @@ ignore = [
 
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]  # disable unused-imports errors on __init__.py
 "tests/**" = ["T20"]
-"noxfile.py" = ["T20"]
-"*.ipynb" = ["T201"]
+"__init__.py" = ["F401"]  # disable unused-imports errors on __init__.py
+"*.ipynb" = ["T201"] # allow print statements in notebooks
 
 
 [tool.pylint]
@@ -190,8 +209,59 @@ messages_control.disable = [
   "missing-module-docstring",
   "missing-function-docstring",
   "wrong-import-position",
-  "cyclic-import",
 ]
 
 [tool.codespell]
 ignore-words-list = ["words-to-ignore"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+airbornegeo = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+all = { features = ["all"], solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default" }
+test = { features = ["test"], solve-group = "default" }
+
+[tool.pixi.dependencies]
+numpy = ">=2.0"
+scipy = ">=1.13.0"
+matplotlib = ">=3.9.0"
+pandas = ">=2.3.0"
+scikit-learn = ">=1.5.0"
+ipython = ">=8.23.0"
+nbformat = ">=4.2.0" # needed for plotly
+harmonica = ">=0.7.0,<0.8"
+geopandas = ">=1.1.3,<2"
+pygmt = ">=0.18.0,<0.19"
+shapely = ">=2.1.2,<3"
+tqdm = ">=4.67.3,<5"
+verde = ">=1.8.1,<2"
+ipykernel = ">=7.2.0,<8"
+plotly = ">=6.6.0,<7"
+seaborn = ">=0.13.2,<0.14"
+scooby = ">=0.11.0,<0.12"
+
+[tool.pixi.feature.test.tasks.test]
+cmd = "pytest {{ target }} -ra --cov --cov-report=xml --cov-report=term --durations=20"
+args = [{ arg = "target", default = "tests/" }]
+
+[tool.pixi.feature.dev.tasks.format]
+cmd = "pre-commit run --all-files"
+
+[tool.pixi.feature.dev.tasks.lint]
+cmd = "pylint airbornegeo"
+
+[tool.pixi.feature.dev.tasks.style]
+cmd = "pre-commit run --all-files ; pylint airbornegeo"
+
+[tool.pixi.feature.docs.tasks.docs]
+cmd = "sphinx-autobuild --open-browser -n -T -b=html docs docs/_build/html"
+
+[tool.pixi.feature.docs.tasks.docs_static]
+cmd = "sphinx-build --keep-going -n -T -b=html docs docs/_build/html"
