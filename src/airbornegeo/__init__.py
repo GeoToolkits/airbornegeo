@@ -92,6 +92,9 @@ from .processing import (  # noqa: E402
     unique_line_id,
     vertical_acceleration,
 )
+from .reproject import (  # noqa: E402
+    reproject,
+)
 from .utils import (  # noqa: E402
     get_min_max,
     normalize_values,
