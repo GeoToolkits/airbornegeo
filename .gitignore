@@ -5,6 +5,9 @@ docs/api/generated/
 # Ignore the virtual environment
 **uv.lock
 
+# Ignore vs code files
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -165,3 +168,6 @@ Thumbs.db
 # Common editor files
 *~
 *.swp
+# pixi environments
+.pixi/*
+!.pixi/config.toml
