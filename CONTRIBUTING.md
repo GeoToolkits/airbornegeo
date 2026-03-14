@@ -277,10 +277,10 @@ The Docs are build with [Sphinx](https://www.sphinx-doc.org/en/master/) and host
 
 You can build the docs using:
 ```bash
-    nox -s docs
+    pixi run docs
 ```
 
-Click the link to open your docs in a website which will automatically update as you make edits.
+This should open a webpage showing your local version of the docs. If you make a change to the content of the docs, it should automatically update.
 
 #### Automatically build the docs
 

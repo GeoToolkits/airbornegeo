@@ -39,6 +39,7 @@ jobs:
       - run: pixi run style
 
   test:
+    name: Tests
     strategy:
       fail-fast: false
       matrix:

@@ -192,7 +192,6 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]
-"noxfile.py" = ["T20"]
 "__init__.py" = ["F401"]  # disable unused-imports errors on __init__.py
 "*.ipynb" = ["T201"] # allow print statements in notebooks
 
