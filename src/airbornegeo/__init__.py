@@ -51,7 +51,7 @@ from .distances import (  # noqa: E402
     relative_distance,
 )
 from .filtering import (  # noqa: E402
-    filter_by_line,
+    filter1d,
 )
 from .levelling import (  # noqa: E402
     calculate_misties,
