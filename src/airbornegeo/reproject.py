@@ -1,6 +1,7 @@
 import pandas as pd
-from pyproj import Transformer
 from numpy.typing import NDArray
+from pyproj import Transformer
+
 
 def reproject(
     data: pd.DataFrame,
@@ -18,7 +19,7 @@ def reproject(
     data : pandas.DataFrame
         input dataframe with coordinate columns specified by input_coord_names
     input_crs : str
-        input CRS in EPSG format, e.g. "epsg:4326" which can used for geographic data in 
+        input CRS in EPSG format, e.g. "epsg:4326" which can used for geographic data in
         degrees
     output_crs : str
         output CRS in EPSG format, e.g. "epsg:3413"
@@ -43,7 +44,9 @@ def reproject(
 
     data = data.copy()
 
-    assert all(col in data.columns for col in input_coord_names), "supplied coordinate names not in columns of dataframe"
+    assert all(col in data.columns for col in input_coord_names), (
+        "supplied coordinate names not in columns of dataframe"
+    )
 
     return transformer.transform(
         data[input_coord_names[0]].to_numpy(),
