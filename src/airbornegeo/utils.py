@@ -3,7 +3,9 @@ import typing
 
 import numpy as np
 import pandas as pd
+import pygmt
 import verde as vd
+import xarray as xr
 from numpy.typing import NDArray
 
 from airbornegeo import logger
@@ -141,3 +143,54 @@ def get_min_max(
 
     assert v_min <= v_max, "min value should be less than or equal to max value"  # pylint: disable=possibly-used-before-assignment
     return (v_min, v_max)
+
+
+def sample_grid(
+    data: pd.DataFrame,
+    grid: xr.DataArray,
+    coord_names: tuple[str, str],
+) -> NDArray:
+    """
+    Sample grid values at supplied points in dataframe.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Dataframe containing columns 'easting', 'northing', or columns with names
+        defined by kwarg "coord_names".
+    grid : xarray.DataArray
+        Grid to sample
+    coord_names : tuple[str, str],
+        Names of the coordinates, in order x then y.
+
+    Returns
+    -------
+    NDArray
+        sample values, which can be added to the dataframe
+    """
+    data = data.copy()
+
+    data["original_index"] = data.index
+
+    data = data.reset_index(drop=True)
+
+    assert all(c in data.columns for c in coord_names), (
+        f"{coord_names} must be in the dataframe"
+    )
+
+    # get points to sample at
+    points = data[list(coord_names)]
+
+    # sample the grid at all x,y points
+    sampled = pygmt.grdtrack(
+        points=points,
+        grid=grid,
+        newcolname="tmp",
+        no_skip=True,  # if false causes issues
+        verbose="warning",
+        interpolation="c",
+    )
+
+    data["tmp"] = sampled.tmp
+
+    return data.set_index("original_index").tmp

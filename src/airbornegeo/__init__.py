@@ -59,7 +59,6 @@ from .filtering import (  # noqa: E402
 from .levelling import (  # noqa: E402
     calculate_misties,
     # calculate_intersection_weights,
-    # level_survey_lines_to_grid,
     # iterative_levelling,
     # iterative_levelling_alternate,
     # level_lines,
@@ -67,6 +66,7 @@ from .levelling import (  # noqa: E402
     create_intersection_table,
     inspect_intersections,
     interpolate_intersections,
+    level_to_grid,
     lines_without_intersections,
     plot_line_and_crosses,
 )
@@ -80,7 +80,7 @@ from .plotting import (  # noqa: E402
 from .potential_fields import (  # noqa: E402
     eotvos_correction,
     eotvos_correction_full,
-    eq_sources_by_line,
+    eq_sources_1d,
     update_intersections_with_eq_sources,
     upward_continue_by_line,
 )
@@ -101,4 +101,5 @@ from .utils import (  # noqa: E402
     get_min_max,
     normalize_values,
     rmse,
+    sample_grid,
 )

@@ -11,32 +11,55 @@ import airbornegeo
 sns.set_theme()
 
 
-def eq_sources_by_line(
-    df: pd.DataFrame,
+def eq_sources_1d(
+    data: pd.DataFrame,
     *,
     data_column: str,
     damping: float,
     depth: float | str = "default",
     block_size: float | None = None,
-) -> pd.Series:
+    groupby_column: str | None = None,
+) -> dict | hm.EquivalentSources:
     """
-    For each light line in a dataframe, fit a set of equivalent sources to them. These
-    can then be used to predict the data at the intersection points, on a regular line
-    spacing, or to upward continue the line.
+    Fit a set of equivalent sources along 1 dimension. These fitted sources
+    can then be used to predict the  data at the intersection points, on a regular line
+    spacing, or to upward continue  the line. If groupby_column is provided, the source
+    will be fit individually for each group,
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        the dataframe containing the columns distance_along_line, grouby_column,
+        data_column, and height.
+    data_column : str
+        the column name for the data to fit.
+    damping : float
+        the damping value to use in fitting the equivalent sources
+    depth : float | str, optional
+        the source depths, by default "default"
+    block_size : float | None, optional
+        Block reduce the number of sources. This doesn't block reduce the data, that
+        should be done before with func::`block_reduce`, by default None
+    groupby_column : str | None, optional
+        Column name to group by before sorting by time, by default None
+
+    Returns
+    -------
+    dict | hm.EquivalentSources
+        a dictionary with a keys of each group name and a values of fitted equivalent
+        sources, or if groupby_column is not provided, just a single fitted set of
+        equivalent sources.
     """
 
-    df = df.copy()
+    data = data.copy()
 
-    assert "line" in df.columns, "line column must be in dataframe"
+    data["tmp"] = 0
 
-    df["tmp"] = 0
-
-    fitted_eqs = {}
-    for name, line_df in tqdm(df.groupby("line"), desc="Lines"):
+    if groupby_column is None:
         coords = (
-            line_df.distance_along_line,
-            line_df.tmp,
-            line_df.height,
+            data.distance_along_line,
+            data.tmp,
+            data.height,
         )
 
         # define equivalent source parameters
@@ -46,18 +69,39 @@ def eq_sources_by_line(
             block_size=block_size,
         )
 
-        eqs_line.fit(coords, line_df[data_column])
+        eqs_line.fit(coords, data[data_column])
 
-        fitted_eqs[name] = eqs_line
+        return eqs_line
+
+    assert groupby_column in data.columns, "groupby_column must be in dataframe"
+
+    fitted_eqs = {}
+    for segment_name, segment_data in tqdm(data.groupby(groupby_column), desc="Groups"):
+        coords = (
+            segment_data.distance_along_line,
+            segment_data.tmp,
+            segment_data.height,
+        )
+
+        # define equivalent source parameters
+        eqs_line = hm.EquivalentSources(
+            damping=damping,
+            depth=depth,
+            block_size=block_size,
+        )
+
+        eqs_line.fit(coords, segment_data[data_column])
+
+        fitted_eqs[segment_name] = eqs_line
 
     return fitted_eqs
 
 
 def upward_continue_by_line(
-    df: pd.DataFrame,
-    *,
+    data: pd.DataFrame,
     fitted_equivalent_sources: dict,
     height: float,
+    groupby_column: str = "line",
     no_downward_continuation: bool = True,
 ) -> pd.Series:
     """
@@ -65,34 +109,38 @@ def upward_continue_by_line(
     continue to data to a specified height and return the upward continued data.
     """
 
-    df = df.copy()
+    data = data.copy()
 
-    assert "line" in df.columns, "line column must be in dataframe"
-    assert "height" in df.columns, "height column must be in dataframe"
+    assert "line" in data.columns, "line column must be in dataframe"
+    assert "height" in data.columns, "height column must be in dataframe"
 
-    df["tmp"] = 0
+    data["tmp"] = 0
 
-    for name, line_df in tqdm(df.groupby("line"), desc="Lines"):
-        eqs = fitted_equivalent_sources[name]
+    for segment_name, segment_data in tqdm(data.groupby(groupby_column), desc="Groups"):
+        eqs = fitted_equivalent_sources[segment_name]
 
-        upward = np.full_like(line_df.tmp, height)
+        upward = np.full_like(segment_data.tmp, height)
 
         if no_downward_continuation is True:
             upward = np.where(
-                upward > line_df.height.to_numpy(), upward, line_df.height.to_numpy()
+                upward > segment_data.height.to_numpy(),
+                upward,
+                segment_data.height.to_numpy(),
             )
 
         upward_continued = eqs.predict(
             (
-                line_df.distance_along_line,
-                line_df.tmp,
+                segment_data.distance_along_line,
+                segment_data.tmp,
                 upward,
             )
         )
 
-        df.loc[df.line == name, "upward_continued"] = upward_continued
+        data.loc[data[groupby_column] == segment_name, "upward_continued"] = (
+            upward_continued
+        )
 
-    return df.upward_continued
+    return data.upward_continued
 
 
 def eotvos_correction(lat_deg, lon_deg, time):
@@ -228,6 +276,7 @@ def update_intersections_with_eq_sources(
     *,
     fitted_equivalent_sources: dict,
     data_column: str,
+    groupby_column: str = "line",
 ) -> pd.Series:
     """
     At each theoretical intersection point, replace the interpolated field value with a
@@ -242,11 +291,11 @@ def update_intersections_with_eq_sources(
         dataframe containing the data to update
     fitted_equivalent_sources : dict
         a dictionary with keys of line names and values of fitted equivalent sources for
-        each line, which can be created using the function `eq_sources_by_line`
+        each line, which can be created using the function `eq_sources_1d`
     data_column : str
         name of the column containing the field values to update at the intersection
         points, this should be the same as the column that use used as 'data_column'
-        when fitting the equivalent sources for each line with `eq_sources_by_line`.
+        when fitting the equivalent sources for each line with `eq_sources_1d`.
 
     Returns
     -------
@@ -260,26 +309,26 @@ def update_intersections_with_eq_sources(
 
     assert "line" in data.columns, "data must have column 'line'"
 
-    pbar = tqdm(data.groupby("line"), desc="Lines")
-    for line, line_df in pbar:
-        pbar.set_description(f"Line {line}")
-
+    for segment_name, segment_data in tqdm(
+        data.groupby(groupby_column), desc="Segments"
+    ):
         # get fitted equivalent sources for this line
-        eqs = fitted_equivalent_sources[line]
+        eqs = fitted_equivalent_sources[segment_name]
 
         # get intersection points for this line
-        line_inters = line_df[line_df.is_intersection]
+        line_inters = segment_data[segment_data.is_intersection]
 
         for i, row in line_inters.iterrows():
             # get height of intersection point for the cross line
             cross_inter = data[
-                (data.line == row.intersecting_line) & (data.intersecting_line == line)
+                (data.line == row.intersecting_line)
+                & (data.intersecting_line == segment_name)
             ]
 
             assert len(cross_inter) == 1, (
-                data[data.intersecting_line == line],
+                data[data.intersecting_line == segment_name],
                 row.intersecting_line,
-                line,
+                segment_name,
             )
 
             cross_height = cross_inter.height.to_numpy()[0]

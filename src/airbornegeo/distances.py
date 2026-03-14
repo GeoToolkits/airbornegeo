@@ -5,6 +5,7 @@ import seaborn as sns
 import shapely
 from numpy.typing import NDArray
 from shapely.geometry import LineString
+from tqdm.autonotebook import tqdm
 
 import airbornegeo
 
@@ -159,7 +160,9 @@ def along_track_distance(
             )
             return horizontal_df.tmp
         data = data.copy()
-        for _segment_name, segment_data in data.groupby(groupby_column):
+        for _segment_name, segment_data in tqdm(
+            data.groupby(groupby_column), desc="Segments"
+        ):
             # turn point data into line
             line = gpd.GeoSeries(LineString(segment_data.geometry.tolist()))
 

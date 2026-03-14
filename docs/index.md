@@ -31,14 +31,26 @@ citing
 
 ```{toctree}
 :hidden:
-:caption: 🚶 Tutorials
-tutorials/index.md
+:caption: 🛩️ Initial processing
+initial_processing.md
 ```
 
 ```{toctree}
 :hidden:
-:caption: 📚 How-To Guides
-how_to/index.md
+:caption: 🎚️ Levelling
+levelling.md
+```
+
+```{toctree}
+:hidden:
+:caption: 🫧 Cleaning and Quality Control
+quality_control.md
+```
+
+```{toctree}
+:hidden:
+:caption: Processing
+processing.md
 ```
 
 ```{toctree}
