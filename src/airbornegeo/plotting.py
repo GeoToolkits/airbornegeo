@@ -186,7 +186,7 @@ def plotly_points(
     coord_names: tuple[str, str] | None = None,
     hover_cols: list[str] | None = None,
     size: int = 4,
-    edge_width: int = 1,
+    edge_width: int | None = None,
     edge_color: str = "black",
     cmap: str | None = None,
     cmap_middle: float | None = None,
