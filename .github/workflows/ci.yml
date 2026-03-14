@@ -34,6 +34,7 @@ jobs:
         with:
           pixi-version: v0.65.0
           cache: true
+          environments: dev
 
       - run: pixi run style
 
@@ -60,6 +61,7 @@ jobs:
         with:
           pixi-version: v0.65.0
           cache: true
+          environments: test
 
       - run: pixi run test
 
