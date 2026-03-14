@@ -11,6 +11,7 @@ You should follow these in order, then refer to the [how-to guides](../how_to/in
 "numbered":
 ---
 reproject_data
+change_sampling_frequency
 along_track_distance
 filtering_data_in_1D
 split_survey_into_lines

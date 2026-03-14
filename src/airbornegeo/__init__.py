@@ -46,6 +46,9 @@ class Report(scooby.Report):  # type: ignore[misc] # pylint: disable=missing-cla
         )
 
 
+from .block_reduce import (  # noqa: E402
+    block_reduce,
+)
 from .distances import (  # noqa: E402
     along_track_distance,
     relative_distance,
@@ -87,7 +90,6 @@ from .processing import (  # noqa: E402
     eastward_velocity,
     line_bearing,
     northward_velocity,
-    reduce_by_line,
     split_into_segments,
     unique_line_id,
     vertical_acceleration,
