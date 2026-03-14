@@ -260,3 +260,9 @@ cmd = "pylint airbornegeo"
 
 [tool.pixi.feature.dev.tasks.style]
 cmd = "pre-commit run --all-files ; pylint airbornegeo"
+
+[tool.pixi.feature.docs.tasks.docs]
+cmd = "sphinx-autobuild --open-browser -n -T -b=html docs docs/_build/html"
+
+[tool.pixi.feature.docs.tasks.docs_static]
+cmd = "sphinx-build --keep-going -n -T -b=html docs docs/_build/html"

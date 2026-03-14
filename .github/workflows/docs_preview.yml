@@ -37,24 +37,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # Install Micromamba with conda-forge dependencies
-      - name: Setup Micromamba
-        uses: mamba-org/setup-micromamba@v2
+      - uses: prefix-dev/setup-pixi@v0.9.4
         with:
-          environment-file: environment.yml
-          post-cleanup: "all"
-          cache-downloads: false
-          # environment cache is persistent for one week.
-          cache-environment-key:
-            micromamba-environment-${{ steps.date.outputs.date }}
-
-      - name: Install package
-        run: pip install --no-deps -e .
+          pixi-version: v0.64.0
+          cache: true
+          environments: docs
 
       # Build the documentation
       - name: Build the documentation
         if: github.event.action != 'closed'
-        run: sphinx-build -n -T -b="html" docs docs/_build/html
+        run: pixi run docs_static
 
       # Deploy the preview of the docs
       - name: Deploy Preview
@@ -67,3 +59,5 @@ jobs:
           action: auto
           deploy-repository: ${{ github.repository }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          enable_jekyll: false
+          disable_nojekyll: false
