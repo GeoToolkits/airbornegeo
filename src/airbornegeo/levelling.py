@@ -429,7 +429,6 @@ def calculate_intersection_weights(
             cmap="matter_r",
             # robust=False,
             cmap_lims=(0, 1),
-            # edge_width=0,
             size=6,
             theme=None,
         )
@@ -2090,7 +2089,6 @@ def level_lines(
             ],
             cmap="balance",
             absolute=True,
-            # edge_width=0,
             size=10,
             theme=None,
         )
@@ -2113,7 +2111,6 @@ def level_lines(
             hover_cols=["line", data_col, levelled_col],
             cmap="balance",
             absolute=True,
-            edge_width=0,
             size=5,
             theme=None,
             robust=True,
