@@ -173,22 +173,12 @@ You can install nox with `pip install nox`.
 
 ### Setting up your environment
 
-Run the following `make` commands to create a new environment and install the package dependencies. If you don't have / want to install make, just copy the commands from the Makefile file and run them in the terminal.
+We use `pixi` to manage our dependencies and to run certain workflows, like style-checking the code and building the documentation.
+If you don't have `pixi`, see the install instructions [here](https://pixi.prefix.dev/latest/installation/).
 
-```
-make create
-```
-Activate the environment:
-```
-mamba activate airbornegeo
-```
-Install your local version:
-```
-make install
-```
-This environment now contains your local, editable version of airbornegeo, meaning if you alter code in the package, it will automatically include those changes in your environment (you may need to restart your kernel if using Jupyter). If you need to update the dependencies, see the [update the dependencies](#update-the-dependencies) section below.
+Run `pixi install` to set up your environments.
 
-> **Note:** You'll need to activate the environment every time you start a new terminal.
+This contains your local, editable version of airbornegeo, meaning if you alter code in the package, it will automatically include those changes in your environment (you may need to restart your kernel if using Jupyter). If you need to update the dependencies, see the [update the dependencies](#update-the-dependencies) section below.
 
 ### Make a branch
 
@@ -391,6 +381,6 @@ Once the new version is on PyPI, within a few hours a bot will automatically ope
 
 ## Update the dependencies
 
-To add or update a dependencies, add it to `pyproject.toml` either under `dependencies` or `optional-dependencies`. This will be included in the next build uploaded to PyPI.
+To add or update a dependencies, add it to `pyproject.toml` either under `[dependencies]` or `[optional-dependencies]`. This will be included in the next build uploaded to PyPI. You also need to add it to pixi, with `pixi add PACKAGE`.
 
-If you add a dependency necessary for using the package, make sure to update the `environment.yml` file in the repository. See below.
+If you just want to add a package to your environment temporarily, but not included it as a dependencies of `airbornegeo`, use can use `pixi add PACKAGE`. The package will be added to the pixi portion of the pyproject.toml, but not to the packages dependencies. When a user installs `airbornegeo`, they will only get the dependencies list in the [project][dependencies] section, not those listed in the [tool.pixi.dependencies] section.
