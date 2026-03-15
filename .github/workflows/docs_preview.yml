@@ -1,15 +1,6 @@
 name: Docs Preview
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - edited
-      - closed
-    branches:
-      - "main"
   workflow_dispatch:
 
 concurrency: preview-${{github.ref}}
