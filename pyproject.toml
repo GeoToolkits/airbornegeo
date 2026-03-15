@@ -219,7 +219,7 @@ ignore-words-list = ["words-to-ignore"]
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
-platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
+platforms = ["win-64", "linux-64"]#, "osx-64", "osx-arm64"]
 
 [tool.pixi.pypi-dependencies]
 airbornegeo = { path = ".", editable = true }
@@ -253,6 +253,7 @@ iprogress = ">=0.4,<0.5"
 pyproj = ">=3.7.2,<4"
 polartoolkit = ">=1.5.0,<2"
 boule = ">=0.5.0,<0.6"
+invert4geom = ">=2"
 
 [tool.pixi.feature.test.tasks.test]
 cmd = "pytest {{ target }} -ra --cov --cov-report=xml --cov-report=term --durations=20"
