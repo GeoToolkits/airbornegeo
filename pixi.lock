@@ -4742,8 +4742,8 @@ packages:
   timestamp: 1751626573984
 - pypi: ./
   name: airbornegeo
-  version: 0.1.dev21+g37fa986a0.d20260315
-  sha256: 597741c72382db130011c7e95dce9a866bef75b3f9689f1a01b0cfe6ddac03a5
+  version: 0.1.dev24+gd2f974035.d20260315
+  sha256: 244b5a5e1aecfcd36d7e27e0ae1b6ae18b9b5abb6bd91c51e033213b533fae1e
   requires_dist:
   - geopandas
   - harmonica
