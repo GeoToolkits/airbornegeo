@@ -1,6 +1,6 @@
 {
   "title": "AirborneGeo: Tools for processing airborne geophysical survey data",
-  "description": "<p><strong>AirborneGeo</strong> is a Python package providing tools for conducting standard airborne geophysical tasks.</p><p><strong>Documentation</strong>: <a href=\"https://mdtanker.github.io/airbornegeo/\">https://mdtanker.github.io/airbornegeo/</a></p><p><strong>Source code</strong>: <a href=\"https://github.com/mdtanker/airbornegeo\">https://github.com/mdtanker/airbornegeo</a></p>",
+  "description": "<p><strong>AirborneGeo</strong> is a Python package providing tools for conducting standard airborne geophysical tasks.</p><p><strong>Documentation</strong>: <a href=\"https://airbornegeo.github.io/airbornegeo/\">https://airbornegeo.github.io/airbornegeo/</a></p><p><strong>Source code</strong>: <a href=\"https://github.com/airbornegeo/airbornegeo\">https://github.com/airbornegeo/airbornegeo</a></p>",
   "creators": [
     {
       "name": "AirborneGeo Community"

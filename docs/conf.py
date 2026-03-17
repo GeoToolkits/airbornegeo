@@ -85,7 +85,7 @@ html_show_sphinx = True
 html_show_copyright = False
 html_theme = "sphinx_book_theme"
 html_theme_options: dict[str, Any] = {
-    "repository_url": "https://github.com/mdtanker/airbornegeo",
+    "repository_url": "https://github.com/airbornegeo/airbornegeo",
     "repository_branch": "main",
     "path_to_docs": "docs",
     "launch_buttons": {

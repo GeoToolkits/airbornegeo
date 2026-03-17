@@ -84,11 +84,11 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mdtanker/airbornegeo"
-Documentation = "https://mdtanker.github.io/airbornegeo/"
-"Bug Tracker" = "https://github.com/mdtanker/airbornegeo/issues"
-Discussions = "https://github.com/mdtanker/airbornegeo/discussions"
-Changelog = "https://github.com/mdtanker/airbornegeo/docs/changelog.md"
+Homepage = "https://github.com/airbornegeo/airbornegeo"
+Documentation = "https://airbornegeo.github.io/airbornegeo/"
+"Bug Tracker" = "https://github.com/airbornegeo/airbornegeo/issues"
+Discussions = "https://github.com/airbornegeo/airbornegeo/discussions"
+Changelog = "https://github.com/airbornegeo/airbornegeo/docs/changelog.md"
 
 
 [tool.hatch]

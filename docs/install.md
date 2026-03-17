@@ -46,12 +46,12 @@ pip install airbornegeo
 
 You can use pip, with the above created environment, to install the latest source from GitHub:
 
-    pip install git+https://github.com/mdtanker/airbornegeo.git
+    pip install git+https://github.com/airbornegeo/airbornegeo.git
 
 Or you can clone the git repository and install:
 
 
-    git clone https://github.com/mdtanker/airbornegeo.git
+    git clone https://github.com/airbornegeo/airbornegeo.git
     cd airbornegeo
     pip install .
 
