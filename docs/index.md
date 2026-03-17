@@ -9,7 +9,7 @@ Tools for processing airborne geophysical survey data
 ```{admonition} How to contribute
 :class: seealso
 
-We really welcome all forms of contribution! If you have any questions, comments or suggestions, please open a [discussion](https://github.com/mdtanker/airbornegeo/discussions/new/choose) or [issue (feature request)](https://github.com/mdtanker/airbornegeo/issues/new/choose) on the [GitHub page](https://github.com/mdtanker/airbornegeo/)!
+We really welcome all forms of contribution! If you have any questions, comments or suggestions, please open a [discussion](https://github.com/airbornegeo/airbornegeo/discussions/new/choose) or [issue (feature request)](https://github.com/airbornegeo/airbornegeo/issues/new/choose) on the [GitHub page](https://github.com/airbornegeo/airbornegeo/)!
 
 Please, read our [Contributor Guide](contributing.md) to learn
 how you can contribute to the project.
@@ -72,7 +72,7 @@ api/airbornegeo
 :caption: ℹ️ Other resources
 contributing.md
 changelog.md
-Source code on GitHub <https://github.com/mdtanker/airbornegeo>
+Source code on GitHub <https://github.com/airbornegeo/airbornegeo>
 ```
 
 
@@ -91,7 +91,7 @@ New to AirborneGeo? Start here!
 :::{grid-item-card} {octicon}`comment-discussion` Need help?
 :text-align: center
 Start a discussion on GitHub!
-```{button-link} https://github.com/mdtanker/airbornegeo/discussions
+```{button-link} https://github.com/airbornegeo/airbornegeo/discussions
     :click-parent:
     :color: primary
     :outline:

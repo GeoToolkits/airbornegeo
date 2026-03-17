@@ -1,8 +1,8 @@
 # How to contribute
 
 ## TLDR (Too long; didn't read)
-* [fork](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project) the [repository](https://github.com/mdtanker/airbornegeo) using the `Fork` button on GitHub.
-* clone your forked repository on your computer: `git clone https://github.com/mdtanker/airbornegeo`.
+* [fork](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project) the [repository](https://github.com/airbornegeo/airbornegeo) using the `Fork` button on GitHub.
+* clone your forked repository on your computer: `git clone https://github.com/airbornegeo/airbornegeo`.
 * [create a branch](https://docs.github.com/en/get-started/using-github/github-flow#create-a-branch) for your edits: `git checkout -b new-branch`
 * set up your environment: `pixi install`
 * make your changes
@@ -10,13 +10,13 @@
 * add your changed files: `git add .`
 * once the style checks pass, commit your changes: `git commit -m "a short description of your changes"`
 * push your changes: `git push -u origin new-branch`
-* [make a Pull Request](http://makeapullrequest.com/) for your branch from the main GitHub repository [PR page](https://github.com/mdtanker/airbornegeo/pulls).
+* [make a Pull Request](http://makeapullrequest.com/) for your branch from the main GitHub repository [PR page](https://github.com/airbornegeo/airbornegeo/pulls).
 
 🎉 Thanks for considering contributing to this package! 🎉
 
 <sub>Adapted from the great contribution guidelines of the [Fatiando a Terra](https://www.fatiando.org/) packages<sub>.
 
-> This document contains some general guidelines to help with contributing to this code. Contributing to a package can be a daunting task, if you want help please reach out on the [GitHub discussions page](https://github.com/mdtanker/airbornegeo/discussions)!
+> This document contains some general guidelines to help with contributing to this code. Contributing to a package can be a daunting task, if you want help please reach out on the [GitHub discussions page](https://github.com/airbornegeo/airbornegeo/discussions)!
 
 Any kind of help would be much appreciated. Here are a few ways to contribute:
 * 🐛 Submitting bug reports and feature requests
@@ -103,7 +103,7 @@ example scripts. See [Contributing Code](#contributing-code) for instructions.
 
 **Is this your first contribution?**
 Please take a look at these resources to learn about git and pull requests (don't
-hesitate to ask questions in the [GitHub discussions page](https://github.com/mdtanker/airbornegeo/discussions)):
+hesitate to ask questions in the [GitHub discussions page](https://github.com/airbornegeo/airbornegeo/discussions)):
 
 * [How to Contribute to Open Source](https://opensource.guide/how-to-contribute/).
 * Aaron Meurer's [tutorial on the git workflow](http://www.asmeurer.com/git-workflow/)
@@ -153,7 +153,7 @@ On the github page, first fork the repository to get your own version of it. Thi
 
 Now you need to get the cloned repository files onto your computer. This is referred to as `cloning`. In a terminal, or Git Bash, `cd` to the directory you want your cloned folder to be placed into and enter:
 ```bash
-git clone https://github.com/mdtanker/airbornegeo
+git clone https://github.com/airbornegeo/airbornegeo
 ```
 
 Now we need to configure Git to sync this fork to the main repository, not your fork of it.
@@ -161,7 +161,7 @@ Now we need to configure Git to sync this fork to the main repository, not your 
 `cd` into the directory you just cloned and run:
 
 ```bash
-git remote add upstream https://github.com/mdtanker/airbornegeo.git
+git remote add upstream https://github.com/airbornegeo/airbornegeo.git
 ```
 
 ### Setting up your environment
@@ -344,7 +344,7 @@ This includes running both the unit tests as well as code linters.
 GitHub will show the status of these checks on the pull request.
 Try to get them all passing (green).
 If you have any trouble, leave a comment in the PR or
-[post on the GH discussions page](https://github.com/mdtanker/airbornegeo/discussions).
+[post on the GH discussions page](https://github.com/airbornegeo/airbornegeo/discussions).
 
 ### Sync your fork and local
 
