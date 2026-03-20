@@ -176,7 +176,8 @@ def eotvos_correction_harlan(latitude, track, ground_speed, height):
     Compute the Eötvös correction (mGal) from latitude, track, ground speed, and height
     using the Harlan 1968 equation 16, which uses ground speed instead of air speed.
 
-    Ground speed and velocity at altitude differ due to the Coriolis term
+    Ground speed and velocity at altitude differ due to the Coriolis term.
+
     Parameters
     ----------
     latitude : array-like
@@ -185,6 +186,8 @@ def eotvos_correction_harlan(latitude, track, ground_speed, height):
         Aircraft track in degrees from geographic north, positive clock-wise
     ground_speed : array-like
         Ground speed in meters per seconds
+    height : array-like
+        Aircraft height in meters
 
     Returns
     -------
@@ -219,50 +222,50 @@ def eotvos_correction_harlan(latitude, track, ground_speed, height):
     #       + 2 * ell.angular_velocity * velocity_easting * np.cos(lat_rad) * 1e5
 
 
-def eotvos_correction(latitude, track, ground_speed, height):
-    """
-    Compute Eötvös correction (mGal) from latitude, longitude, and time.
+# def eotvos_correction(latitude, track, ground_speed, height):
+#     """
+#     Compute Eötvös correction (mGal) from latitude, longitude, and time.
 
-    Parameters
-    ----------
-    latitude : array-like
-        Latitude in degrees
-    track : array-like
-        Aircraft track in degrees from geographic north, positive clock-wise
-    ground_speed : array-like
-        Ground speed in meters per seconds
-    height : array-like
-        Height above ...
+#     Parameters
+#     ----------
+#     latitude : array-like
+#         Latitude in degrees
+#     track : array-like
+#         Aircraft track in degrees from geographic north, positive clock-wise
+#     ground_speed : array-like
+#         Ground speed in meters per seconds
+#     height : array-like
+#         Height above ...
 
-    Returns
-    -------
-    E : ndarray
-        Eötvös correction in mGal
-    """
-    # define an ellipsoid
-    ell = boule.WGS84
+#     Returns
+#     -------
+#     E : ndarray
+#         Eötvös correction in mGal
+#     """
+#     # define an ellipsoid
+#     ell = boule.WGS84
 
-    # mps to knots
-    ground_speed = ground_speed * 1.94384
+#     # mps to knots
+#     ground_speed = ground_speed * 1.94384
 
-    # degrees to radian
-    lat_rad = np.radians(latitude)
-    track_rad = np.radians(track)
+#     # degrees to radian
+#     lat_rad = np.radians(latitude)
+#     track_rad = np.radians(track)
 
-    velocity_easting = np.sin(track_rad) * ground_speed
-    velocity_northing = np.cos(track_rad) * ground_speed
+#     velocity_easting = np.sin(track_rad) * ground_speed
+#     velocity_northing = np.cos(track_rad) * ground_speed
 
-    sin_lat = np.sin(lat_rad)
-    cos_lat = np.cos(lat_rad)
+#     sin_lat = np.sin(lat_rad)
+#     cos_lat = np.cos(lat_rad)
 
-    # Eotvos correction in mGal
-    return (
-        ((velocity_northing**2) / ell.semimajor_axis)
-        * (1 - height / ell.semimajor_axis + ell.flattening * (2 - 3 * sin_lat**2))
-        + ((velocity_easting**2) / ell.semimajor_axis)
-        * (1 - height / ell.semimajor_axis - ell.flattening * (sin_lat**2))
-        + 2 * ell.angular_velocity * velocity_easting * cos_lat * 1e5
-    )
+#     # Eotvos correction in mGal
+#     return (
+#         ((velocity_northing**2) / ell.semimajor_axis)
+#         * (1 - height / ell.semimajor_axis + ell.flattening * (2 - 3 * sin_lat**2))
+#         + ((velocity_easting**2) / ell.semimajor_axis)
+#         * (1 - height / ell.semimajor_axis - ell.flattening * (sin_lat**2))
+#         + 2 * ell.angular_velocity * velocity_easting * cos_lat * 1e5
+#     )
 
 
 # def eotvos_correction(data_in, differentiator=central_difference):

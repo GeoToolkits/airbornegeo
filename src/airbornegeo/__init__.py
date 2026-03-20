@@ -83,7 +83,6 @@ from .plotting import (  # noqa: E402
     plotly_profiles,
 )
 from .potential_fields import (  # noqa: E402
-    eotvos_correction,
     eotvos_correction_glicken,
     eotvos_correction_harlan,
     eq_sources_1d,
