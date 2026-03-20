@@ -1,6 +1,8 @@
 # AirborneGeo
 Tools for processing airborne geophysical survey data.
 
+This package allows for a range of processing steps necessary for airborne geophysical data. Some of the functions are generic for many types of airborne surveys, such as splitting flights into segments, calculating quantities such as distance along lines, velocities, bearings, and cross-over errors, etc. However, there are many functions specifically focused on gravity and magnetic data. These include field reductions, 1D equivalent source inversion, and levelling of flight lines.
+
 ## Levelling
 We offer a range of ways to perform levelling of your flight line data.
 
@@ -18,18 +20,6 @@ Instead of relying on all cross-over points to an equal amount, you can weight t
 
 ### Upward continued cross-overs
 If your crossing lines have drastically different altitudes at a cross-over point, the mistie value may reflect that your observation of your field are at different points in 3D space (same horizontal coordinates but different elevations) and therefore you would expect them to have different values. To account for this, when calculating the cross-over misties, you can choose to do it at the same point in 3D space. We do this by fitting equivalent sources individually to each line (in 1D), and predicting the field values at the same point in 3D space. This is just to determine the mistie, but leaves the data at its original observation locations.
-
-# Example datasets
-AGAP gravity
-    - has most corrections and levelling as channels
-EAGLE/ICECAP II
-    - grav and mag
-    - level 2 provides ..
-    - L0 and L1B
-    - doesn't give levelling
-
-A Magnetic Data Correction Workflow for Sparse Four Dimensional data” (Aitken et al., 2020, Journal of Geophysical Research, https://doi.org/10.1029/2020JB019825).
-    - this includes the re-processing of EAGLE/ICECAP II datasets.
 
 
 [![Actions Status][actions-badge]][actions-link]
