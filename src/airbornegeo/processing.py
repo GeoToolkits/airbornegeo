@@ -1,12 +1,7 @@
-import math
-
-import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from shapely.geometry import LineString
-from tqdm.autonotebook import tqdm
 
 from airbornegeo import logger
 
@@ -198,68 +193,6 @@ def vertical_acceleration(
     # return df.dist_along_flight
 
 
-def eastward_velocity(lat_deg, lon_deg, time):
-    """
-    Compute eastward velocity (m/s) from latitude, longitude, and time.
-
-    Parameters
-    ----------
-    lat_deg : array-like
-        Latitude in degrees
-    lon_deg : array-like
-        Longitude in degrees
-    time : array-like
-        Time in seconds (difference between consecutive measurements should be ~1-10 s)
-
-    Returns
-    -------
-    v_east : ndarray
-        Eastward velocity in m/s
-    """
-    lat_rad = np.radians(np.asarray(lat_deg))
-    lon_rad = np.unwrap(np.radians(np.asarray(lon_deg)))  # avoid ±180 jumps
-
-    time = np.asarray(time)
-    dt = np.diff(time, prepend=np.nan)
-    dt[dt == 0] = np.nan  # avoid division by zero
-
-    dlon = np.diff(lon_rad, prepend=np.nan)
-
-    r = 6371000  # Earth radius in meters
-    return r * np.cos(lat_rad) * dlon / dt
-
-
-def northward_velocity(lat_deg, lon_deg, time):
-    """
-    Compute northward velocity (m/s) from latitude, longitude, and time.
-
-    Parameters
-    ----------
-    lat_deg : array-like
-        Latitude in degrees
-    lon_deg : array-like
-        Longitude in degrees
-    time : array-like
-        Time in seconds (difference between consecutive measurements should be ~1-10 s)
-
-    Returns
-    -------
-    v_north : ndarray
-        Northward velocity in m/s
-    """
-    lat_rad = np.radians(np.asarray(lat_deg))
-    _lon_rad = np.unwrap(np.radians(np.asarray(lon_deg)))  # avoid ±180 jumps
-
-    time = np.asarray(time)
-    dt = np.diff(time, prepend=np.nan)
-    dt[dt == 0] = np.nan  # avoid division by zero
-
-    dlat = np.diff(lat_rad, prepend=np.nan)
-
-    r = 6371000  # Earth radius in meters
-    return r * dlat / dt
-
-
 def unique_line_id(
     df: pd.DataFrame,
     line_col_name: str = "line",
@@ -291,116 +224,6 @@ def unique_line_id(
         df1.loc[line_series == n, line_col_name] = int(i + 1)
 
     return df1[line_col_name].astype(int)
-
-
-def line_bearing(
-    data: gpd.GeoDataFrame,
-    groupby_column: str = "line",
-) -> pd.Series:
-    """
-    Calculate the average bearing of each line in a GeoDataFrame. The bearing is
-    calculated by finding the minimum rotated rectangle around the line, and then
-    calculating the angle of the rectangle.
-
-    Parameters
-    ----------
-    data : gpd.GeoDataFrame
-        Dataframe containing the data points and the line labels.
-        must have a set geometry column.
-    groupby_column: str, optional
-        Column to group the dataframe by, by default "line"
-
-    Returns
-    -------
-    pd.Series
-        The bearing of each line in degrees
-    """
-
-    data = data.copy()
-
-    assert isinstance(data, gpd.GeoDataFrame), "gdf must be a GeoDataFrame"
-    assert data.geometry.geom_type.isin(["Point"]).all(), "geometry must be points"
-    assert groupby_column in data.columns, "line column must be in dataframe"
-
-    data["bearing"] = np.nan
-
-    for segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
-        # turn point data into line
-        line = gpd.GeoSeries(LineString(segment_data.geometry.tolist()))
-
-        # find minimum rotated rectangle around line
-        rect = line.iloc[0].minimum_rotated_rectangle
-
-        # get angle of rotation
-        angle = azimuth(rect)
-        if 90 < angle <= 180:
-            angle = angle - 180
-
-        data.loc[data[groupby_column] == segment_name, "bearing"] = angle
-
-    return data.bearing
-
-
-def bearing(data: gpd.GeoDataFrame, window_width: float) -> pd.Series:
-    """
-    Calculate the average bearing of a moving window in a GeoDataFrame. The bearing is
-    calculated by finding the minimum rotated rectangle around the window, and then
-    calculating the angle of the rectangle.
-
-    Parameters
-    ----------
-    gdf : gpd.GeoDataFrame
-        Dataframe containing the data points and must have a set geometry column.
-
-    Returns
-    -------
-    pd.Series
-        The bearing in degrees
-    """
-    data = data.copy()
-
-    # save index, sort by time and reset index
-    data = data.reset_index(names="tmp_index")
-
-    # # do with pandas, much slower
-    # def angle(series):
-    #     view = data.iloc[series.index]
-    #     delta_x = view.easting.iloc[-1] - view.easting.iloc[0]
-    #     delta_y = view.northing.iloc[-1] - view.northing.iloc[0]
-    #     return np.rad2deg(np.arctan2(delta_y, delta_x))
-    # return data[['easting','northing']].rolling(window_width).apply(angle)['easting']
-
-    # do with numpy, much faster
-    # create sliding windows of data
-    windows = np.lib.stride_tricks.sliding_window_view(
-        data[["easting", "northing"]].values,
-        window_width,
-        axis=0,
-    )
-
-    def angle(window):
-        delta_x = window[0][-1] - window[0][0]
-        delta_y = window[1][-1] - window[1][0]
-        return np.rad2deg(np.arctan2(delta_y, delta_x))
-
-    angles = []
-    for x in windows:
-        # get angle of rotation
-        ang = angle(x)
-        # if 90 < ang <= 180:
-        #     ang = ang - 180
-        angles.append(ang)
-
-    data["tmp_bearing"] = np.pad(
-        angles, (0, len(data) - len(windows)), constant_values=np.nan
-    )
-
-    # Reset index and sort
-    data = data.set_index("tmp_index").sort_values("tmp_index")
-
-    return data.tmp_bearing
 
 
 def detect_outliers(df: pd.DataFrame) -> None:
@@ -448,32 +271,3 @@ def detect_outliers(df: pd.DataFrame) -> None:
 #     # outliers = outliers[["index"]+cols]
 
 #     return outliers
-
-
-def _azimuth_between_points(
-    point1: tuple[float, float],
-    point2: tuple[float, float],
-) -> float:
-    """azimuth between 2 points (interval 0 - 180)"""
-
-    angle = np.arctan2(point2[1] - point1[1], point2[0] - point1[0])
-    return np.degrees(angle) if angle > 0 else np.degrees(angle) + 180  # type: ignore[no-any-return]
-
-
-def _dist(a: tuple[float, float], b: tuple[float, float]) -> float:
-    """distance between points"""
-    return math.hypot(b[0] - a[0], b[1] - a[1])
-
-
-def azimuth(mrr) -> float:  # type: ignore[no-untyped-def]
-    """azimuth of minimum_rotated_rectangle"""
-    bbox = list(mrr.exterior.coords)
-    axis1 = _dist(bbox[0], bbox[3])
-    axis2 = _dist(bbox[0], bbox[1])
-
-    if axis1 <= axis2:
-        az = _azimuth_between_points(bbox[0], bbox[1])
-    else:
-        az = _azimuth_between_points(bbox[0], bbox[3])
-
-    return az

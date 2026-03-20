@@ -22,7 +22,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from tqdm.autonotebook import tqdm
 
 import airbornegeo
-from airbornegeo import logger, processing
+from airbornegeo import logger
 
 sns.set_theme()
 
@@ -803,7 +803,7 @@ def extend_line(
     """extend line in either direction by distance"""
     # find minimum rotated rectangle around line
     rect = line.minimum_rotated_rectangle
-    angle = processing.azimuth(rect)
+    angle = airbornegeo.nav.azimuth(rect)
 
     rect_center = shapely.centroid(rect).x, shapely.centroid(rect).y
 

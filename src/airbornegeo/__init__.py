@@ -49,10 +49,6 @@ class Report(scooby.Report):  # type: ignore[misc] # pylint: disable=missing-cla
 from .block_reduce import (  # noqa: E402
     block_reduce,
 )
-from .distances import (  # noqa: E402
-    along_track_distance,
-    relative_distance,
-)
 from .filtering import (  # noqa: E402
     filter1d,
 )
@@ -71,6 +67,14 @@ from .levelling import (  # noqa: E402
     plot_line_and_crosses,
     update_intersections_with_eq_sources,
 )
+from .nav import (  # noqa: E402
+    along_track_distance,
+    eastward_velocity,
+    ground_speed,
+    northward_velocity,
+    relative_distance,
+    track,
+)
 from .plotting import (  # noqa: E402
     inspect_lines,
     plot_flightlines,
@@ -85,11 +89,7 @@ from .potential_fields import (  # noqa: E402
     upward_continue_by_line,
 )
 from .processing import (  # noqa: E402
-    bearing,
     detect_outliers,
-    eastward_velocity,
-    line_bearing,
-    northward_velocity,
     split_into_segments,
     unique_line_id,
     vertical_acceleration,
