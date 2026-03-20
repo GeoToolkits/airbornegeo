@@ -84,7 +84,8 @@ from .plotting import (  # noqa: E402
 )
 from .potential_fields import (  # noqa: E402
     eotvos_correction,
-    eotvos_correction_full,
+    eotvos_correction_glicken,
+    eotvos_correction_harlan,
     eq_sources_1d,
     upward_continue_by_line,
 )
