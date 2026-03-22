@@ -6,7 +6,6 @@ ci:
 exclude: |
   (?x)^(
       .github/config.yml |
-      environment.yml |
       pixi.lock
   )$
 
