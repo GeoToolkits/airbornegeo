@@ -51,6 +51,7 @@ from .block_reduce import (  # noqa: E402
 )
 from .filtering import (  # noqa: E402
     filter_grid,
+    filter_line,
 )
 from .levelling import (  # noqa: E402
     alternating_iterative_line_levelling,

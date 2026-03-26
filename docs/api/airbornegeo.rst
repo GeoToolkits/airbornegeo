@@ -18,10 +18,7 @@ Functions for performing geospatial operations.
 
     reproject
     block_reduce
-    along_track_distance
-    relative_distance
-    ground_speed
-    track
+    filter_line
     filter_grid
 
 
