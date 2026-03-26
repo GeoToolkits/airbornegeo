@@ -2,6 +2,8 @@ docs/data/*
 !docs/data/.gitkeep
 docs/api/generated/
 
+testing_folder
+
 # Ignore the virtual environment
 **uv.lock
 

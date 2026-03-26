@@ -5,6 +5,7 @@ import typing
 import warnings
 
 import geopandas as gpd
+import harmonica as hm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -25,6 +26,271 @@ import airbornegeo
 from airbornegeo import logger
 
 sns.set_theme()
+
+
+def _end_iterations(
+    rms_values: list[float],
+    delta_rms_values: list[float],
+    max_iterations: int,
+    rms_tolerance: float | None = None,
+    rms_percent_change_tolerance: float | None = None,
+    rms_percent_increase_tolerance: float | None = None,
+):
+    end = False
+    termination_reason = []
+
+    iteration = len(rms_values)
+    rms = rms_values[-1]
+    delta_rms = delta_rms_values[-1]
+    previous_delta_rms = delta_rms_values[-2] if iteration > 2 else np.inf
+
+    # ignore for first iteration
+    if iteration == 1:
+        pass
+    else:
+        # end because RMS is increasing above a unreasonable amount
+        if rms > np.min(rms_values) * (1 + rms_percent_increase_tolerance / 100):
+            logger.info(  # pylint: disable=logging-fstring-interpolation
+                f"\nEquivalent source levelling terminated after {iteration} iterations because the RMS of the levelling corrections ({round(rms, 4)}) \n"
+                f"was over {rms_percent_increase_tolerance}% greater than minimum RMS ({round(np.min(rms_values), 4)}) \n"
+                "Change parameter 'rms_percent_increase_tolerance' if desired.",
+            )
+            end = True
+            termination_reason.append("RMS increasing")
+        # end because RMS decrease has plateaued (defined over 2 iterations)
+        if (
+            (rms_percent_change_tolerance is not None)
+            and (delta_rms <= rms_percent_change_tolerance)
+            and (previous_delta_rms <= rms_percent_change_tolerance)
+        ):
+            logger.info(  # pylint: disable=logging-fstring-interpolation
+                f"\nEquivalent source levelling terminated after {iteration} iterations because there was no "
+                f"significant variation in the RMS (delta RMS of {round(delta_rms, 2)}%) of the levelling corrections over 2 iterations \n"
+                f"Change parameter 'rms_percent_change_tolerance' ({rms_percent_change_tolerance}%) if desired.",
+            )
+            end = True
+            termination_reason.append("RMS percent change tolerance")
+        # end because RMS is below the set tolerance
+        if (rms_tolerance is not None) and (rms < rms_tolerance):
+            logger.info(  # pylint: disable=logging-fstring-interpolation
+                f"\nEquivalent source levelling terminated after {iteration} iterations because the RMS of the levelling corrections ({rms}) was "
+                f"less then set tolerance ({rms_tolerance}) \nChange parameter "
+                "'rms_tolerance' if desired.",
+            )
+            end = True
+            termination_reason.append("RMS tolerance")
+    # end because max iterations reached
+    if iteration >= max_iterations:
+        logger.warning(  # pylint: disable=logging-fstring-interpolation
+            f"\nEquivalent source levelling terminated after {iteration} iterations with RMS of levelling correction of {round(rms, 2)} because "
+            f"maximum number of iterations ({max_iterations}) reached.",
+        )
+
+        end = True
+        termination_reason.append("max iterations")
+
+    return end, termination_reason
+
+
+def equivalent_source_levelling(
+    data: pd.DataFrame,
+    data_column: str,
+    max_dist: float,
+    degree: int,
+    lines_to_level: list[float] | None = None,
+    damping: float | None = None,
+    depth: str | float = "default",
+    block_size: float | None = None,
+    max_iterations: int = 1,
+    rms_tolerance: float | None = None,
+    rms_percent_change_tolerance: float = 10,
+    rms_percent_increase_tolerance: float = 20,
+    seed: int = 42,
+    plot_iterations: bool = True,
+    progressbar: bool = True,
+) -> pd.Series:
+    """
+    _summary_
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The dataframe containing columns 'easting', 'northing', 'height', 'line',
+        'distance_along_line', and the data, specified by parameter `data_column`.
+    data_column : str
+        The name of the column containing the data values to fit equivalent sources to
+        and level, typically gravity or magnetics.
+    max_dist : float
+        For each line to be levelled, only fit equivalent sources using data within this
+        distance to the line, excluding the line data itself. This should be large
+        enough to include at least 1 adjacent flight line.
+    degree : int
+        The degree order of the polynomial trend to fit the misfit between the
+        data_column and the predicted values from the equivalent sources. 0 gives a
+        DC-shift, 1 additionally allows a tilt, 2 additional allows a curve, etc.
+    lines_to_level : list[float]
+        Which lines to level, by default will level all lines.
+    damping : float | None, optional
+        The damping regularization to use when fitting the equivalent sources, by
+        default None
+    depth : str | float, optional
+        The source depths for the equivalent sources, by default "default", which uses
+        4.5 times the mean distance between first neighboring sources.
+    block_size : float | None, optional
+        The block size for placing the equivalent sources, by default None which place 1
+        source beneath each datapoint.
+    max_iterations : int, optional
+        End the iterations after this value, by default 1
+    rms_tolerance : float | None, optional
+        End the iteration once the levelling correction RMS is less than this value, by
+        default None
+    rms_percent_change_tolerance : float, optional
+        End the iterations if the percentage change of levelling correction RMS over 2
+        consecutive iterations is less the than this percentage. This helps stop the
+        iterations once improvement has plateaued, by default 10.
+    rms_percent_increase_tolerance : float, optional
+        End the iterations if the levelling correction RMS of the current iterations is
+        more than this percent greater then the minimum RMS of past iterations. This
+        helps stop run-away iterations which keep getting worse, by default 20
+    seed : int, optional
+        Seed supplied to the random number generator for shuffling the lines so they are
+        iterated over in a random order, by default 42
+    plot_iterations : bool, optional
+        Plot the convergence of levelling correction RMS value, by default True
+    progressbar : bool, optional
+        Show progress bars for both iterations and levelling of lines, by default True
+
+    Returns
+    -------
+    pd.Series
+        The levelled data column, which can be assigned back to the original dataframe.
+    """
+    # check columns are present
+    cols = ["easting", "northing", "height", "line", "distance_along_line", data_column]
+    assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
+
+    data = data.copy()
+
+    # save index and reset
+    data = data.reset_index(names="tmp_index").reset_index(drop=True)
+
+    if lines_to_level is not None:
+        line_list = copy.deepcopy(lines_to_level)
+    else:
+        line_list = data.line.unique()
+
+    if max_iterations == 1:
+        progressbar = False
+
+    if progressbar:
+        pbar_iterations = tqdm(range(1, max_iterations + 1))
+    else:
+        pbar_iterations = range(1, max_iterations + 1)
+
+    correction_rms_values = []
+    correction_delta_rms_values = []
+    iteration = 1
+    for iteration in pbar_iterations:
+        if progressbar:
+            pbar_iterations.set_description(f"Iteration: {iteration}")
+
+        # shuffle to order of lines to not start at the edge
+        rng = np.random.default_rng(seed + iteration)
+        rng.shuffle(line_list)
+
+        pbar_lines = tqdm(line_list, leave=False) if progressbar else line_list
+        for line_name in pbar_lines:
+            if progressbar:
+                pbar_lines.set_description(f"Levelling line: {line_name}")
+
+            line_df = data[data.line == line_name]
+            survey_df = data[data.line != line_name]
+
+            # subset data nearby
+            dist_mask = vd.distance_mask(
+                (line_df.easting, line_df.northing),
+                maxdist=max_dist,
+                coordinates=(survey_df.easting, survey_df.northing),
+            )
+            survey_df = survey_df.iloc[dist_mask]
+
+            # fit eq sources to nearby data
+            coords = (
+                survey_df.easting,
+                survey_df.northing,
+                survey_df.height,
+            )
+            eqs = hm.EquivalentSources(
+                damping=damping, depth=depth, block_size=block_size
+            )
+            eqs.fit(coords, survey_df[data_column])
+
+            # predict eq sources on the line to be levelled
+            line_df["tmp_predicted_eqs"] = eqs.predict(
+                (line_df.easting, line_df.northing, line_df.height)
+            )
+
+            line_df["tmp_misfit"] = line_df.tmp_predicted_eqs - line_df[data_column]
+
+            # calculate levelling correction with a trend fit to the misfit values
+            line_df = airbornegeo.levelling.skl_predict_trend(
+                data_to_fit=line_df,
+                cols_to_fit=["distance_along_line", "tmp_misfit"],
+                data_to_predict=line_df,
+                cols_to_predict=[
+                    "distance_along_line",
+                    f"tmp_levelling_correction_{iteration}",
+                ],
+                degree=degree,
+            )
+
+            # update the levelled line before moving on to the next line
+            data.loc[data.line == line_name, data_column] = (
+                line_df[data_column] + line_df[f"tmp_levelling_correction_{iteration}"]
+            )
+            data.loc[
+                data.line == line_name, f"tmp_levelling_correction_{iteration}"
+            ] = line_df[f"tmp_levelling_correction_{iteration}"]
+
+        # add RMS and delta RMS of correction values for iteration to lists
+        rms = airbornegeo.rmse(data[f"tmp_levelling_correction_{iteration}"])
+        delta_rms = (
+            (correction_rms_values[-1] / rms - 1) * 100 if iteration > 1 else np.inf
+        )
+        correction_rms_values.append(rms)
+        correction_delta_rms_values.append(delta_rms)
+
+        # apply levelling correction to data
+        # data["tmp_levelled"] = data[data_column] + data[f"tmp_levelling_correction_{iteration}"]
+
+        end, termination_reason = _end_iterations(
+            rms_values=correction_rms_values,
+            delta_rms_values=correction_delta_rms_values,
+            max_iterations=max_iterations,
+            rms_tolerance=rms_tolerance,
+            rms_percent_change_tolerance=rms_percent_change_tolerance,
+            rms_percent_increase_tolerance=rms_percent_increase_tolerance,
+        )
+
+        if end:
+            if progressbar:
+                pbar_iterations.set_description(
+                    f"Iterations ended due to {termination_reason}"
+                )
+            break
+
+    # Reset index and sort
+    data = data.set_index("tmp_index").sort_values("tmp_index")
+
+    if plot_iterations and max_iterations > 1:
+        airbornegeo.plotting.plot_eqs_levelling_convergence(
+            rms_values=correction_rms_values,
+            delta_rms_values=correction_delta_rms_values,
+            rms_tolerance=rms_tolerance,
+            rms_percent_change_tolerance=rms_percent_change_tolerance,
+        )
+
+    return data[data_column]
 
 
 def calculate_intersection_weights(
@@ -442,8 +708,6 @@ def plot_levelling_convergence(
     title: str = "Levelling convergence",
     as_median: bool = False,
 ) -> None:
-    sns.set_theme()
-
     # get mistie columns
     cols = [s for s in results.columns.to_list() if s.startswith("mistie_")]
 
