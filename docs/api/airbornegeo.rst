@@ -87,6 +87,7 @@ Functions related specifically to working with potential-fields data
 
     eq_sources_1d
     upward_continue_by_line
+    vertical_acceleration
 
 Plotting functions
 ------------------

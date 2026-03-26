@@ -40,6 +40,119 @@ def ground_speed(
     return data.relative_distance / data.unixtime.diff()
 
 
+def vertical_acceleration(
+    data: pd.DataFrame,
+    *,
+    groupby_column: str | None = None,
+    time_threshold: float | None = None,
+    smoothing_window: int | None = None,
+) -> pd.Series:
+    """
+    Calculate the 2nd derivative of height change with respect to time for each line.
+    If there is a gap between points greater than time_threshold in seconds, the line
+    will be split at the gap and the acceleration will be NaN for the points on
+    either side of the gap.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the data points and must have columns 'height' and
+        'unixtime'.
+    groupby_column : str | None, optional
+        Column name to group by before sorting by time, by default None
+    time_threshold : float
+        Threshold in seconds for determining gaps in the data, where acceleration will be set to NaN
+    smoothing_window : int, optional
+        Window size in number of data points for smoothing each derivative after it's
+        been calculated, by default None
+
+    Returns
+    -------
+    pd.Series
+        Series containing the vertical acceleration in m/s^2 for each point in the
+        dataframe.
+    """
+    data = data.copy()
+
+    if (groupby_column is None) and (time_threshold is not None):
+        # split data into segments where there is a gap in time greater than
+        # time_threshold
+        # Calculate time difference between each point
+        data["tmp_time_diff"] = pd.to_timedelta(data.unixtime.diff(), unit="s")
+
+        # Create new subline when gap > time_threshold
+        data["tmp_new_group"] = (
+            data["tmp_time_diff"] > pd.Timedelta(seconds=time_threshold)
+        ).astype(int)
+
+        # Cumulative sum per Line to generate subline number
+        data["tmp_segment"] = data["tmp_new_group"].cumsum()
+
+        # Drop helper columns if not needed
+        data = data.drop(columns=["tmp_time_diff", "tmp_new_group"])
+
+        groupby_column = "tmp_segment"
+
+    if (groupby_column is not None) and (time_threshold is not None):
+        # split data into segments where there is a gap in time greater than
+        # time_threshold
+        # Calculate time difference between each point
+        data["tmp_time_diff"] = pd.to_timedelta(
+            data.groupby(groupby_column).unixtime.diff(), unit="s"
+        )
+
+        # Create new subline when gap > time_threshold
+        data["tmp_new_group"] = (
+            data["tmp_time_diff"] > pd.Timedelta(seconds=time_threshold)
+        ).astype(int)
+
+        # Cumulative sum per Line to generate subline number
+        data["tmp_segment"] = data.groupby(groupby_column)["tmp_new_group"].cumsum()
+
+        # Drop helper columns if not needed
+        data = data.drop(columns=["tmp_time_diff", "tmp_new_group"])
+
+        groupby_column = [groupby_column, "tmp_segment"]
+
+    if groupby_column is None:
+        times = data.unixtime
+        heights = data.height
+
+        dt = times.diff()
+        dh = heights.diff()
+
+        vertical_vel = dh / dt
+
+        vertical_accel = vertical_vel.diff() / dt
+
+        if smoothing_window is not None:
+            return vertical_accel.rolling(window=smoothing_window, min_periods=1).mean()
+        return vertical_accel
+
+    # iterate through groups, append accelerations, and concat
+    accels = []
+    for _segment_name, segment_data in tqdm(
+        data.groupby(groupby_column), desc="Segments"
+    ):
+        times = segment_data.unixtime
+        heights = segment_data.height
+
+        dt = times.diff()
+        dh = heights.diff()
+
+        vertical_vel = dh / dt
+
+        vertical_accel = vertical_vel.diff() / dt
+
+        if smoothing_window is not None:
+            vertical_accel = vertical_accel.rolling(
+                window=smoothing_window, min_periods=1
+            ).mean()
+        accels.append(vertical_accel)
+
+    return np.concatenate(accels)
+
+
 def relative_track_ellipsoid(
     lat: NDArray,
     lon: NDArray,

@@ -76,6 +76,7 @@ from .nav import (  # noqa: E402
     northward_velocity,
     relative_distance,
     track,
+    vertical_acceleration,
 )
 from .plotting import (  # noqa: E402
     inspect_lines,
@@ -94,7 +95,6 @@ from .processing import (  # noqa: E402
     detect_outliers,
     split_into_segments,
     unique_line_id,
-    vertical_acceleration,
 )
 from .reproject import (  # noqa: E402
     reproject,
