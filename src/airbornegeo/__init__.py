@@ -56,6 +56,7 @@ from .levelling import (  # noqa: E402
     alternating_iterative_line_levelling,
     calculate_crossover_errors,
     create_intersection_table,
+    equivalent_source_levelling,
     inspect_intersections,
     interpolate_intersections,
     # calculate_intersection_weights,

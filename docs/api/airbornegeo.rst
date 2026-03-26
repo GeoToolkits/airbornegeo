@@ -20,6 +20,8 @@ Functions for performing geospatial operations.
     block_reduce
     along_track_distance
     relative_distance
+    ground_speed
+    track
     filter_grid
 
 
@@ -75,6 +77,7 @@ Functions for levelling airborne geophysical survey data.
     line_levelling
     iterative_line_levelling
     alternating_iterative_line_levelling
+    equivalent_source_levelling
     plot_levelling_convergence
 
 

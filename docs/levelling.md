@@ -9,5 +9,6 @@ using_equivalent_sources_for_cross_over_errors
 tie_line_levelling
 iterative_tie_line_levelling
 alternating_iterative_tie_line_levelling
+equivalent_source_levelling
 assessing_levelling_results
 ```

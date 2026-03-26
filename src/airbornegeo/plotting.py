@@ -1,6 +1,9 @@
 import typing
 
 import geopandas as gpd
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import plotly
 import plotly.express as px
@@ -13,6 +16,112 @@ from IPython.display import clear_output
 import airbornegeo
 
 sns.set_theme()
+
+
+def align_yaxis(
+    ax1: mpl.axes.Axes,
+    v1: float,
+    ax2: mpl.axes.Axes,
+    v2: float,
+) -> None:
+    """
+    adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1.
+    From https://stackoverflow.com/a/10482477/18686384
+    """
+    _, y1 = ax1.transData.transform((0, v1))
+    _, y2 = ax2.transData.transform((0, v2))
+    inv = ax2.transData.inverted()
+    _, dy = inv.transform((0, 0)) - inv.transform((0, y1 - y2))
+    miny, maxy = ax2.get_ylim()
+    ax2.set_ylim(miny + dy, maxy + dy)
+
+
+def plot_eqs_levelling_convergence(
+    rms_values: list[float],
+    delta_rms_values: list[float],
+    rms_tolerance: float | None = None,
+    rms_percent_change_tolerance: float | None = None,
+) -> None:
+    """
+    plot a graph of RMS and delta RMS vs iteration number.
+    """
+
+    # create figure instance
+    _fig, ax1 = plt.subplots(figsize=(5, 3.5))
+
+    # make second y axis for delta RMS
+    ax2 = ax1.twinx()
+
+    # plot RMS convergence
+    ax1.plot(
+        range(1, len(rms_values) + 1),
+        rms_values,
+        "b-",
+    )
+
+    # plot delta RMS convergence
+    ax2.plot(
+        range(1, len(rms_values) + 1),
+        delta_rms_values,
+        "g-",
+    )
+
+    # set axis labels, ticks and gridlines
+    ax1.set_xlabel("Iteration")
+    ax1.set_ylabel("levelling correction RMS", color="b")
+    ax1.tick_params(axis="y", colors="b", which="both")
+    ax2.set_ylabel("RMS % change", color="g")
+    ax2.tick_params(axis="y", colors="g", which="both")
+    ax2.grid(False)
+
+    ax1.set_ylim(min(rms_values), max(rms_values))
+    ax2.set_ylim(
+        np.nanmin(np.isfinite(delta_rms_values)),
+        np.nanmax(np.isfinite(delta_rms_values)),
+    )
+
+    # set x axis to integer values
+    ax1.xaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True))
+
+    if (rms_tolerance is not None) and (rms_percent_change_tolerance is not None):
+        # make both y axes align at tolerance levels
+        align_yaxis(ax1, rms_tolerance, ax2, rms_percent_change_tolerance)
+        # plot horizontal line of tolerances
+        ax2.axhline(
+            y=rms_percent_change_tolerance,
+            linewidth=1,
+            color="r",
+            linestyle="dashed",
+            label="tolerances",
+        )
+    elif rms_percent_change_tolerance is not None:
+        ax2.axhline(
+            y=rms_percent_change_tolerance,
+            linewidth=1,
+            color="r",
+            linestyle="dashed",
+            label="RMS percent change tolerance",
+        )
+    elif rms_tolerance is not None:
+        ax1.axhline(
+            y=rms_tolerance,
+            linewidth=1,
+            color="r",
+            linestyle="dashed",
+            label="RMS tolerance",
+        )
+
+    if (rms_tolerance is None) and (rms_percent_change_tolerance is None):
+        pass
+    else:
+        # ask matplotlib for the plotted objects and their labels
+        lines, labels = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax2.legend(lines + lines2, labels + labels2, loc="upper right")
+
+    plt.title("Equivalent source iterative levelling")
+    plt.tight_layout()
+    plt.show()
 
 
 def inspect_lines(

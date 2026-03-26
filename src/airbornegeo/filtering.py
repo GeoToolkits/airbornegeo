@@ -1,6 +1,5 @@
 import typing
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pygmt
@@ -117,7 +116,7 @@ def filter1d(
     pad_width_percentage: float = 10,
     pad_mode: str = "reflect",
     **kwargs: typing.Any,
-) -> gpd.GeoDataFrame | pd.DataFrame:
+) -> pd.DataFrame:
     """
     Apply a 1D filter to a column of a pandas DataFrame along values of another column.
     The filter_by_column would typically be either distance along track for a spatial
@@ -178,7 +177,9 @@ def filter1d(
             end=True,
             time_col=0,
             filter_type=filter_type,
-        ).rename(columns={0: filter_by_column, 1: data_column})
+        )
+
+        filtered = filtered.rename(columns={0: filter_by_column, 1: data_column})
 
         # un-pad the data
         filtered["original_index"] = padded.true_index
