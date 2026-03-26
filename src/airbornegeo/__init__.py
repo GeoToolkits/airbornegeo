@@ -50,7 +50,7 @@ from .block_reduce import (  # noqa: E402
     block_reduce,
 )
 from .filtering import (  # noqa: E402
-    filter1d,
+    filter_grid,
 )
 from .levelling import (  # noqa: E402
     alternating_iterative_line_levelling,
@@ -99,7 +99,6 @@ from .reproject import (  # noqa: E402
     reproject,
 )
 from .utils import (  # noqa: E402
-    filter_grid,
     get_min_max,
     normalize_values,
     rmse,

@@ -1,8 +1,13 @@
 import typing
+import warnings
 
+import harmonica as hm
 import numpy as np
 import pandas as pd
 import pygmt
+import verde as vd
+import xarray as xr
+import xrft
 from tqdm.autonotebook import tqdm
 
 
@@ -106,7 +111,7 @@ def pad1d(
     return padded
 
 
-def filter1d(
+def filter_line(
     data: pd.DataFrame,
     *,
     filter_type: str,
@@ -220,3 +225,231 @@ def filter1d(
         ]
 
     return data[data_column]
+
+
+def _nearest_grid_fill(
+    grid: xr.DataArray,
+    method: str = "verde",
+    crs: str | None = None,
+) -> xr.DataArray:
+    """
+    fill missing values in a grid with the nearest value.
+
+    Parameters
+    ----------
+    grid : xarray.DataArray
+        grid with missing values
+    method : str, optional
+        choose method of filling, by default "verde"
+    crs : str | None, optional
+        if method is 'rioxarray', provide the crs of the grid, in format 'epsg:xxxx',
+        by default None
+    Returns
+    -------
+    xarray.DataArray
+        filled grid
+    """
+
+    # TODO: also check out rasterio fillnodata() https://rasterio.readthedocs.io/en/latest/api/rasterio.fill.html#rasterio.fill.fillnodata
+    # uses https://gdal.org/en/stable/api/gdal_alg.html#_CPPv414GDALFillNodata15GDALRasterBandH15GDALRasterBandHdiiPPc16GDALProgressFuncPv
+    # can fill with nearest neighbor or inverse distance weighting
+
+    # get coordinate names
+    original_dims = list(grid.sizes.keys())
+
+    # get original grid name
+    original_name = grid.name
+
+    if method == "rioxarray":
+        filled: xr.DataArray = (
+            grid.rio.write_crs(crs)
+            .rio.set_spatial_dims(original_dims[1], original_dims[0])
+            .rio.write_nodata(np.nan)
+            .rio.interpolate_na(method="nearest")
+            .rename(original_name)
+        )
+    elif method == "verde":
+        df = vd.grid_to_table(grid)
+        df_dropped = df[df[grid.name].notna()]
+        coords = (df_dropped[grid.dims[1]], df_dropped[grid.dims[0]])
+        region = vd.get_region((df[grid.dims[1]], df[grid.dims[0]]))
+        filled = (
+            vd.KNeighbors()
+            .fit(coords, df_dropped[grid.name])
+            .grid(
+                region=region,
+                shape=grid.shape,
+                data_names=original_name,
+                dims=(original_dims[1], original_dims[0]),
+            )[original_name]
+        )
+    # elif method == "pygmt":
+    #     filled = pygmt.grdfill(grid, mode="n", verbose="q").rename(original_name)
+    else:
+        msg = "method must be 'rioxarray', or 'verde'"
+        raise ValueError(msg)
+
+    # reset coordinate names if changed
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="rename '")
+        return filled.rename(
+            {
+                next(iter(filled.dims)): original_dims[0],
+                list(filled.dims)[1]: original_dims[1],
+            }
+        )
+
+
+def filter_grid(
+    grid: xr.DataArray,
+    filter_width: float | None = None,
+    height_displacement: float | None = None,
+    filter_type: str = "lowpass",
+    pad_width_factor: int = 3,
+    pad_mode: str = "linear_ramp",
+    pad_constant: float | None = None,
+    pad_end_values: float | None = None,
+) -> xr.DataArray:
+    """
+    Apply a spatial filter to a grid.
+
+    Parameters
+    ----------
+    grid : xarray.DataArray
+        grid to filter the values of
+    filter_width : float, optional
+        width of the filter in meters, by default None
+    height_displacement : float, optional
+        height displacement for upward continuation, relative to observation height, by
+        default None
+    filter_type : str, optional
+        type of filter to use from 'lowpass', 'highpass' 'up_deriv', 'easting_deriv',
+        'northing_deriv', 'up_continue', or 'total_gradient', by default "lowpass"
+    pad_width_factor : int, optional
+        factor of grid width to pad the grid by, by default 3, which equates to a pad
+        with a width of 1/3 of the grid width.
+    pad_mode : str, optional
+        mode of padding, can be "linear", by default "linear_ramp"
+    pad_constant : float | None, optional
+        constant value to use for padding, by default None
+    pad_end_values : float | None, optional
+        value to use for end of padding if pad_mode is "linear_ramp", by default None
+
+    Returns
+    -------
+    xarray.DataArray
+        a filtered grid
+    """
+    # get coordinate names
+    original_dims = list(grid.sizes.keys())
+
+    # get original grid name
+    original_name = grid.name
+
+    # if there are nan's, fill them with nearest neighbor
+    if grid.isnull().any():  # noqa: PD003
+        filled = _nearest_grid_fill(grid, method="verde")
+    else:
+        filled = grid.copy()
+
+    # reset coordinate names if changed
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="rename '")
+        filled = filled.rename(
+            {
+                next(iter(filled.dims)): original_dims[0],
+                list(filled.dims)[1]: original_dims[1],
+            }
+        )
+
+    # define width of padding in each direction
+    pad_width = {
+        original_dims[1]: grid[original_dims[1]].size // pad_width_factor,
+        original_dims[0]: grid[original_dims[0]].size // pad_width_factor,
+    }
+
+    if pad_mode == "constant":
+        if pad_constant is None:
+            pad_constant = filled.median()
+        pad_end_values = None
+
+    if (pad_mode == "linear_ramp") and (pad_end_values is None):
+        pad_end_values = filled.median()
+
+    if pad_mode != "constant":
+        pad_constant = (
+            None  # needed until https://github.com/xgcm/xrft/issues/211 is fixed
+        )
+
+    # apply padding
+    pad_kwargs = {
+        **pad_width,
+        "mode": pad_mode,
+        "constant_values": pad_constant,
+        "end_values": pad_end_values,
+    }
+
+    padded = xrft.pad(
+        filled,
+        **pad_kwargs,
+    )
+
+    if filter_type == "lowpass":
+        if filter_width is None:
+            msg = "filter_width must be provided if filter_type is 'lowpass'"
+            raise ValueError(msg)
+        filt = hm.gaussian_lowpass(padded, wavelength=filter_width).rename("filt")
+    elif filter_type == "highpass":
+        if filter_width is None:
+            msg = "filter_width must be provided if filter_type is 'highpass'"
+            raise ValueError(msg)
+        filt = hm.gaussian_highpass(padded, wavelength=filter_width).rename("filt")
+    elif filter_type == "up_deriv":
+        filt = hm.derivative_upward(padded).rename("filt")
+    elif filter_type == "easting_deriv":
+        filt = hm.derivative_easting(padded).rename("filt")
+    elif filter_type == "northing_deriv":
+        filt = hm.derivative_northing(padded).rename("filt")
+    elif filter_type == "up_continue":
+        if height_displacement is None:
+            msg = "height_displacement must be provided if filter_type is 'up_continue'"
+            raise ValueError(msg)
+        filt = hm.upward_continuation(
+            padded, height_displacement=height_displacement
+        ).rename("filt")
+    elif filter_type == "total_gradient":
+        filt = hm.total_gradient_amplitude(padded).rename("filt")
+    else:
+        msg = (
+            "filter_type must be 'lowpass', 'highpass' 'up_deriv', 'easting_deriv', "
+            "'northing_deriv', 'up_continue', or 'total_gradient'"
+        )
+        raise ValueError(msg)
+
+    unpadded = xrft.unpad(filt, pad_width)
+
+    # reset coordinate values to original (avoid rounding errors)
+    unpadded = unpadded.assign_coords(
+        {
+            original_dims[0]: grid[original_dims[0]].to_numpy(),
+            original_dims[1]: grid[original_dims[1]].to_numpy(),
+        }
+    )
+
+    if grid.isnull().any():  # noqa: PD003
+        result: xr.DataArray = xr.where(grid.notnull(), unpadded, grid)  # noqa: PD004
+    else:
+        result = unpadded.copy()
+
+    # reset coordinate names if changed
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="rename '")
+        result = result.rename(
+            {
+                next(iter(result.dims)): original_dims[0],
+                # list(result.dims)[0]: original_dims[0],
+                list(result.dims)[1]: original_dims[1],
+            }
+        )
+
+    return result.rename(original_name)
