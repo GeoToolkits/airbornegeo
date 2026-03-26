@@ -37,12 +37,14 @@ dependencies = [
   "pandas>=2.3.0",
   "scikit-learn>=1.5.0",
   "ipython>=8.23.0",
-  "harmonica",
+  "harmonica>=0.7.0", # need depth 'default' argument
+  "xrft",
   "geopandas",
   "pygmt",
   "shapely",
   "tqdm",
   "verde",
+  "geographiclib",
   "ipykernel",
   "plotly",
   "seaborn",
@@ -50,23 +52,9 @@ dependencies = [
   "scooby",
   "nbformat>=4.2.0", # needed for plotly
   "iprogress", # need for progressbars
+  "nomkl", # needed to avoid abort from pygmt during filter1d
 ]
 
-[dependency-groups]
-docs = [
-
-
-
-
-
-
-
-
-
-  "invert4geom",
-  "polartoolkit",
-  "boule",
-]
 
 [project.urls]
 Homepage = "https://github.com/airbornegeo/airbornegeo"
@@ -225,23 +213,26 @@ matplotlib = ">=3.9.0"
 pandas = ">=2.3.0"
 scikit-learn = ">=1.5.0"
 ipython = ">=8.23.0"
-nbformat = ">=4.2.0" # needed for plotly
 harmonica = ">=0.7.0,<0.8"
+xrft = ">=1.0.2,<2"
 geopandas = ">=1.1.3,<2"
 pygmt = ">=0.18.0,<0.19"
 shapely = ">=2.1.2,<3"
 tqdm = ">=4.67.3,<5"
 verde = ">=1.8.1,<2"
+geographiclib = ">=2.1,<3"
 ipykernel = ">=7.2.0,<8"
 plotly = ">=6.6.0,<7"
 seaborn = ">=0.13.2,<0.14"
-scooby = ">=0.11.0,<0.12"
-iprogress = ">=0.4,<0.5"
 pyproj = ">=3.7.2,<4"
+scooby = ">=0.11.0,<0.12"
+nbformat = ">=4.2.0" # needed for plotly
+iprogress = ">=0.4,<0.5"
 polartoolkit = ">=1.5.0,<2"
 boule = ">=0.5.0,<0.6"
-invert4geom = ">=2"
-geographiclib = ">=2.1,<3"
+cmocean = ">=4.0.3,<5"
+nomkl = "*"
+
 
 [tool.pixi.feature.test.tasks.test]
 cmd = "pytest {{ target }} -ra --cov --cov-report=xml --cov-report=term --durations=20"
@@ -279,10 +270,7 @@ sphinx-copybutton = ">=0.5.2,<0.6"
 sphinx-autodoc-typehints = ">=3.9.9,<4"
 sphinx-book-theme = ">=0.3"
 nbsphinx = ">=0.9.8,<0.10"
-ipykernel = ">=7.2.0,<8"
 sphinxcontrib-bibtex = ">=2.6.5,<3"
 sphinx-design = ">=0.7.0,<0.8"
 sphinx-autobuild = ">=2025.8.25,<2026"
-invert4geom = ">=2.0.1,<3"
 polartoolkit = ">=1.5.0,<2"
-boule = ">=0.5.0,<0.6"

@@ -20,6 +20,7 @@ Functions for performing geospatial operations.
     block_reduce
     along_track_distance
     relative_distance
+    filter_grid
 
 
 Organizing survey data
