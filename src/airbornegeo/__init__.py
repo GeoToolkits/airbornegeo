@@ -98,6 +98,7 @@ from .reproject import (  # noqa: E402
     reproject,
 )
 from .utils import (  # noqa: E402
+    filter_grid,
     get_min_max,
     normalize_values,
     rmse,
