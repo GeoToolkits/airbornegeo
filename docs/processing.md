@@ -2,6 +2,9 @@
 ---
 "numbered":
 ---
+reproject_data
+change_sampling_frequency
+split_survey_into_lines
+along_track_distance
 filtering_data_in_1D
-eotvos_correction
 ```

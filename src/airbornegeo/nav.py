@@ -40,6 +40,172 @@ def ground_speed(
     return data.relative_distance / data.unixtime.diff()
 
 
+def _vertical_acceleration(
+    time: NDArray,
+    height: NDArray,
+) -> NDArray:
+    """
+    Calculate the vertical acceleration between each successive set of points
+
+    Parameters
+    ----------
+    time : NDArray
+        array of the time values
+    height : NDArray
+        array of the height values
+
+    Returns
+    -------
+    NDArray
+        the vertical acceleration between each set of points
+    """
+    assert len(time) == len(height)
+
+    # shift the arrays by 1
+    time_lag = np.empty_like(time)
+    time_lag[:1] = np.nan
+    time_lag[1:] = time[:-1]
+
+    height_lag = np.empty_like(height)
+    height_lag[:1] = np.nan
+    height_lag[1:] = height[:-1]
+
+    # compute vertical velocity
+    vertical_vel = (height - height_lag) / (time - time_lag)
+
+    # shift arrays by 1
+    vertical_vel_lag = np.empty_like(vertical_vel)
+    vertical_vel_lag[:1] = np.nan
+    vertical_vel_lag[1:] = vertical_vel[:-1]
+
+    # comput vertical acceleration
+    return (vertical_vel - vertical_vel_lag) / (time - time_lag)
+
+
+def vertical_acceleration(
+    data: pd.DataFrame,
+    *,
+    time_column: str,
+    height_column: str,
+    groupby_column: str | None = None,
+    time_threshold: float | None = None,
+    smoothing_window: int | None = None,
+) -> pd.Series:
+    """
+    Calculate the 2nd derivative of height change with respect to time for each line.
+    If there is a gap between points greater than time_threshold in seconds, the line
+    will be split at the gap and the acceleration will be NaN for the points on
+    either side of the gap.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the data points and must have columns set from time_column
+        and height_column.
+    time_column : str
+        Column name to containing the time in seconds
+    height_column : str
+        Column name to containing the flight height in meters
+    groupby_column : str | None, optional
+        Column name to group by before sorting by time, by default None
+    time_threshold : float
+        Threshold in seconds for determining gaps in the data, where acceleration will be set to NaN
+    smoothing_window : int, optional
+        Window size in number of data points for smoothing each derivative after it's
+        been calculated, by default None
+
+    Returns
+    -------
+    pd.Series
+        Series containing the vertical acceleration in m/s^2 for each point in the
+        dataframe.
+    """
+    data = data.copy()
+
+    col_list = [time_column, height_column, groupby_column]
+    assert all(x in data.columns for x in col_list), (
+        f"dataframe must contain columns {col_list} "
+    )
+
+    if (groupby_column is None) and (time_threshold is not None):
+        # split data into segments where there is a gap in time greater than
+        # time_threshold
+        # Calculate time difference between each point
+        data["tmp_time_diff"] = pd.to_timedelta(data[time_column].diff(), unit="s")
+
+        # Create new subline when gap > time_threshold
+        data["tmp_new_group"] = (
+            data["tmp_time_diff"] > pd.Timedelta(seconds=time_threshold)
+        ).astype(int)
+
+        # Cumulative sum per Line to generate subline number
+        data["tmp_segment"] = data["tmp_new_group"].cumsum()
+
+        # Drop helper columns if not needed
+        data = data.drop(columns=["tmp_time_diff", "tmp_new_group"])
+
+        groupby_column = "tmp_segment"
+
+    if (groupby_column is not None) and (time_threshold is not None):
+        # split data into segments where there is a gap in time greater than
+        # time_threshold
+        # Calculate time difference between each point
+        data["tmp_time_diff"] = pd.to_timedelta(
+            data.groupby(groupby_column)[time_column].diff(), unit="s"
+        )
+
+        # Create new subline when gap > time_threshold
+        data["tmp_new_group"] = (
+            data["tmp_time_diff"] > pd.Timedelta(seconds=time_threshold)
+        ).astype(int)
+
+        # Cumulative sum per Line to generate subline number
+        data["tmp_segment"] = data.groupby(groupby_column)["tmp_new_group"].cumsum()
+
+        # Drop helper columns if not needed
+        data = data.drop(columns=["tmp_time_diff", "tmp_new_group"])
+
+        groupby_column = [groupby_column, "tmp_segment"]
+
+    if groupby_column is None:
+        # times = data[time_column]
+        # heights = data[height_column]
+        # dt = times.diff()
+        # dh = heights.diff()
+        # vertical_vel = dh / dt
+        # vertical_accel = vertical_vel.diff() / dt
+
+        vertical_accel = _vertical_acceleration(data[time_column], data[height_column])
+
+        if smoothing_window is not None:
+            return vertical_accel.rolling(window=smoothing_window, min_periods=1).mean()
+        return vertical_accel
+
+    # iterate through groups, append accelerations, and concat
+    accels = []
+    for _segment_name, segment_data in tqdm(
+        data.groupby(groupby_column), desc="Segments"
+    ):
+        # times = segment_data[time_column]
+        # heights = segment_data[height_column]
+        # dt = times.diff()
+        # dh = heights.diff()
+        # vertical_vel = dh / dt
+        # vertical_accel = vertical_vel.diff() / dt
+
+        vertical_accel = _vertical_acceleration(
+            segment_data[time_column], segment_data[height_column]
+        )
+
+        if smoothing_window is not None:
+            vertical_accel = vertical_accel.rolling(
+                window=smoothing_window, min_periods=1
+            ).mean()
+        accels.append(vertical_accel)
+
+    return np.concatenate(accels)
+
+
 def relative_track_ellipsoid(
     lat: NDArray,
     lon: NDArray,

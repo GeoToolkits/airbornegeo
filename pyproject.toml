@@ -52,7 +52,7 @@ dependencies = [
   "scooby",
   "nbformat>=4.2.0", # needed for plotly
   "iprogress", # need for progressbars
-  "nomkl", # needed to avoid abort from pygmt during filter1d
+  "nomkl", # needed to avoid abort from pygmt during filter_line
 ]
 
 
