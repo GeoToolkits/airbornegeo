@@ -1,5 +1,5 @@
-# AirborneGeo
-Tools for processing airborne geophysical survey data
+# AirborneGeo ✈️
+Tools for processing airborne geophysical survey data.
 
 ```{include} ../README.md
 :start-after: <!-- SPHINX-START-badges -->
@@ -22,22 +22,27 @@ how you can contribute to the project.
 ```{toctree}
 :maxdepth: 1
 :hidden:
-:caption: 🚀 Getting started
+:caption: ℹ️️ Getting started
 overview
 install
-quickstart
 citing
 ```
 
 ```{toctree}
 :hidden:
-:caption: 🛩️ Initial processing
-initial_processing.md
+:caption: ⛏️ Generic processing
+processing.md
 ```
 
 ```{toctree}
 :hidden:
-:caption: 🎚️ Levelling
+:caption: 🍎🧲 Potential-fields processing
+potential_field_processing.md
+```
+
+```{toctree}
+:hidden:
+:caption: 📈 Levelling
 levelling.md
 ```
 
@@ -47,11 +52,7 @@ levelling.md
 quality_control.md
 ```
 
-```{toctree}
-:hidden:
-:caption: Processing
-processing.md
-```
+
 
 ```{toctree}
 :hidden:
@@ -69,7 +70,7 @@ api/airbornegeo
 ```{toctree}
 :maxdepth: 1
 :hidden:
-:caption: ℹ️ Other resources
+:caption: 🗂️ Other resources
 contributing.md
 changelog.md
 Source code on GitHub <https://github.com/airbornegeo/airbornegeo>
@@ -80,7 +81,7 @@ Source code on GitHub <https://github.com/airbornegeo/airbornegeo>
 :::{grid-item-card} {octicon}`rocket` Getting started?
 :text-align: center
 New to AirborneGeo? Start here!
-```{button-ref} quickstart
+```{button-ref} overview
     :click-parent:
     :color: primary
     :outline:

@@ -3261,8 +3261,8 @@ packages:
   timestamp: 1751626573984
 - pypi: ./
   name: airbornegeo
-  version: 0.0.1a2.dev0+g17eb299b1.d20260326
-  sha256: b62300920eb99e07aeac7631ce3e92d413da5bedbc34db1e9041de364eec25ff
+  version: 0.0.1a2.dev2+gcff285428.d20260326
+  sha256: b14ccb31664b6dee85763bb00b8114849cbb7dbba39dc872aa994dcf6ef4da72
   requires_dist:
   - geographiclib
   - geopandas

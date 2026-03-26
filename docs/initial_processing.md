@@ -1,9 +1,0 @@
-```{nbgallery}
----
-"numbered":
----
-reproject_data
-change_sampling_frequency
-split_survey_into_lines
-along_track_distance
-```
