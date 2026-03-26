@@ -9,6 +9,20 @@ API Reference
 .. currentmodule:: airbornegeo
 
 
+Trajectories
+--------------------------
+Functions for calculated trajectory or navigation related fields
+
+.. autosummary::
+    :toctree: generated/
+
+    along_track_distance
+    relative_distance
+    ground_speed
+    vertical_acceleration
+    track
+
+
 Geospatial data operations
 --------------------------
 Functions for performing geospatial operations.
@@ -20,11 +34,12 @@ Functions for performing geospatial operations.
     block_reduce
     filter_line
     filter_grid
+    sample_grid
 
 
 Organizing survey data
 ----------------------
-Functions for working with and organize survey flights.
+Functions for working with and organizing survey data.
 
 .. autosummary::
     :toctree: generated/
@@ -41,19 +56,6 @@ Functions for automated and manual quality control of airborne geophysical surve
     :toctree: generated/
 
     inspect_lines
-    detect_outliers
-
-Processing
-----------
-Functions for processing airborne geophysical survey data.
-
-.. autosummary::
-    :toctree: generated/
-
-    filter1d
-    upward_continue_by_line
-    sample_grid
-    bearing
 
 
 Levelling
@@ -87,6 +89,8 @@ Functions related specifically to working with potential-fields data
 
     eq_sources_1d
     upward_continue_by_line
+    eotvos_correction_glicken
+    eotvos_correction_harlan
     vertical_acceleration
 
 Plotting functions
@@ -98,5 +102,3 @@ Plotting functions
     plotly_points
     plotly_profiles
     inspect_lines
-    plot_flightlines
-    plot_flightlines_grids

@@ -22,14 +22,20 @@ class Report(scooby.Report):  # type: ignore[misc] # pylint: disable=missing-cla
             "scikit-learn",
             "ipython",
             "harmonica",
+            "xrft",
             "geopandas",
             "pygmt",
             "shapely",
             "tqdm",
             "verde",
+            "geographiclib",
             "ipykernel",
             "plotly",
             "seaborn",
+            "pyproj",
+            "nbformat",
+            "iprogress",
+            "nomkl",
         ]
 
         # Optional packages.
@@ -71,17 +77,17 @@ from .levelling import (  # noqa: E402
 )
 from .nav import (  # noqa: E402
     along_track_distance,
-    eastward_velocity,
+    # eastward_velocity,
     ground_speed,
-    northward_velocity,
+    # northward_velocity,
     relative_distance,
     track,
     vertical_acceleration,
 )
 from .plotting import (  # noqa: E402
     inspect_lines,
-    plot_flightlines,
-    plot_flightlines_grids,
+    # plot_flightlines,
+    # plot_flightlines_grids,
     plotly_points,
     plotly_profiles,
 )
@@ -92,7 +98,7 @@ from .potential_fields import (  # noqa: E402
     upward_continue_by_line,
 )
 from .processing import (  # noqa: E402
-    detect_outliers,
+    # detect_outliers,
     split_into_segments,
     unique_line_id,
 )
