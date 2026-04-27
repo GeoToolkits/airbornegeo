@@ -1,7 +1,7 @@
 # AirborneGeo
 Tools for processing airborne geophysical survey data.
 
-This package allows for a range of processing steps necessary for airborne geophysical data. Some of the functions are generic for many types of airborne surveys, such as splitting flights into segments, calculating quantities such as distance along lines, velocities, bearings, and cross-over errors, etc. There are also many functions specifically focused on gravity and magnetic data. These include field reductions, 1D equivalent source inversion, and several methods of levelling line data.
+This package allows for a range of processing steps necessary for airborne geophysical data. Some of the functions are generic for many types of airborne surveys, such as splitting flights into segments, calculating quantities such as distance along lines, velocities, headings (tracks), and cross-over errors, etc. There are also many functions specifically focused on gravity and magnetic data. These include field reductions, 1D equivalent source inversion, and several methods of levelling line data.
 
 [![Actions Status][actions-badge]][actions-link]
 [![Documentation Status][website-badge]][website-link]

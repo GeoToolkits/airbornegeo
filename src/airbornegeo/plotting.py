@@ -186,7 +186,7 @@ def plot_flightlines(
                     justify="CM",
                     font=font,
                     fill="white",
-                    angle=line.bearing.iloc[0],
+                    angle=line.track.iloc[0],
                 )
             else:
                 # plot label at max value of y-coord
@@ -200,7 +200,7 @@ def plot_flightlines(
                     justify="CM",
                     font=font,
                     fill="white",
-                    angle=line.bearing.iloc[0],
+                    angle=line.track.iloc[0],
                 )
 
 
