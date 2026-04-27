@@ -105,6 +105,10 @@ from .processing import (  # noqa: E402
 from .reproject import (  # noqa: E402
     reproject,
 )
+from .resample import (  # noqa: E402
+    resample,
+    resample_as,
+)
 from .utils import (  # noqa: E402
     get_min_max,
     normalize_values,
