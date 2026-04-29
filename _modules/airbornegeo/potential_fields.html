@@ -1,0 +1,1502 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>airbornegeo.potential_fields &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=2b22d5ff"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/airbornegeo/potential_fields';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g8f4514fc4" />
+    <meta name="docbuild:last-update" content="Apr 29, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../reproject_data.html">1. Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../change_sampling_frequency.html">2. Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../split_survey_into_lines.html">3. Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../along_track_distance.html">4. Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filtering_data_in_1D.html">5. Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../vertical_acceleration_correction.html">1. Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../eotvos_correction.html">2. Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../normal_gravity_correction.html">3. Normal gravity correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../levelling_to_a_grid.html">1. Levelling to a grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../find_survey_intersections.html">2. Find survey intersections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cross_over_errors.html">3. Cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../using_equivalent_sources_for_cross_over_errors.html">4. Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tie_line_levelling.html">5. Tie line levelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equivalent_source_levelling.html">6. Levelling with equivalent sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../assessing_levelling_results.html">7. Assessing levelling results</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.line_levelling.html">airbornegeo.line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.iterative_line_levelling.html">airbornegeo.iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.eotvos_correction_glicken.html">airbornegeo.eotvos_correction_glicken</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2F_modules/airbornegeo/potential_fields.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for airbornegeo.potential_fields</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">boule</span>  <span class="c1"># pylint: disable=too-many-lines</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">harmonica</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.autonotebook</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">set_theme</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="eq_sources_1d">
+<a class="viewcode-back" href="../../api/generated/airbornegeo.eq_sources_1d.html#airbornegeo.eq_sources_1d">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">eq_sources_1d</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">damping</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">block_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">groupby_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">hm</span><span class="o">.</span><span class="n">EquivalentSources</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit a set of equivalent sources along 1 dimension. These fitted sources</span>
+<span class="sd">    can then be used to predict the  data at the intersection points, on a regular line</span>
+<span class="sd">    spacing, or to upward continue  the line. If groupby_column is provided, the source</span>
+<span class="sd">    will be fit individually for each group,</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        the dataframe containing the columns distance_along_line, grouby_column,</span>
+<span class="sd">        data_column, and height.</span>
+<span class="sd">    data_column : str</span>
+<span class="sd">        the column name for the data to fit.</span>
+<span class="sd">    damping : float</span>
+<span class="sd">        the damping value to use in fitting the equivalent sources</span>
+<span class="sd">    depth : float | str, optional</span>
+<span class="sd">        the source depths, by default &quot;default&quot;</span>
+<span class="sd">    block_size : float | None, optional</span>
+<span class="sd">        Block reduce the number of sources. This doesn&#39;t block reduce the data, that</span>
+<span class="sd">        should be done before with func::`block_reduce`, by default None</span>
+<span class="sd">    groupby_column : str | None, optional</span>
+<span class="sd">        Column name to group by before fitting sources, by default None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict | hm.EquivalentSources</span>
+<span class="sd">        a dictionary with a keys of each group name and a values of fitted equivalent</span>
+<span class="sd">        sources, or if groupby_column is not provided, just a single fitted set of</span>
+<span class="sd">        equivalent sources.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;tmp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">groupby_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">distance_along_line</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">tmp</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># define equivalent source parameters</span>
+        <span class="n">eqs_line</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">EquivalentSources</span><span class="p">(</span>
+            <span class="n">damping</span><span class="o">=</span><span class="n">damping</span><span class="p">,</span>
+            <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span>
+            <span class="n">block_size</span><span class="o">=</span><span class="n">block_size</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">eqs_line</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">data_column</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">eqs_line</span>
+
+    <span class="k">assert</span> <span class="n">groupby_column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;groupby_column must be in dataframe&quot;</span>
+
+    <span class="n">fitted_eqs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">segment_name</span><span class="p">,</span> <span class="n">segment_data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">groupby_column</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Groups&quot;</span><span class="p">):</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">segment_data</span><span class="o">.</span><span class="n">distance_along_line</span><span class="p">,</span>
+            <span class="n">segment_data</span><span class="o">.</span><span class="n">tmp</span><span class="p">,</span>
+            <span class="n">segment_data</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># define equivalent source parameters</span>
+        <span class="n">eqs_line</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">EquivalentSources</span><span class="p">(</span>
+            <span class="n">damping</span><span class="o">=</span><span class="n">damping</span><span class="p">,</span>
+            <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span>
+            <span class="n">block_size</span><span class="o">=</span><span class="n">block_size</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">eqs_line</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">segment_data</span><span class="p">[</span><span class="n">data_column</span><span class="p">])</span>
+
+        <span class="n">fitted_eqs</span><span class="p">[</span><span class="n">segment_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">eqs_line</span>
+
+    <span class="k">return</span> <span class="n">fitted_eqs</span></div>
+
+
+
+<div class="viewcode-block" id="upward_continue_by_line">
+<a class="viewcode-back" href="../../api/generated/airbornegeo.upward_continue_by_line.html#airbornegeo.upward_continue_by_line">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">upward_continue_by_line</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">fitted_equivalent_sources</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">groupby_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">no_downward_continuation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For each light line in a dataframe, fit a set of equivalent sources and then upward</span>
+<span class="sd">    continue to data to a specified height and return the upward continued data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="s2">&quot;line&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;line column must be in dataframe&quot;</span>
+    <span class="k">assert</span> <span class="s2">&quot;height&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="s2">&quot;height column must be in dataframe&quot;</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;tmp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">segment_name</span><span class="p">,</span> <span class="n">segment_data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">groupby_column</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Groups&quot;</span><span class="p">):</span>
+        <span class="n">eqs</span> <span class="o">=</span> <span class="n">fitted_equivalent_sources</span><span class="p">[</span><span class="n">segment_name</span><span class="p">]</span>
+
+        <span class="n">upward</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">segment_data</span><span class="o">.</span><span class="n">tmp</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">no_downward_continuation</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">upward</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="n">upward</span> <span class="o">&gt;</span> <span class="n">segment_data</span><span class="o">.</span><span class="n">height</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+                <span class="n">upward</span><span class="p">,</span>
+                <span class="n">segment_data</span><span class="o">.</span><span class="n">height</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+        <span class="n">upward_continued</span> <span class="o">=</span> <span class="n">eqs</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">segment_data</span><span class="o">.</span><span class="n">distance_along_line</span><span class="p">,</span>
+                <span class="n">segment_data</span><span class="o">.</span><span class="n">tmp</span><span class="p">,</span>
+                <span class="n">upward</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">groupby_column</span><span class="p">]</span> <span class="o">==</span> <span class="n">segment_name</span><span class="p">,</span> <span class="s2">&quot;upward_continued&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">upward_continued</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">upward_continued</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">eotvos_correction_full</span><span class="p">(</span>
+    <span class="n">latitude</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">longitude</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">time</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    TODO: for deviation, should height be 0 or observation height?</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Eötvös correction in mGal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># define an ellipsoid</span>
+    <span class="n">ell</span> <span class="o">=</span> <span class="n">boule</span><span class="o">.</span><span class="n">WGS84</span>
+
+    <span class="c1"># convert degrees to radians, and unwrap</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+    <span class="n">lon_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
+    <span class="n">lon_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">lon_rad</span><span class="p">)</span>
+
+    <span class="c1"># compute 1st and 2nd time derivatives of lat, lon, and heights</span>
+    <span class="c1"># dot means time derivative</span>
+    <span class="c1"># dt = np.diff(time, prepend=np.nan)</span>
+    <span class="c1"># lat_dot = np.diff(lat_rad, prepend=np.nan) / dt</span>
+    <span class="c1"># lat_dotdot = np.diff(lat_dot, prepend=np.nan) / dt</span>
+    <span class="c1"># lon_dot = np.diff(lon_rad, prepend=np.nan) / dt</span>
+    <span class="c1"># lon_dotdot = np.diff(lon_dot, prepend=np.nan) / dt</span>
+    <span class="c1"># height_dot = np.diff(height, prepend=np.nan) / dt</span>
+    <span class="c1"># height_dotdot = np.diff(height_dot, prepend=np.nan) / dt</span>
+    <span class="n">lat_dot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">lat_dotdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">lat_dot</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">lon_dot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">lon_rad</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">lon_dotdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">lon_dot</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">height_dot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">height_dotdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">height_dot</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+    <span class="c1"># pre-compute trig functions</span>
+    <span class="n">sin_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">sin_2lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_2lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lat_rad</span><span class="p">)</span>
+
+    <span class="c1"># calculate r&#39; and its derivatives (Eqs. 6,7,8)</span>
+    <span class="c1"># r&#39; is the vector from center of ellipsoid to point on ellipsoid directly (normal)</span>
+    <span class="c1"># below the aircraft</span>
+    <span class="n">asquared_bsquared</span> <span class="o">=</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">semiminor_axis</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">bsquared_minus_asquared</span> <span class="o">=</span> <span class="n">ell</span><span class="o">.</span><span class="n">semiminor_axis</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">asquared_bsquared</span> <span class="o">*</span> <span class="n">bsquared_minus_asquared</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">semiminor_axis</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">r_prime</span> <span class="o">=</span> <span class="n">ell</span><span class="o">.</span><span class="n">geocentric_radius</span><span class="p">(</span><span class="n">latitude</span><span class="p">,</span> <span class="n">coordinate_system</span><span class="o">=</span><span class="s2">&quot;geodetic&quot;</span><span class="p">)</span>
+    <span class="n">r_prime_dot</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r_prime</span><span class="p">))</span> <span class="o">*</span> <span class="n">lat_dot</span> <span class="o">*</span> <span class="p">((</span><span class="n">k</span> <span class="o">*</span> <span class="n">sin_2lat</span><span class="p">)</span> <span class="o">/</span> <span class="n">g</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">drdlat</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">sin_2lat</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="n">g</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">d2rdlat2</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="n">g</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">cos_2lat</span><span class="p">)</span>
+        <span class="o">-</span> <span class="p">(</span>
+            <span class="n">sin_2lat</span><span class="o">**</span><span class="mi">2</span>
+            <span class="o">/</span> <span class="p">(</span><span class="n">r_prime</span> <span class="o">*</span> <span class="n">g</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">((</span><span class="n">k</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">r_prime</span><span class="p">))</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="n">g</span> <span class="o">*</span> <span class="n">bsquared_minus_asquared</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">r_prime_dotdot</span> <span class="o">=</span> <span class="n">lat_dot</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d2rdlat2</span> <span class="o">+</span> <span class="n">lat_dotdot</span> <span class="o">*</span> <span class="n">drdlat</span>
+
+    <span class="c1"># below are approximations</span>
+    <span class="c1"># r_prime = ell.semimajor_axis * (1 - (ell.flattening * sin_lat * sin_lat))</span>
+    <span class="c1"># r_prime_dot = -ell.semimajor_axis * lat_dot * ell.flattening * sin_2lat</span>
+    <span class="c1"># r_prime_dotdot = (-ell.semimajor_axis * lat_dotdot * ell.flattening * sin_2lat) - (2 * ell.semimajor_axis * lat_dot * lat_dot * ell.flattening * cos_2lat)</span>
+
+    <span class="c1"># calculate deviation between geodetic and geocentric latitudes and derivatives (Eqs. 10,11,12)</span>
+    <span class="n">two_e_squared_minus_e_to_forth</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">eccentricity</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">ell</span><span class="o">.</span><span class="n">eccentricity</span><span class="o">**</span><span class="mi">4</span>
+    <span class="n">dev</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">latitude</span>
+        <span class="o">-</span> <span class="n">ell</span><span class="o">.</span><span class="n">geodetic_to_spherical</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">latitude</span><span class="p">)))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span>  <span class="c1"># Fig 1 from Harlan 1968 shows dev as the angle with a height of 0 ...</span>
+    <span class="n">dev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+    <span class="n">devdot</span> <span class="o">=</span> <span class="n">lat_dot</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">ell</span><span class="o">.</span><span class="n">eccentricity</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">two_e_squared_minus_e_to_forth</span>
+        <span class="o">*</span> <span class="n">sin_lat</span><span class="o">**</span><span class="mi">2</span>
+        <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">two_e_squared_minus_e_to_forth</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">term1</span> <span class="o">=</span> <span class="p">(</span><span class="n">ell</span><span class="o">.</span><span class="n">eccentricity</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">two_e_squared_minus_e_to_forth</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="n">two_e_squared_minus_e_to_forth</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="o">**</span><span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">term2</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ell</span><span class="o">.</span><span class="n">eccentricity</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">two_e_squared_minus_e_to_forth</span> <span class="o">*</span> <span class="n">sin_2lat</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">two_e_squared_minus_e_to_forth</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">devdotdot</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">*</span> <span class="n">lat_dotdot</span> <span class="o">-</span> <span class="n">term2</span> <span class="o">*</span> <span class="n">lat_dot</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="c1"># below are approximations</span>
+    <span class="c1"># dev = np.arctan(ell.flattening * sin_2lat) # eq. 9 is D = arctan(flattening * sin2lat)</span>
+    <span class="c1"># devdot = 2 * lat_dot * ell.flattening * cos_2lat</span>
+    <span class="c1"># devdotdot = 2 * lat_dotdot * ell.flattening * cos_2lat - 4 * lat_dot * lat_dot * ell.flattening * sin_2lat</span>
+
+    <span class="c1"># pre-compute trig functions</span>
+    <span class="n">sin_dev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+    <span class="n">cos_dev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">dev</span><span class="p">)</span>
+
+    <span class="c1"># define r and its derivatives (Eq. 2)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="o">-</span><span class="n">r_prime</span> <span class="o">*</span> <span class="n">sin_dev</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r_prime</span><span class="p">)),</span>
+            <span class="o">-</span><span class="n">r_prime</span> <span class="o">*</span> <span class="n">cos_dev</span> <span class="o">-</span> <span class="n">height</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">rdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="o">-</span><span class="n">r_prime_dot</span> <span class="o">*</span> <span class="n">sin_dev</span> <span class="o">-</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="n">devdot</span> <span class="o">*</span> <span class="n">cos_dev</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r_prime</span><span class="p">)),</span>
+            <span class="o">-</span><span class="n">r_prime_dot</span> <span class="o">*</span> <span class="n">cos_dev</span> <span class="o">+</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="n">devdot</span> <span class="o">*</span> <span class="n">sin_dev</span> <span class="o">-</span> <span class="n">height_dot</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">rdotdot_x</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="n">r_prime_dotdot</span> <span class="o">*</span> <span class="n">sin_dev</span>
+        <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">r_prime_dot</span> <span class="o">*</span> <span class="n">devdot</span> <span class="o">*</span> <span class="n">cos_dev</span>
+        <span class="o">-</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="p">(</span><span class="n">devdotdot</span> <span class="o">*</span> <span class="n">cos_dev</span> <span class="o">-</span> <span class="n">devdot</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sin_dev</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">rdotdot_z</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="n">r_prime_dotdot</span> <span class="o">*</span> <span class="n">cos_dev</span>
+        <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">r_prime_dot</span> <span class="o">*</span> <span class="n">devdot</span> <span class="o">*</span> <span class="n">sin_dev</span>
+        <span class="o">+</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="p">(</span><span class="n">devdotdot</span> <span class="o">*</span> <span class="n">sin_dev</span> <span class="o">+</span> <span class="n">devdot</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">cos_dev</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">height_dotdot</span>
+    <span class="p">)</span>
+    <span class="n">rdotdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">rdotdot_x</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rdotdot_x</span><span class="p">)),</span>
+            <span class="n">rdotdot_z</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># define w and derivative (Eq. 3)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="p">(</span><span class="n">lon_dot</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">lat_dot</span><span class="p">,</span>
+            <span class="o">-</span><span class="p">(</span><span class="n">lon_dot</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">wdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">lon_dotdot</span> <span class="o">*</span> <span class="n">cos_lat</span> <span class="o">-</span> <span class="p">(</span><span class="n">lon_dot</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span><span class="p">)</span> <span class="o">*</span> <span class="n">lat_dot</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">lat_dotdot</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">lon_dotdot</span> <span class="o">*</span> <span class="n">sin_lat</span>
+            <span class="o">-</span> <span class="p">(</span><span class="n">lon_dot</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span><span class="p">)</span> <span class="o">*</span> <span class="n">lat_dot</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># total acceleration of the aircraft Eq.1 from Harlan 1968</span>
+    <span class="n">w2xrdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rdot</span><span class="p">)</span>
+    <span class="n">wdotxr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">wdot</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+    <span class="n">wxr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+    <span class="n">wxwxr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">wxr</span><span class="p">)</span>
+    <span class="n">accel</span> <span class="o">=</span> <span class="n">rdotdot</span> <span class="o">+</span> <span class="n">w2xrdot</span> <span class="o">+</span> <span class="n">wdotxr</span> <span class="o">+</span> <span class="n">wxwxr</span>
+
+    <span class="c1"># calculate wexwexre, centrifugal acceleration due to the Earth</span>
+    <span class="n">we</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sin_lat</span><span class="p">)),</span>
+            <span class="o">-</span><span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">wexr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">we</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+    <span class="n">wexwexr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">we</span><span class="p">,</span> <span class="n">wexr</span><span class="p">)</span>
+
+    <span class="c1"># Eotvos correction is the vertical component of the total acceleration of</span>
+    <span class="c1"># the aircraft minus the centrifugal acceleration of the Earth</span>
+    <span class="n">eotvos_corr</span> <span class="o">=</span> <span class="n">accel</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">wexwexr</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># eotvos correction in mGal</span>
+    <span class="k">return</span> <span class="mf">1e5</span> <span class="o">*</span> <span class="n">eotvos_corr</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">eotvos_correction_approx</span><span class="p">(</span>
+    <span class="n">latitude</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">longitude</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">time</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Eötvös correction in mGal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># define an ellipsoid</span>
+    <span class="n">ell</span> <span class="o">=</span> <span class="n">boule</span><span class="o">.</span><span class="n">WGS84</span>
+
+    <span class="c1"># convert degrees to radians, and unwrap</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+    <span class="n">lon_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">longitude</span><span class="p">)</span>
+    <span class="n">lon_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">lon_rad</span><span class="p">)</span>
+
+    <span class="c1"># compute 1st and 2nd time derivatives of lat, lon, and heights</span>
+    <span class="c1"># dot means time derivative</span>
+    <span class="c1"># dt = np.diff(time, prepend=np.nan)</span>
+    <span class="c1"># lat_dot = np.diff(lat_rad, prepend=np.nan) / dt</span>
+    <span class="c1"># lon_dot = np.diff(lon_rad, prepend=np.nan) / dt</span>
+    <span class="c1"># height_dot = np.diff(height, prepend=np.nan) / dt</span>
+    <span class="c1"># lat_dotdot = np.diff(lat_dot, prepend=np.nan) / dt</span>
+    <span class="c1"># lon_dotdot = np.diff(lon_dot, prepend=np.nan) / dt</span>
+    <span class="c1"># height_dotdot = np.diff(height_dot, prepend=np.nan) / dt</span>
+    <span class="n">lat_dot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">lat_dotdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">lat_dot</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">lon_dot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">lon_rad</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">lon_dotdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">lon_dot</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">height_dot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">height_dotdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">height_dot</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+    <span class="c1"># pre-compute trig functions</span>
+    <span class="n">sin_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">sin_2lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lat_rad</span><span class="p">)</span>
+    <span class="n">cos_2lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">lat_rad</span><span class="p">)</span>
+
+    <span class="c1"># calculate r&#39; and its derivatives (Eqs. 6,7,8)</span>
+    <span class="c1"># r&#39; is the vector from center of ellipsoid to point on ellipsoid directly (normal)</span>
+    <span class="c1"># below the aircraft</span>
+    <span class="n">r_prime</span> <span class="o">=</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="o">**</span><span class="mi">2</span>
+    <span class="p">)</span>  <span class="c1"># Eq 6, simplification</span>
+    <span class="n">r_prime_dot</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span> <span class="o">*</span> <span class="n">lat_dot</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">sin_2lat</span>
+    <span class="p">)</span>  <span class="c1"># Eq 7, simplification</span>
+    <span class="n">r_prime_dotdot</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span> <span class="o">*</span> <span class="n">lat_dotdot</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">sin_2lat</span>
+        <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span> <span class="o">*</span> <span class="n">lat_dot</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">cos_2lat</span>
+    <span class="p">)</span>  <span class="c1"># Eq 8, simplification</span>
+
+    <span class="c1"># calculate deviation from normal and derivatives (Eqs. 10,11,12)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">sin_2lat</span><span class="p">)</span>  <span class="c1"># Eq 10, simplification</span>
+    <span class="n">ddot</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">lat_dot</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">cos_2lat</span>  <span class="c1"># Eq 11, simplification</span>
+    <span class="n">ddotdot</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">lat_dotdot</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">cos_2lat</span>
+        <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">lat_dot</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">sin_2lat</span>
+    <span class="p">)</span>  <span class="c1"># Eq 12, simplification</span>
+
+    <span class="c1"># pre-compute trig functions</span>
+    <span class="n">sin_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="n">cos_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+    <span class="c1"># define r and its derivatives</span>
+    <span class="c1"># r is vector</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>  <span class="c1"># Eq 2</span>
+            <span class="o">-</span><span class="n">r_prime</span> <span class="o">*</span> <span class="n">sin_d</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r_prime</span><span class="p">)),</span>
+            <span class="o">-</span><span class="n">r_prime</span> <span class="o">*</span> <span class="n">cos_d</span> <span class="o">-</span> <span class="n">height</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">rdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>  <span class="c1"># this is just time derivative of above components</span>
+            <span class="o">-</span><span class="n">r_prime_dot</span> <span class="o">*</span> <span class="n">sin_d</span> <span class="o">-</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="n">ddot</span> <span class="o">*</span> <span class="n">cos_d</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r_prime</span><span class="p">)),</span>
+            <span class="o">-</span><span class="n">r_prime_dot</span> <span class="o">*</span> <span class="n">cos_d</span> <span class="o">+</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="n">ddot</span> <span class="o">*</span> <span class="n">sin_d</span> <span class="o">-</span> <span class="n">height_dot</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">ci</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="n">r_prime_dotdot</span> <span class="o">*</span> <span class="n">sin_d</span>
+        <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">r_prime_dot</span> <span class="o">*</span> <span class="n">ddot</span> <span class="o">*</span> <span class="n">cos_d</span>
+        <span class="o">-</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="p">(</span><span class="n">ddotdot</span> <span class="o">*</span> <span class="n">cos_d</span> <span class="o">-</span> <span class="n">ddot</span> <span class="o">*</span> <span class="n">ddot</span> <span class="o">*</span> <span class="n">sin_d</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">ck</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="n">r_prime_dotdot</span> <span class="o">*</span> <span class="n">cos_d</span>
+        <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">r_prime_dot</span> <span class="o">*</span> <span class="n">ddot</span> <span class="o">*</span> <span class="n">sin_d</span>
+        <span class="o">+</span> <span class="n">r_prime</span> <span class="o">*</span> <span class="p">(</span><span class="n">ddotdot</span> <span class="o">*</span> <span class="n">sin_d</span> <span class="o">+</span> <span class="n">ddot</span> <span class="o">*</span> <span class="n">ddot</span> <span class="o">*</span> <span class="n">cos_d</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">height_dotdot</span>
+    <span class="p">)</span>
+    <span class="n">rdotdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">ci</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ci</span><span class="p">)),</span> <span class="n">ck</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># this is just 2nd time derivative of above components</span>
+
+    <span class="c1"># define w and derivative (Eq. 3)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="p">(</span><span class="n">lon_dot</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">lat_dot</span><span class="p">,</span>
+            <span class="o">-</span><span class="p">(</span><span class="n">lon_dot</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">wdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">lon_dotdot</span> <span class="o">*</span> <span class="n">cos_lat</span>  <span class="c1"># I think the first lon_dot should be lon_dotdot!</span>
+            <span class="o">-</span> <span class="p">(</span><span class="n">lon_dot</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span><span class="p">)</span> <span class="o">*</span> <span class="n">lat_dot</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">lat_dotdot</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">lon_dotdot</span> <span class="o">*</span> <span class="n">sin_lat</span>
+            <span class="o">-</span> <span class="p">(</span><span class="n">lon_dot</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span><span class="p">)</span> <span class="o">*</span> <span class="n">lat_dot</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># total acceleration of the aircraft Eq.1 from Harlan 1968</span>
+    <span class="n">w2xrdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rdot</span><span class="p">)</span>
+    <span class="n">wdotxr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">wdot</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+    <span class="n">wxr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+    <span class="n">wxwxr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">wxr</span><span class="p">)</span>
+    <span class="n">accel</span> <span class="o">=</span> <span class="n">rdotdot</span> <span class="o">+</span> <span class="n">w2xrdot</span> <span class="o">+</span> <span class="n">wdotxr</span> <span class="o">+</span> <span class="n">wxwxr</span>
+
+    <span class="c1"># calculate wexwexre, centrifugal acceleration due to the Earth</span>
+    <span class="n">we</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span> <span class="o">*</span> <span class="n">cos_lat</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sin_lat</span><span class="p">)),</span>
+            <span class="o">-</span><span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span> <span class="o">*</span> <span class="n">sin_lat</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">wexr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">we</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+    <span class="n">wexwexr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">we</span><span class="p">,</span> <span class="n">wexr</span><span class="p">)</span>
+
+    <span class="c1"># Eotvos correction is the vertical component of the total acceleration of</span>
+    <span class="c1"># the aircraft minus the centrifugal acceleration of the Earth</span>
+    <span class="n">eotvos_corr</span> <span class="o">=</span> <span class="n">accel</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">wexwexr</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># eotvos correction in mGal</span>
+    <span class="k">return</span> <span class="mf">1e5</span> <span class="o">*</span> <span class="n">eotvos_corr</span>
+    <span class="c1"># return eotvos_corr</span>
+
+
+<div class="viewcode-block" id="eotvos_correction_glicken">
+<a class="viewcode-back" href="../../api/generated/airbornegeo.eotvos_correction_glicken.html#airbornegeo.eotvos_correction_glicken">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">eotvos_correction_glicken</span><span class="p">(</span>
+    <span class="n">latitude</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">track</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">ground_speed</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the simple Eötvös correction from latitude, aircraft track and ground</span>
+<span class="sd">    speed using the Glicken 1962 simplified equation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    latitude : ndarray</span>
+<span class="sd">        Latitude in decimal degrees</span>
+<span class="sd">    track : ndarray</span>
+<span class="sd">        Aircraft track in decimal degrees from geographic north, positive clock-wise</span>
+<span class="sd">    ground_speed : array-like</span>
+<span class="sd">        Ground speed in meters per second</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Eötvös correction in mGal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># mps to knots</span>
+    <span class="n">ground_speed</span> <span class="o">=</span> <span class="n">ground_speed</span> <span class="o">*</span> <span class="mf">1.94384</span>
+
+    <span class="c1"># degrees to radian</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+    <span class="n">track_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mf">7.503</span> <span class="o">*</span> <span class="n">ground_speed</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">track_rad</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
+        <span class="mf">0.004154</span> <span class="o">*</span> <span class="n">ground_speed</span><span class="o">**</span><span class="mi">2</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">eotvos_correction_harlan_track</span><span class="p">(</span>
+    <span class="n">latitude</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">track</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">ground_speed</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the Eötvös correction from latitude, track, ground speed, and height</span>
+<span class="sd">    using equation 15 from Harlan 1968 .</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    latitude : ndarray</span>
+<span class="sd">        Latitude in degrees</span>
+<span class="sd">    track : ndarray</span>
+<span class="sd">        Aircraft track in degrees from geographic north, positive clock-wise</span>
+<span class="sd">    ground_speed : ndarray</span>
+<span class="sd">        Ground speed in meters per seconds</span>
+<span class="sd">    height : ndarray</span>
+<span class="sd">        Aircraft height in meters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    E : ndarray</span>
+<span class="sd">        Eötvös correction in mGal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># define an ellipsoid</span>
+    <span class="n">ell</span> <span class="o">=</span> <span class="n">boule</span><span class="o">.</span><span class="n">WGS84</span>
+
+    <span class="c1"># degrees to radian</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+    <span class="n">track_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">track</span><span class="p">)</span>
+
+    <span class="c1"># # Equation 16 from Harlan</span>
+    <span class="c1"># return 1e5 * (((ground_speed**2) / ell.semimajor_axis) * (</span>
+    <span class="c1">#     1</span>
+    <span class="c1">#     + height / ell.semimajor_axis</span>
+    <span class="c1">#     - ell.flattening * (1 - np.cos(lat_rad) ** 2 * (3 - 2 * np.sin(track_rad) ** 2))</span>
+    <span class="c1"># ) + 2 * ground_speed * ell.angular_velocity * np.cos(lat_rad) * np.sin(</span>
+    <span class="c1">#     track_rad</span>
+    <span class="c1"># ) * (1 + height / ell.semimajor_axis))</span>
+
+    <span class="c1"># # Equation 18 from Harlan</span>
+    <span class="c1"># return 1e5 * (((ground_speed**2) / ell.semimajor_axis) * (</span>
+    <span class="c1">#     1</span>
+    <span class="c1">#     + height / ell.semimajor_axis</span>
+    <span class="c1">#     - ell.flattening * (1 - np.cos(lat_rad) ** 2 * (3 - 2 * np.sin(track_rad) ** 2))</span>
+    <span class="c1"># ) + 2 * ground_speed * ell.angular_velocity * np.cos(lat_rad) * np.sin(</span>
+    <span class="c1">#     track_rad</span>
+    <span class="c1"># ))</span>
+
+    <span class="c1"># Equation 15 from Harlan</span>
+    <span class="n">velocity_easting</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">track_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">ground_speed</span>
+    <span class="n">velocity_northing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">track_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">ground_speed</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="mf">1e5</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="p">((</span><span class="n">velocity_northing</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="mi">1</span>
+                <span class="o">+</span> <span class="p">(</span><span class="n">height</span> <span class="o">/</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="p">((</span><span class="n">velocity_easting</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="mi">1</span>
+                <span class="o">+</span> <span class="p">(</span><span class="n">height</span> <span class="o">/</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span><span class="p">)</span>
+                <span class="o">-</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span> <span class="o">*</span> <span class="n">velocity_easting</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">height</span> <span class="o">/</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span><span class="p">))</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">eotvos_correction_harlan_velocity</span><span class="p">(</span>
+    <span class="n">latitude</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">velocity_latitudinal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">velocity_longitudinal</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the complete Eötvös correction from latitude, latitude and longitude</span>
+<span class="sd">    components of aircraft velocity, and height. This follows equation 17 of Harlan 1968</span>
+<span class="sd">    which assumes the velocities are given as aircraft velocities at altitude, not</span>
+<span class="sd">    ground velocities.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    latitude : ndarray</span>
+<span class="sd">        Latitude in decimal degrees</span>
+<span class="sd">    velocity_latitudinal : ndarray</span>
+<span class="sd">        Latitudinal component of aircraft ground velocity in decimal degrees per second</span>
+<span class="sd">    velocity_latitudinal : ndarray</span>
+<span class="sd">        Longitudinal component of aircraft ground velocity in decimal degrees per second</span>
+<span class="sd">    height : ndarray</span>
+<span class="sd">        Aircraft height in meters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ndarray</span>
+<span class="sd">        Eötvös correction in mGal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># define an ellipsoid</span>
+    <span class="n">ell</span> <span class="o">=</span> <span class="n">boule</span><span class="o">.</span><span class="n">WGS84</span>
+
+    <span class="c1"># degrees to radian</span>
+    <span class="n">lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">latitude</span><span class="p">)</span>
+    <span class="n">velocity_lat_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">velocity_latitudinal</span><span class="p">)</span>
+    <span class="n">velocity_lon_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">velocity_longitudinal</span><span class="p">)</span>
+
+    <span class="n">sin_lat2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">ecc2</span> <span class="o">=</span> <span class="n">ell</span><span class="o">.</span><span class="n">first_eccentricity</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">ell</span><span class="o">.</span><span class="n">semimajor_axis</span>
+
+    <span class="c1"># local radii of curvature</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ecc2</span> <span class="o">*</span> <span class="n">sin_lat2</span>
+    <span class="n">curvature_meridional</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ecc2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">denom</span><span class="o">**</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">curvature_normal</span> <span class="o">=</span> <span class="n">r</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">denom</span><span class="p">)</span>
+
+    <span class="c1"># velocity components</span>
+    <span class="n">velocity_northing</span> <span class="o">=</span> <span class="p">(</span><span class="n">curvature_meridional</span> <span class="o">+</span> <span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="n">velocity_lat_rad</span>
+    <span class="n">velocity_easting_height</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">curvature_normal</span> <span class="o">+</span> <span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">velocity_lon_rad</span>
+    <span class="p">)</span>
+
+    <span class="c1"># northerly centrifugal term</span>
+    <span class="n">term_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">velocity_northing</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">height</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">+</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">sin_lat2</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># easterly centrifugal term</span>
+    <span class="n">term_e</span> <span class="o">=</span> <span class="p">(</span><span class="n">velocity_easting_height</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">height</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">-</span> <span class="n">ell</span><span class="o">.</span><span class="n">flattening</span> <span class="o">*</span> <span class="n">sin_lat2</span>
+    <span class="p">)</span>
+
+    <span class="c1"># coriolis term</span>
+    <span class="n">term_coriolis</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ell</span><span class="o">.</span><span class="n">angular_velocity</span> <span class="o">*</span> <span class="n">velocity_easting_height</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat_rad</span><span class="p">)</span>
+
+    <span class="c1"># eotvos correction in mGal</span>
+    <span class="k">return</span> <span class="mf">1e5</span> <span class="o">*</span> <span class="p">(</span><span class="n">term_n</span> <span class="o">+</span> <span class="n">term_e</span> <span class="o">+</span> <span class="n">term_coriolis</span><span class="p">)</span>
+
+
+<span class="c1"># def central_difference(data_in, n=1, order=2, dt=0.1):</span>
+<span class="c1">#     &quot;&quot;&quot;central difference differentiator&quot;&quot;&quot;</span>
+<span class="c1">#     if order == 2:</span>
+<span class="c1">#         # first derivative</span>
+<span class="c1">#         if n == 1:</span>
+<span class="c1">#             dy = (data_in[2:] - data_in[0:-2]) / (2 * dt)</span>
+<span class="c1">#         # second derivative</span>
+<span class="c1">#         elif n == 2:</span>
+<span class="c1">#             dy = (data_in[0:-2] - 2 * data_in[1:-1] + data_in[2:]) / np.power(dt, 2)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             raise ValueError(&quot;Invalid value for parameter n {1 or 2}&quot;)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         raise NotImplementedError</span>
+
+<span class="c1">#     return np.pad(dy, (1, 1), &quot;edge&quot;)</span>
+
+
+<span class="c1"># def eotvos_correction_dgs(</span>
+<span class="c1">#     latitude: NDArray,</span>
+<span class="c1">#     longitude: NDArray,</span>
+<span class="c1">#     height: NDArray,</span>
+<span class="c1">#     dt,</span>
+<span class="c1">#     differentiator=central_difference,</span>
+<span class="c1"># ):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     from https://github.com/DynamicGravitySystems/DGP/blob/5c0b566b846eb25f1e5ede64b2caaaa6a3352a29/dgp/lib/transform/gravity.py#L73</span>
+<span class="c1">#     I changed sampling rate to match my data</span>
+<span class="c1">#     final eotvos correction is column eotvos plus column kin_accel</span>
+<span class="c1">#     I changed variables names to match with the shipgrav implementation to compare</span>
+<span class="c1">#     I changed to output eotvos correction, which is columns eotvos + kin_accel</span>
+<span class="c1">#     I added sampling rate (dt) as parameter</span>
+<span class="c1">#     I changed inputs to be same as other functions</span>
+
+<span class="c1">#     Eotvos correction</span>
+
+<span class="c1">#     Parameters</span>
+<span class="c1">#     ----------</span>
+<span class="c1">#     data_in: DataFrame</span>
+<span class="c1">#         trajectory frame containing latitude, longitude, and</span>
+<span class="c1">#         height above the ellipsoid</span>
+<span class="c1">#     dt: float</span>
+<span class="c1">#         sample period</span>
+
+<span class="c1">#     Returns</span>
+<span class="c1">#     -------</span>
+<span class="c1">#         Series</span>
+<span class="c1">#             index taken from the input</span>
+
+<span class="c1">#     Notes</span>
+<span class="c1">#     -----</span>
+<span class="c1">#     Added to observed gravity when the positive direction of the sensitive axis is</span>
+<span class="c1">#     down, otherwise, subtracted.</span>
+
+<span class="c1">#     References</span>
+<span class="c1">#     ---------</span>
+<span class="c1">#     Harlan 1968, &quot;Eotvos Corrections for Airborne Gravimetry&quot; JGR 73,n14</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     # dt = 0.1</span>
+
+<span class="c1">#     # constants # added these to the function</span>
+<span class="c1">#     a = 6378137.0  # Default semi-major axis</span>
+<span class="c1">#     b = 6356752.3142  # Default semi-minor axis</span>
+<span class="c1">#     ecc = (a - b) / a  # Eccentricity</span>
+<span class="c1">#     omega = 0.00007292115  # sidereal rotation rate, radians/sec</span>
+<span class="c1">#     mps2mgal = 100000  # m/s/s to mgal</span>
+
+<span class="c1">#     latr = np.deg2rad(latitude)</span>
+<span class="c1">#     lonr = np.deg2rad(longitude)</span>
+<span class="c1">#     # lonr = np.unwrap(lonr)</span>
+
+<span class="c1">#     dlat = differentiator(latr, n=1, dt=dt)</span>
+<span class="c1">#     ddlat = differentiator(latr, n=2, dt=dt)</span>
+<span class="c1">#     dlon = differentiator(lonr, n=1, dt=dt)</span>
+<span class="c1">#     ddlon = differentiator(lonr, n=2, dt=dt)</span>
+<span class="c1">#     dht = differentiator(height, n=1, dt=dt)</span>
+<span class="c1">#     ddht = differentiator(height, n=2, dt=dt)</span>
+
+<span class="c1">#     sin_lat = np.sin(latr)</span>
+<span class="c1">#     cos_lat = np.cos(latr)</span>
+<span class="c1">#     sin_2lat = np.sin(2.0 * latr)</span>
+<span class="c1">#     cos_2lat = np.cos(2.0 * latr)</span>
+
+<span class="c1">#     # Calculate the r&#39; and its derivatives</span>
+<span class="c1">#     r_prime = a * (1.0 - ecc * sin_lat**2)</span>
+<span class="c1">#     dr_prime = -a * dlat * ecc * sin_2lat</span>
+<span class="c1">#     ddr_prime = -a * ddlat * ecc * sin_2lat - 2.0 * a * (dlat**2) * ecc * cos_2lat</span>
+
+<span class="c1">#     # Calculate the deviation from the normal and its derivatives</span>
+<span class="c1">#     d = np.arctan(ecc * sin_2lat)</span>
+<span class="c1">#     dd = 2.0 * dlat * ecc * cos_2lat</span>
+<span class="c1">#     ddd = 2.0 * ddlat * ecc * cos_2lat - 4.0 * dlat * dlat * ecc * sin_2lat</span>
+
+<span class="c1">#     # Calculate this value once (used many times)</span>
+<span class="c1">#     sinD = np.sin(d)</span>
+<span class="c1">#     cosD = np.cos(d)</span>
+
+<span class="c1">#     # Calculate r and its derivatives</span>
+<span class="c1">#     r = np.array([-r_prime * sinD, np.zeros(r_prime.size), -r_prime * cosD - height])</span>
+
+<span class="c1">#     rdot = np.array(</span>
+<span class="c1">#         [</span>
+<span class="c1">#             (-dr_prime * sinD - r_prime * dd * cosD),</span>
+<span class="c1">#             np.zeros(r_prime.size),</span>
+<span class="c1">#             (-dr_prime * cosD + r_prime * dd * sinD - dht),</span>
+<span class="c1">#         ]</span>
+<span class="c1">#     )</span>
+
+<span class="c1">#     ci = (</span>
+<span class="c1">#         -ddr_prime * sinD</span>
+<span class="c1">#         - 2.0 * dr_prime * dd * cosD</span>
+<span class="c1">#         - r_prime * (ddd * cosD - dd * dd * sinD)</span>
+<span class="c1">#     )</span>
+<span class="c1">#     ck = (</span>
+<span class="c1">#         -ddr_prime * cosD</span>
+<span class="c1">#         + 2.0 * dr_prime * dd * sinD</span>
+<span class="c1">#         + r_prime * (ddd * sinD + dd * dd * cosD)</span>
+<span class="c1">#         - ddht  # here ddht is correctly outsite parenthesis, in shipgrap its inside</span>
+<span class="c1">#     )</span>
+<span class="c1">#     rdotdot = np.array([ci, np.zeros(ci.size), ck])</span>
+
+<span class="c1">#     # Define w and its derivative</span>
+<span class="c1">#     w = np.array([(dlon + omega) * cos_lat, -dlat, (-(dlon + omega)) * sin_lat])</span>
+
+<span class="c1">#     wdot = np.array(</span>
+<span class="c1">#         [</span>
+<span class="c1">#             ddlon * cos_lat  # first term, dlon, should be ddlon</span>
+<span class="c1">#             - (dlon + omega) * dlat * sin_lat,</span>
+<span class="c1">#             -ddlat,</span>
+<span class="c1">#             (-ddlon * sin_lat - (dlon + omega) * dlat * cos_lat),</span>
+<span class="c1">#         ]</span>
+<span class="c1">#     )</span>
+
+<span class="c1">#     w2xrdot = np.cross(2.0 * w, rdot, axis=0)</span>
+<span class="c1">#     wdotxr = np.cross(wdot, r, axis=0)</span>
+<span class="c1">#     wxr = np.cross(w, r, axis=0)</span>
+<span class="c1">#     wxwxr = np.cross(w, wxr, axis=0)</span>
+
+<span class="c1">#     we = np.array([omega * cos_lat, np.zeros(sin_lat.shape), -omega * sin_lat])</span>
+<span class="c1">#     wexr = np.cross(we, r, axis=0)</span>
+<span class="c1">#     wexwexr = np.cross(we, wexr, axis=0)</span>
+
+<span class="c1">#     kin_accel = rdotdot * mps2mgal</span>
+<span class="c1">#     eotvos = (w2xrdot + wdotxr + wxwxr - wexwexr) * mps2mgal</span>
+
+<span class="c1">#     # acc = rdotdot + w2xrdot + wdotxr + wxwxr</span>
+
+<span class="c1">#     # eotvos = pd.Series(eotvos[2], index=data_in.index, name=&#39;eotvos&#39;)</span>
+<span class="c1">#     # kin_accel = pd.Series(kin_accel[2], index=data_in.index, name=&#39;kin_accel&#39;)</span>
+
+<span class="c1">#     # df = pd.concat([eotvos, kin_accel], axis=1, join=&#39;outer&#39;)</span>
+
+<span class="c1">#     return eotvos[2] + kin_accel[2]</span>
+
+
+<span class="c1"># def eotvos_correction_shipgrav(</span>
+<span class="c1">#     latitude: NDArray,</span>
+<span class="c1">#     longitude: NDArray,</span>
+<span class="c1">#     height: NDArray,</span>
+<span class="c1">#     time: NDArray,</span>
+<span class="c1"># ) -&gt; pd.Series:</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     This is my re-writting of the below `eotvos_correction_shipgrav` function, which is</span>
+<span class="c1">#     directly from the shipgrav python package. They assume a constant sampling rate</span>
+<span class="c1">#     between points, but here I&#39;ve re-written to allow varying sampling rates.</span>
+<span class="c1">#     I changed variable names to match with DGS package implementation</span>
+<span class="c1">#     ck and wdot both had mistakes I fixed</span>
+<span class="c1">#     I changed inputs to match format of other functions</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     a = 6378137.0</span>
+<span class="c1">#     b = 6356752.3142</span>
+
+<span class="c1">#     omega = 0.00007292115  # siderial rotation rate, radians/sec</span>
+<span class="c1">#     ecc = (a - b) / a  # this is referred to as flattening in Boule</span>
+
+<span class="c1">#     latr = np.deg2rad(latitude)</span>
+<span class="c1">#     lonr = np.deg2rad(longitude)</span>
+<span class="c1">#     lonr = np.unwrap(lonr)</span>
+
+<span class="c1">#     # get time derivatives of position</span>
+<span class="c1">#     # dt = np.diff(time, prepend=np.nan)</span>
+<span class="c1">#     # dlat = np.diff(latr, prepend=np.nan) / dt</span>
+<span class="c1">#     # dlon = np.diff(lonr, prepend=np.nan) / dt</span>
+<span class="c1">#     # dht = np.diff(height, prepend=np.nan) / dt</span>
+<span class="c1">#     # ddlat = np.diff(dlat, prepend=np.nan) / dt</span>
+<span class="c1">#     # ddlon = np.diff(dlon, prepend=np.nan) / dt</span>
+<span class="c1">#     # ddht = np.diff(dht, prepend=np.nan) / dt</span>
+
+<span class="c1">#     dlat = np.gradient(latr, time)</span>
+<span class="c1">#     ddlat = np.gradient(dlat, time)</span>
+<span class="c1">#     dlon = np.gradient(lonr, time)</span>
+<span class="c1">#     ddlon = np.gradient(dlon, time)</span>
+<span class="c1">#     dht = np.gradient(height, time)</span>
+<span class="c1">#     ddht = np.gradient(dht, time)</span>
+
+<span class="c1">#     # sines and cosines etc</span>
+<span class="c1">#     sin_lat = np.sin(latr)</span>
+<span class="c1">#     cos_lat = np.cos(latr)</span>
+<span class="c1">#     sin_2lat = np.sin(2 * latr)</span>
+<span class="c1">#     cos_2lat = np.cos(2 * latr)</span>
+
+<span class="c1">#     # calculate r&#39; and its derivatives</span>
+<span class="c1">#     r_prime = a * (1 - ecc * sin_lat * sin_lat)</span>
+<span class="c1">#     dr_prime = -a * dlat * ecc * sin_2lat</span>
+<span class="c1">#     ddr_prime = -a * ddlat * ecc * sin_2lat - 2 * a * dlat * dlat * ecc * cos_2lat</span>
+
+<span class="c1">#     # calculate deviation from normal and derivatives</span>
+<span class="c1">#     d = np.arctan(ecc * sin_2lat)  # eq. 9 is D = arctan(flattening * sin2lat)</span>
+<span class="c1">#     dd = 2 * dlat * ecc * cos_2lat</span>
+<span class="c1">#     ddd = 2 * ddlat * ecc * cos_2lat - 4 * dlat * dlat * ecc * sin_2lat</span>
+
+<span class="c1">#     # define r and its derivatives</span>
+<span class="c1">#     # r is the vector from the earth&#39;s center to the aircraft</span>
+<span class="c1">#     r = np.vstack(</span>
+<span class="c1">#         (</span>
+<span class="c1">#             -r_prime * np.sin(d),</span>
+<span class="c1">#             np.zeros(len(r_prime)),</span>
+<span class="c1">#             -r_prime * np.cos(d) - height,</span>
+<span class="c1">#         )</span>
+<span class="c1">#     ).T</span>
+<span class="c1">#     rdot = np.vstack(</span>
+<span class="c1">#         (</span>
+<span class="c1">#             -dr_prime * np.sin(d) - r_prime * dd * np.cos(d),</span>
+<span class="c1">#             np.zeros(len(r_prime)),</span>
+<span class="c1">#             -dr_prime * np.cos(d) + r_prime * dd * np.sin(d) - dht,</span>
+<span class="c1">#         )</span>
+<span class="c1">#     ).T</span>
+<span class="c1">#     ci = (</span>
+<span class="c1">#         -ddr_prime * np.sin(d)</span>
+<span class="c1">#         - 2.0 * dr_prime * dd * np.cos(d)</span>
+<span class="c1">#         - r_prime * (ddd * np.cos(d) - dd * dd * np.sin(d))</span>
+<span class="c1">#     )</span>
+<span class="c1">#     ck = (</span>
+<span class="c1">#         -ddr_prime * np.cos(d)</span>
+<span class="c1">#         + 2.0 * dr_prime * dd * np.sin(d)</span>
+<span class="c1">#         # + r_prime * (ddd * np.sin(d) + dd * dd * np.cos(d) - ddht) # this is wrong, ddht should be outside parenthesis</span>
+<span class="c1">#         + r_prime * (ddd * np.sin(d) + dd * dd * np.cos(d))</span>
+<span class="c1">#         - ddht  # this is correct</span>
+<span class="c1">#     )</span>
+<span class="c1">#     rdotdot = np.vstack((ci, np.zeros(len(ci)), ck)).T</span>
+
+<span class="c1">#     # define w and derivative</span>
+<span class="c1">#     w = np.vstack(</span>
+<span class="c1">#         (</span>
+<span class="c1">#             (dlon + omega) * cos_lat,</span>
+<span class="c1">#             -dlat,</span>
+<span class="c1">#             -(dlon + omega) * sin_lat,</span>
+<span class="c1">#         )</span>
+<span class="c1">#     ).T</span>
+<span class="c1">#     wdot = np.vstack(</span>
+<span class="c1">#         (</span>
+<span class="c1">#             ddlon * cos_lat</span>
+<span class="c1">#             - (dlon + omega)</span>
+<span class="c1">#             * dlat</span>
+<span class="c1">#             * sin_lat,  # changed first term dlong to ddlon, no dicernable difference</span>
+<span class="c1">#             -ddlat,</span>
+<span class="c1">#             -ddlon * sin_lat - (dlon + omega) * dlat * cos_lat,</span>
+<span class="c1">#         )</span>
+<span class="c1">#     ).T</span>
+
+<span class="c1">#     w2xrdot = np.cross(2 * w, rdot)</span>
+<span class="c1">#     wdotxr = np.cross(wdot, r)</span>
+<span class="c1">#     wxr = np.cross(w, r)</span>
+<span class="c1">#     wxwxr = np.cross(w, wxr)</span>
+
+<span class="c1">#     # calculate wexwexre, centrifugal acceleration due to the Earth</span>
+<span class="c1">#     we = np.vstack(</span>
+<span class="c1">#         (</span>
+<span class="c1">#             omega * cos_lat,</span>
+<span class="c1">#             np.zeros(len(sin_lat)),</span>
+<span class="c1">#             -omega * sin_lat,</span>
+<span class="c1">#         )</span>
+<span class="c1">#     ).T</span>
+<span class="c1">#     wexr = np.cross(we, r)</span>
+<span class="c1">#     wexwexr = np.cross(we, wexr)</span>
+
+<span class="c1">#     # calculate total acceleration for the aircraft</span>
+<span class="c1">#     accel = rdotdot + w2xrdot + wdotxr + wxwxr</span>
+
+<span class="c1">#     # Eotvos correction is the vertical component of the total acceleration of</span>
+<span class="c1">#     # the aircraft minus the centrifugal acceleration of the Earth, convert to mGal</span>
+<span class="c1">#     return (accel[:, 2] - wexwexr[:, 2]) * 100e3</span>
+
+
+<span class="c1"># def center_diff(y, n, samp):</span>
+<span class="c1">#     &quot;&quot;&quot; Numerical derivatives, central difference of nth order</span>
+
+<span class="c1">#     :param y: data to differentiate</span>
+<span class="c1">#     :type y: array_like</span>
+<span class="c1">#     :param n: order, either 1 or 2</span>
+<span class="c1">#     :type n: int</span>
+<span class="c1">#     :param samp: sampling rate</span>
+<span class="c1">#     :type samp: float</span>
+
+<span class="c1">#     :return: 1st or 2nd order derivative of **y**</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     if n == 1:</span>
+<span class="c1">#         return (y[2:] - y[:-2])*(samp/2)</span>
+<span class="c1">#     elif n == 2:</span>
+<span class="c1">#         return (y[:-2] - 2*y[1:-1] + y[2:])*(samp**2)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         print(&#39;bad order for derivative&#39;)</span>
+<span class="c1">#         return -999</span>
+
+
+<span class="c1"># def eotvos_correction_shipgrav(lon, lat, ht, samp, a=6378137.0, b=6356752.3142):</span>
+<span class="c1">#     &quot;&quot;&quot; Full Eotvos correction in mGals.</span>
+<span class="c1">#     From https://github.com/PFPE/shipgrav/blob/e84b33cc6fcfddf0e18736cd1205620d82e16e91/shipgrav/grav.py#L194</span>
+
+<span class="c1">#     The Eotvos correction is the effect on measured gravity due to horizontal</span>
+<span class="c1">#     motion over the Earth&#39;s surface.</span>
+
+<span class="c1">#     This formulation is from Harlan (1968), &quot;Eotvos Corrections for Airborne Gravimetry&quot; in</span>
+<span class="c1">#     *Journal of Geophysical Research*, 73(14), DOI: 10.1029/JB073i014p04675</span>
+
+<span class="c1">#     Implementation modified from matlab script written by Sandra Preaux, NGS, NOAA August 24 2009</span>
+
+<span class="c1">#     Components of the correction:</span>
+
+<span class="c1">#     * rdoubledot</span>
+<span class="c1">#     * angular acceleration of the reference frame</span>
+<span class="c1">#     * corliolis</span>
+<span class="c1">#     * centrifugal</span>
+<span class="c1">#     * centrifugal acceleration of Earth</span>
+
+<span class="c1">#     :param lon: longitudes in degrees</span>
+<span class="c1">#     :type lon: array_like</span>
+<span class="c1">#     :param lat: latitudes in degrees</span>
+<span class="c1">#     :type lat: array_like</span>
+<span class="c1">#     :param ht: elevation (referenced to sea level)</span>
+<span class="c1">#     :type ht: array_like</span>
+<span class="c1">#     :param samp: sampling rate</span>
+<span class="c1">#     :type samp: float</span>
+<span class="c1">#     :param a: major axis of ellipsoid (default is WGS84)</span>
+<span class="c1">#     :type a: float, optional</span>
+<span class="c1">#     :param b: minor axis of ellipsoid (default is WGS84)</span>
+<span class="c1">#     :type b: float, optional</span>
+
+<span class="c1">#     :return: **E** (*ndarray*), Eotvos correction in mGal</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     We = 0.00007292115    # siderial rotation rate, radians/sec</span>
+<span class="c1">#     mps2mgal = 100000     # m/s/s to mgal</span>
+<span class="c1">#     ecc = (a-b)/a # this is referred to as flattening in Boule</span>
+
+<span class="c1">#     latr = np.deg2rad(lat)</span>
+<span class="c1">#     lonr = np.deg2rad(lon)</span>
+
+<span class="c1">#     # get time derivatives of position</span>
+<span class="c1">#     dlat = center_diff(latr, 1, samp)</span>
+<span class="c1">#     ddlat = center_diff(latr, 2, samp)</span>
+<span class="c1">#     dlon = center_diff(lonr, 1, samp)</span>
+<span class="c1">#     ddlon = center_diff(lonr, 2, samp)</span>
+<span class="c1">#     dht = center_diff(ht, 1, samp)</span>
+<span class="c1">#     ddht = center_diff(ht, 2, samp)</span>
+
+<span class="c1">#     # sines and cosines etc</span>
+<span class="c1">#     slat = np.sin(latr[1:-1])</span>
+<span class="c1">#     clat = np.cos(latr[1:-1])</span>
+<span class="c1">#     s2lat = np.sin(2*latr[1:-1])</span>
+<span class="c1">#     c2lat = np.cos(2*latr[1:-1])</span>
+
+<span class="c1">#     # calculate r&#39; and its derivatives</span>
+<span class="c1">#     rp = a*(1 - ecc*slat*slat)</span>
+<span class="c1">#     drp = -a*dlat*ecc*s2lat</span>
+<span class="c1">#     ddrp = -a*ddlat*ecc*s2lat - 2*a*dlat*dlat*ecc*c2lat</span>
+
+<span class="c1">#     # calculate deviation from normal and derivatives</span>
+<span class="c1">#     D = np.arctan(ecc*s2lat)</span>
+<span class="c1">#     dD = 2*dlat*ecc*c2lat</span>
+<span class="c1">#     ddD = 2*ddlat*ecc*c2lat - 4*dlat*dlat*ecc*s2lat</span>
+
+<span class="c1">#     # define r and its derivatives</span>
+<span class="c1">#     r = np.vstack((-rp*np.sin(D), np.zeros(len(rp)), -</span>
+<span class="c1">#                   rp*np.cos(D) - ht[1:-1])).T</span>
+<span class="c1">#     rdot = np.vstack((-drp*np.sin(D) - rp*dD*np.cos(D),</span>
+<span class="c1">#                      np.zeros(len(rp)), -drp*np.cos(D) + rp*dD*np.sin(D) - dht)).T</span>
+<span class="c1">#     ci = -ddrp*np.sin(D) - 2.*drp*dD*np.cos(D) - rp * \</span>
+<span class="c1">#         (ddD*np.cos(D) - dD*dD*np.sin(D))</span>
+<span class="c1">#     ck = -ddrp*np.cos(D) + 2.*drp*dD*np.sin(D) + rp * \</span>
+<span class="c1">#         (ddD*np.sin(D) + dD*dD*np.cos(D) - ddht)</span>
+<span class="c1">#     rdotdot = np.vstack((ci, np.zeros(len(ci)), ck)).T</span>
+
+<span class="c1">#     # define w and derivative</span>
+<span class="c1">#     w = np.vstack(((dlon + We)*clat, -dlat, -(dlon + We)*slat)).T</span>
+<span class="c1">#     wdot = np.vstack((dlon*clat - (dlon + We)*dlat*slat, - # should 1st term be ddlon??</span>
+<span class="c1">#                      ddlat, -ddlon*slat - (dlon + We)*dlat*clat)).T</span>
+
+<span class="c1">#     w2xrdot = np.cross(2*w, rdot)</span>
+<span class="c1">#     wdotxr = np.cross(wdot, r)</span>
+<span class="c1">#     wxr = np.cross(w, r)</span>
+<span class="c1">#     wxwxr = np.cross(w, wxr)</span>
+
+<span class="c1">#     # calculate wexwexre, centrifugal acceleration due to the Earth</span>
+<span class="c1">#     # re = np.vstack((-rp*np.sin(D), np.zeros(len(rp)), -rp*np.cos(D))).T # this is actually used, comment out?</span>
+<span class="c1">#     we = np.vstack((We*clat, np.zeros(len(slat)), -We*slat)).T</span>
+<span class="c1">#     # wexre = np.cross(we, re) # this is actually used, comment out?</span>
+<span class="c1">#     # wexwexre = np.cross(we, wexre) # this is actually used, comment out?</span>
+<span class="c1">#     wexr = np.cross(we, r)</span>
+<span class="c1">#     wexwexr = np.cross(we, wexr)</span>
+
+<span class="c1">#     # calculate total acceleration for the aircraft</span>
+<span class="c1">#     a = rdotdot + w2xrdot + wdotxr + wxwxr</span>
+
+<span class="c1">#     # Eotvos correction is the vertical component of the total acceleration of</span>
+<span class="c1">#     # the aircraft minus the centrifugal acceleration of the Earth, convert to mGal</span>
+<span class="c1">#     E = (a[:, 2] - wexwexr[:, 2])*mps2mgal</span>
+<span class="c1">#     E = np.hstack((E[0], E, E[-1]))</span>
+
+<span class="c1">#     return E</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Apr 29, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

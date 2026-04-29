@@ -1,0 +1,2558 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2. Change samping frequency &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=2b22d5ff"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'change_sampling_frequency';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="3. Split survey data into lines" href="split_survey_into_lines.html" />
+    <link rel="prev" title="1. Reproject data" href="reproject_data.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g8f4514fc4" />
+    <meta name="docbuild:last-update" content="Apr 29, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="reproject_data.html">1. Reproject data</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">2. Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="split_survey_into_lines.html">3. Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="along_track_distance.html">4. Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filtering_data_in_1D.html">5. Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="vertical_acceleration_correction.html">1. Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eotvos_correction.html">2. Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal_gravity_correction.html">3. Normal gravity correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="levelling_to_a_grid.html">1. Levelling to a grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="find_survey_intersections.html">2. Find survey intersections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cross_over_errors.html">3. Cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using_equivalent_sources_for_cross_over_errors.html">4. Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tie_line_levelling.html">5. Tie line levelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="equivalent_source_levelling.html">6. Levelling with equivalent sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assessing_levelling_results.html">7. Assessing levelling results</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.line_levelling.html">airbornegeo.line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.iterative_line_levelling.html">airbornegeo.iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eotvos_correction_glicken.html">airbornegeo.eotvos_correction_glicken</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/airbornegeo/airbornegeo/main?urlpath=lab/tree/docs/change_sampling_frequency.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/change_sampling_frequency.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Fchange_sampling_frequency.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/change_sampling_frequency.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Change samping frequency</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reduce-sampling-frequency">2.1. Reduce sampling frequency</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Block-reduce-by-distance">2.1.1. Block-reduce by distance</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Block-reduce-by-time">2.1.2. Block-reduce by time</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Block-reduce-all-lines-in-a-survey">2.2. Block-reduce all lines in a survey</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Increase-or-change-sampling-frequency">2.3. Increase or change sampling frequency</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Resample-all-lines-in-a-survey">2.3.1. Resample all lines in a survey</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Change-samping-frequency">
+<h1><span class="section-number">2. </span>Change samping frequency<a class="headerlink" href="#Change-samping-frequency" title="Link to this heading">#</a></h1>
+<p>Sometimes we require resample survey data at either a heigher or lower sampling frequency. Here we show how to do both.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %load_ext autoreload</span>
+<span class="c1"># %autoreload 2</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">cmocean</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">verde</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">airbornegeo</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/sungw937/airbornegeo/.pixi/envs/default/lib/python3.14/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/AGAP_gravity_survey_processed.csv&quot;</span><span class="p">)</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span>
+    <span class="p">[</span>
+        <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">][::</span><span class="mi">5</span><span class="p">]</span>  <span class="c1"># every 5th point</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>distance_along_line</th>
+      <th>grav_disturbance_filt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.000024e+06</td>
+      <td>226237.330771</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>0.000000</td>
+      <td>49.38</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>1.000319e+06</td>
+      <td>226283.309168</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>299.027209</td>
+      <td>49.71</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>1.000613e+06</td>
+      <td>226327.808992</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>595.833891</td>
+      <td>50.01</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>1.000903e+06</td>
+      <td>226371.179740</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>888.955840</td>
+      <td>50.27</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>1.001192e+06</td>
+      <td>226414.710863</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>1181.733769</td>
+      <td>50.52</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<section id="Reduce-sampling-frequency">
+<h2><span class="section-number">2.1. </span>Reduce sampling frequency<a class="headerlink" href="#Reduce-sampling-frequency" title="Link to this heading">#</a></h2>
+<p>For this we will use block-reduction, where we define spatial windows (1D), or blocks (2D), and for all data within the block, retain only the mean or median values.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># extract a single line from the survey</span>
+<span class="n">line_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">8</span><span class="p">]</span>
+<span class="n">line_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>distance_along_line</th>
+      <th>grav_disturbance_filt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>21815</th>
+      <td>1.064934e+06</td>
+      <td>327364.065720</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>202.954030</td>
+      <td>56.97</td>
+    </tr>
+    <tr>
+      <th>21820</th>
+      <td>1.065268e+06</td>
+      <td>327411.697676</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>540.476913</td>
+      <td>55.86</td>
+    </tr>
+    <tr>
+      <th>21825</th>
+      <td>1.065601e+06</td>
+      <td>327464.248325</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>878.033672</td>
+      <td>54.83</td>
+    </tr>
+    <tr>
+      <th>21830</th>
+      <td>1.065934e+06</td>
+      <td>327524.876461</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>1216.298627</td>
+      <td>53.83</td>
+    </tr>
+    <tr>
+      <th>21835</th>
+      <td>1.066267e+06</td>
+      <td>327589.259632</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>1555.357945</td>
+      <td>52.86</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>25255</th>
+      <td>1.321821e+06</td>
+      <td>373028.825792</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>261161.216753</td>
+      <td>-0.68</td>
+    </tr>
+    <tr>
+      <th>25260</th>
+      <td>1.322151e+06</td>
+      <td>373081.094428</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>261495.865268</td>
+      <td>-0.63</td>
+    </tr>
+    <tr>
+      <th>25265</th>
+      <td>1.322480e+06</td>
+      <td>373141.185876</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>261829.523736</td>
+      <td>-0.47</td>
+    </tr>
+    <tr>
+      <th>25270</th>
+      <td>1.322807e+06</td>
+      <td>373203.581372</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>262162.742950</td>
+      <td>-0.22</td>
+    </tr>
+    <tr>
+      <th>25275</th>
+      <td>1.323135e+06</td>
+      <td>373265.681016</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>262496.663302</td>
+      <td>0.07</td>
+    </tr>
+  </tbody>
+</table>
+<p>693 rows × 6 columns</p>
+</div></div>
+</div>
+<section id="Block-reduce-by-distance">
+<h3><span class="section-number">2.1.1. </span>Block-reduce by distance<a class="headerlink" href="#Block-reduce-by-distance" title="Link to this heading">#</a></h3>
+<p>By setting <code class="docutils literal notranslate"><span class="pre">reduce_by</span></code> to ‘distance_along_line’ and <code class="docutils literal notranslate"><span class="pre">spacing</span></code> to 2000, we can block reduce the data to have 1 point every 2000 meters.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">blocked_line</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">block_reduce</span><span class="p">(</span>
+    <span class="n">line_df</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="n">reduce_by</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">blocked_line</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>distance_along_line</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>grav_disturbance_filt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1047.166150</td>
+      <td>1.065768e+06</td>
+      <td>327494.562393</td>
+      <td>8.0</td>
+      <td>1.230574e+09</td>
+      <td>54.330</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>3090.706931</td>
+      <td>1.067777e+06</td>
+      <td>327868.671771</td>
+      <td>8.0</td>
+      <td>1.230575e+09</td>
+      <td>49.095</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>5121.188200</td>
+      <td>1.069772e+06</td>
+      <td>328242.618483</td>
+      <td>8.0</td>
+      <td>1.230575e+09</td>
+      <td>47.350</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>7161.536703</td>
+      <td>1.071772e+06</td>
+      <td>328645.464282</td>
+      <td>8.0</td>
+      <td>1.230575e+09</td>
+      <td>47.825</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>9206.329651</td>
+      <td>1.073790e+06</td>
+      <td>328976.197080</td>
+      <td>8.0</td>
+      <td>1.230575e+09</td>
+      <td>48.940</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>112</th>
+      <td>253340.621952</td>
+      <td>1.314120e+06</td>
+      <td>371682.595111</td>
+      <td>8.0</td>
+      <td>1.230578e+09</td>
+      <td>-2.910</td>
+    </tr>
+    <tr>
+      <th>113</th>
+      <td>255348.383383</td>
+      <td>1.316093e+06</td>
+      <td>372053.647164</td>
+      <td>8.0</td>
+      <td>1.230578e+09</td>
+      <td>-0.215</td>
+    </tr>
+    <tr>
+      <th>114</th>
+      <td>257337.687975</td>
+      <td>1.318042e+06</td>
+      <td>372450.672575</td>
+      <td>8.0</td>
+      <td>1.230578e+09</td>
+      <td>-0.105</td>
+    </tr>
+    <tr>
+      <th>115</th>
+      <td>259494.763940</td>
+      <td>1.320169e+06</td>
+      <td>372809.857086</td>
+      <td>8.0</td>
+      <td>1.230578e+09</td>
+      <td>-0.080</td>
+    </tr>
+    <tr>
+      <th>116</th>
+      <td>261662.694502</td>
+      <td>1.322315e+06</td>
+      <td>373111.140152</td>
+      <td>8.0</td>
+      <td>1.230578e+09</td>
+      <td>-0.540</td>
+    </tr>
+  </tbody>
+</table>
+<p>117 rows × 6 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">blocked_line</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rx&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Block-reduced data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Gravity disturbance (mGal)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;Gravity disturbance (mGal)&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/change_sampling_frequency_7_1.png" src="_images/change_sampling_frequency_7_1.png" />
+</div>
+</div>
+</section>
+<section id="Block-reduce-by-time">
+<h3><span class="section-number">2.1.2. </span>Block-reduce by time<a class="headerlink" href="#Block-reduce-by-time" title="Link to this heading">#</a></h3>
+<p>By setting <code class="docutils literal notranslate"><span class="pre">reduce_by</span></code> to ‘unixtime’ and <code class="docutils literal notranslate"><span class="pre">spacing</span></code> to 60, we can block reduce the data to have 1 point every minute along the flight.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">blocked_line</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">block_reduce</span><span class="p">(</span>
+    <span class="n">line_df</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">reduce_by</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">blocked_line</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>unixtime</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>distance_along_line</th>
+      <th>grav_disturbance_filt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.230575e+09</td>
+      <td>1.066938e+06</td>
+      <td>327715.929722</td>
+      <td>8.0</td>
+      <td>2238.340303</td>
+      <td>51.000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.230575e+09</td>
+      <td>1.071104e+06</td>
+      <td>328504.882220</td>
+      <td>8.0</td>
+      <td>6478.392083</td>
+      <td>47.520</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.230575e+09</td>
+      <td>1.075127e+06</td>
+      <td>329234.502637</td>
+      <td>8.0</td>
+      <td>10568.251984</td>
+      <td>50.170</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.230575e+09</td>
+      <td>1.079154e+06</td>
+      <td>329908.814386</td>
+      <td>8.0</td>
+      <td>14652.187462</td>
+      <td>55.325</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.230575e+09</td>
+      <td>1.083161e+06</td>
+      <td>330641.426426</td>
+      <td>8.0</td>
+      <td>18725.126925</td>
+      <td>65.610</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>1.230575e+09</td>
+      <td>1.087190e+06</td>
+      <td>331337.323567</td>
+      <td>8.0</td>
+      <td>22814.338307</td>
+      <td>79.745</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1.230575e+09</td>
+      <td>1.091191e+06</td>
+      <td>332033.787693</td>
+      <td>8.0</td>
+      <td>26875.778337</td>
+      <td>77.205</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1.230575e+09</td>
+      <td>1.095183e+06</td>
+      <td>332703.209265</td>
+      <td>8.0</td>
+      <td>30924.850905</td>
+      <td>64.805</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1.230575e+09</td>
+      <td>1.099178e+06</td>
+      <td>333472.214395</td>
+      <td>8.0</td>
+      <td>34993.496976</td>
+      <td>55.010</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1.230575e+09</td>
+      <td>1.103235e+06</td>
+      <td>334123.659321</td>
+      <td>8.0</td>
+      <td>39103.107669</td>
+      <td>55.590</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>1.230575e+09</td>
+      <td>1.107275e+06</td>
+      <td>334901.733123</td>
+      <td>8.0</td>
+      <td>43218.959146</td>
+      <td>65.860</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>1.230575e+09</td>
+      <td>1.111307e+06</td>
+      <td>335619.711865</td>
+      <td>8.0</td>
+      <td>47314.771218</td>
+      <td>72.945</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>1.230575e+09</td>
+      <td>1.115317e+06</td>
+      <td>336389.143940</td>
+      <td>8.0</td>
+      <td>51397.427055</td>
+      <td>74.340</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>1.230575e+09</td>
+      <td>1.119366e+06</td>
+      <td>337069.899340</td>
+      <td>8.0</td>
+      <td>55504.074613</td>
+      <td>70.085</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>1.230575e+09</td>
+      <td>1.123429e+06</td>
+      <td>337768.797529</td>
+      <td>8.0</td>
+      <td>59627.594745</td>
+      <td>67.820</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>1.230575e+09</td>
+      <td>1.127536e+06</td>
+      <td>338479.723430</td>
+      <td>8.0</td>
+      <td>63796.259066</td>
+      <td>67.440</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>1.230575e+09</td>
+      <td>1.131594e+06</td>
+      <td>339225.142330</td>
+      <td>8.0</td>
+      <td>67922.125038</td>
+      <td>68.260</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>1.230576e+09</td>
+      <td>1.135653e+06</td>
+      <td>339962.119547</td>
+      <td>8.0</td>
+      <td>72048.102308</td>
+      <td>73.650</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>1.230576e+09</td>
+      <td>1.139719e+06</td>
+      <td>340699.928480</td>
+      <td>8.0</td>
+      <td>76180.815681</td>
+      <td>76.095</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>1.230576e+09</td>
+      <td>1.143845e+06</td>
+      <td>341372.683453</td>
+      <td>8.0</td>
+      <td>80362.222847</td>
+      <td>75.220</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>1.230576e+09</td>
+      <td>1.147919e+06</td>
+      <td>342125.646514</td>
+      <td>8.0</td>
+      <td>84504.959569</td>
+      <td>77.040</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>1.230576e+09</td>
+      <td>1.151992e+06</td>
+      <td>342934.309415</td>
+      <td>8.0</td>
+      <td>88658.491303</td>
+      <td>80.355</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>1.230576e+09</td>
+      <td>1.156091e+06</td>
+      <td>343656.271859</td>
+      <td>8.0</td>
+      <td>92820.318499</td>
+      <td>81.385</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>1.230576e+09</td>
+      <td>1.160175e+06</td>
+      <td>344306.805183</td>
+      <td>8.0</td>
+      <td>96956.462573</td>
+      <td>79.985</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>1.230576e+09</td>
+      <td>1.164242e+06</td>
+      <td>344997.877623</td>
+      <td>8.0</td>
+      <td>101082.151303</td>
+      <td>82.340</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>1.230576e+09</td>
+      <td>1.168297e+06</td>
+      <td>345775.218460</td>
+      <td>8.0</td>
+      <td>105211.464153</td>
+      <td>82.630</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>1.230576e+09</td>
+      <td>1.172314e+06</td>
+      <td>346480.029468</td>
+      <td>8.0</td>
+      <td>109289.435944</td>
+      <td>78.965</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>1.230576e+09</td>
+      <td>1.176367e+06</td>
+      <td>347223.411802</td>
+      <td>8.0</td>
+      <td>113411.160179</td>
+      <td>70.240</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>1.230576e+09</td>
+      <td>1.180416e+06</td>
+      <td>347986.772081</td>
+      <td>8.0</td>
+      <td>117531.321599</td>
+      <td>51.195</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>1.230576e+09</td>
+      <td>1.182771e+06</td>
+      <td>348403.645082</td>
+      <td>8.0</td>
+      <td>119923.337229</td>
+      <td>44.190</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>1.230577e+09</td>
+      <td>1.211823e+06</td>
+      <td>353498.343522</td>
+      <td>8.0</td>
+      <td>149419.492581</td>
+      <td>12.760</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>1.230577e+09</td>
+      <td>1.214584e+06</td>
+      <td>353986.687628</td>
+      <td>8.0</td>
+      <td>152223.872377</td>
+      <td>11.300</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>1.230577e+09</td>
+      <td>1.218506e+06</td>
+      <td>354727.993545</td>
+      <td>8.0</td>
+      <td>156214.784520</td>
+      <td>26.690</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>1.230577e+09</td>
+      <td>1.222421e+06</td>
+      <td>355417.092389</td>
+      <td>8.0</td>
+      <td>160190.394213</td>
+      <td>48.300</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>1.230577e+09</td>
+      <td>1.226381e+06</td>
+      <td>356077.256699</td>
+      <td>8.0</td>
+      <td>164205.920591</td>
+      <td>54.295</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>1.230577e+09</td>
+      <td>1.230297e+06</td>
+      <td>356713.390719</td>
+      <td>8.0</td>
+      <td>168172.906714</td>
+      <td>40.040</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>1.230577e+09</td>
+      <td>1.234219e+06</td>
+      <td>357478.513974</td>
+      <td>8.0</td>
+      <td>172169.343230</td>
+      <td>28.870</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>1.230577e+09</td>
+      <td>1.238212e+06</td>
+      <td>358212.047773</td>
+      <td>8.0</td>
+      <td>176229.168433</td>
+      <td>26.620</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>1.230577e+09</td>
+      <td>1.242174e+06</td>
+      <td>358907.357596</td>
+      <td>8.0</td>
+      <td>180253.014537</td>
+      <td>26.830</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>1.230577e+09</td>
+      <td>1.246066e+06</td>
+      <td>359628.897779</td>
+      <td>8.0</td>
+      <td>184210.857365</td>
+      <td>26.485</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>1.230577e+09</td>
+      <td>1.249953e+06</td>
+      <td>360425.934587</td>
+      <td>8.0</td>
+      <td>188179.685169</td>
+      <td>22.535</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>1.230577e+09</td>
+      <td>1.253873e+06</td>
+      <td>361124.132043</td>
+      <td>8.0</td>
+      <td>192161.057893</td>
+      <td>11.730</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td>1.230577e+09</td>
+      <td>1.257741e+06</td>
+      <td>361717.012417</td>
+      <td>8.0</td>
+      <td>196075.183679</td>
+      <td>-4.550</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>1.230577e+09</td>
+      <td>1.261620e+06</td>
+      <td>362382.864099</td>
+      <td>8.0</td>
+      <td>200011.450462</td>
+      <td>-18.895</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>1.230577e+09</td>
+      <td>1.265552e+06</td>
+      <td>363078.923557</td>
+      <td>8.0</td>
+      <td>204005.086331</td>
+      <td>-20.120</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>1.230578e+09</td>
+      <td>1.269464e+06</td>
+      <td>363800.349071</td>
+      <td>8.0</td>
+      <td>207983.751052</td>
+      <td>-6.155</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>1.230578e+09</td>
+      <td>1.273413e+06</td>
+      <td>364516.976938</td>
+      <td>8.0</td>
+      <td>211998.065357</td>
+      <td>3.020</td>
+    </tr>
+    <tr>
+      <th>47</th>
+      <td>1.230578e+09</td>
+      <td>1.277348e+06</td>
+      <td>365264.133863</td>
+      <td>8.0</td>
+      <td>216003.154676</td>
+      <td>0.105</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>1.230578e+09</td>
+      <td>1.281333e+06</td>
+      <td>365925.142914</td>
+      <td>8.0</td>
+      <td>220042.679199</td>
+      <td>-2.810</td>
+    </tr>
+    <tr>
+      <th>49</th>
+      <td>1.230578e+09</td>
+      <td>1.285278e+06</td>
+      <td>366626.884646</td>
+      <td>8.0</td>
+      <td>224050.417946</td>
+      <td>-2.310</td>
+    </tr>
+    <tr>
+      <th>50</th>
+      <td>1.230578e+09</td>
+      <td>1.289264e+06</td>
+      <td>367471.596501</td>
+      <td>8.0</td>
+      <td>228125.874343</td>
+      <td>-7.550</td>
+    </tr>
+    <tr>
+      <th>51</th>
+      <td>1.230578e+09</td>
+      <td>1.293265e+06</td>
+      <td>368086.882222</td>
+      <td>8.0</td>
+      <td>232174.675987</td>
+      <td>-14.815</td>
+    </tr>
+    <tr>
+      <th>52</th>
+      <td>1.230578e+09</td>
+      <td>1.297292e+06</td>
+      <td>368751.990730</td>
+      <td>8.0</td>
+      <td>236256.680607</td>
+      <td>-23.610</td>
+    </tr>
+    <tr>
+      <th>53</th>
+      <td>1.230578e+09</td>
+      <td>1.301258e+06</td>
+      <td>369414.428630</td>
+      <td>8.0</td>
+      <td>240278.527138</td>
+      <td>-27.105</td>
+    </tr>
+    <tr>
+      <th>54</th>
+      <td>1.230578e+09</td>
+      <td>1.305291e+06</td>
+      <td>370133.757283</td>
+      <td>8.0</td>
+      <td>244375.708604</td>
+      <td>-17.365</td>
+    </tr>
+    <tr>
+      <th>55</th>
+      <td>1.230578e+09</td>
+      <td>1.309250e+06</td>
+      <td>370888.697748</td>
+      <td>8.0</td>
+      <td>248405.798820</td>
+      <td>-11.595</td>
+    </tr>
+    <tr>
+      <th>56</th>
+      <td>1.230578e+09</td>
+      <td>1.313144e+06</td>
+      <td>371528.997319</td>
+      <td>8.0</td>
+      <td>252352.985549</td>
+      <td>-4.720</td>
+    </tr>
+    <tr>
+      <th>57</th>
+      <td>1.230578e+09</td>
+      <td>1.317074e+06</td>
+      <td>372257.091913</td>
+      <td>8.0</td>
+      <td>256350.700822</td>
+      <td>-0.120</td>
+    </tr>
+    <tr>
+      <th>58</th>
+      <td>1.230578e+09</td>
+      <td>1.321157e+06</td>
+      <td>372944.333460</td>
+      <td>8.0</td>
+      <td>260492.125823</td>
+      <td>-0.220</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span> <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">blocked_line</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rx&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Block-reduced data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Gravity disturbance (mGal)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;Gravity disturbance (mGal)&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/change_sampling_frequency_10_1.png" src="_images/change_sampling_frequency_10_1.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Block-reduce-all-lines-in-a-survey">
+<h2><span class="section-number">2.2. </span>Block-reduce all lines in a survey<a class="headerlink" href="#Block-reduce-all-lines-in-a-survey" title="Link to this heading">#</a></h2>
+<p>By supplying ‘line’ to the <code class="docutils literal notranslate"><span class="pre">groupby_column</span></code>, the block-reduce occurs only on 1 line at a time. This means for lines that are closer together than the spacing, or where lines cross, the values from other lines within the same block are not included in the block-reduction.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">blocked_survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">block_reduce</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>
+    <span class="n">reduce_by</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="n">groupby_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">blocked_survey</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Segments: 100%|██████████| 100/100 [00:03&lt;00:00, 25.16it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>distance_along_line</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>unixtime</th>
+      <th>grav_disturbance_filt</th>
+      <th>line</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2384.024088</td>
+      <td>1.002378e+06</td>
+      <td>226611.524394</td>
+      <td>1.229507e+09</td>
+      <td>51.06</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>7455.801489</td>
+      <td>1.007376e+06</td>
+      <td>227469.843549</td>
+      <td>1.229507e+09</td>
+      <td>54.27</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>12553.598397</td>
+      <td>1.012393e+06</td>
+      <td>228353.271366</td>
+      <td>1.229507e+09</td>
+      <td>60.07</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>17554.808264</td>
+      <td>1.017305e+06</td>
+      <td>229272.573119</td>
+      <td>1.229507e+09</td>
+      <td>66.20</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>22537.902177</td>
+      <td>1.022217e+06</td>
+      <td>230102.183617</td>
+      <td>1.229507e+09</td>
+      <td>79.94</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>4336</th>
+      <td>56739.972830</td>
+      <td>1.584069e+06</td>
+      <td>518323.937228</td>
+      <td>1.230381e+09</td>
+      <td>-5.63</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>4337</th>
+      <td>61640.015776</td>
+      <td>1.584931e+06</td>
+      <td>513501.388032</td>
+      <td>1.230381e+09</td>
+      <td>-0.32</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>4338</th>
+      <td>66624.305342</td>
+      <td>1.585845e+06</td>
+      <td>508603.610165</td>
+      <td>1.230382e+09</td>
+      <td>-1.19</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>4339</th>
+      <td>71654.861120</td>
+      <td>1.586682e+06</td>
+      <td>503644.752003</td>
+      <td>1.230382e+09</td>
+      <td>-7.01</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>4340</th>
+      <td>76638.943754</td>
+      <td>1.587565e+06</td>
+      <td>498740.092633</td>
+      <td>1.230382e+09</td>
+      <td>-17.07</td>
+      <td>100</td>
+    </tr>
+  </tbody>
+</table>
+<p>4341 rows × 6 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">max_abs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">grav_disturbance_filt</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/change_sampling_frequency_13_0.png" src="_images/change_sampling_frequency_13_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">blocked_survey</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Block-reduced data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/change_sampling_frequency_14_0.png" src="_images/change_sampling_frequency_14_0.png" />
+</div>
+</div>
+</section>
+<section id="Increase-or-change-sampling-frequency">
+<h2><span class="section-number">2.3. </span>Increase or change sampling frequency<a class="headerlink" href="#Increase-or-change-sampling-frequency" title="Link to this heading">#</a></h2>
+<p>Below we show how to increase the sampling frequency, or resample the data at a specified frequency. This can be done based on any column, but typically you would resample based on a distance along line column, or a time column.</p>
+<p>As we can see below, the line data has a value every ~25 seconds.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># extract a single line from the survey</span>
+<span class="n">line_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">8</span><span class="p">]</span>
+<span class="c1"># for demonstration, only retain every 5th point</span>
+<span class="n">line_df</span> <span class="o">=</span> <span class="n">line_df</span><span class="p">[::</span><span class="mi">5</span><span class="p">]</span>
+
+<span class="n">line_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>distance_along_line</th>
+      <th>grav_disturbance_filt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>21815</th>
+      <td>1.064934e+06</td>
+      <td>327364.065720</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>202.954030</td>
+      <td>56.97</td>
+    </tr>
+    <tr>
+      <th>21840</th>
+      <td>1.066602e+06</td>
+      <td>327650.536827</td>
+      <td>8</td>
+      <td>1.230575e+09</td>
+      <td>1895.906697</td>
+      <td>51.91</td>
+    </tr>
+    <tr>
+      <th>21865</th>
+      <td>1.068273e+06</td>
+      <td>327963.921140</td>
+      <td>8</td>
+      <td>1.230575e+09</td>
+      <td>3596.305820</td>
+      <td>48.32</td>
+    </tr>
+    <tr>
+      <th>21890</th>
+      <td>1.069939e+06</td>
+      <td>328274.457926</td>
+      <td>8</td>
+      <td>1.230575e+09</td>
+      <td>5291.379412</td>
+      <td>47.31</td>
+    </tr>
+    <tr>
+      <th>21915</th>
+      <td>1.071605e+06</td>
+      <td>328613.652292</td>
+      <td>8</td>
+      <td>1.230575e+09</td>
+      <td>6991.055147</td>
+      <td>47.73</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">resampled_line</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
+    <span class="n">line_df</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">resample_by</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">maxdist</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>  <span class="c1"># only retain data within 10 seconds of original data</span>
+<span class="p">)</span>
+<span class="n">resampled_line</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>distance_along_line</th>
+      <th>grav_disturbance_filt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.064934e+06</td>
+      <td>327364.065720</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>202.954030</td>
+      <td>56.970000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.065000e+06</td>
+      <td>327374.278903</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>270.282928</td>
+      <td>56.760883</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.065067e+06</td>
+      <td>327384.624404</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>337.653892</td>
+      <td>56.551485</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.065133e+06</td>
+      <td>327395.098503</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>405.065665</td>
+      <td>56.341914</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.065200e+06</td>
+      <td>327405.697482</td>
+      <td>8</td>
+      <td>1.230574e+09</td>
+      <td>472.516991</td>
+      <td>56.132282</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2894</th>
+      <td>1.322214e+06</td>
+      <td>373102.209570</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>261561.264904</td>
+      <td>-0.514936</td>
+    </tr>
+    <tr>
+      <th>2895</th>
+      <td>1.322281e+06</td>
+      <td>373111.889622</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>261628.289612</td>
+      <td>-0.506920</td>
+    </tr>
+    <tr>
+      <th>2896</th>
+      <td>1.322347e+06</td>
+      <td>373121.610518</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>261695.340734</td>
+      <td>-0.496811</td>
+    </tr>
+    <tr>
+      <th>2897</th>
+      <td>1.322413e+06</td>
+      <td>373131.375016</td>
+      <td>7</td>
+      <td>1.230578e+09</td>
+      <td>261762.418649</td>
+      <td>-0.484531</td>
+    </tr>
+    <tr>
+      <th>2898</th>
+      <td>1.322480e+06</td>
+      <td>373141.185876</td>
+      <td>8</td>
+      <td>1.230578e+09</td>
+      <td>261829.523736</td>
+      <td>-0.470000</td>
+    </tr>
+  </tbody>
+</table>
+<p>2899 rows × 6 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">resampled_line</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span> <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Resampled data&quot;</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span> <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rx&quot;</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Gravity disturbance (mGal)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;Gravity disturbance (mGal)&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/change_sampling_frequency_18_1.png" src="_images/change_sampling_frequency_18_1.png" />
+</div>
+</div>
+<section id="Resample-all-lines-in-a-survey">
+<h3><span class="section-number">2.3.1. </span>Resample all lines in a survey<a class="headerlink" href="#Resample-all-lines-in-a-survey" title="Link to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for demonstration, only retain every 20th point</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[::</span><span class="mi">20</span><span class="p">]</span>
+<span class="n">data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>distance_along_line</th>
+      <th>grav_disturbance_filt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.000024e+06</td>
+      <td>226237.330771</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>0.000000</td>
+      <td>49.38</td>
+    </tr>
+    <tr>
+      <th>100</th>
+      <td>1.005893e+06</td>
+      <td>227198.570832</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>5947.995975</td>
+      <td>52.61</td>
+    </tr>
+    <tr>
+      <th>200</th>
+      <td>1.011809e+06</td>
+      <td>228276.845873</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>11964.181140</td>
+      <td>59.36</td>
+    </tr>
+    <tr>
+      <th>300</th>
+      <td>1.017593e+06</td>
+      <td>229333.885338</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>17849.297147</td>
+      <td>66.73</td>
+    </tr>
+    <tr>
+      <th>400</th>
+      <td>1.023377e+06</td>
+      <td>230253.701428</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>23706.831130</td>
+      <td>84.16</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>333500</th>
+      <td>1.583475e+06</td>
+      <td>521644.499480</td>
+      <td>100</td>
+      <td>1.230381e+09</td>
+      <td>53366.133717</td>
+      <td>-16.62</td>
+    </tr>
+    <tr>
+      <th>333600</th>
+      <td>1.584374e+06</td>
+      <td>516551.941983</td>
+      <td>100</td>
+      <td>1.230381e+09</td>
+      <td>58538.402864</td>
+      <td>-2.12</td>
+    </tr>
+    <tr>
+      <th>333700</th>
+      <td>1.585310e+06</td>
+      <td>511454.712291</td>
+      <td>100</td>
+      <td>1.230381e+09</td>
+      <td>63721.813255</td>
+      <td>-0.39</td>
+    </tr>
+    <tr>
+      <th>333800</th>
+      <td>1.586227e+06</td>
+      <td>506268.485621</td>
+      <td>100</td>
+      <td>1.230382e+09</td>
+      <td>68991.129548</td>
+      <td>-2.40</td>
+    </tr>
+    <tr>
+      <th>333900</th>
+      <td>1.587174e+06</td>
+      <td>501058.057944</td>
+      <td>100</td>
+      <td>1.230382e+09</td>
+      <td>74288.046102</td>
+      <td>-13.27</td>
+    </tr>
+  </tbody>
+</table>
+<p>3340 rows × 6 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">resampled_survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">resample_by</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">maxdist</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>  <span class="c1"># only retain data within 60 seconds of original data</span>
+    <span class="n">groupby_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">resampled_survey</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Segments: 100%|██████████| 100/100 [00:00&lt;00:00, 119.54it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>distance_along_line</th>
+      <th>grav_disturbance_filt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.000024e+06</td>
+      <td>226237.330771</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>0.000000</td>
+      <td>49.380000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.000081e+06</td>
+      <td>226246.043556</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>58.214919</td>
+      <td>49.369844</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.000139e+06</td>
+      <td>226254.777702</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>116.464621</td>
+      <td>49.360794</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.000197e+06</td>
+      <td>226263.533111</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>174.748826</td>
+      <td>49.352843</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.000254e+06</td>
+      <td>226272.309685</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>233.067249</td>
+      <td>49.345984</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>325508</th>
+      <td>1.587135e+06</td>
+      <td>501265.625596</td>
+      <td>100</td>
+      <td>1.230382e+09</td>
+      <td>74076.801591</td>
+      <td>-12.538461</td>
+    </tr>
+    <tr>
+      <th>325509</th>
+      <td>1.587144e+06</td>
+      <td>501213.721966</td>
+      <td>100</td>
+      <td>1.230382e+09</td>
+      <td>74129.622150</td>
+      <td>-12.718538</td>
+    </tr>
+    <tr>
+      <th>325510</th>
+      <td>1.587154e+06</td>
+      <td>501161.826077</td>
+      <td>100</td>
+      <td>1.230382e+09</td>
+      <td>74182.436484</td>
+      <td>-12.900480</td>
+    </tr>
+    <tr>
+      <th>325511</th>
+      <td>1.587164e+06</td>
+      <td>501109.938035</td>
+      <td>100</td>
+      <td>1.230382e+09</td>
+      <td>74235.244499</td>
+      <td>-13.084297</td>
+    </tr>
+    <tr>
+      <th>325512</th>
+      <td>1.587174e+06</td>
+      <td>501058.057944</td>
+      <td>100</td>
+      <td>1.230382e+09</td>
+      <td>74288.046102</td>
+      <td>-13.270000</td>
+    </tr>
+  </tbody>
+</table>
+<p>325513 rows × 6 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">max_abs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">grav_disturbance_filt</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/change_sampling_frequency_22_0.png" src="_images/change_sampling_frequency_22_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">resampled_survey</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Resampled data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/change_sampling_frequency_23_0.png" src="_images/change_sampling_frequency_23_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="reproject_data.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">1. </span>Reproject data</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="split_survey_into_lines.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="section-number">3. </span>Split survey data into lines</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reduce-sampling-frequency">2.1. Reduce sampling frequency</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Block-reduce-by-distance">2.1.1. Block-reduce by distance</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Block-reduce-by-time">2.1.2. Block-reduce by time</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Block-reduce-all-lines-in-a-survey">2.2. Block-reduce all lines in a survey</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Increase-or-change-sampling-frequency">2.3. Increase or change sampling frequency</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Resample-all-lines-in-a-survey">2.3.1. Resample all lines in a survey</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Apr 29, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

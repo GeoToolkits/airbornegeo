@@ -1,0 +1,892 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>airbornegeo.filtering &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=2b22d5ff"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/airbornegeo/filtering';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g8f4514fc4" />
+    <meta name="docbuild:last-update" content="Apr 29, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../reproject_data.html">1. Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../change_sampling_frequency.html">2. Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../split_survey_into_lines.html">3. Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../along_track_distance.html">4. Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filtering_data_in_1D.html">5. Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../vertical_acceleration_correction.html">1. Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../eotvos_correction.html">2. Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../normal_gravity_correction.html">3. Normal gravity correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../levelling_to_a_grid.html">1. Levelling to a grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../find_survey_intersections.html">2. Find survey intersections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cross_over_errors.html">3. Cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../using_equivalent_sources_for_cross_over_errors.html">4. Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tie_line_levelling.html">5. Tie line levelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equivalent_source_levelling.html">6. Levelling with equivalent sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../assessing_levelling_results.html">7. Assessing levelling results</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.line_levelling.html">airbornegeo.line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.iterative_line_levelling.html">airbornegeo.iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.eotvos_correction_glicken.html">airbornegeo.eotvos_correction_glicken</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2F_modules/airbornegeo/filtering.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for airbornegeo.filtering</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">harmonica</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pygmt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">verde</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xrft</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.autonotebook</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pad1d</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">independent_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">width_percentage</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pad a dataframe in the front and back, which reduces edge effects for 1D filtering.</span>
+<span class="sd">    The pad width is given by a percentage of the range of values in column given by</span>
+<span class="sd">    independent_column. For this column, the pad values are extrapolation of the values.</span>
+<span class="sd">    For example, if independent_column is along track distance in meters, from 0 to 100,</span>
+<span class="sd">    and width_percentage is 10, than a 10 m pad would be added to the beginning and</span>
+<span class="sd">    end of the data, with the same spacing as the median spacing of the along track</span>
+<span class="sd">    distances. The pad values for the data column are chosen based on the supplied mode.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        _description_</span>
+<span class="sd">    data_column : str</span>
+<span class="sd">        _description_</span>
+<span class="sd">    independent_column : str</span>
+<span class="sd">        _description_</span>
+<span class="sd">    width_percentage : float</span>
+<span class="sd">        The width of the pad to add before and after the data in percentage of the</span>
+<span class="sd">        range of values provided by independent_column, by default 10.</span>
+<span class="sd">    mode : str, optional</span>
+<span class="sd">        The mode to use for padding, by default is &quot;reflect&quot;.</span>
+<span class="sd">    kwargs : Any, optional</span>
+<span class="sd">        Keyword arguments to pass directly to np.pad, such as stat_length and</span>
+<span class="sd">        constant_values.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        A dataframe with a column &#39;true_index&#39; which can be used to reset the dataframe</span>
+<span class="sd">        to the index it had before padding, and the padded data and independent variable</span>
+<span class="sd">        columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="n">independent_column</span><span class="p">,</span> <span class="n">data_column</span><span class="p">]]</span>
+
+    <span class="c1"># get data spacing</span>
+    <span class="n">filter_by</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">independent_column</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+    <span class="n">spacing</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">filter_by</span><span class="p">))</span>
+
+    <span class="c1"># pad as percentage of filter_by range</span>
+    <span class="n">pad_dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">filter_by</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">filter_by</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="p">(</span><span class="n">width_percentage</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">pad_dist</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">pad_dist</span> <span class="o">/</span> <span class="n">spacing</span><span class="p">)</span> <span class="o">*</span> <span class="n">spacing</span>
+
+    <span class="c1"># get the number of points to pad</span>
+    <span class="n">n_pad</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pad_dist</span> <span class="o">/</span> <span class="n">spacing</span><span class="p">)</span>
+
+    <span class="c1"># add pad points to filter_by values</span>
+    <span class="n">lower_pad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+        <span class="n">filter_by</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">pad_dist</span><span class="p">,</span>
+        <span class="n">filter_by</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">spacing</span><span class="p">,</span>
+        <span class="n">n_pad</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">upper_pad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+        <span class="n">filter_by</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+        <span class="n">filter_by</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">pad_dist</span><span class="p">,</span>
+        <span class="n">n_pad</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">lower_pad</span><span class="p">,</span> <span class="n">upper_pad</span><span class="p">))</span>
+    <span class="n">new_dist</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">independent_column</span><span class="p">:</span> <span class="n">vals</span><span class="p">})</span>
+
+    <span class="c1"># pad the line in the front and back</span>
+    <span class="n">padded</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span> <span class="n">new_dist</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">independent_column</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">padded</span> <span class="o">=</span> <span class="n">padded</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;true_index&quot;</span><span class="p">})</span>
+
+    <span class="c1"># get unpadded data</span>
+    <span class="n">unpadded_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+    <span class="c1"># pad this with numpy</span>
+    <span class="n">padded_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+        <span class="n">unpadded_data</span><span class="p">,</span>
+        <span class="n">pad_width</span><span class="o">=</span><span class="n">n_pad</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># add padded data to padded dataframe</span>
+    <span class="n">padded</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">padded_data</span>
+
+    <span class="k">return</span> <span class="n">padded</span>
+
+
+<div class="viewcode-block" id="filter_line">
+<a class="viewcode-back" href="../../api/generated/airbornegeo.filter_line.html#airbornegeo.filter_line">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">filter_line</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">filter_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">filter_by_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">groupby_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pad_width_percentage</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply a 1D filter to a column of a pandas DataFrame along values of another column.</span>
+<span class="sd">    The filter_by_column would typically be either distance along track for a spatial</span>
+<span class="sd">    filter, or a time column, for a temporal filter. The dataframe can be grouped by the</span>
+<span class="sd">    groupby_column before applying the filter. This column could contain flight names,</span>
+<span class="sd">    or lines names. The type of filter is supplied by filter_type, which uses the GMT</span>
+<span class="sd">    string format for filters. For example, if filter_by_column is &quot;distance_along_line&quot;</span>
+<span class="sd">    in meters, and filter_type is &quot;g1000+l&quot;, then this would give a 1000 m low pass</span>
+<span class="sd">    gaussian filter. If filter_by_column is &quot;time&quot; in seconds, then the filter width</span>
+<span class="sd">    would be 1000 seconds. Ends of lines are automatically padded to avoid edge effects.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : pd.DataFrame</span>
+<span class="sd">        Dataframe containing the data points to filter.</span>
+<span class="sd">    filter_type : str</span>
+<span class="sd">        A string with format &quot;&lt;type&gt;&lt;width&gt;+h&quot; where type is GMT filter type, width is</span>
+<span class="sd">        the filter width in same units as filter_by_column, and optional +h switches</span>
+<span class="sd">        from low-pass to high-pass filter; e.g. &quot;g10+h&quot; is a 10m high-pass Gaussian</span>
+<span class="sd">        filter.</span>
+<span class="sd">    data_column : str</span>
+<span class="sd">        The data to filter.</span>
+<span class="sd">    filter_by_column : str, optional</span>
+<span class="sd">        The independent variable to filter against, typically either a time or distance</span>
+<span class="sd">        along track values.</span>
+<span class="sd">    groupby_column : str | None, optional</span>
+<span class="sd">        Column name to group by before filtering, by default None.</span>
+<span class="sd">    pad_width_percentage : float, optional</span>
+<span class="sd">        The width of the pad to add before and after the data in percentage of the</span>
+<span class="sd">        range of values provided by filter_by_column, by default 10.</span>
+<span class="sd">    pad_mode : str, optional</span>
+<span class="sd">        The mode to use for padding, by default is &quot;reflect&quot;.</span>
+<span class="sd">    kwargs : Any, optional</span>
+<span class="sd">        Keyword arguments to pass to np.pad, such as stat_length and</span>
+<span class="sd">        constant_values.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.Series</span>
+<span class="sd">        The filtered data values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">groupby_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># pad the data with pad_mode, and the filter_by_column by extrapolation</span>
+        <span class="n">padded</span> <span class="o">=</span> <span class="n">pad1d</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">data_column</span><span class="o">=</span><span class="n">data_column</span><span class="p">,</span>
+            <span class="n">independent_column</span><span class="o">=</span><span class="n">filter_by_column</span><span class="p">,</span>
+            <span class="n">width_percentage</span><span class="o">=</span><span class="n">pad_width_percentage</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># filter the padded data</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">pygmt</span><span class="o">.</span><span class="n">filter1d</span><span class="p">(</span>
+            <span class="n">padded</span><span class="p">[[</span><span class="n">filter_by_column</span><span class="p">,</span> <span class="n">data_column</span><span class="p">]],</span>
+            <span class="n">end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">time_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">filter_type</span><span class="o">=</span><span class="n">filter_type</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">filter_by_column</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">data_column</span><span class="p">})</span>
+
+        <span class="c1"># un-pad the data</span>
+        <span class="n">filtered</span><span class="p">[</span><span class="s2">&quot;original_index&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">padded</span><span class="o">.</span><span class="n">true_index</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;original_index&quot;</span><span class="p">)</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">filtered</span><span class="p">[</span><span class="n">filtered</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">filtered</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">segment_name</span><span class="p">,</span> <span class="n">segment_data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">groupby_column</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Segments&quot;</span>
+    <span class="p">):</span>
+        <span class="c1"># pad the data with pad_mode, and the filter_by_column by extrapolation</span>
+        <span class="n">padded</span> <span class="o">=</span> <span class="n">pad1d</span><span class="p">(</span>
+            <span class="n">segment_data</span><span class="p">,</span>
+            <span class="n">data_column</span><span class="o">=</span><span class="n">data_column</span><span class="p">,</span>
+            <span class="n">independent_column</span><span class="o">=</span><span class="n">filter_by_column</span><span class="p">,</span>
+            <span class="n">width_percentage</span><span class="o">=</span><span class="n">pad_width_percentage</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># filter the padded data</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">pygmt</span><span class="o">.</span><span class="n">filter1d</span><span class="p">(</span>
+            <span class="n">padded</span><span class="p">[[</span><span class="n">filter_by_column</span><span class="p">,</span> <span class="n">data_column</span><span class="p">]],</span>
+            <span class="n">end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">time_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">filter_type</span><span class="o">=</span><span class="n">filter_type</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">filter_by_column</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">data_column</span><span class="p">})</span>
+
+        <span class="c1"># un-pad the data</span>
+        <span class="n">filtered</span><span class="p">[</span><span class="s2">&quot;original_index&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">padded</span><span class="o">.</span><span class="n">true_index</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;original_index&quot;</span><span class="p">)</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">filtered</span><span class="p">[</span><span class="n">filtered</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">segment_data</span><span class="o">.</span><span class="n">index</span><span class="p">)]</span>
+
+        <span class="c1"># replace original data with filtered data</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">groupby_column</span><span class="p">]</span> <span class="o">==</span> <span class="n">segment_name</span><span class="p">,</span> <span class="n">data_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">filtered</span><span class="p">[</span>
+            <span class="n">data_column</span>
+        <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">data_column</span><span class="p">]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_nearest_grid_fill</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;verde&quot;</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    fill missing values in a grid with the nearest value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grid : xarray.DataArray</span>
+<span class="sd">        grid with missing values</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        choose method of filling, by default &quot;verde&quot;</span>
+<span class="sd">    crs : str | None, optional</span>
+<span class="sd">        if method is &#39;rioxarray&#39;, provide the crs of the grid, in format &#39;epsg:xxxx&#39;,</span>
+<span class="sd">        by default None</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xarray.DataArray</span>
+<span class="sd">        filled grid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: also check out rasterio fillnodata() https://rasterio.readthedocs.io/en/latest/api/rasterio.fill.html#rasterio.fill.fillnodata</span>
+    <span class="c1"># uses https://gdal.org/en/stable/api/gdal_alg.html#_CPPv414GDALFillNodata15GDALRasterBandH15GDALRasterBandHdiiPPc16GDALProgressFuncPv</span>
+    <span class="c1"># can fill with nearest neighbor or inverse distance weighting</span>
+
+    <span class="c1"># get coordinate names</span>
+    <span class="n">original_dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">sizes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="c1"># get original grid name</span>
+    <span class="n">original_name</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;rioxarray&quot;</span><span class="p">:</span>
+        <span class="n">filled</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">set_spatial_dims</span><span class="p">(</span><span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">write_nodata</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">original_name</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;verde&quot;</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">grid_to_table</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">df_dropped</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()]</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_dropped</span><span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">df_dropped</span><span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">region</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">get_region</span><span class="p">((</span><span class="n">df</span><span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
+        <span class="n">filled</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">vd</span><span class="o">.</span><span class="n">KNeighbors</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">df_dropped</span><span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">grid</span><span class="p">(</span>
+                <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span>
+                <span class="n">shape</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="n">data_names</span><span class="o">=</span><span class="n">original_name</span><span class="p">,</span>
+                <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="p">)[</span><span class="n">original_name</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="c1"># elif method == &quot;pygmt&quot;:</span>
+    <span class="c1">#     filled = pygmt.grdfill(grid, mode=&quot;n&quot;, verbose=&quot;q&quot;).rename(original_name)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;method must be &#39;rioxarray&#39;, or &#39;verde&#39;&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># reset coordinate names if changed</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;rename &#39;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">filled</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">filled</span><span class="o">.</span><span class="n">dims</span><span class="p">)):</span> <span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">filled</span><span class="o">.</span><span class="n">dims</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="filter_grid">
+<a class="viewcode-back" href="../../api/generated/airbornegeo.filter_grid.html#airbornegeo.filter_grid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">filter_grid</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">filter_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">height_displacement</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lowpass&quot;</span><span class="p">,</span>
+    <span class="n">pad_width_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear_ramp&quot;</span><span class="p">,</span>
+    <span class="n">pad_constant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pad_end_values</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply a spatial filter to a grid.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grid : xarray.DataArray</span>
+<span class="sd">        grid to filter the values of</span>
+<span class="sd">    filter_width : float, optional</span>
+<span class="sd">        width of the filter in meters, by default None</span>
+<span class="sd">    height_displacement : float, optional</span>
+<span class="sd">        height displacement for upward continuation, relative to observation height, by</span>
+<span class="sd">        default None</span>
+<span class="sd">    filter_type : str, optional</span>
+<span class="sd">        type of filter to use from &#39;lowpass&#39;, &#39;highpass&#39; &#39;up_deriv&#39;, &#39;easting_deriv&#39;,</span>
+<span class="sd">        &#39;northing_deriv&#39;, &#39;up_continue&#39;, or &#39;total_gradient&#39;, by default &quot;lowpass&quot;</span>
+<span class="sd">    pad_width_factor : int, optional</span>
+<span class="sd">        factor of grid width to pad the grid by, by default 3, which equates to a pad</span>
+<span class="sd">        with a width of 1/3 of the grid width.</span>
+<span class="sd">    pad_mode : str, optional</span>
+<span class="sd">        mode of padding, can be &quot;linear&quot;, by default &quot;linear_ramp&quot;</span>
+<span class="sd">    pad_constant : float | None, optional</span>
+<span class="sd">        constant value to use for padding, by default None</span>
+<span class="sd">    pad_end_values : float | None, optional</span>
+<span class="sd">        value to use for end of padding if pad_mode is &quot;linear_ramp&quot;, by default None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xarray.DataArray</span>
+<span class="sd">        a filtered grid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get coordinate names</span>
+    <span class="n">original_dims</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">sizes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="c1"># get original grid name</span>
+    <span class="n">original_name</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="c1"># if there are nan&#39;s, fill them with nearest neighbor</span>
+    <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>  <span class="c1"># noqa: PD003</span>
+        <span class="n">filled</span> <span class="o">=</span> <span class="n">_nearest_grid_fill</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;verde&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filled</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># reset coordinate names if changed</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;rename &#39;&quot;</span><span class="p">)</span>
+        <span class="n">filled</span> <span class="o">=</span> <span class="n">filled</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">filled</span><span class="o">.</span><span class="n">dims</span><span class="p">)):</span> <span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">filled</span><span class="o">.</span><span class="n">dims</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="c1"># define width of padding in each direction</span>
+    <span class="n">pad_width</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">grid</span><span class="p">[</span><span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="n">pad_width_factor</span><span class="p">,</span>
+        <span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">grid</span><span class="p">[</span><span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="n">pad_width_factor</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">pad_mode</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pad_constant</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pad_constant</span> <span class="o">=</span> <span class="n">filled</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+        <span class="n">pad_end_values</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">pad_mode</span> <span class="o">==</span> <span class="s2">&quot;linear_ramp&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">pad_end_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">pad_end_values</span> <span class="o">=</span> <span class="n">filled</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">pad_mode</span> <span class="o">!=</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
+        <span class="n">pad_constant</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span>  <span class="c1"># needed until https://github.com/xgcm/xrft/issues/211 is fixed</span>
+        <span class="p">)</span>
+
+    <span class="c1"># apply padding</span>
+    <span class="n">pad_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="o">**</span><span class="n">pad_width</span><span class="p">,</span>
+        <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="n">pad_mode</span><span class="p">,</span>
+        <span class="s2">&quot;constant_values&quot;</span><span class="p">:</span> <span class="n">pad_constant</span><span class="p">,</span>
+        <span class="s2">&quot;end_values&quot;</span><span class="p">:</span> <span class="n">pad_end_values</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">padded</span> <span class="o">=</span> <span class="n">xrft</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+        <span class="n">filled</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">pad_kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;lowpass&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">filter_width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;filter_width must be provided if filter_type is &#39;lowpass&#39;&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">gaussian_lowpass</span><span class="p">(</span><span class="n">padded</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="n">filter_width</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;filt&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;highpass&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">filter_width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;filter_width must be provided if filter_type is &#39;highpass&#39;&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">gaussian_highpass</span><span class="p">(</span><span class="n">padded</span><span class="p">,</span> <span class="n">wavelength</span><span class="o">=</span><span class="n">filter_width</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;filt&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;up_deriv&quot;</span><span class="p">:</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">derivative_upward</span><span class="p">(</span><span class="n">padded</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;filt&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;easting_deriv&quot;</span><span class="p">:</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">derivative_easting</span><span class="p">(</span><span class="n">padded</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;filt&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;northing_deriv&quot;</span><span class="p">:</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">derivative_northing</span><span class="p">(</span><span class="n">padded</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;filt&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;up_continue&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">height_displacement</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;height_displacement must be provided if filter_type is &#39;up_continue&#39;&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">upward_continuation</span><span class="p">(</span>
+            <span class="n">padded</span><span class="p">,</span> <span class="n">height_displacement</span><span class="o">=</span><span class="n">height_displacement</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;filt&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;total_gradient&quot;</span><span class="p">:</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">total_gradient_amplitude</span><span class="p">(</span><span class="n">padded</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;filt&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;filter_type must be &#39;lowpass&#39;, &#39;highpass&#39; &#39;up_deriv&#39;, &#39;easting_deriv&#39;, &quot;</span>
+            <span class="s2">&quot;&#39;northing_deriv&#39;, &#39;up_continue&#39;, or &#39;total_gradient&#39;&quot;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">unpadded</span> <span class="o">=</span> <span class="n">xrft</span><span class="o">.</span><span class="n">unpad</span><span class="p">(</span><span class="n">filt</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">)</span>
+
+    <span class="c1"># reset coordinate values to original (avoid rounding errors)</span>
+    <span class="n">unpadded</span> <span class="o">=</span> <span class="n">unpadded</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">grid</span><span class="p">[</span><span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+            <span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">grid</span><span class="p">[</span><span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>  <span class="c1"># noqa: PD003</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">notnull</span><span class="p">(),</span> <span class="n">unpadded</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>  <span class="c1"># noqa: PD004</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">unpadded</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># reset coordinate names if changed</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;rename &#39;&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">dims</span><span class="p">)):</span> <span class="n">original_dims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="c1"># list(result.dims)[0]: original_dims[0],</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">dims</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">original_dims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">original_name</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Apr 29, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

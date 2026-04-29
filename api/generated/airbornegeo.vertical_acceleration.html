@@ -1,0 +1,574 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>airbornegeo.vertical_acceleration &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=2b22d5ff"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generated/airbornegeo.vertical_acceleration';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="airbornegeo.track" href="airbornegeo.track.html" />
+    <link rel="prev" title="airbornegeo.ground_speed" href="airbornegeo.ground_speed.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g8f4514fc4" />
+    <meta name="docbuild:last-update" content="Apr 29, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../reproject_data.html">1. Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../change_sampling_frequency.html">2. Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../split_survey_into_lines.html">3. Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../along_track_distance.html">4. Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filtering_data_in_1D.html">5. Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../vertical_acceleration_correction.html">1. Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../eotvos_correction.html">2. Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../normal_gravity_correction.html">3. Normal gravity correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../levelling_to_a_grid.html">1. Levelling to a grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../find_survey_intersections.html">2. Find survey intersections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cross_over_errors.html">3. Cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../using_equivalent_sources_for_cross_over_errors.html">4. Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tie_line_levelling.html">5. Tie line levelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../equivalent_source_levelling.html">6. Levelling with equivalent sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../assessing_levelling_results.html">7. Assessing levelling results</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../airbornegeo.html">API Reference</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.line_levelling.html">airbornegeo.line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.iterative_line_levelling.html">airbornegeo.iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.eotvos_correction_glicken.html">airbornegeo.eotvos_correction_glicken</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/api/generated/airbornegeo.vertical_acceleration.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Fapi/generated/airbornegeo.vertical_acceleration.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/api/generated/airbornegeo.vertical_acceleration.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>airbornegeo.vertical_acceleration</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#airbornegeo.vertical_acceleration"><code class="docutils literal notranslate"><span class="pre">vertical_acceleration</span></code></a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="airbornegeo-vertical-acceleration">
+<h1>airbornegeo.vertical_acceleration<a class="headerlink" href="#airbornegeo-vertical-acceleration" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="airbornegeo.vertical_acceleration">
+<span class="sig-name descname"><span class="pre">vertical_acceleration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupby_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/airbornegeo/nav.html#vertical_acceleration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#airbornegeo.vertical_acceleration" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the 2nd derivative of height change with respect to time for each line.
+If there is a gap between points greater than time_threshold in seconds, the line
+will be split at the gap and the acceleration will be NaN for the points on
+either side of the gap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span>) – Dataframe containing the data points and must have columns set from time_column
+and height_column.</p></li>
+<li><p><strong>time_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Column name to containing the time in seconds</p></li>
+<li><p><strong>height_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Column name to containing the flight height in meters</p></li>
+<li><p><strong>groupby_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Column name to group by before calculation, by default None</p></li>
+<li><p><strong>time_threshold</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Threshold in seconds for determining gaps in the data, where acceleration will be set to NaN</p></li>
+<li><p><strong>smoothing_window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Window size in number of data points for smoothing each derivative after it’s
+been calculated, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Series containing the vertical acceleration in m/s^2 for each point in the
+dataframe.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v3.0.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="airbornegeo.ground_speed.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">airbornegeo.ground_speed</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="airbornegeo.track.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">airbornegeo.track</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#airbornegeo.vertical_acceleration"><code class="docutils literal notranslate"><span class="pre">vertical_acceleration</span></code></a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Apr 29, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

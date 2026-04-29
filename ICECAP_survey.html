@@ -1,0 +1,1775 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Downloading the ICECAP airborne magnetic survey to use in the notebooks &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=2b22d5ff"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'ICECAP_survey';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g8f4514fc4" />
+    <meta name="docbuild:last-update" content="Apr 29, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="reproject_data.html">1. Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_sampling_frequency.html">2. Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="split_survey_into_lines.html">3. Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="along_track_distance.html">4. Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filtering_data_in_1D.html">5. Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="vertical_acceleration_correction.html">1. Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eotvos_correction.html">2. Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal_gravity_correction.html">3. Normal gravity correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="levelling_to_a_grid.html">1. Levelling to a grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="find_survey_intersections.html">2. Find survey intersections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cross_over_errors.html">3. Cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using_equivalent_sources_for_cross_over_errors.html">4. Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tie_line_levelling.html">5. Tie line levelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="equivalent_source_levelling.html">6. Levelling with equivalent sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assessing_levelling_results.html">7. Assessing levelling results</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.line_levelling.html">airbornegeo.line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.iterative_line_levelling.html">airbornegeo.iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eotvos_correction_glicken.html">airbornegeo.eotvos_correction_glicken</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/airbornegeo/airbornegeo/main?urlpath=lab/tree/docs/ICECAP_survey.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/ICECAP_survey.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2FICECAP_survey.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/ICECAP_survey.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Downloading the ICECAP airborne magnetic survey to use in the notebooks</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Downloading-the-ICECAP-airborne-magnetic-survey-to-use-in-the-notebooks">
+<h1>Downloading the ICECAP airborne magnetic survey to use in the notebooks<a class="headerlink" href="#Downloading-the-ICECAP-airborne-magnetic-survey-to-use-in-the-notebooks" title="Link to this heading">#</a></h1>
+<p>This is the reprocessed dataset from <a class="reference external" href="https://doi.org/10.26179/5e015bb8dce7f">Aitken and Ramos 2019</a>, which corresponds to the paper <a class="reference external" href="https://doi.org/10.1029/2020JB019825">Aitken et al. 2020</a></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">polartoolkit</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ptk</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">verde</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">airbornegeo</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;whitegrid&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div></div>
+</div>
+<section id="Load-data">
+<h2>Load data<a class="headerlink" href="#Load-data" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">preprocessing</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">_pooch2</span><span class="p">):</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+    <span class="c1"># Rename to the file to ***_preprocessed.txt</span>
+    <span class="n">fname_processed</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">with_stem</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="s2">&quot;_only_data&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Only recalculate if new download or the processed file doesn&#39;t exist yet</span>
+    <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;download&quot;</span><span class="p">,</span> <span class="s2">&quot;update&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">fname_processed</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">line_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Line&quot;</span><span class="p">,</span> <span class="s2">&quot;Tie&quot;</span><span class="p">,</span> <span class="s2">&quot;Special&quot;</span><span class="p">,</span> <span class="s2">&quot;Random&quot;</span><span class="p">]</span>  <span class="c1"># types of line permitted</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">cutlines</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">LINE</span><span class="p">):</span>
+            <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">with</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>  <span class="c1"># skip header row</span>
+                <span class="k">for</span> <span class="n">_i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">LINE</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># noqa: SIM102</span>
+                        <span class="k">if</span> <span class="n">LINE</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># noqa: SIM102</span>
+                            <span class="k">if</span> <span class="n">LINE</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># noqa: SIM102</span>
+                                <span class="k">if</span> <span class="n">LINE</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                                    <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">list</span>
+
+        <span class="n">line_list</span> <span class="o">=</span> <span class="n">cutlines</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">line_types</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fname_processed</span><span class="p">)</span> <span class="k">as</span> <span class="n">fo</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line_list</span><span class="p">)):</span>
+                <span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">line_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname_processed</span><span class="p">)</span>
+
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://data.aad.gov.au/eds/api/dataset/00c5e647-ba35-4073-992b-f98ceaee6887/object/download?prefix=AAS_4460_Reprocessed_ICECAP_Magnetic_Data</span><span class="si">%2F</span><span class="s2">Distribution</span><span class="si">%2F</span><span class="s2">ICECAP_IandII_TMI_100m_A2000.txt&quot;</span><span class="p">,</span>
+    <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;ICECAP_IandII_TMI_100m_A2000.txt&quot;</span><span class="p">,</span>
+    <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pooch</span><span class="o">.</span><span class="n">os_cache</span><span class="p">(</span><span class="s1">&#39;airbornegeo&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">known_hash</span><span class="o">=</span><span class="s2">&quot;97d220b179049a0ed3abc8e348bab3cb3a48ab4a4d56dd2ffa7ed3836f649eae&quot;</span><span class="p">,</span>
+    <span class="n">progressbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">processor</span><span class="o">=</span><span class="n">preprocessing</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">path</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;/home/mdtanker/.cache/airbornegeo/ICECAP_IandII_TMI_100m_A2000_only_data.txt&#39;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">,</span>
+    <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span>  <span class="c1"># split on whitespace</span>
+    <span class="c1"># skiprows=2,  # skip the first row which contains column names</span>
+    <span class="c1"># nrows=1000e3,</span>
+    <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span>  <span class="c1"># replace -9999.0 with NaN</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;line_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fid&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;doy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sod&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;decimal_days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;x_admap&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;y_admap&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_distance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;elevation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;surface_elevation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bed_elevation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;igrf_f&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;igrf_i&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;igrf_d&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tmi_raw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;despike_correction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tmi_despiked&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pomme_f&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pomme_f_t0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tmi_pomme_corrected&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;base_correction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tmi_base_corrected&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;a2000_elevation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;a2000_tmi&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;median_levelling_correction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tmi_a2000_levelled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tensioned_spline_correction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tmi_tensioned_spline_corrected&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="n">data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>line_id</th>
+      <th>fid</th>
+      <th>year</th>
+      <th>doy</th>
+      <th>sod</th>
+      <th>decimal_days</th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>x_admap</th>
+      <th>y_admap</th>
+      <th>...</th>
+      <th>pomme_f_t0</th>
+      <th>tmi_pomme_corrected</th>
+      <th>base_correction</th>
+      <th>tmi_base_corrected</th>
+      <th>a2000_elevation</th>
+      <th>a2000_tmi</th>
+      <th>median_levelling_correction</th>
+      <th>tmi_a2000_levelled</th>
+      <th>tensioned_spline_correction</th>
+      <th>tmi_tensioned_spline_corrected</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>0</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63240.30</td>
+      <td>3313.731948</td>
+      <td>96.154742</td>
+      <td>-74.379667</td>
+      <td>1745030.71</td>
+      <td>-188176.46</td>
+      <td>...</td>
+      <td>58787.75</td>
+      <td>-18.38</td>
+      <td>0.21</td>
+      <td>-18.58</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>100</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63241.35</td>
+      <td>3313.731960</td>
+      <td>96.151627</td>
+      <td>-74.379405</td>
+      <td>1745070.64</td>
+      <td>-188084.77</td>
+      <td>...</td>
+      <td>58787.36</td>
+      <td>-11.65</td>
+      <td>0.20</td>
+      <td>-11.85</td>
+      <td>2020.03</td>
+      <td>-21.21</td>
+      <td>0.00</td>
+      <td>-21.21</td>
+      <td>-67.25</td>
+      <td>-88.46</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>200</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63242.40</td>
+      <td>3313.731972</td>
+      <td>96.148500</td>
+      <td>-74.379152</td>
+      <td>1745109.44</td>
+      <td>-187992.61</td>
+      <td>...</td>
+      <td>58786.87</td>
+      <td>-5.45</td>
+      <td>0.19</td>
+      <td>-5.64</td>
+      <td>2020.03</td>
+      <td>-3.20</td>
+      <td>0.00</td>
+      <td>-3.20</td>
+      <td>-67.25</td>
+      <td>-70.45</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>300</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63243.45</td>
+      <td>3313.731984</td>
+      <td>96.145365</td>
+      <td>-74.378907</td>
+      <td>1745147.40</td>
+      <td>-187900.10</td>
+      <td>...</td>
+      <td>58786.35</td>
+      <td>0.00</td>
+      <td>0.18</td>
+      <td>-0.17</td>
+      <td>2020.03</td>
+      <td>13.57</td>
+      <td>0.00</td>
+      <td>13.57</td>
+      <td>-67.25</td>
+      <td>-53.68</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>400</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63244.50</td>
+      <td>3313.731997</td>
+      <td>96.142225</td>
+      <td>-74.378667</td>
+      <td>1745184.88</td>
+      <td>-187807.39</td>
+      <td>...</td>
+      <td>58785.80</td>
+      <td>4.40</td>
+      <td>0.17</td>
+      <td>4.24</td>
+      <td>2020.03</td>
+      <td>28.90</td>
+      <td>0.00</td>
+      <td>28.90</td>
+      <td>-67.25</td>
+      <td>-38.35</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2034305</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44000</td>
+      <td>2012.0</td>
+      <td>319.0</td>
+      <td>3729.60</td>
+      <td>4701.043167</td>
+      <td>123.397372</td>
+      <td>-75.145177</td>
+      <td>1392714.89</td>
+      <td>-918234.63</td>
+      <td>...</td>
+      <td>62671.43</td>
+      <td>22.74</td>
+      <td>38.32</td>
+      <td>-15.58</td>
+      <td>2018.19</td>
+      <td>13.14</td>
+      <td>31.34</td>
+      <td>44.47</td>
+      <td>1.57</td>
+      <td>46.04</td>
+    </tr>
+    <tr>
+      <th>2034306</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44100</td>
+      <td>2012.0</td>
+      <td>319.0</td>
+      <td>3730.84</td>
+      <td>4701.043181</td>
+      <td>123.395690</td>
+      <td>-75.144409</td>
+      <td>1392814.63</td>
+      <td>-918241.74</td>
+      <td>...</td>
+      <td>62671.65</td>
+      <td>23.58</td>
+      <td>38.32</td>
+      <td>-14.73</td>
+      <td>2018.19</td>
+      <td>13.59</td>
+      <td>31.34</td>
+      <td>44.93</td>
+      <td>1.57</td>
+      <td>46.50</td>
+    </tr>
+    <tr>
+      <th>2034307</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44200</td>
+      <td>2012.0</td>
+      <td>319.0</td>
+      <td>3732.09</td>
+      <td>4701.043196</td>
+      <td>123.394014</td>
+      <td>-75.143640</td>
+      <td>1392914.36</td>
+      <td>-918249.03</td>
+      <td>...</td>
+      <td>62671.87</td>
+      <td>24.44</td>
+      <td>38.31</td>
+      <td>-13.87</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2034308</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44300</td>
+      <td>2012.0</td>
+      <td>319.0</td>
+      <td>3733.35</td>
+      <td>4701.043210</td>
+      <td>123.392345</td>
+      <td>-75.142871</td>
+      <td>1393014.07</td>
+      <td>-918256.55</td>
+      <td>...</td>
+      <td>62672.10</td>
+      <td>25.00</td>
+      <td>38.31</td>
+      <td>-13.31</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2034309</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44400</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>2034310 rows × 31 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">));</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/ICECAP_survey_5_0.png" src="_images/ICECAP_survey_5_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># reproject to EPSG:3031 Polar Stereographic</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">ptk</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">input_crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span>
+    <span class="n">output_crs</span><span class="o">=</span><span class="s2">&quot;EPSG:3031&quot;</span><span class="p">,</span>
+    <span class="n">input_coord_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
+    <span class="n">output_coord_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;easting&quot;</span><span class="p">,</span> <span class="s2">&quot;northing&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="c1"># turn into geopandas dataframe with geometry column</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">easting</span><span class="p">,</span> <span class="n">data_df</span><span class="o">.</span><span class="n">northing</span><span class="p">),</span>
+    <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:3031&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>line_id</th>
+      <th>fid</th>
+      <th>year</th>
+      <th>doy</th>
+      <th>sod</th>
+      <th>decimal_days</th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>x_admap</th>
+      <th>y_admap</th>
+      <th>...</th>
+      <th>tmi_base_corrected</th>
+      <th>a2000_elevation</th>
+      <th>a2000_tmi</th>
+      <th>median_levelling_correction</th>
+      <th>tmi_a2000_levelled</th>
+      <th>tensioned_spline_correction</th>
+      <th>tmi_tensioned_spline_corrected</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>0</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63240.30</td>
+      <td>3313.731948</td>
+      <td>96.154742</td>
+      <td>-74.379667</td>
+      <td>1745030.71</td>
+      <td>-188176.46</td>
+      <td>...</td>
+      <td>-18.58</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.697512e+06</td>
+      <td>-183052.224475</td>
+      <td>POINT (1697511.843 -183052.224)</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>100</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63241.35</td>
+      <td>3313.731960</td>
+      <td>96.151627</td>
+      <td>-74.379405</td>
+      <td>1745070.64</td>
+      <td>-188084.77</td>
+      <td>...</td>
+      <td>-11.85</td>
+      <td>2020.03</td>
+      <td>-21.21</td>
+      <td>0.00</td>
+      <td>-21.21</td>
+      <td>-67.25</td>
+      <td>-88.46</td>
+      <td>1.697551e+06</td>
+      <td>-182963.041187</td>
+      <td>POINT (1697550.607 -182963.041)</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>200</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63242.40</td>
+      <td>3313.731972</td>
+      <td>96.148500</td>
+      <td>-74.379152</td>
+      <td>1745109.44</td>
+      <td>-187992.61</td>
+      <td>...</td>
+      <td>-5.64</td>
+      <td>2020.03</td>
+      <td>-3.20</td>
+      <td>0.00</td>
+      <td>-3.20</td>
+      <td>-67.25</td>
+      <td>-70.45</td>
+      <td>1.697588e+06</td>
+      <td>-182873.392057</td>
+      <td>POINT (1697588.415 -182873.392)</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>300</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63243.45</td>
+      <td>3313.731984</td>
+      <td>96.145365</td>
+      <td>-74.378907</td>
+      <td>1745147.40</td>
+      <td>-187900.10</td>
+      <td>...</td>
+      <td>-0.17</td>
+      <td>2020.03</td>
+      <td>13.57</td>
+      <td>0.00</td>
+      <td>13.57</td>
+      <td>-67.25</td>
+      <td>-53.68</td>
+      <td>1.697625e+06</td>
+      <td>-182783.407581</td>
+      <td>POINT (1697625.363 -182783.408)</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ASB_JKB0a_R16Ta.1</td>
+      <td>400</td>
+      <td>2009.0</td>
+      <td>26.0</td>
+      <td>63244.50</td>
+      <td>3313.731997</td>
+      <td>96.142225</td>
+      <td>-74.378667</td>
+      <td>1745184.88</td>
+      <td>-187807.39</td>
+      <td>...</td>
+      <td>4.24</td>
+      <td>2020.03</td>
+      <td>28.90</td>
+      <td>0.00</td>
+      <td>28.90</td>
+      <td>-67.25</td>
+      <td>-38.35</td>
+      <td>1.697662e+06</td>
+      <td>-182693.212285</td>
+      <td>POINT (1697661.773 -182693.212)</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2034305</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44000</td>
+      <td>2012.0</td>
+      <td>319.0</td>
+      <td>3729.60</td>
+      <td>4701.043167</td>
+      <td>123.397372</td>
+      <td>-75.145177</td>
+      <td>1392714.89</td>
+      <td>-918234.63</td>
+      <td>...</td>
+      <td>-15.58</td>
+      <td>2018.19</td>
+      <td>13.14</td>
+      <td>31.34</td>
+      <td>44.47</td>
+      <td>1.57</td>
+      <td>46.04</td>
+      <td>1.354790e+06</td>
+      <td>-893230.200952</td>
+      <td>POINT (1354789.916 -893230.201)</td>
+    </tr>
+    <tr>
+      <th>2034306</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44100</td>
+      <td>2012.0</td>
+      <td>319.0</td>
+      <td>3730.84</td>
+      <td>4701.043181</td>
+      <td>123.395690</td>
+      <td>-75.144409</td>
+      <td>1392814.63</td>
+      <td>-918241.74</td>
+      <td>...</td>
+      <td>-14.73</td>
+      <td>2018.19</td>
+      <td>13.59</td>
+      <td>31.34</td>
+      <td>44.93</td>
+      <td>1.57</td>
+      <td>46.50</td>
+      <td>1.354887e+06</td>
+      <td>-893237.107834</td>
+      <td>POINT (1354886.942 -893237.108)</td>
+    </tr>
+    <tr>
+      <th>2034307</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44200</td>
+      <td>2012.0</td>
+      <td>319.0</td>
+      <td>3732.09</td>
+      <td>4701.043196</td>
+      <td>123.394014</td>
+      <td>-75.143640</td>
+      <td>1392914.36</td>
+      <td>-918249.03</td>
+      <td>...</td>
+      <td>-13.87</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.354984e+06</td>
+      <td>-893244.212539</td>
+      <td>POINT (1354983.968 -893244.213)</td>
+    </tr>
+    <tr>
+      <th>2034308</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44300</td>
+      <td>2012.0</td>
+      <td>319.0</td>
+      <td>3733.35</td>
+      <td>4701.043210</td>
+      <td>123.392345</td>
+      <td>-75.142871</td>
+      <td>1393014.07</td>
+      <td>-918256.55</td>
+      <td>...</td>
+      <td>-13.31</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>1.355081e+06</td>
+      <td>-893251.477965</td>
+      <td>POINT (1355080.886 -893251.478)</td>
+    </tr>
+    <tr>
+      <th>2034309</th>
+      <td>WSB_JKB2h_R39b_magfld.1</td>
+      <td>44400</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>POINT (NaN NaN)</td>
+    </tr>
+  </tbody>
+</table>
+<p>2034310 rows × 34 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>fid</th>
+      <th>year</th>
+      <th>doy</th>
+      <th>sod</th>
+      <th>decimal_days</th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>x_admap</th>
+      <th>y_admap</th>
+      <th>line_distance</th>
+      <th>...</th>
+      <th>tmi_base_corrected</th>
+      <th>a2000_elevation</th>
+      <th>a2000_tmi</th>
+      <th>median_levelling_correction</th>
+      <th>tmi_a2000_levelled</th>
+      <th>tensioned_spline_correction</th>
+      <th>tmi_tensioned_spline_corrected</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>2.034310e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>...</td>
+      <td>2.033035e+06</td>
+      <td>2.031121e+06</td>
+      <td>2.030974e+06</td>
+      <td>2.030839e+06</td>
+      <td>2.030839e+06</td>
+      <td>2.030839e+06</td>
+      <td>2.030839e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.033109e+06</td>
+      <td>2.034310e+06</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>2.583773e+05</td>
+      <td>2.011264e+03</td>
+      <td>1.780806e+02</td>
+      <td>3.167995e+04</td>
+      <td>4.291931e+03</td>
+      <td>1.224337e+02</td>
+      <td>-7.024648e+01</td>
+      <td>1.843696e+06</td>
+      <td>-1.021042e+06</td>
+      <td>2.584102e+05</td>
+      <td>...</td>
+      <td>3.931846e+01</td>
+      <td>1.999788e+03</td>
+      <td>3.731678e+01</td>
+      <td>-1.788569e+00</td>
+      <td>3.554183e+01</td>
+      <td>-1.697305e-01</td>
+      <td>3.537211e+01</td>
+      <td>1.793490e+06</td>
+      <td>-9.932379e+05</td>
+      <td>4.108137e+02</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>2.703390e+05</td>
+      <td>2.570041e+00</td>
+      <td>1.611675e+02</td>
+      <td>2.018982e+04</td>
+      <td>8.943363e+02</td>
+      <td>2.117820e+01</td>
+      <td>4.492817e+00</td>
+      <td>7.398809e+05</td>
+      <td>5.000740e+05</td>
+      <td>2.703552e+05</td>
+      <td>...</td>
+      <td>2.629324e+02</td>
+      <td>1.307855e+01</td>
+      <td>2.589660e+02</td>
+      <td>5.991359e+01</td>
+      <td>2.522648e+02</td>
+      <td>1.977529e+01</td>
+      <td>2.522225e+02</td>
+      <td>7.197332e+05</td>
+      <td>4.864564e+05</td>
+      <td>3.017694e+02</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>0.000000e+00</td>
+      <td>2.009000e+03</td>
+      <td>1.000000e+00</td>
+      <td>-9.294290e+03</td>
+      <td>3.298607e+03</td>
+      <td>7.762933e+01</td>
+      <td>-8.416519e+01</td>
+      <td>1.244714e+05</td>
+      <td>-2.204780e+06</td>
+      <td>0.000000e+00</td>
+      <td>...</td>
+      <td>-3.684830e+03</td>
+      <td>1.975030e+03</td>
+      <td>-5.663940e+03</td>
+      <td>-1.305230e+03</td>
+      <td>-5.641570e+03</td>
+      <td>-1.557100e+02</td>
+      <td>-5.646760e+03</td>
+      <td>1.210819e+05</td>
+      <td>-2.144742e+06</td>
+      <td>1.000000e+00</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>5.740000e+04</td>
+      <td>2.009000e+03</td>
+      <td>2.000000e+01</td>
+      <td>1.754473e+04</td>
+      <td>3.640523e+03</td>
+      <td>1.089891e+02</td>
+      <td>-7.228444e+01</td>
+      <td>1.456651e+06</td>
+      <td>-1.248410e+06</td>
+      <td>5.740000e+04</td>
+      <td>...</td>
+      <td>-8.809000e+01</td>
+      <td>1.989620e+03</td>
+      <td>-9.036000e+01</td>
+      <td>-2.109000e+01</td>
+      <td>-8.802000e+01</td>
+      <td>-6.010000e+00</td>
+      <td>-8.794000e+01</td>
+      <td>1.416985e+06</td>
+      <td>-1.214415e+06</td>
+      <td>1.240000e+02</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>1.494000e+05</td>
+      <td>2.011000e+03</td>
+      <td>3.700000e+01</td>
+      <td>2.726331e+04</td>
+      <td>4.021447e+03</td>
+      <td>1.152084e+02</td>
+      <td>-6.818261e+01</td>
+      <td>2.182220e+06</td>
+      <td>-9.886312e+05</td>
+      <td>1.494000e+05</td>
+      <td>...</td>
+      <td>8.610000e+00</td>
+      <td>2.000000e+03</td>
+      <td>8.900000e+00</td>
+      <td>0.000000e+00</td>
+      <td>8.100000e+00</td>
+      <td>-1.900000e-01</td>
+      <td>8.480000e+00</td>
+      <td>2.122796e+06</td>
+      <td>-9.617098e+05</td>
+      <td>3.190000e+02</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>3.756000e+05</td>
+      <td>2.012000e+03</td>
+      <td>3.370000e+02</td>
+      <td>4.020095e+04</td>
+      <td>4.710049e+03</td>
+      <td>1.407825e+02</td>
+      <td>-6.698804e+01</td>
+      <td>2.408385e+06</td>
+      <td>-7.566044e+05</td>
+      <td>3.757000e+05</td>
+      <td>...</td>
+      <td>1.490500e+02</td>
+      <td>2.009230e+03</td>
+      <td>1.518500e+02</td>
+      <td>1.990000e+01</td>
+      <td>1.459000e+02</td>
+      <td>5.215000e+00</td>
+      <td>1.456200e+02</td>
+      <td>2.342802e+06</td>
+      <td>-7.360014e+05</td>
+      <td>6.930000e+02</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>1.404600e+06</td>
+      <td>2.017000e+03</td>
+      <td>3.650000e+02</td>
+      <td>9.570950e+04</td>
+      <td>6.245363e+03</td>
+      <td>1.749176e+02</td>
+      <td>-6.473134e+01</td>
+      <td>2.826609e+06</td>
+      <td>5.012924e+05</td>
+      <td>1.404500e+06</td>
+      <td>...</td>
+      <td>3.859790e+03</td>
+      <td>2.025000e+03</td>
+      <td>4.433030e+03</td>
+      <td>1.016240e+03</td>
+      <td>3.258350e+03</td>
+      <td>1.310600e+02</td>
+      <td>3.249710e+03</td>
+      <td>2.749638e+06</td>
+      <td>4.876417e+05</td>
+      <td>9.630000e+02</td>
+    </tr>
+  </tbody>
+</table>
+<p>8 rows × 33 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;line&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">unique_line_id</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="s2">&quot;line_id&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([  1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,
+        14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,
+        27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,
+        40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  52,
+        53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,  65,
+        66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,
+        79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,
+        92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103, 104,
+       105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117,
+       118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
+       131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
+       144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156,
+       157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169,
+       170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182,
+       183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195,
+       196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208,
+       209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221,
+       222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234,
+       235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247,
+       248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260,
+       261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273,
+       274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286,
+       287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299,
+       300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312,
+       313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325,
+       326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338,
+       339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351,
+       352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364,
+       365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377,
+       378, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389, 390,
+       391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403,
+       404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416,
+       417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 427, 428, 429,
+       430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440, 441, 442,
+       443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455,
+       456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468,
+       469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481,
+       482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494,
+       495, 496, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507,
+       508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520,
+       521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533,
+       534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546,
+       547, 548, 549, 550, 551, 552, 553, 554, 555, 556, 557, 558, 559,
+       560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572,
+       573, 574, 575, 576, 577, 578, 579, 580, 581, 582, 583, 584, 585,
+       586, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598,
+       599, 600, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611,
+       612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623, 624,
+       625, 626, 627, 628, 629, 630, 631, 632, 633, 634, 635, 636, 637,
+       638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649, 650,
+       651, 652, 653, 654, 655, 656, 657, 658, 659, 660, 661, 662, 663,
+       664, 665, 666, 667, 668, 669, 670, 671, 672, 673, 674, 675, 676,
+       677, 678, 679, 680, 681, 682, 683, 684, 685, 686, 687, 688, 689,
+       690, 691, 692, 693, 694, 695, 696, 697, 698, 699, 700, 701, 702,
+       703, 704, 705, 706, 707, 708, 709, 710, 711, 712, 713, 714, 715,
+       716, 717, 718, 719, 720, 721, 722, 723, 724, 725, 726, 727, 728,
+       729, 730, 731, 732, 733, 734, 735, 736, 737, 738, 739, 740, 741,
+       742, 743, 744, 745, 746, 747, 748, 749, 750, 751, 752, 753, 754,
+       755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 765, 766, 767,
+       768, 769, 770, 771, 772, 773, 774, 775, 776, 777, 778, 779, 780,
+       781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791, 792, 793,
+       794, 795, 796, 797, 798, 799, 800, 801, 802, 803, 804, 805, 806,
+       807, 808, 809, 810, 811, 812, 813, 814, 815, 816, 817, 818, 819,
+       820, 821, 822, 823, 824, 825, 826, 827, 828, 829, 830, 831, 832,
+       833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845,
+       846, 847, 848, 849, 850, 851, 852, 853, 854, 855, 856, 857, 858,
+       859, 860, 861, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871,
+       872, 873, 874, 875, 876, 877, 878, 879, 880, 881, 882, 883, 884,
+       885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897,
+       898, 899, 900, 901, 902, 903, 904, 905, 906, 907, 908, 909, 910,
+       911, 912, 913, 914, 915, 916, 917, 918, 919, 920, 921, 922, 923,
+       924, 925, 926, 927, 928, 929, 930, 931, 932, 933, 934, 935, 936,
+       937, 938, 939, 940, 941, 942, 943, 944, 945, 946, 947, 948, 949,
+       950, 951, 952, 953, 954, 955, 956, 957, 958, 959, 960, 961, 962,
+       963])
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">region</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">get_region</span><span class="p">((</span><span class="n">data_df</span><span class="o">.</span><span class="n">easting</span><span class="p">,</span> <span class="n">data_df</span><span class="o">.</span><span class="n">northing</span><span class="p">))</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">ptk</span><span class="o">.</span><span class="n">basemap</span><span class="p">(</span>
+    <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;ICECAP Survey&quot;</span><span class="p">,</span>
+    <span class="n">points</span><span class="o">=</span><span class="n">data_df</span><span class="p">[::</span><span class="mi">10</span><span class="p">],</span>
+    <span class="n">points_style</span><span class="o">=</span><span class="s2">&quot;c1.5p&quot;</span><span class="p">,</span>
+    <span class="n">points_fill</span><span class="o">=</span><span class="s2">&quot;tmi_tensioned_spline_corrected&quot;</span><span class="p">,</span>
+    <span class="n">cbar_label</span><span class="o">=</span><span class="s2">&quot;TMI (nT)&quot;</span><span class="p">,</span>
+    <span class="n">hist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">coast</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/ICECAP_survey_9_0.png" class="no-scaled-link" src="_images/ICECAP_survey_9_0.png" width="500" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">ptk</span><span class="o">.</span><span class="n">basemap</span><span class="p">(</span>
+    <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;ICECAP Survey&quot;</span><span class="p">,</span>
+    <span class="n">points</span><span class="o">=</span><span class="n">data_df</span><span class="p">[::</span><span class="mi">10</span><span class="p">],</span>
+    <span class="n">points_style</span><span class="o">=</span><span class="s2">&quot;c1.5p&quot;</span><span class="p">,</span>
+    <span class="n">points_fill</span><span class="o">=</span><span class="s2">&quot;line_distance&quot;</span><span class="p">,</span>
+    <span class="n">cbar_label</span><span class="o">=</span><span class="s2">&quot;Distance along line (m)&quot;</span><span class="p">,</span>
+    <span class="n">hist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">coast</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/ICECAP_survey_10_0.png" class="no-scaled-link" src="_images/ICECAP_survey_10_0.png" width="500" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;../data/ICECAP_survey.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Apr 29, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

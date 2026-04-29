@@ -1,0 +1,1132 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Level ROSETTA-ice gravity data &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=2b22d5ff"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'levelling_gravity';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g8f4514fc4" />
+    <meta name="docbuild:last-update" content="Apr 29, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="reproject_data.html">1. Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_sampling_frequency.html">2. Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="split_survey_into_lines.html">3. Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="along_track_distance.html">4. Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filtering_data_in_1D.html">5. Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="vertical_acceleration_correction.html">1. Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eotvos_correction.html">2. Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal_gravity_correction.html">3. Normal gravity correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="levelling_to_a_grid.html">1. Levelling to a grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="find_survey_intersections.html">2. Find survey intersections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cross_over_errors.html">3. Cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using_equivalent_sources_for_cross_over_errors.html">4. Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tie_line_levelling.html">5. Tie line levelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="equivalent_source_levelling.html">6. Levelling with equivalent sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assessing_levelling_results.html">7. Assessing levelling results</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.line_levelling.html">airbornegeo.line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.iterative_line_levelling.html">airbornegeo.iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eotvos_correction_glicken.html">airbornegeo.eotvos_correction_glicken</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/airbornegeo/airbornegeo/main?urlpath=lab/tree/docs/levelling_gravity.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/levelling_gravity.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Flevelling_gravity.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/levelling_gravity.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Level ROSETTA-ice gravity data</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-data">load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Unlevel-the-lines-with-shifts-and-low-order-trends">Unlevel the lines with shifts and low-order trends</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Calculate-intersections-of-lines-and-ties">Calculate intersections of lines and ties</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Calculate-intersection-mistie-values">Calculate intersection mistie values</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Simple-levelling:-without-weights">Simple levelling: without weights</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Level-with-manual-intersection-weights">Level with manual intersection weights</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Level-with-automatical-intersection-weights">Level with automatical intersection weights</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Create-weights-for-each-intersection">Create weights for each intersection</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Level-ROSETTA-ice-gravity-data">
+<h1>Level ROSETTA-ice gravity data<a class="headerlink" href="#Level-ROSETTA-ice-gravity-data" title="Link to this heading">#</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">verde</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">airbornegeo</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="load-data">
+<h2>load data<a class="headerlink" href="#load-data" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;http://wonder.ldeo.columbia.edu/data/ROSETTA-Ice/Gravity/rs_2019_grav.csv&quot;</span><span class="p">,</span>
+    <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;ROSETTA_2019_grav.csv&quot;</span><span class="p">,</span>
+    <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pooch</span><span class="o">.</span><span class="n">os_cache</span><span class="p">(</span><span class="s1">&#39;airbornegeo&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">known_hash</span><span class="o">=</span><span class="s2">&quot;d4fdfcc293ac13e6222938bfa9e1e9ccc781ea7556a13d356e9f1b4aba809928&quot;</span><span class="p">,</span>
+    <span class="n">progressbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+<span class="c1"># set standard column names</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;Line&quot;</span><span class="p">:</span> <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Height&quot;</span><span class="p">:</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;FAG_levelled&quot;</span><span class="p">:</span> <span class="s2">&quot;grav&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># get rid of unneeded columns</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;LATITUDE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;LONGITUDE&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># convert line numbers into float format (L200 -&gt; 200)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;line&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;line&quot;</span><span class="p">])</span>
+
+<span class="c1"># for simplicity, only keep a few lines</span>
+<span class="n">line</span> <span class="o">=</span> <span class="mi">840</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">line</span><span class="p">,</span>
+            <span class="mi">1120</span><span class="p">,</span>
+            <span class="mi">1100</span><span class="p">,</span>
+            <span class="mi">1090</span><span class="p">,</span>
+            <span class="mi">1080</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># covert from pandas dataframe to geopandas geodataframe</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data_df</span><span class="o">.</span><span class="n">easting</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">data_df</span><span class="o">.</span><span class="n">northing</span><span class="p">),</span>
+    <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:3031&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># calculate distance along flight lines</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;dist_along_line&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">distance_along_line</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">time_col_name</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">region</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">pad_region</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">get_region</span><span class="p">((</span><span class="n">data_df</span><span class="o">.</span><span class="n">easting</span><span class="p">,</span> <span class="n">data_df</span><span class="o">.</span><span class="n">northing</span><span class="p">)),</span> <span class="p">(</span><span class="mf">20e3</span><span class="p">,</span> <span class="mf">20e3</span><span class="p">))</span>
+
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Unlevel-the-lines-with-shifts-and-low-order-trends">
+<h2>Unlevel the lines with shifts and low-order trends<a class="headerlink" href="#Unlevel-the-lines-with-shifts-and-low-order-trends" title="Link to this heading">#</a></h2>
+<p>Later on, our levelling will attempt to undo these changes and restore the lines to level.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># move 1 tie line up</span>
+<span class="c1"># print(data_df[data_df.line == line].grav.mean())</span>
+<span class="c1"># data_df.loc[data_df.line==line, &quot;grav&quot;] += 20</span>
+<span class="c1"># print(data_df[data_df.line == line].grav.mean())</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="n">line</span><span class="p">]</span><span class="o">.</span><span class="n">height</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="n">line</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">500</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="n">line</span><span class="p">]</span><span class="o">.</span><span class="n">height</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># save orginal gravity before un-levelling it</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;grav_original&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># add a portion of a sin curve</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="n">line</span><span class="p">]</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">df</span><span class="o">.</span><span class="n">dist_along_line</span>
+<span class="n">amplitude</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="c1"># period = (x.max()-x.min())*1.5</span>
+<span class="n">period</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mi">2</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;curve&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">curve</span> <span class="o">=</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span> <span class="o">/</span> <span class="n">period</span><span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="n">line</span><span class="p">,</span> <span class="s2">&quot;curve to added&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curve</span> <span class="o">-</span> <span class="n">curve</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;grav&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav_original</span> <span class="o">+</span> <span class="n">data_df</span><span class="o">.</span><span class="n">curve</span>
+
+<span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_line_and_crosses</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dist_along_line&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;grav_original&quot;</span><span class="p">,</span> <span class="s2">&quot;grav&quot;</span><span class="p">,</span> <span class="s2">&quot;curve&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Calculate-intersections-of-lines-and-ties">
+<h2>Calculate intersections of lines and ties<a class="headerlink" href="#Calculate-intersections-of-lines-and-ties" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># calculate theoretical intersection points</span>
+<span class="n">inters</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">create_intersection_table</span><span class="p">(</span>
+    <span class="n">flight_lines</span><span class="o">=</span><span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">],</span>
+    <span class="n">tie_lines</span><span class="o">=</span><span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">],</span>
+    <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">inters</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># interpolate data values at the intersection points</span>
+<span class="n">data_df</span><span class="p">,</span> <span class="n">inters</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">interp1d_all_lines</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">inters</span><span class="p">,</span>
+    <span class="n">window_width</span><span class="o">=</span><span class="mf">5e3</span><span class="p">,</span>
+    <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;scipy&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">,</span>
+    <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span>
+    <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">plot_variable</span><span class="o">=</span><span class="s2">&quot;grav&quot;</span><span class="p">,</span>
+    <span class="n">wait_for_input</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">inters</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_line_and_crosses</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dist_along_line&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;grav&quot;</span><span class="p">],</span>
+    <span class="n">plot_inters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Calculate-intersection-mistie-values">
+<h2>Calculate intersection mistie values<a class="headerlink" href="#Calculate-intersection-mistie-values" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inters</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">calculate_crossover_errors</span><span class="p">(</span>
+    <span class="n">inters</span><span class="p">,</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">data_col</span><span class="o">=</span><span class="s2">&quot;grav&quot;</span><span class="p">,</span>
+    <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">inters</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Simple-levelling:-without-weights">
+<h2>Simple levelling: without weights<a class="headerlink" href="#Simple-levelling:-without-weights" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># TREND 1</span>
+<span class="n">data_df</span><span class="p">,</span> <span class="n">inters_levelled</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">iterative_line_levelling</span><span class="p">(</span>
+    <span class="n">inters</span><span class="p">,</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">lines_to_level</span><span class="o">=</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span>
+    <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">data_col</span><span class="o">=</span><span class="s2">&quot;grav&quot;</span><span class="p">,</span>
+    <span class="n">levelled_col</span><span class="o">=</span><span class="s2">&quot;grav_trend_1&quot;</span><span class="p">,</span>
+    <span class="c1"># plot_convergence=True,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;levelling_corr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav</span> <span class="o">-</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav_trend_1</span>
+<span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_line_and_crosses</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dist_along_line&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span>
+        <span class="c1"># &quot;grav&quot;,</span>
+        <span class="s2">&quot;grav_original&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_trend_1&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;levelling_corr&quot;,</span>
+    <span class="p">],</span>
+    <span class="c1"># y_axes=[1,1,2],</span>
+    <span class="n">plot_inters</span><span class="o">=</span><span class="p">[</span>
+        <span class="c1"># False,</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="kc">True</span><span class="p">,</span>
+        <span class="c1"># False</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Level-with-manual-intersection-weights">
+<h2>Level with manual intersection weights<a class="headerlink" href="#Level-with-manual-intersection-weights" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set weight for intersection with 1040 to be lower than the rest</span>
+<span class="n">inters</span><span class="p">[</span><span class="s2">&quot;mistie_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inters</span><span class="o">.</span><span class="n">tie</span> <span class="o">==</span> <span class="mi">1100</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">inters</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;airbornegeo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;WARN&quot;</span><span class="p">)</span>
+
+<span class="c1"># TREND 2</span>
+<span class="n">data_df</span><span class="p">,</span> <span class="n">inters_levelled</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">iterative_line_levelling</span><span class="p">(</span>
+    <span class="n">inters</span><span class="p">,</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">lines_to_level</span><span class="o">=</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span>
+    <span class="n">degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">data_col</span><span class="o">=</span><span class="s2">&quot;grav&quot;</span><span class="p">,</span>
+    <span class="n">levelled_col</span><span class="o">=</span><span class="s2">&quot;grav_trend_2_weights&quot;</span><span class="p">,</span>
+    <span class="n">sample_weight_col</span><span class="o">=</span><span class="s2">&quot;mistie_weight&quot;</span><span class="p">,</span>
+    <span class="c1"># plot_convergence=True,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;levelling_corr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav</span> <span class="o">-</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav_trend_2</span>
+<span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_line_and_crosses</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dist_along_line&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span>
+        <span class="c1"># &quot;grav&quot;,</span>
+        <span class="s2">&quot;grav_original&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_trend_2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_trend_2_weights&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;levelling_corr&quot;,</span>
+    <span class="p">],</span>
+    <span class="c1"># y_axes=[1,1,2],</span>
+    <span class="n">plot_inters</span><span class="o">=</span><span class="p">[</span>
+        <span class="c1"># False,</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="kc">True</span><span class="p">,</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="c1"># False</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Level-with-automatical-intersection-weights">
+<h2>Level with automatical intersection weights<a class="headerlink" href="#Level-with-automatical-intersection-weights" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;grav_filt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">filter_by_distance</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">filt_type</span><span class="o">=</span><span class="s2">&quot;g20000&quot;</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;grav_1st_derive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;line&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">grav_filt</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dist_along_line</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+        <span class="n">include_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;grav_1st_derive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+    <span class="n">airbornegeo</span><span class="o">.</span><span class="n">filter_by_distance</span><span class="p">(</span>
+        <span class="n">data_df</span><span class="p">,</span>
+        <span class="n">filt_type</span><span class="o">=</span><span class="s2">&quot;g20000&quot;</span><span class="p">,</span>
+        <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_1st_derive&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;grav_2nd_derive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;line&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">grav_1st_derive</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dist_along_line</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">),</span>
+        <span class="n">include_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;grav_2nd_derive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+    <span class="n">airbornegeo</span><span class="o">.</span><span class="n">filter_by_distance</span><span class="p">(</span>
+        <span class="n">data_df</span><span class="p">,</span>
+        <span class="n">filt_type</span><span class="o">=</span><span class="s2">&quot;g20000&quot;</span><span class="p">,</span>
+        <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_2nd_derive&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_line_and_crosses</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dist_along_line&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;grav&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_1st_derive&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_2nd_derive&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">y_axes</span><span class="o">=</span><span class="p">[</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="c1"># plot_inters=[False, True, True],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># data_df[&quot;grav_filt&quot;] = airbornegeo.filter_flight_lines(</span>
+<span class="c1">#     data_df,</span>
+<span class="c1">#     filt_type=&quot;g20000&quot;,</span>
+<span class="c1">#     data_column=&quot;grav&quot;,</span>
+<span class="c1"># )</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;height_1st_derive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;line&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dist_along_line</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+        <span class="n">include_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;height_1st_derive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+    <span class="n">airbornegeo</span><span class="o">.</span><span class="n">filter_by_distance</span><span class="p">(</span>
+        <span class="n">data_df</span><span class="p">,</span>
+        <span class="n">filt_type</span><span class="o">=</span><span class="s2">&quot;g20000&quot;</span><span class="p">,</span>
+        <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;height_1st_derive&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;height_2nd_derive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;line&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">height_1st_derive</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">dist_along_line</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">),</span>
+        <span class="n">include_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;height_2nd_derive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+    <span class="n">airbornegeo</span><span class="o">.</span><span class="n">filter_by_distance</span><span class="p">(</span>
+        <span class="n">data_df</span><span class="p">,</span>
+        <span class="n">filt_type</span><span class="o">=</span><span class="s2">&quot;g20000&quot;</span><span class="p">,</span>
+        <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;height_2nd_derive&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_line_and_crosses</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dist_along_line&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;height&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;height_1st_derive&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;height_2nd_derive&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">y_axes</span><span class="o">=</span><span class="p">[</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">plot_inters</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span>
+    <span class="c1"># use_intersection_y=False,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Create-weights-for-each-intersection">
+<h3>Create weights for each intersection<a class="headerlink" href="#Create-weights-for-each-intersection" title="Link to this heading">#</a></h3>
+<p>When fitting polynomials to each line’s mistie values, we can weight certain intersection more or less. This may depend on several factors, such as:</p>
+<ul class="simple">
+<li><p>distance of intersection to actual data</p></li>
+<li><p>if the intersection was interpolated or extrapolated</p></li>
+<li><p>if the intersection is at a location of high gradient magnetic data or flight elevations</p></li>
+<li><p>if there is a large elevation difference between the flight and the tie at the intersection</p></li>
+</ul>
+<p>We convert these factors into numeric values, where higher values mean the intersection is reliable.</p>
+<p>Should these weights be calculated based on percentile rank for the entire dataset, or just per line?</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">inters</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">calculate_intersection_weights</span><span class="p">(</span>
+    <span class="n">inters</span><span class="p">,</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">weight_by</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+    <span class="n">max_dist_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">height_difference_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">interpolation_type_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">data_1st_derive_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">data_1st_derive_col_name</span><span class="o">=</span><span class="s2">&quot;grav_1st_derive&quot;</span><span class="p">,</span>
+    <span class="n">data_2nd_derive_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">data_2nd_derive_col_name</span><span class="o">=</span><span class="s2">&quot;grav_2nd_derive&quot;</span><span class="p">,</span>
+    <span class="n">height_1st_derive_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">height_1st_derive_col_name</span><span class="o">=</span><span class="s2">&quot;height_1st_derive&quot;</span><span class="p">,</span>
+    <span class="n">height_2nd_derive_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">height_2nd_derive_col_name</span><span class="o">=</span><span class="s2">&quot;height_2nd_derive&quot;</span><span class="p">,</span>
+    <span class="c1"># plot=True,</span>
+<span class="p">)</span>
+<span class="n">inters</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;mistie_weight&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;airbornegeo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;WARN&quot;</span><span class="p">)</span>
+
+<span class="c1"># TREND 2</span>
+<span class="n">data_df</span><span class="p">,</span> <span class="n">inters_levelled</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">iterative_line_levelling</span><span class="p">(</span>
+    <span class="n">inters</span><span class="p">,</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">lines_to_level</span><span class="o">=</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span>
+    <span class="n">degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">data_col</span><span class="o">=</span><span class="s2">&quot;grav&quot;</span><span class="p">,</span>
+    <span class="n">levelled_col</span><span class="o">=</span><span class="s2">&quot;grav_trend_2_auto_weights&quot;</span><span class="p">,</span>
+    <span class="n">sample_weight_col</span><span class="o">=</span><span class="s2">&quot;mistie_weight&quot;</span><span class="p">,</span>
+    <span class="c1"># plot_convergence=True,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;levelling_corr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav</span> <span class="o">-</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav_trend_2</span>
+<span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_line_and_crosses</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;dist_along_line&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span>
+        <span class="c1"># &quot;grav&quot;,</span>
+        <span class="s2">&quot;grav_original&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_trend_2&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_trend_2_weights&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_trend_2_auto_weights&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;levelling_corr&quot;,</span>
+    <span class="p">],</span>
+    <span class="c1"># y_axes=[1,1,2],</span>
+    <span class="n">plot_inters</span><span class="o">=</span><span class="p">[</span>
+        <span class="c1"># False,</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="kc">True</span><span class="p">,</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="kc">False</span><span class="p">,</span>
+        <span class="c1"># False</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-data">load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Unlevel-the-lines-with-shifts-and-low-order-trends">Unlevel the lines with shifts and low-order trends</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Calculate-intersections-of-lines-and-ties">Calculate intersections of lines and ties</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Calculate-intersection-mistie-values">Calculate intersection mistie values</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Simple-levelling:-without-weights">Simple levelling: without weights</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Level-with-manual-intersection-weights">Level with manual intersection weights</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Level-with-automatical-intersection-weights">Level with automatical intersection weights</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Create-weights-for-each-intersection">Create weights for each intersection</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Apr 29, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

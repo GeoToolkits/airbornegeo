@@ -1,0 +1,125 @@
+# AirborneGeo ✈️
+Tools for processing airborne geophysical survey data.
+
+```{include} ../README.md
+:start-after: <!-- SPHINX-START-badges -->
+:end-before: <!-- SPHINX-END-badges -->
+```
+
+```{admonition} How to contribute
+:class: seealso
+
+We really welcome all forms of contribution! If you have any questions, comments or suggestions, please open a [discussion](https://github.com/airbornegeo/airbornegeo/discussions/new/choose) or [issue (feature request)](https://github.com/airbornegeo/airbornegeo/issues/new/choose) on the [GitHub page](https://github.com/airbornegeo/airbornegeo/)!
+
+Please, read our [Contributor Guide](contributing.md) to learn
+how you can contribute to the project.
+```
+
+```{note}
+*Many parts of this documentation was adapted from the* [Fatiando project](https://www.fatiando.org/).
+```
+
+```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: ℹ️️ Getting started
+overview
+install
+citing
+```
+
+```{toctree}
+:hidden:
+:caption: ⛏️ Generic processing
+processing.md
+```
+
+```{toctree}
+:hidden:
+:caption: 🍎🧲 Potential-fields processing
+potential_field_processing.md
+```
+
+```{toctree}
+:hidden:
+:caption: 📈 Levelling
+levelling.md
+```
+
+```{toctree}
+:hidden:
+:caption: 🫧 Cleaning and Quality Control
+quality_control.md
+```
+
+
+
+```{toctree}
+:hidden:
+:caption: 📂 Examples
+examples/index.md
+```
+
+```{toctree}
+:maxdepth: 2
+:hidden:
+:caption: 📖 API
+api/airbornegeo
+```
+
+```{toctree}
+:maxdepth: 1
+:hidden:
+:caption: 🗂️ Other resources
+contributing.md
+changelog.md
+Source code on GitHub <https://github.com/airbornegeo/airbornegeo>
+```
+
+
+::::{grid} 2
+:::{grid-item-card} {octicon}`rocket` Getting started?
+:text-align: center
+New to AirborneGeo? Start here!
+```{button-ref} overview
+    :click-parent:
+    :color: primary
+    :outline:
+    :expand:
+```
+:::
+
+:::{grid-item-card} {octicon}`comment-discussion` Need help?
+:text-align: center
+Start a discussion on GitHub!
+```{button-link} https://github.com/airbornegeo/airbornegeo/discussions
+    :click-parent:
+    :color: primary
+    :outline:
+    :expand:
+    Discussions
+```
+:::
+
+:::{grid-item-card} {octicon}`file-badge` Reference documentation
+:text-align: center
+A list of modules and functions
+```{button-ref} api/airbornegeo
+    :click-parent:
+    :color: primary
+    :outline:
+    :expand:
+```
+:::
+
+:::{grid-item-card} {octicon}`bookmark` Using AirborneGeo for research?
+:text-align: center
+Citations help support our work
+```{button-ref} citing
+    :click-parent:
+    :color: primary
+    :outline:
+    :expand:
+```
+:::
+::::
