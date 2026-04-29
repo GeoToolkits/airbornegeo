@@ -59,6 +59,9 @@ from .filtering import (  # noqa: E402
     filter_grid,
     filter_line,
 )
+from .interpolating import (  # noqa: E402
+    interpolate_missing,
+)
 from .levelling import (  # noqa: E402
     alternating_iterative_line_levelling,
     calculate_crossover_errors,

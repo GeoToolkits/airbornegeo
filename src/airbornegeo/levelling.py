@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import plotly
 import plotly.graph_objects as go
-import scipy
 import seaborn as sns
 import shapely
 import verde as vd
@@ -948,7 +947,7 @@ def add_intersections(
         rows_to_drop = data[data.is_intersection]
         data = data.drop(index=rows_to_drop.index)
     data = data.drop(
-        columns=["is_intersection", "intersecting_line", "interpolation_type"],
+        columns=["is_intersection", "intersecting_line"],
         errors="ignore",
     )
 
@@ -1011,9 +1010,11 @@ def add_intersections(
 
                 # inter_and_nearest_point = pd.concat([new_row, min_dist_point])[["easting", "northing"]]
                 # print(inter_and_nearest_point)
-                dist_between = airbornegeo.relative_distance(inter_and_nearest_point)[
-                    -1
-                ]
+                dist_between = airbornegeo.relative_distance(
+                    inter_and_nearest_point,
+                    easting_column="easting",
+                    northing_column="northing",
+                )[-1]
                 # print(dist_between)
                 # print(min_dist_point.distance_along_line)
                 new_row["distance_along_line"] = (
@@ -1354,440 +1355,11 @@ def get_line_intersections(
     return inters
 
 
-def scipy_interp(
-    df: pd.DataFrame,
-    *,
-    to_interp: str,
-    interp_on: str,
-    method: str = "linear",
-    extrapolate: bool = False,
-    fill_value: tuple[float, float] | str | None = None,
-) -> pd.DataFrame:
-    """
-    interpolate NaN's in "to_interp" column, based on values from "interp_on" column
-    method:
-        'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic',
-        'previous', 'next'
-    """
-    df = df.copy()
-
-    # drop NaN's
-    df_no_nans = df.dropna(subset=[to_interp, interp_on], how="any")
-
-    if extrapolate is True:
-        bounds_error = False
-        if fill_value is None:
-            fill_value = "extrapolate"
-        elif fill_value == "edge":
-            fill_value = (df_no_nans[to_interp].iloc[0], df_no_nans[to_interp].iloc[-1])
-        elif fill_value == "mean":
-            fill_value = (np.nanmean(df[to_interp]), np.nanmean(df[to_interp]))
-        logger.debug("extrapolating with fill_value: %s", fill_value)
-    else:
-        bounds_error = False
-        fill_value = np.nan
-
-    # define interpolation function
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message="The number of derivatives at boundaries does not match:",
-        )
-        # this is legacy! Info here https://docs.scipy.org/doc/scipy/tutorial/interpolate/1D.html#tutorial-interpolate-1dsection
-        f = scipy.interpolate.interp1d(
-            df_no_nans[interp_on],
-            df_no_nans[to_interp],
-            kind=method,
-            bounds_error=bounds_error,
-            fill_value=fill_value,
-        )
-
-    # get interpolated values at points with NaN's
-    values = f(df[df[to_interp].isna()][interp_on])
-
-    # fill NaN's  with values
-    df.loc[df[to_interp].isna(), to_interp] = values
-
-    return df
-
-
-def interp_single_col(
-    df: pd.DataFrame,
-    *,
-    to_interp: str,
-    interp_on: str,
-    method: str = "cubic",
-    extrapolate: bool = False,
-    fill_value: tuple[float, float] | str | None = None,
-    plot: bool = False,
-) -> pd.DataFrame:
-    """
-    interpolate NaN's in "to_interp" column, based on value(s) from "interp_on"
-    column(s).
-    method:
-        'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic',
-        'cubic', 'previous', 'next'
-    """
-
-    assert "line" in df.columns, "df must have column 'line'"
-
-    args = {
-        "df": df,
-        "to_interp": to_interp,
-        "interp_on": interp_on,
-        "method": method,
-        "extrapolate": extrapolate,
-        "fill_value": fill_value,
-    }
-
-    # try:
-    filled = scipy_interp(**args)
-    # except ValueError as e:
-    #     # logger.error(args)
-    #     filled = np.nan
-
-    if plot is True:
-        plot_line_and_crosses(
-            filled,
-            line=filled.line.iloc[0],
-            x=interp_on[0],
-            y=[to_interp],
-            y_axes=[str(i + 1) for i in range(len([to_interp]))],
-        )
-
-    return filled
-
-
-def interp_windows_single_col(
-    df: pd.DataFrame,
-    *,
-    window_width: float,
-    to_interp: str,
-    plot_windows: bool = False,
-    plot_line: bool = False,
-    **kwargs: typing.Any,
-) -> pd.DataFrame:
-    """
-    Create a window of data either side of NaN's based on "distance_along_line" column and
-    interpolate the value. Useful when NaN's are sparse, or lines are long. All kwargs
-    are based to function "interp"
-    """
-    df = df.copy()
-    kwargs = copy.deepcopy(kwargs)
-
-    assert "line" in df.columns, "df must have column 'line'"
-
-    assert "distance_along_line" in df.columns, (
-        "df must have column 'distance_along_line'"
-    )
-    extrapolate = kwargs.pop("extrapolate", False)
-
-    df["interpolation_type"] = "none"
-
-    # iterate through NaNs
-    for i in df[df[to_interp].isna()].index:  # pylint: disable=too-many-nested-blocks
-        # get distance along line of NaN
-        dist_at_nan = df.distance_along_line.loc[i]
-
-        # try interpolation with set window width, if there's not enough data (bounds
-        # error), double the width up to 2 times.
-        # if 2 attempts fail and extrapolate is True, allow extrapolation, if False, return NaN
-        # if extrapolating, start with original window width and double up to 2 times, if fails, return NaN
-        win = window_width
-        while win <= window_width * 2:
-            try:
-                # get data inside window
-                llim, ulim = dist_at_nan - win, dist_at_nan + win
-                df_inside = df[df.distance_along_line.between(llim, ulim)]
-
-                if len(df_inside) <= 1:
-                    win += win
-                    logger.debug(
-                        "Error with inter: %s/%s doubling window size to %s",
-                        df.intersecting_line.loc[i],
-                        df.line.loc[i],
-                        win,
-                    )
-                    continue
-
-                # may be multiple NaN's within window (some outside of bounds)
-                # but we only extract the fill value for loc[i]
-                filled = interp(
-                    df_inside,
-                    to_interp=[to_interp],
-                    extrapolate=False,
-                    **kwargs,
-                )
-                # extract just the filled value
-                value = filled[to_interp].loc[i]
-                if np.isnan(value):
-                    msg = "filled value is NaN"
-                    raise ValueError(msg)  # noqa: TRY301
-
-                interp_type = "interpolated"
-
-            except Exception:  # noqa: BLE001 pylint: disable=broad-exception-caught
-                # logger.error(e)
-                win += win
-                logger.debug(
-                    "Error with inter: %s/%s doubling window size to %s",
-                    df.intersecting_line.loc[i],
-                    df.line.loc[i],
-                    win,
-                )
-                # # error messages for too few points in window
-                # few_points_errors = [
-                #     "cannot reshape array of",
-                #     "Found array with",
-                #     "The number of derivatives at boundaries does not match:",
-                # ]
-                # # error message for bounds error
-                # bounds_errors = [
-                #     "in x_new is above the interpolation range",
-                #     "in x_new is below the interpolation range",
-                # ]
-                # if any(item in str(e) for item in few_points_errors):
-                #     win += win
-                #     logger.warning(
-                #         "too few points in window for intersection of lines %s & %s "
-                #         "doubling window size to %s",
-                #         df.intersecting_line.loc[i],
-                #         df.line.loc[i],
-                #         win,
-                #     )
-                # elif any(item in str(e) for item in bounds_errors):
-                #     win += win
-                #     logger.warning(
-                #         "bounds error for interpolation of intersection of lines %s "
-                #         "and %s, doubling window size to %s",
-                #         df.intersecting_line.loc[i],
-                #         df.line.loc[i],
-                #         win,
-                #     )
-                # else:  # raise other errors
-                #     win += win
-                #     logger.error(e)
-                #     logger.warning(
-                #         "Error for interpolation of intersection of lines %s and %s, "
-                #         "doubling window size to %s",
-                #         df.intersecting_line.loc[i],
-                #         df.line.loc[i],
-                #         win,
-                #     )
-                continue
-            break
-        else:
-            if extrapolate:
-                # try extrapolation with set window width, if there's not enough data, double the width up to 2 times.
-                win = window_width
-                while win <= window_width * (2):
-                    try:
-                        # get data inside window
-                        llim, ulim = dist_at_nan - win, dist_at_nan + win
-                        df_inside = df[df.distance_along_line.between(llim, ulim)]
-
-                        if len(df_inside) <= 1:
-                            win += win
-                            logger.debug(
-                                "Error with inter: %s/%s doubling window size to %s",
-                                df.intersecting_line.loc[i],
-                                df.line.loc[i],
-                                win,
-                            )
-                            continue
-
-                        # may be multiple NaN's within window (some outside of bounds)
-                        # but we only extract the fill value for loc[i]
-                        filled = interp(
-                            df_inside,
-                            to_interp=[to_interp],
-                            extrapolate=True,
-                            **kwargs,
-                        )
-                        # extract just the filled value
-                        value = filled[to_interp].loc[i]
-                        if np.isnan(value):
-                            msg = "filled value is NaN"
-                            raise ValueError(msg)  # noqa: TRY301
-
-                        interp_type = "extrapolated"
-
-                    except Exception:  # noqa: BLE001 pylint: disable=broad-exception-caught
-                        win += win
-                        logger.debug(
-                            "Error with inter: %s/%s doubling window size to %s",
-                            df.intersecting_line.loc[i],
-                            df.line.loc[i],
-                            win,
-                        )
-                        continue
-                    logger.debug(
-                        "Extrapolated value for inter: %s/%s",
-                        df.intersecting_line.loc[i],
-                        df.line.loc[i],
-                    )
-                    break
-                else:
-                    logger.debug(
-                        "Extrapolation failed after window expanded 2 times, to %s "
-                        "returning NaN for intersection values",
-                        win,
-                    )
-                    value = np.nan
-                    interp_type = "none"
-            else:
-                logger.debug(
-                    "Window expanded 2 times, to %s, without success and `extrapolate` "
-                    "set to False, returning NaN for intersection values",
-                    win,
-                )
-                value = np.nan
-                interp_type = "none"
-
-            if plot_windows is True:
-                plot_line_and_crosses(
-                    filled,
-                    line=filled.line.iloc[0],
-                    x="distance_along_line",
-                    y=[to_interp],
-                    y_axes=[str(i + 1) for i in range(len([to_interp]))],
-                )
-        # add values into dataframe
-        df.at[i, to_interp] = value  # noqa: PD008
-        df.at[i, "interpolation_type"] = interp_type  # noqa: PD008
-
-    if plot_line is True:
-        plot_line_and_crosses(
-            df,
-            line=df.line.iloc[0],
-            x="distance_along_line",
-            y=[to_interp],
-            y_axes=[str(i + 1) for i in range(len([to_interp]))],
-        )
-
-    return df
-
-
-def interp_windows(
-    df: pd.DataFrame,
-    *,
-    to_interp: str | list[str],
-    plot_line: bool = False,
-    **kwargs: typing.Any,
-) -> pd.DataFrame:
-    assert "distance_along_line" in df.columns, (
-        "df must have column 'distance_along_line'"
-    )
-    assert "line" in df.columns, "df must have column 'line'"
-
-    assert len(df.line.unique()) <= 1, "Warning: provided more than 1 flight line"
-
-    if isinstance(to_interp, str):
-        to_interp = [to_interp]
-
-    df = df.copy()
-    kwargs = copy.deepcopy(kwargs)
-
-    # iterate through columns
-    with airbornegeo.utils.DuplicateFilter(logger):
-        for col in to_interp:
-            logger.debug("Interpolating column: %s", col)
-            filled = interp_windows_single_col(
-                df,
-                to_interp=col,
-                **kwargs,
-            )
-            df = filled
-            # df[col] = filled[col]
-
-    if plot_line is True:
-        plot_line_and_crosses(
-            df,
-            line=df.line.iloc[0],
-            x="distance_along_line",
-            y=to_interp,
-            y_axes=[str(i + 1) for i in range(len(to_interp))],
-        )
-
-    return df
-
-
-def interp(
-    df: pd.DataFrame | gpd.GeoDataFrame,
-    *,
-    to_interp: list[str],
-    interp_on: str,
-    method: str = "cubic",
-    extrapolate: bool = False,
-    fill_value: tuple[float, float] | str | None = None,
-    plot_line: bool = False,
-) -> pd.DataFrame | gpd.GeoDataFrame:
-    """
-    Interpolate NaN's in "to_interp" column(s), based on value(s) from "interp_on"
-
-    Parameters
-    ----------
-    df : pd.DataFrame | gpd.GeoDataFrame
-        Dataframe containing the data to interpolate
-    to_interp : list[str] | str
-        Column(s) to interpolate
-    interp_on : str
-        Column to interpolate on
-    method : str, optional
-        Interpolation method to use, by default "cubic"
-    extrapolate : bool, optional
-        Whether to extrapolate beyond the data range, by default False
-    fill_value : tuple[float, float] | str | None, optional
-        Value to use for filling gaps, by default None
-    plot_line : bool, optional
-        Whether to plot the interpolation line, by default False
-
-    Returns
-    -------
-    pd.DataFrame | gpd.GeoDataFrame
-        Interpolated dataframe
-    """
-
-    assert "line" in df.columns, "df must have column 'line'"
-
-    assert len(df.line.unique()) <= 1, "Warning: provided more than 1 flight line"
-    if isinstance(to_interp, str):  # type: ignore [unreachable]
-        to_interp = [to_interp]  # type: ignore [unreachable]
-
-    df1 = df.copy()
-
-    # iterate through columns
-    for col in to_interp:
-        filled = interp_single_col(
-            df1,
-            to_interp=col,
-            interp_on=interp_on,
-            method=method,
-            extrapolate=extrapolate,
-            fill_value=fill_value,
-        )
-        # try:
-        df1[col] = filled[col]
-        # except:
-        #     logger.error(f"Error with filling nans in column: {col}")
-
-    if plot_line is True:
-        plot_line_and_crosses(
-            df1,
-            line=df1.line.iloc[0],
-            x=interp_on,
-            y=to_interp,
-            y_axes=[str(i + 1) for i in range(len(to_interp))],
-        )
-
-    return df1
-
-
 def interpolate_intersections(
     df: pd.DataFrame | gpd.GeoDataFrame,
     intersections: pd.DataFrame | gpd.GeoDataFrame,
     *,
-    to_interp: list[str] | str,
+    to_interp: str,
     interp_on: str = "distance_along_line",
     method: str = "cubic",
     extrapolate: bool = False,
@@ -1803,7 +1375,7 @@ def interpolate_intersections(
         Dataframe containing the data to interpolate
     intersections : pd.DataFrame | gpd.GeoDataFrame
         Dataframe containing the intersection points
-    to_interp : list[str] | None,
+    to_interp : str,
         specify which column to interpolate NaNs for
     interp_on : str, optional
         Decide which column interpolation is based on, by default "distance_along_line"
@@ -1824,49 +1396,72 @@ def interpolate_intersections(
 
     assert "line" in df.columns, "df must have column 'line'"
 
-    if isinstance(to_interp, str):
-        to_interp = [to_interp]
+    assert isinstance(to_interp, str), "to_interp should be a single string"
+    # if isinstance(to_interp, str):
+    #     to_interp = [to_interp]
 
     # drop rows with NaNs in all rows to interp
-    df = df.dropna(subset=to_interp, how="all")
+    df = df.dropna(subset=to_interp, how="any")
 
     # add empty rows at each intersection to the df
     df, inters = add_intersections(df, inters)
 
-    lines = df.groupby("line")
-    filled_lines = []
-    pbar = tqdm(lines, desc="Lines")
-    for line, line_df in pbar:
-        pbar.set_description(f"Line {line}")
+    if window_width is None:
+        filled_lines = airbornegeo.interpolating.interpolate_missing(
+            df,
+            to_interp=to_interp,
+            interp_on=interp_on,
+            method=method,
+            extrapolate=extrapolate,
+            fill_value=fill_value,
+            groupby_column="line",
+        )
+    else:
+        filled_lines = airbornegeo.interpolating.interpolate_missing_with_windows(
+            df,
+            to_interp=to_interp,
+            window_width=window_width,
+            interp_on=interp_on,
+            method=method,
+            extrapolate=extrapolate,
+            fill_value=fill_value,
+            groupby_column="line",
+        )
 
-        if window_width is None:
-            filled = interp(
-                line_df,
-                to_interp=to_interp,
-                interp_on=interp_on,
-                method=method,
-                extrapolate=extrapolate,
-                fill_value=fill_value,
-            )
-        else:
-            filled = interp_windows(
-                line_df,
-                to_interp=to_interp,
-                window_width=window_width,
-                interp_on=interp_on,
-                method=method,
-                extrapolate=extrapolate,
-                fill_value=fill_value,
-            )
+    # lines = df.groupby("line")
+    # filled_lines = []
+    # pbar = tqdm(lines, desc="Lines")
+    # for line, line_df in pbar:
+    #     pbar.set_description(f"Line {line}")
 
-        filled_lines.append(filled)
+    #     if window_width is None:
+    #         filled = airbornegeo.interpolating.interpolate_missing(
+    #             line_df,
+    #             to_interp=to_interp,
+    #             interp_on=interp_on,
+    #             method=method,
+    #             extrapolate=extrapolate,
+    #             fill_value=fill_value,
+    #         )
+    #     else:
+    #         filled = airbornegeo.interpolating.interpolate_missing_with_windows(
+    #             line_df,
+    #             to_interp=to_interp,
+    #             window_width=window_width,
+    #             interp_on=interp_on,
+    #             method=method,
+    #             extrapolate=extrapolate,
+    #             fill_value=fill_value,
+    #         )
 
-    filled_lines = pd.concat(filled_lines)
+    #     filled_lines.append(filled)
+
+    # filled_lines = pd.concat(filled_lines)
 
     inters["flight_interpolation_type"] = "none"
     inters["tie_interpolation_type"] = "none"
-    inters["flight_height"] = np.nan
-    inters["tie_height"] = np.nan
+    # inters["flight_height"] = np.nan
+    # inters["tie_height"] = np.nan
     # add whether intersection was interpolated or extrapolated with respect to both lines and ties
     for ind, row in inters.iterrows():
         # search data for values at intersecting lines
@@ -1879,16 +1474,18 @@ def interpolate_intersections(
             & (filled_lines.intersecting_line == row.line)
         ]
         # get interpolation type
-        flight_interp_type = line_values.interpolation_type.to_numpy()[0]
-        tie_interp_type = tie_values.interpolation_type.to_numpy()[0]
+        flight_interp_type = line_values[f"{to_interp}_interpolation_type"].to_numpy()[
+            0
+        ]
+        tie_interp_type = tie_values[f"{to_interp}_interpolation_type"].to_numpy()[0]
         # get heights
-        line_height = line_values.height.to_numpy()[0]
-        tie_height = tie_values.height.to_numpy()[0]
+        # line_height = line_values.height.to_numpy()[0]
+        # tie_height = tie_values.height.to_numpy()[0]
         # add to intersection table
         inters.loc[ind, "flight_interpolation_type"] = flight_interp_type
         inters.loc[ind, "tie_interpolation_type"] = tie_interp_type
-        inters.loc[ind, "flight_height"] = line_height
-        inters.loc[ind, "tie_height"] = tie_height
+        # inters.loc[ind, "flight_height"] = line_height
+        # inters.loc[ind, "tie_height"] = tie_height
 
     # drop inters rows if the interpolation didn't work for either line or tie
     inters_to_drop = inters[
