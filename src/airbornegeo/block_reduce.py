@@ -39,7 +39,7 @@ def block_reduce(
         will be reduced by both columns, e.g. in 1x1 km blocks if the columns are
         'easting' and 'northing'.
     groupby_column : str | None, optional
-        Column name to group by before sorting by time, by default None.
+        Column name to group by before block reducing, by default None.
     kwargs : typing.Any
         Any additional keyword arguments to pass to verde.BlockReduce.
 

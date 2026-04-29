@@ -148,7 +148,7 @@ def filter_line(
         The independent variable to filter against, typically either a time or distance
         along track values.
     groupby_column : str | None, optional
-        Column name to group by before sorting by time, by default None.
+        Column name to group by before filtering, by default None.
     pad_width_percentage : float, optional
         The width of the pad to add before and after the data in percentage of the
         range of values provided by filter_by_column, by default 10.

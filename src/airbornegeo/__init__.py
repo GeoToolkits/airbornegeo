@@ -59,6 +59,9 @@ from .filtering import (  # noqa: E402
     filter_grid,
     filter_line,
 )
+from .interpolating import (  # noqa: E402
+    interpolate_missing,
+)
 from .levelling import (  # noqa: E402
     alternating_iterative_line_levelling,
     calculate_crossover_errors,
@@ -77,6 +80,7 @@ from .levelling import (  # noqa: E402
 )
 from .nav import (  # noqa: E402
     along_track_distance,
+    directional_velocity,
     # eastward_velocity,
     ground_speed,
     # northward_velocity,
@@ -92,8 +96,11 @@ from .plotting import (  # noqa: E402
     plotly_profiles,
 )
 from .potential_fields import (  # noqa: E402
+    eotvos_correction_approx,
+    eotvos_correction_full,
     eotvos_correction_glicken,
-    eotvos_correction_harlan,
+    eotvos_correction_harlan_track,
+    eotvos_correction_harlan_velocity,
     eq_sources_1d,
     upward_continue_by_line,
 )
@@ -104,6 +111,10 @@ from .processing import (  # noqa: E402
 )
 from .reproject import (  # noqa: E402
     reproject,
+)
+from .resample import (  # noqa: E402
+    resample,
+    resample_as,
 )
 from .utils import (  # noqa: E402
     get_min_max,
