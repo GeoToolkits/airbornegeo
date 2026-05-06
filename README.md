@@ -4,7 +4,7 @@ Tools for processing airborne geophysical survey data.
 This package allows for a range of processing steps necessary for airborne geophysical data. Some of the functions are generic for many types of airborne surveys, such as splitting flights into segments, calculating quantities such as distance along lines, velocities, headings (tracks), and cross-over errors, etc. There are also many functions specifically focused on gravity and magnetic data. These include field reductions, 1D equivalent source inversion, and several methods of levelling line data.
 
 [![Actions Status][actions-badge]][actions-link]
-[![Documentation Status][website-badge]][website-link]
+[![Documentation][website-badge]][website-link]
 
 [![PyPI version][pypi-version]][pypi-link]
 [![Conda-Forge][conda-badge]][conda-link]
@@ -28,7 +28,7 @@ This package allows for a range of processing steps necessary for airborne geoph
 [pypi-platforms]:           https://img.shields.io/pypi/pyversions/airbornegeo
 [pypi-version]:             https://img.shields.io/pypi/v/airbornegeo
 [website-badge]:            https://github.com/airbornegeo/airbornegeo/actions/workflows/pages/pages-build-deployment/badge.svg
-[website-link]:             https://airbornegeo.github.io/airbornegeo/
+[website-link]:            https://geotoolkits.github.io/airbornegeo/
 [zenodo-badge]:            https://zenodo.org/badge/DOI/10.5281/zenodo.zenodo_DOI.svg
 [zenodo-link]:             https://doi.org/10.5281/zenodo.zenodo_DOI
 <!-- prettier-ignore-end -->
