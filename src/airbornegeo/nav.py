@@ -291,7 +291,7 @@ def relative_track_ellipsoid(
 ) -> NDArray:
     """
     Calculate the track between each successive set of points in degrees clockwise from
-    geographic north in the range 180 to -180. This uses the WGS84 ellipsoid, make the
+    geographic north in the range 0 to 360. This uses the WGS84 ellipsoid, make the
     results more accurate the ::func:`relative_track_sheroid`.
 
     Parameters
@@ -321,7 +321,8 @@ def relative_track_ellipsoid(
         # Handle single point case (no direction possible)
         tracks.append(None)
 
-    return np.array(tracks)
+    # make tracks in range of 0 to 360
+    return np.array(tracks) % 360
 
 
 def relative_track_spheroid(
@@ -330,7 +331,7 @@ def relative_track_spheroid(
 ) -> NDArray:
     """
     Calculate the track between each successive set of points in degrees clockwise from
-    geographic north in the range 180 to -180. This assumes the Earth is a sphere, which
+    geographic north in the range 0 to 360. This assumes the Earth is a sphere, which
     is less accurate the using an ellipsoid model.
 
     Parameters
@@ -371,7 +372,12 @@ def relative_track_spheroid(
     # calculate track
     track_rad = np.atan2(y, x)
     track_deg = np.rad2deg(track_rad)
-    return np.insert(track_deg, 0, np.nan)
+
+    # replace first values with second value
+    track_deg = np.insert(track_deg, 0, track_deg[1])
+
+    # make tracks in range of 0 to 360
+    return track_deg % 360
 
 
 def track(
@@ -400,7 +406,8 @@ def track(
     Returns
     -------
     pd.Series
-        The track in degrees, -180 to 180, positive clockwise from geographic north
+        The track in degrees, in the range 0 to 360, positive clockwise from geographic
+        north
     """
     track_func = relative_track_ellipsoid if ellipsoid else relative_track_spheroid
 

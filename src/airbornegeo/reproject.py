@@ -27,7 +27,7 @@ def reproject(
     Returns
     -------
     tuple[NDArray, NDArray]
-        a tuple of two arrays in the order earthing, northing, or longitude, latitude.
+        a tuple of two arrays in the order easting, northing, or longitude, latitude.
     """
 
     # make crs lowercase
