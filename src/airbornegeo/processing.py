@@ -13,12 +13,19 @@ def split_into_segments(
     threshold: float,
     column_name: str,
     min_points_per_segment: int = 0,
+    angular_difference: bool = False,
+    segment_column: str | None = None,
+    smoothing_window: int | None = None,
 ) -> pd.Series:
     """
     Split dataframe into segments where there is a gap in the supplied values greater
-    than the threshold. Data are sorted by column 'unixtime'. The values are chosen
-    with column_name, and could be quantities such as time in seconds, cumulative
-    distances, or aircraft bearings.
+    than the threshold. Data are sorted by the column given by column_name which can be
+    quantities such as time in seconds, cumulative distances, or aircraft heading or
+    track. By default, a series of sequential segments names as integers starting at 1
+    will be returned. Alternatively, existing segments can be divided into new segments.
+    These existing segment ID's should be provided as floats, via the column given by
+    segment_column. New sub-segments will have a decimal added (i.e., 210 -> 210.0 and
+    210.1) or the decimal will be incremented (210.1 -> 210.1 and 210.2).
 
     Parameters
     ----------
@@ -30,47 +37,114 @@ def split_into_segments(
         Name of column supplying to data.
     min_points_per_segment: int or None
         Segments with fewer points are giving a segment id of NaN, by default 0
+    angular_difference : bool
+        if True, will interpret the data as degrees between 0 and 360, so the calculated
+        differences are the shorted, for example the difference between 0 and 350
+        degrees will be -10 instead of 340.
+    segment_column: str or None
+        The segment ID's, as floats.
+    smoothing_window : int, optional
+        Window size in number of data points for smoothing each difference after it's
+        been calculated, by default None
 
     Returns
     -------
     pd.Series
-        A series with new new segments identified with integers
+        A series with new segments identified with sequential integers starting with 1,
+        or if segment_column is provided, existing segment ID numbers will be
+        incremented by 0.1 if the segment is split (i.e. 210 -> 210.0 and 210.1).
     """
     df = data.copy()
 
-    col_list = ["unixtime", column_name]
-    assert all(x in df.columns for x in col_list), (
-        f"dataframe must contain columns {col_list} "
-    )
+    if segment_column is None:
+        col_list = [column_name]
 
-    # save index, sort by time and reset index
-    df = df.reset_index(names="tmp_index")
-    df = df.sort_values(by="unixtime").reset_index(drop=True)
-
-    # Calculate difference between each point
-    df["diff"] = df[column_name].diff()
-
-    # Create new segment when gap > distance_threshold
-    df["segment"] = (df["diff"] > threshold).cumsum()
-
-    # remove segments which are less than specified number of points
-    if min_points_per_segment > 0:
-        groups = df.groupby("segment")
-        prior_len = len(df.segment.unique())
-        # make segment ID nan for small segments
-        small_segments = groups.filter(lambda x: len(x) < min_points_per_segment)
-        df.loc[small_segments.index, "segment"] = np.nan
-        post_len = len(df.segment.unique())
-        logger.info(
-            "dropped %s segments which contained less than %s points.",
-            prior_len - post_len,
-            min_points_per_segment,
+        assert all(x in df.columns for x in col_list), (
+            f"dataframe must contain columns {col_list} "
         )
 
-    # Reset index and sort
-    df = df.set_index("tmp_index").sort_values("tmp_index")
+        # Calculate difference between each point
+        df["dif"] = df[column_name].diff()
 
-    return df.segment
+        # If data are angles between 0-360, differences around 0 / 360 should be small
+        if angular_difference:
+            df["dif"] = df.dif % 360
+            df["dif"] = np.where(df.dif > 180, df.dif - 360, df.dif)
+
+        if smoothing_window is not None:
+            df["dif"] = df.dif.rolling(window=smoothing_window, min_periods=1).mean()
+
+        # Create new segment when gap > threshold
+        df["segment"] = (df.dif > threshold).cumsum()
+
+        # remove segments which are less than specified number of points
+        if min_points_per_segment > 0:
+            groups = df.groupby("segment")
+            prior_len = len(df.segment.unique())
+            # make segment ID nan for small segments
+            small_segments = groups.filter(lambda x: len(x) < min_points_per_segment)
+            df.loc[small_segments.index, "segment"] = np.nan
+            post_len = len(df.segment.unique())
+            logger.info(
+                "dropped %s segments which contained less than %s points.",
+                prior_len - post_len,
+                min_points_per_segment,
+            )
+
+        return df.segment
+
+    raise NotImplementedError
+
+    # col_list = [column_name, segment_column]
+
+    # assert all(x in df.columns for x in col_list), (
+    #     f"dataframe must contain columns {col_list} "
+    # )
+
+    # # check segment_column is right dtype
+    # assert isinstance(df[segment_column], float)
+
+    # # save index, sort by time and reset index
+    # segments = []
+    # for _segment_name, segment_data in df.groupby(segment_column):
+    #     segment_data = segment_data.reset_index(names="tmp_index")
+    #     segment_data = segment_data.sort_values(by=column_name).reset_index(drop=True)
+
+    #     # Calculate difference between each point
+    #     segment_data["diff"] = segment_data[column_name].diff()
+
+    #     # Create new segment when difference >threshold
+    #     segment_data["segment"] = (segment_data["diff"] > threshold).cumsum()
+
+    #     # remove segments which are less than specified number of points
+    #     if min_points_per_segment > 0:
+    #         groups = segment_data.groupby("segment")
+    #         prior_len = len(segment_data.segment.unique())
+    #         # make segment ID nan for small segments
+    #         small_segments = groups.filter(lambda x: len(x) < min_points_per_segment)
+    #         segment_data.loc[small_segments.index, "segment"] = np.nan
+    #         post_len = len(segment_data.segment.unique())
+    #         logger.info(
+    #             "dropped %s segments which contained less than %s points.",
+    #             prior_len - post_len,
+    #             min_points_per_segment,
+    #         )
+
+    #     # Reset index and sort
+    #     segment_data = segment_data.set_index("tmp_index").sort_values("tmp_index")
+
+    #     # if segment has been split, increment the decimal of the provided ID
+    #     if len(segment_data.segment.unique() > 1):
+    #         increment = 0.1
+    #         for _subsegment_name, subsegment_data in segment_data.groupby("segment"):
+    #             segment_data["segment"] = subsegment_data[segment_column] + increment
+    #             increment += 0.1
+    #     else:
+    #         segment_data["segment"] = segment_data[segment_column]
+
+    # df = pd.concat(segments)
+
+    # return df.segment
 
 
 def unique_line_id(
