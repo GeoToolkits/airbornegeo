@@ -693,68 +693,6 @@ def along_track_distance(
     return np.concatenate(groups)
 
 
-# def eastward_velocity(lat_deg, lon_deg, time):
-#     """
-#     Compute eastward velocity (m/s) from latitude, longitude, and time.
-
-#     Parameters
-#     ----------
-#     lat_deg : array-like
-#         Latitude in degrees
-#     lon_deg : array-like
-#         Longitude in degrees
-#     time : array-like
-#         Time in seconds (difference between consecutive measurements should be ~1-10 s)
-
-#     Returns
-#     -------
-#     v_east : ndarray
-#         Eastward velocity in m/s
-#     """
-#     lat_rad = np.radians(np.asarray(lat_deg))
-#     lon_rad = np.unwrap(np.radians(np.asarray(lon_deg)))  # avoid ±180 jumps
-
-#     time = np.asarray(time)
-#     dt = np.diff(time, prepend=np.nan)
-#     dt[dt == 0] = np.nan  # avoid division by zero
-
-#     dlon = np.diff(lon_rad, prepend=np.nan)
-
-#     r = 6371000  # Earth radius in meters
-#     return r * np.cos(lat_rad) * dlon / dt
-
-
-# def northward_velocity(lat_deg, lon_deg, time):
-#     """
-#     Compute northward velocity (m/s) from latitude, longitude, and time.
-
-#     Parameters
-#     ----------
-#     lat_deg : array-like
-#         Latitude in degrees
-#     lon_deg : array-like
-#         Longitude in degrees
-#     time : array-like
-#         Time in seconds (difference between consecutive measurements should be ~1-10 s)
-
-#     Returns
-#     -------
-#     v_north : ndarray
-#         Northward velocity in m/s
-#     """
-#     lat_rad = np.radians(np.asarray(lat_deg))
-#     _lon_rad = np.unwrap(np.radians(np.asarray(lon_deg)))  # avoid ±180 jumps
-
-#     time = np.asarray(time)
-#     dt = np.diff(time, prepend=np.nan)
-#     dt[dt == 0] = np.nan  # avoid division by zero
-
-#     dlat = np.diff(lat_rad, prepend=np.nan)
-
-#     r = 6371000  # Earth radius in meters
-#     return r * dlat / dt
-
-
 def _azimuth_between_points(
     point1: tuple[float, float],
     point2: tuple[float, float],
