@@ -55,6 +55,12 @@ class Report(scooby.Report):  # type: ignore[misc] # pylint: disable=missing-cla
 from .block_reduce import (  # noqa: E402
     block_reduce,
 )
+from .eotvos import (  # noqa: E402
+    eotvos_correction_approx,
+    eotvos_correction_full,
+    eotvos_correction_glicken,
+    eotvos_correction_harlan,
+)
 from .filtering import (  # noqa: E402
     filter_grid,
     filter_line,
@@ -81,9 +87,7 @@ from .levelling import (  # noqa: E402
 from .nav import (  # noqa: E402
     along_track_distance,
     directional_velocity,
-    # eastward_velocity,
     ground_speed,
-    # northward_velocity,
     relative_distance,
     track,
     vertical_acceleration,
@@ -96,11 +100,6 @@ from .plotting import (  # noqa: E402
     plotly_profiles,
 )
 from .potential_fields import (  # noqa: E402
-    eotvos_correction_approx,
-    eotvos_correction_full,
-    eotvos_correction_glicken,
-    eotvos_correction_harlan_track,
-    eotvos_correction_harlan_velocity,
     eq_sources_1d,
     upward_continue_by_line,
 )
