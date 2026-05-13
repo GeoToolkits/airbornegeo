@@ -73,7 +73,7 @@ Functions for levelling airborne geophysical survey data.
     lines_without_intersections
     calculate_crossover_errors
     update_intersections_with_eq_sources
-    line_levelling
+    crossover_levelling
     iterative_line_levelling
     alternating_iterative_line_levelling
     equivalent_source_levelling
