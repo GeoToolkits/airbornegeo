@@ -235,7 +235,7 @@ boule = ">=0.6"
 nomkl = "*"
 bordado = ">=0.4.0,<0.5"
 netcdf4 = ">=1.7.4,<2"
-
+cmocean = ">=4.0.3,<5"
 
 [tool.pixi.feature.test.tasks.test]
 cmd = "pytest {{ target }} -ra --cov --cov-report=xml --cov-report=term --durations=20"
@@ -276,5 +276,4 @@ nbsphinx = ">=0.9.8,<0.10"
 sphinxcontrib-bibtex = ">=2.6.5,<3"
 sphinx-design = ">=0.7.0,<0.8"
 sphinx-autobuild = ">=2025.8.25,<2026"
-cmocean = ">=4.0.3,<5"
 # polartoolkit = ">=1.5.0,<2"
