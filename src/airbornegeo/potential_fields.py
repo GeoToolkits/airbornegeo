@@ -16,6 +16,7 @@ def eq_sources_1d(
     depth: float | str = "default",
     block_size: float | None = None,
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> dict | hm.EquivalentSources:
     """
     Fit a set of equivalent sources along 1 dimension. These fitted sources
@@ -39,6 +40,8 @@ def eq_sources_1d(
         should be done before with func::`block_reduce`, by default None
     groupby_column : str | None, optional
         Column name to group by before fitting sources, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -72,8 +75,12 @@ def eq_sources_1d(
 
     assert groupby_column in data.columns, "groupby_column must be in dataframe"
 
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
     fitted_eqs = {}
-    for segment_name, segment_data in tqdm(data.groupby(groupby_column), desc="Groups"):
+    for segment_name, segment_data in pbar:
         coords = (
             segment_data.distance_along_line,
             segment_data.tmp,
@@ -99,6 +106,7 @@ def upward_continue_by_line(
     fitted_equivalent_sources: dict,
     height: float,
     groupby_column: str = "line",
+    progressbar: bool = True,
     no_downward_continuation: bool = True,
 ) -> pd.Series:
     """
@@ -113,7 +121,11 @@ def upward_continue_by_line(
 
     data["tmp"] = 0
 
-    for segment_name, segment_data in tqdm(data.groupby(groupby_column), desc="Groups"):
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
+    for segment_name, segment_data in pbar:
         eqs = fitted_equivalent_sources[segment_name]
 
         upward = np.full_like(segment_data.tmp, height)
@@ -148,6 +160,7 @@ def igrf(
     longitude_column: str,
     height_column: str,
     groupby_column: str | None = None,
+    progressbar: bool = True,
     ellipsoid=bl.WGS84,
     min_degree=1,
     max_degree=13,
@@ -172,6 +185,8 @@ def igrf(
         name of the column containing the ellipsoidal heights in meters
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
     ellipsoid:
         The ellipsoid used to convert geodetic to geocentric spherical coordinates and
         convert the magnetic field vector from a geocentric spherical to a geodetic
@@ -224,9 +239,11 @@ def igrf(
 
     # iterate through groups, append values, and concat
     intensities, incs, decs = [], [], []
-    for _segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
+    for _segment_name, segment_data in pbar:
         # select the first row's datetime
         datetime = segment_data[datetime_column].iloc[0]
 

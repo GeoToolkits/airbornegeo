@@ -14,6 +14,7 @@ def resample(
     resample_by: str,
     maxdist: float | None,
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.DataFrame:
     """
     Resample all numeric columns in a dataframe at a supplied spacing of the supplied
@@ -34,6 +35,8 @@ def resample(
         point provided in resample_by, by default None,
     groupby_column : str | None, optional
         Column name to group by before resampling, by default None.
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -109,10 +112,12 @@ def resample(
 
     assert groupby_column in data.columns, "groupby_column must be in the dataframe"
 
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
     resampled_dfs = []
-    for segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for segment_name, segment_data in pbar:
         # get tuples of pd.Series
         original_values = segment_data[resample_by].to_numpy()
         input_data = tuple([segment_data[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator
@@ -165,6 +170,7 @@ def resample_as(
     resample_by: str,
     resample_values: NDArray,
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.DataFrame:
     """
 
@@ -176,6 +182,8 @@ def resample_as(
         Column name to use for the resampling, for example time or distance.
     groupby_column : str | None, optional
         Column name to group by before resampling, by default None.
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -238,10 +246,12 @@ def resample_as(
 
     assert groupby_column in data.columns, "groupby_column must be in the dataframe"
 
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
     resampled_dfs = []
-    for segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for segment_name, segment_data in pbar:
         # get tuples of pd.Series
         original_values = segment_data[resample_by].to_numpy()
         input_data = tuple([segment_data[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator

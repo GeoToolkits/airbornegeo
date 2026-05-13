@@ -18,6 +18,7 @@ def interpolate_missing(
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.DataFrame:
     """
     Interpolate NaN's in "to_interp" column(s), based on value(s) from "interp_on". If
@@ -40,6 +41,8 @@ def interpolate_missing(
         Value to use for filling gaps, by default None
     groupby_column : str | None, optional
         Column name to group by before interpolating, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -72,10 +75,13 @@ def interpolate_missing(
             data[col] = filled[col]
         return data
 
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
+
     filled_segments = []
-    for _segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for _segment_name, segment_data in pbar:
         for col in to_interp:
             filled = interpolate_missing_single_column(
                 segment_data,
@@ -100,6 +106,7 @@ def interpolate_missing_with_windows(
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.DataFrame:
     """
     Interpolate NaN's in "to_interp" column(s), based on value(s) from "interp_on" using
@@ -126,6 +133,8 @@ def interpolate_missing_with_windows(
         Value to use for filling gaps, by default None
     groupby_column : str | None, optional
         Column name to group by before interpolating, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -162,10 +171,13 @@ def interpolate_missing_with_windows(
                 data = filled
         return data
 
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
+
     filled_segments = []
-    for _segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for _segment_name, segment_data in pbar:
         for col in to_interp:
             filled = interpolate_missing_with_windows_single_column(
                 segment_data,
