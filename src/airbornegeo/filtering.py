@@ -118,6 +118,7 @@ def filter_line(
     data_column: str,
     filter_by_column: str,
     groupby_column: str | None = None,
+    progressbar: bool = True,
     pad_width_percentage: float = 10,
     pad_mode: str = "reflect",
     **kwargs: typing.Any,
@@ -149,6 +150,8 @@ def filter_line(
         along track values.
     groupby_column : str | None, optional
         Column name to group by before filtering, by default None.
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
     pad_width_percentage : float, optional
         The width of the pad to add before and after the data in percentage of the
         range of values provided by filter_by_column, by default 10.
@@ -193,9 +196,12 @@ def filter_line(
 
         return filtered[data_column]
 
-    for segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
+
+    for segment_name, segment_data in pbar:
         # pad the data with pad_mode, and the filter_by_column by extrapolation
         padded = pad1d(
             segment_data,

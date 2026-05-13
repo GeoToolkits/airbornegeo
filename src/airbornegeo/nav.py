@@ -19,6 +19,7 @@ def directional_velocity(
     time_column: str = "unixtime",
     coordinate_column: str = "easting",
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.Series:
     """
     Calculate one component of velocity, which is the change in coordinate values
@@ -44,6 +45,8 @@ def directional_velocity(
         name of the column containing the coordinates to use for calculating velocity
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -56,10 +59,13 @@ def directional_velocity(
         return np.gradient(data[coordinate_column], data[time_column])
 
     # iterate through groups, append speeds, and concat
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
+
     groups = []
-    for _segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for _segment_name, segment_data in pbar:
         groups.append(
             np.gradient(segment_data[coordinate_column], segment_data[time_column])
         )
@@ -74,6 +80,7 @@ def ground_speed(
     easting_column: str = "easting",
     northing_column: str = "northing",
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.Series:
     """
     TODO: do calculation forward for 1st points so they aren't 0
@@ -98,6 +105,8 @@ def ground_speed(
         name of the column containing the northing coordinates in meters
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -117,10 +126,13 @@ def ground_speed(
         return np.gradient(data.cumulative_distance, data[time_column])
 
     # iterate through groups, append speeds, and concat
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
+
     groups = []
-    for _segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for _segment_name, segment_data in pbar:
         groups.append(
             np.gradient(segment_data.cumulative_distance, segment_data[time_column])
         )
@@ -175,6 +187,7 @@ def vertical_acceleration(
     time_column: str,
     height_column: str,
     groupby_column: str | None = None,
+    progressbar: bool = True,
     time_threshold: float | None = None,
     smoothing_window: int | None = None,
 ) -> pd.Series:
@@ -195,6 +208,8 @@ def vertical_acceleration(
         Column name to containing the flight height in meters
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
     time_threshold : float
         Threshold in seconds for determining gaps in the data, where acceleration will be set to NaN
     smoothing_window : int, optional
@@ -267,10 +282,12 @@ def vertical_acceleration(
         return vertical_accel
 
     # iterate through groups, append accelerations, and concat
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
     accels = []
-    for _segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for _segment_name, segment_data in pbar:
         times = segment_data[time_column]
         heights = segment_data[height_column]
         vertical_vel = np.gradient(heights, times)
@@ -386,6 +403,7 @@ def track(
     latitude_column: str,
     longitude_column: str,
     groupby_column: str | None = None,
+    progressbar: bool = True,
     ellipsoid: bool = True,
 ) -> pd.Series:
     """
@@ -402,6 +420,8 @@ def track(
         'northing'.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -418,10 +438,12 @@ def track(
         )
 
     # iterate through groups, append tracks, and concat
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
     tracks = []
-    for _segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for _segment_name, segment_data in pbar:
         calc_track = track_func(
             lat=segment_data[latitude_column].values,
             lon=segment_data[longitude_column].values,
@@ -474,6 +496,7 @@ def relative_distance(
     easting_column: str = "easting",
     northing_column: str = "northing",
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.Series:
     """
     Calculate distance between successive points in a dataframe. This assumes the data
@@ -493,6 +516,8 @@ def relative_distance(
         name of the column containing the northing coordinates in meters
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -513,10 +538,12 @@ def relative_distance(
         )
 
     # iterate through groups, append distances, and concat
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
     dists = []
-    for _segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for _segment_name, segment_data in pbar:
         distances = _relative_distance(
             segment_data[easting_column].values, segment_data[northing_column].values
         )
@@ -530,6 +557,7 @@ def cumulative_distance(
     easting_column: str = "easting",
     northing_column: str = "northing",
     groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.Series:
     """
     Calculate the cumulative distance along track in a dataframe. This assumes the data
@@ -549,6 +577,8 @@ def cumulative_distance(
         name of the column containing the northing coordinates in meters
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
 
     Returns
     -------
@@ -561,6 +591,7 @@ def cumulative_distance(
         easting_column=easting_column,
         northing_column=northing_column,
         groupby_column=groupby_column,
+        progressbar=progressbar,
     ).cumsum()
 
 
@@ -570,6 +601,7 @@ def along_track_distance(
     easting_column: str = "easting",
     northing_column: str = "northing",
     groupby_column: str | None = None,
+    progressbar: bool = True,
     guess_start_position: bool = False,
 ) -> pd.Series:
     """
@@ -591,6 +623,8 @@ def along_track_distance(
         name of the column containing the northing coordinates in meters
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
     guess_start_position: bool, optional
         If True, this will determine the start of the line, not by the first row, but by
         finding the leftmost corner of the line. This is useful if you don't have a time
@@ -630,6 +664,7 @@ def along_track_distance(
                 easting_column="x",
                 northing_column="y",
                 groupby_column=None,
+                progressbar=False,
             )
             horizontal_df = horizontal_df.sort_values("original_index").set_index(
                 "original_index"
@@ -637,9 +672,11 @@ def along_track_distance(
             return horizontal_df.tmp
 
         data = data.copy()
-        for _segment_name, segment_data in tqdm(
-            data.groupby(groupby_column), desc="Segments"
-        ):
+        if progressbar:
+            pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+        else:
+            pbar = data.groupby(groupby_column)
+        for _segment_name, segment_data in pbar:
             # turn point data into line
             line = gpd.GeoSeries(LineString(segment_data.geometry.tolist()))
 
@@ -664,6 +701,7 @@ def along_track_distance(
                 easting_column="x",
                 northing_column="y",
                 groupby_column=None,
+                progressbar=False,
             )
             horizontal_df = horizontal_df.sort_values("original_index").set_index(
                 "original_index"
@@ -677,6 +715,7 @@ def along_track_distance(
             easting_column=easting_column,
             northing_column=northing_column,
             groupby_column=None,
+            progressbar=False,
         )
 
     # iterate through groups, append distances, and concat
@@ -688,6 +727,7 @@ def along_track_distance(
                 easting_column=easting_column,
                 northing_column=northing_column,
                 groupby_column=None,
+                progressbar=False,
             )
         )
     return np.concatenate(groups)

@@ -12,6 +12,7 @@ def block_reduce(
     spacing: float,
     reduce_by: str | tuple[str, str],
     groupby_column: str | None = None,
+    progressbar: bool = True,
     **kwargs,
 ) -> pd.DataFrame:
     """
@@ -40,6 +41,8 @@ def block_reduce(
         'easting' and 'northing'.
     groupby_column : str | None, optional
         Column name to group by before block reducing, by default None.
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
     kwargs : typing.Any
         Any additional keyword arguments to pass to verde.BlockReduce.
 
@@ -107,10 +110,13 @@ def block_reduce(
 
     assert groupby_column in data.columns, "groupby_column must be in the dataframe"
 
+    if progressbar:
+        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
+    else:
+        pbar = data.groupby(groupby_column)
+
     blocked_dfs = []
-    for segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Segments"
-    ):
+    for segment_name, segment_data in pbar:
         # get tuples of pd.Series
         input_coords = tuple([segment_data[col].to_numpy() for col in reduce_by])  # pylint: disable=consider-using-generator
         input_data = tuple([segment_data[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator

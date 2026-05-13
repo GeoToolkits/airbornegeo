@@ -31,6 +31,7 @@ def _end_iterations(
     rms_values: list[float],
     delta_rms_values: list[float],
     max_iterations: int,
+    mistie_values: list[float] | None = None,
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float | None = None,
     rms_percent_increase_tolerance: float | None = None,
@@ -43,6 +44,10 @@ def _end_iterations(
     delta_rms = delta_rms_values[-1]
     previous_delta_rms = delta_rms_values[-2] if iteration > 2 else np.inf
 
+    if mistie_values is not None:
+        mistie = mistie_values[-1]
+        previous_mistie = mistie_values[-2] if iteration > 2 else np.inf
+
     # ignore for first iteration
     if iteration == 1:
         pass
@@ -50,7 +55,7 @@ def _end_iterations(
         # end because RMS is increasing above a unreasonable amount
         if rms > np.min(rms_values) * (1 + rms_percent_increase_tolerance / 100):
             logger.info(  # pylint: disable=logging-fstring-interpolation
-                f"\nEquivalent source levelling terminated after {iteration} iterations because the RMS of the levelling corrections ({round(rms, 4)}) \n"
+                f"\nLevelling terminated after {iteration} iterations because the RMS of the levelling corrections ({round(rms, 4)}) \n"
                 f"was over {rms_percent_increase_tolerance}% greater than minimum RMS ({round(np.min(rms_values), 4)}) \n"
                 "Change parameter 'rms_percent_increase_tolerance' if desired.",
             )
@@ -63,7 +68,7 @@ def _end_iterations(
             and (previous_delta_rms <= rms_percent_change_tolerance)
         ):
             logger.info(  # pylint: disable=logging-fstring-interpolation
-                f"\nEquivalent source levelling terminated after {iteration} iterations because there was no "
+                f"\nLevelling terminated after {iteration} iterations because there was no "
                 f"significant variation in the RMS (delta RMS of {round(delta_rms, 2)}%) of the levelling corrections over 2 iterations \n"
                 f"Change parameter 'rms_percent_change_tolerance' ({rms_percent_change_tolerance}%) if desired.",
             )
@@ -72,12 +77,21 @@ def _end_iterations(
         # end because RMS is below the set tolerance
         if (rms_tolerance is not None) and (rms < rms_tolerance):
             logger.info(  # pylint: disable=logging-fstring-interpolation
-                f"\nEquivalent source levelling terminated after {iteration} iterations because the RMS of the levelling corrections ({rms}) was "
+                f"\nLevelling terminated after {iteration} iterations because the RMS of the levelling corrections ({rms}) was "
                 f"less then set tolerance ({rms_tolerance}) \nChange parameter "
                 "'rms_tolerance' if desired.",
             )
             end = True
             termination_reason.append("RMS tolerance")
+        # end because RMS of cross-overs is increasing
+        if (mistie_values is not None) and (mistie > previous_mistie):  # pylint: disable=possibly-used-before-assignment
+            logger.info(  # pylint: disable=logging-fstring-interpolation
+                f"\nLevelling terminated after {iteration} iterations because the RMS of the cross-over errors ({rms}) "
+                f"began to increase.",
+            )
+            end = True
+            termination_reason.append("cross-over RMS increasing")
+
     # end because max iterations reached
     if iteration >= max_iterations:
         logger.warning(  # pylint: disable=logging-fstring-interpolation
@@ -93,13 +107,16 @@ def _end_iterations(
 
 def equivalent_source_levelling(
     data: pd.DataFrame,
+    *,
     data_column: str,
+    distance_column: str,
     max_dist: float,
     degree: int,
     lines_to_level: list[float] | None = None,
     damping: float | None = None,
     depth: str | float = "default",
-    block_size: float | None = None,
+    data_block_size: float | None = None,
+    source_block_size: float | None = None,
     max_iterations: int = 1,
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
@@ -109,7 +126,13 @@ def equivalent_source_levelling(
     progressbar: bool = True,
 ) -> pd.Series:
     """
-    _summary_
+    Iteratively levelling lines by comparing the line to the forward calculated effect
+    of equivalent sources which have been fitted to nearby data from other lines. The
+    difference between the prediction and the observed data gives a misfit, which a
+    trend is then fit to, creating the levelling correction, which is subsequently added
+    to the line. Randomly iterate through all the lines, creating new equivalent source
+    models and calculating levelling corrections for each line. Then repeat this entire
+    process several times, until one of several stopping criteria are met.
 
     Parameters
     ----------
@@ -119,6 +142,8 @@ def equivalent_source_levelling(
     data_column : str
         The name of the column containing the data values to fit equivalent sources to
         and level, typically gravity or magnetics.
+    distance_column : str
+        The column containing the distance along the line in meters.
     max_dist : float
         For each line to be levelled, only fit equivalent sources using data within this
         distance to the line, excluding the line data itself. This should be large
@@ -134,10 +159,15 @@ def equivalent_source_levelling(
         default None
     depth : str | float, optional
         The source depths for the equivalent sources, by default "default", which uses
-        4.5 times the mean distance between first neighboring sources.
-    block_size : float | None, optional
-        The block size for placing the equivalent sources, by default None which place 1
-        source beneath each datapoint.
+        4.5 times the median distance between first neighboring sources.
+    data_block_size : float | None, optional
+        The block size for reducing the number of data points used in fitting the
+        equivalent sources, by default None. If given, data will be block reduced along
+        individual lines.
+    source_block_size : float | None, optional
+        The block size for placing the equivalent sources, by default None which places
+        1 source beneath each (blocked) datapoint. If given, will instead place 1 source
+        in each window of line data with a width of the block size.
     max_iterations : int, optional
         End the iterations after this value, by default 1
     rms_tolerance : float | None, optional
@@ -165,7 +195,8 @@ def equivalent_source_levelling(
         The levelled data column, which can be assigned back to the original dataframe.
     """
     # check columns are present
-    cols = ["easting", "northing", "height", "line", "distance_along_line", data_column]
+    cols = ["easting", "northing", "height", "line", distance_column, data_column]
+
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
     data = data.copy()
@@ -211,18 +242,70 @@ def equivalent_source_levelling(
                 maxdist=max_dist,
                 coordinates=(survey_df.easting, survey_df.northing),
             )
-            survey_df = survey_df.iloc[dist_mask]
+            nearby_survey_df = survey_df.iloc[dist_mask]
+
+            if len(nearby_survey_df) == 0:
+                continue
+
+            # block reduce data used for fitting eq sources
+            if data_block_size is not None:
+                nearby_survey_df = airbornegeo.block_reduce(
+                    nearby_survey_df,
+                    np.median,
+                    reduce_by=distance_column,
+                    spacing=data_block_size,
+                    groupby_column="line",
+                    progressbar=False,
+                )
 
             # fit eq sources to nearby data
             coords = (
-                survey_df.easting,
-                survey_df.northing,
-                survey_df.height,
+                nearby_survey_df.easting,
+                nearby_survey_df.northing,
+                nearby_survey_df.height,
             )
+            # # if block-reducing for sources, do it manually so sources are along lines
+            # if source_block_size is not None:
+            #     blocked_nearby_survey = airbornegeo.block_reduce(
+            #         nearby_survey_df,
+            #         np.median,
+            #         spacing=source_block_size,
+            #         reduce_by=distance_column,
+            #         groupby_column='line',
+            #         progressbar=False,
+            #     )
+            #     blocked_nearby_survey = airbornegeo.block_reduce(
+            #         blocked_nearby_survey,
+            #         np.median,
+            #         spacing=source_block_size,
+            #         reduce_by=('easting','northing'),
+            #         progressbar=False,
+            #     )
+            #     if depth == "default":
+            #         source_depth = 4.5 * np.mean(
+            #         bd.neighbor_distance_statistics(
+            #             (blocked_nearby_survey.easting, blocked_nearby_survey.northing),
+            #             "median",
+            #             k=1,
+            #         )
+            #     )
+            #     else:
+            #         source_depth = depth
+            #     points = (
+            #         blocked_nearby_survey.easting,
+            #         blocked_nearby_survey.northing,
+            #         blocked_nearby_survey.height - source_depth,
+            #     )
+            # else:
+            #     points = None
+
             eqs = hm.EquivalentSources(
-                damping=damping, depth=depth, block_size=block_size
+                damping=damping,
+                depth=depth,
+                # points=points,
+                block_size=source_block_size,
             )
-            eqs.fit(coords, survey_df[data_column])
+            eqs.fit(coords, nearby_survey_df[data_column])
 
             # predict eq sources on the line to be levelled
             line_df["tmp_predicted_eqs"] = eqs.predict(
@@ -242,6 +325,8 @@ def equivalent_source_levelling(
                 ],
                 degree=degree,
             )
+
+            # TODO: make levelling correction 0 if more than max_dist from other line data
 
             # update the levelled line before moving on to the next line
             data.loc[data.line == line_name, data_column] = (
@@ -281,8 +366,8 @@ def equivalent_source_levelling(
     # Reset index and sort
     data = data.set_index("tmp_index").sort_values("tmp_index")
 
-    if plot_iterations and max_iterations > 1:
-        airbornegeo.plotting.plot_eqs_levelling_convergence(
+    if plot_iterations and iteration > 2:
+        airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
             rms_tolerance=rms_tolerance,
@@ -787,12 +872,14 @@ def create_intersection_table(
     """
     data = data.copy()
 
-    assert "tie" in data.columns, "data must have column of booleans named 'tie'"
+    assert "line_type" in data.columns, (
+        "data must have column 'line_type' with values of 'tie', 'line', or 'other'"
+    )
     assert isinstance(data, gpd.GeoDataFrame), "data must be a GeoDataFrame"
     assert data.geometry.geom_type.isin(["Point"]).all(), "geometry must be points"
 
-    lines_df = data[~data.tie]
-    ties_df = data[data.tie]
+    lines_df = data[data.line_type == "line"]
+    ties_df = data[data.line_type == "tie"]
 
     assert "line" in lines_df.columns, "flight_lines must have column 'line'"
     assert "line" in ties_df.columns, "tie_lines must have column 'line'"
@@ -957,9 +1044,15 @@ def add_intersections(
     data["is_intersection"] = False
     data["intersecting_line"] = np.nan
 
+    pbar = tqdm(
+        inters.iterrows(),
+        desc="Collecting intersections",
+        total=len(inters),
+    )
+
     # collect intersections to be added
     dfs = []
-    for _, row in inters.iterrows():
+    for _, row in pbar:
         for i in list(data.line.unique()):
             if i in (row.line, row.tie):
                 new_row = pd.DataFrame(
@@ -977,8 +1070,7 @@ def add_intersections(
                 new_row["geometry"] = gpd.points_from_xy(
                     new_row.easting, new_row.northing
                 )
-                # print(new_row)
-                # for each intersection row, find the closest 2 two points, then take
+                # for each intersection row, find the closest 2 points, then take
                 # the one with the lower `distance_along_line` value, then calculate the
                 # cumulative distance from that point to the intersection point.
                 line_points = data[data.line == i]
@@ -988,11 +1080,9 @@ def add_intersections(
                     .iloc[0:2]
                 )
                 nearest_two_points = line_points.loc[nearest_two_points.index]
-                # print(nearest_two_points)
                 min_dist_point = nearest_two_points.sort_values(
                     by="distance_along_line", ascending=True
                 ).iloc[0]
-                # print(min_dist_point)
 
                 # calculate cumulative distance to the min_dist_point
                 inter_and_nearest_point = pd.DataFrame(
@@ -1009,19 +1099,15 @@ def add_intersections(
                 )
 
                 # inter_and_nearest_point = pd.concat([new_row, min_dist_point])[["easting", "northing"]]
-                # print(inter_and_nearest_point)
                 dist_between = airbornegeo.relative_distance(
                     inter_and_nearest_point,
                     easting_column="easting",
                     northing_column="northing",
                 )[-1]
-                # print(dist_between)
-                # print(min_dist_point.distance_along_line)
+
                 new_row["distance_along_line"] = (
                     min_dist_point.distance_along_line + dist_between
                 )
-                # print(new_row)
-                # return
                 dfs.append(new_row)
 
     # add intersections as new rows to dataframe
@@ -1565,6 +1651,7 @@ def calculate_crossover_errors(
     plot_hist: bool = True,
     robust: bool = True,
     warn_if_unchanged: bool = False,
+    progressbar: bool = True,
 ) -> gpd.GeoDataFrame:
     """
     Calculate mistie values for all intersections. For each intersection, find the data
@@ -1595,6 +1682,8 @@ def calculate_crossover_errors(
     warn_if_unchanged : bool, optional
         If true, raise a UserWarning if misties haven't changed from previous column, by
         default False.
+    progressbar : bool, optional
+        Show progress bars for iteration through intersections, by default True
 
     Returns
     -------
@@ -1609,8 +1698,17 @@ def calculate_crossover_errors(
     assert "line" in df.columns, "df must have column 'line'"
 
     # iterate through intersections
+    if progressbar:
+        pbar = tqdm(
+            inters.iterrows(),
+            desc="Intersections",
+            total=len(inters),
+        )
+    else:
+        pbar = inters.iterrows()
+
     misties = []
-    for _ind, row in inters.iterrows():
+    for _ind, row in pbar:
         # search data for values at intersecting lines
         line_value = df[(df.line == row.line) & (df.intersecting_line == row.tie)][
             data_col
@@ -1813,7 +1911,7 @@ def level_to_grid(
     return data[data_column] - data.levelling_correction
 
 
-def line_levelling(
+def crossover_levelling(
     data: gpd.GeoDataFrame | pd.DataFrame,
     inters: gpd.GeoDataFrame | pd.DataFrame,
     *,
@@ -1874,6 +1972,7 @@ def line_levelling(
         data_col=data_col,
         plot_map=False,
         plot_hist=False,
+        progressbar=False,
     )
     mistie_col = [
         int(col.split("_")[-1]) for col in inters2.columns if "mistie_" in col
@@ -1944,6 +2043,7 @@ def line_levelling(
         plot_map=False,
         plot_hist=False,
         warn_if_unchanged=warn_if_unchanged,
+        progressbar=False,
     )
     mistie_col = [int(col.split("_")[-1]) for col in inters.columns if "mistie_" in col]
     mistie_col = f"mistie_{max(mistie_col)}"
@@ -1993,23 +2093,93 @@ def iterative_line_levelling(
     levelled_col: str,
     degree: int,
     intersection_weight_col: str | None = None,
-    iterations: int = 5,
-    plot_results: bool = False,
-    plot_convergence: bool = False,
-    logy: bool = False,
-    title: str = "Levelling convergence",
-    as_median: bool = False,
+    max_iterations: int = 5,
+    rms_tolerance: float | None = None,
+    rms_percent_change_tolerance: float = 10,
+    rms_percent_increase_tolerance: float = 20,
+    plot_iterations: bool = True,
+    progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
+    """
+    _summary_
+
+    Parameters
+    ----------
+    data : gpd.GeoDataFrame | pd.DataFrame
+        _description_
+    inters : gpd.GeoDataFrame | pd.DataFrame
+        _description_
+    lines_to_level : list[float]
+        _description_
+    data_col : str
+        _description_
+    levelled_col : str
+        _description_
+    degree : int
+        _description_
+    intersection_weight_col : str | None, optional
+        _description_, by default None
+    max_iterations : int, optional
+        End the iterations after this value, by default 1
+    rms_tolerance : float | None, optional
+        End the iteration once the levelling correction RMS is less than this value, by
+        default None
+    rms_percent_change_tolerance : float, optional
+        End the iterations if the percentage change of levelling correction RMS over 2
+        consecutive iterations is less the than this percentage. This helps stop the
+        iterations once improvement has plateaued, by default 10.
+    rms_percent_increase_tolerance : float, optional
+        End the iterations if the levelling correction RMS of the current iterations is
+        more than this percent greater then the minimum RMS of past iterations. This
+        helps stop run-away iterations which keep getting worse, by default 20
+    plot_results : bool, optional
+        _description_, by default False
+    plot_convergence : bool, optional
+        _description_, by default False
+    logy : bool, optional
+        _description_, by default False
+    title : str, optional
+        _description_, by default "Levelling convergence"
+    as_median : bool, optional
+        _description_, by default False
+    plot_iterations : bool, optional
+        Plot the convergence of levelling correction RMS value, by default True
+    progressbar : bool, optional
+        Show progress bars for both iterations and levelling of lines, by default True
+
+    Returns
+    -------
+    tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]
+        _description_
+    """
     data = data.copy()
-    ints = inters.copy()
+    inters = inters.copy()
 
-    assert "line" in data.columns, "df must have column 'line'"
+    # check columns are present
+    cols = ["line", data_col]
+    assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
-    for _i in tqdm(range(1, iterations + 1), desc="Iteration"):
+    if max_iterations == 1:
+        progressbar = False
+
+    if progressbar:
+        pbar_iterations = tqdm(range(1, max_iterations + 1))
+    else:
+        pbar_iterations = range(1, max_iterations + 1)
+
+    correction_rms_values = []
+    correction_delta_rms_values = []
+    mistie_values = []
+    iteration = 1
+    for iteration in pbar_iterations:
+        if progressbar:
+            pbar_iterations.set_description(f"Iteration: {iteration}")
+
         try:
-            data, ints = line_levelling(
+            original_values = data[data_col]
+            data, inters = crossover_levelling(
                 data,
-                ints,
+                inters,
                 lines_to_level=lines_to_level,
                 degree=degree,
                 data_col=data_col,
@@ -2017,28 +2187,56 @@ def iterative_line_levelling(
                 intersection_weight_col=intersection_weight_col,
                 warn_if_unchanged=True,
             )
-            data_col = levelled_col
+            final_values = data[levelled_col]
         except UserWarning:
             break
-    if plot_convergence is True:
-        plot_levelling_convergence(
-            ints,
-            logy=logy,
-            title=title,
-            as_median=as_median,
+
+        cols = [c for c in inters.columns if "mistie_" in c]
+        mistie_col = [int(col.split("_")[-1]) for col in cols]
+        try:
+            current_mistie_col = f"mistie_{max(mistie_col)}"
+        except ValueError:
+            current_mistie_col = "mistie_0"
+        mistie_values.append(airbornegeo.rmse(inters[current_mistie_col]))
+
+        # add RMS and delta RMS of correction values for iteration to lists
+        levelling_correction = original_values - final_values
+        rms = airbornegeo.rmse(levelling_correction)
+        delta_rms = (
+            (correction_rms_values[-1] / rms - 1) * 100 if iteration > 1 else np.inf
         )
-    if plot_results is True:
-        # plot flight lines
-        airbornegeo.plotly_points(
-            data[data.line.isin(lines_to_level)],
-            color_col="levelling_correction",
-            size=4,
-            hover_cols=[
-                "line",
-            ],
+        correction_rms_values.append(rms)
+        correction_delta_rms_values.append(delta_rms)
+
+        end, termination_reason = _end_iterations(
+            rms_values=correction_rms_values,
+            delta_rms_values=correction_delta_rms_values,
+            max_iterations=max_iterations,
+            mistie_values=mistie_values,
+            rms_tolerance=rms_tolerance,
+            rms_percent_change_tolerance=rms_percent_change_tolerance,
+            rms_percent_increase_tolerance=rms_percent_increase_tolerance,
         )
 
-    return data, ints
+        if end:
+            if progressbar:
+                pbar_iterations.set_description(
+                    f"Iterations ended due to {termination_reason}"
+                )
+            break
+
+        # use levelled column as input for next iteration
+        data_col = levelled_col
+
+    if plot_iterations and iteration > 2:
+        airbornegeo.plotting.plot_levelling_convergence(
+            rms_values=correction_rms_values,
+            delta_rms_values=correction_delta_rms_values,
+            rms_tolerance=rms_tolerance,
+            rms_percent_change_tolerance=rms_percent_change_tolerance,
+        )
+
+    return data, inters
 
 
 def alternating_iterative_line_levelling(
@@ -2049,36 +2247,42 @@ def alternating_iterative_line_levelling(
     levelled_col: str,
     degree: int,
     intersection_weight_col: str | None = None,
-    iterations: int = 5,
-    # plot_results=False,
-    plot_convergence: bool = False,
-    logy: bool = False,
-    title: str = "Levelling convergence",
-    as_median: bool = False,
+    max_iterations: int = 5,
+    rms_tolerance: float | None = None,
+    rms_percent_change_tolerance: float = 10,
+    rms_percent_increase_tolerance: float = 20,
+    plot_iterations: bool = True,
+    progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     data = data.copy()
     inters = inters.copy()
 
-    assert "tie" in data.columns, "data must have column 'tie'"
-    assert "line" in data.columns, "data must have column 'line'"
-    assert "distance_along_line" in data.columns, (
-        "data must have column 'distance_along_line'"
-    )
+    # check columns are present
+    cols = ["line", "line_type", "distance_along_line", data_col]
+    assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
-    lines_to_level = data[data.tie == False].line.unique()  # noqa: E712 pylint: disable=singleton-comparison
-    ties_to_level = data[data.tie == True].line.unique()  # noqa: E712 pylint: disable=singleton-comparison
+    lines_to_level = data[data.line_type == "line"].line.unique()
+    ties_to_level = data[data.line_type == "tie"].line.unique()
 
-    for _i in tqdm(range(1, iterations + 1), desc="Iteration"):
+    if max_iterations == 1:
+        progressbar = False
+
+    if progressbar:
+        pbar_iterations = tqdm(range(1, max_iterations + 1))
+    else:
+        pbar_iterations = range(1, max_iterations + 1)
+
+    correction_rms_values = []
+    correction_delta_rms_values = []
+    mistie_values = []
+    iteration = 1
+    for iteration in pbar_iterations:
+        if progressbar:
+            pbar_iterations.set_description(f"Iteration: {iteration}")
+
         # level lines to ties
-        cols = [c for c in inters.columns if "mistie_" in c]
-        mistie_col = [int(col.split("_")[-1]) for col in cols]
-        try:
-            current_mistie_col = f"mistie_{max(mistie_col)}"
-            prior_mistie = airbornegeo.rmse(inters[current_mistie_col])
-        except ValueError:
-            prior_mistie = None
-
-        data, inters = line_levelling(
+        original_values = data[data_col]
+        data, inters = crossover_levelling(
             data,
             inters,
             lines_to_level=lines_to_level,
@@ -2088,7 +2292,7 @@ def alternating_iterative_line_levelling(
             intersection_weight_col=intersection_weight_col,
         )
         # level ties to lines
-        data, inters = line_levelling(
+        data, inters = crossover_levelling(
             data,
             inters,
             lines_to_level=ties_to_level,
@@ -2097,7 +2301,7 @@ def alternating_iterative_line_levelling(
             levelled_col=levelled_col,
             intersection_weight_col=intersection_weight_col,
         )
-        data_col = levelled_col
+        final_values = data[levelled_col]
 
         cols = [c for c in inters.columns if "mistie_" in c]
         mistie_col = [int(col.split("_")[-1]) for col in cols]
@@ -2105,17 +2309,43 @@ def alternating_iterative_line_levelling(
             current_mistie_col = f"mistie_{max(mistie_col)}"
         except ValueError:
             current_mistie_col = "mistie_0"
-        post_mistie = airbornegeo.rmse(inters[current_mistie_col])
-        if (prior_mistie is not None) and (post_mistie > prior_mistie):
-            logger.warning("Mistie increased, ending iterations")
+        mistie_values.append(airbornegeo.rmse(inters[current_mistie_col]))
+
+        # add RMS and delta RMS of correction values for iteration to lists
+        levelling_correction = original_values - final_values
+        rms = airbornegeo.rmse(levelling_correction)
+        delta_rms = (
+            (correction_rms_values[-1] / rms - 1) * 100 if iteration > 1 else np.inf
+        )
+        correction_rms_values.append(rms)
+        correction_delta_rms_values.append(delta_rms)
+
+        end, termination_reason = _end_iterations(
+            rms_values=correction_rms_values,
+            delta_rms_values=correction_delta_rms_values,
+            max_iterations=max_iterations,
+            mistie_values=mistie_values,
+            rms_tolerance=rms_tolerance,
+            rms_percent_change_tolerance=rms_percent_change_tolerance,
+            rms_percent_increase_tolerance=rms_percent_increase_tolerance,
+        )
+
+        if end:
+            if progressbar:
+                pbar_iterations.set_description(
+                    f"Iterations ended due to {termination_reason}"
+                )
             break
 
-    if plot_convergence is True:
-        plot_levelling_convergence(
-            inters,
-            logy=logy,
-            title=title,
-            as_median=as_median,
+        # use levelled column as input for next iteration
+        data_col = levelled_col
+
+    if plot_iterations and iteration > 2:
+        airbornegeo.plotting.plot_levelling_convergence(
+            rms_values=correction_rms_values,
+            delta_rms_values=correction_delta_rms_values,
+            rms_tolerance=rms_tolerance,
+            rms_percent_change_tolerance=rms_percent_change_tolerance,
         )
 
     return data, inters

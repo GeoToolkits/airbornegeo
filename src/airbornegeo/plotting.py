@@ -36,7 +36,7 @@ def align_yaxis(
     ax2.set_ylim(miny + dy, maxy + dy)
 
 
-def plot_eqs_levelling_convergence(
+def plot_levelling_convergence(
     rms_values: list[float],
     delta_rms_values: list[float],
     rms_tolerance: float | None = None,
@@ -74,11 +74,26 @@ def plot_eqs_levelling_convergence(
     ax2.tick_params(axis="y", colors="g", which="both")
     ax2.grid(False)
 
-    ax1.set_ylim(min(rms_values), max(rms_values))
-    ax2.set_ylim(
-        np.nanmin(np.isfinite(delta_rms_values)),
-        np.nanmax(np.isfinite(delta_rms_values)),
+    rms_range = max(rms_values) - min(rms_values)
+    if rms_tolerance is not None:
+        ax1.set_ylim(rms_tolerance - (rms_range * 0.1), max(rms_values))
+    else:
+        ax1.set_ylim(min(rms_values), max(rms_values))
+
+    finite_delta_rms_values = np.array(delta_rms_values)[np.isfinite(delta_rms_values)]
+    delta_rms_range = np.nanmax(finite_delta_rms_values) - np.nanmin(
+        finite_delta_rms_values
     )
+    if rms_percent_change_tolerance is not None:
+        ax2.set_ylim(
+            rms_percent_change_tolerance - (delta_rms_range * 0.1),
+            np.nanmax(finite_delta_rms_values),
+        )
+    else:
+        ax2.set_ylim(
+            np.nanmin(finite_delta_rms_values),
+            np.nanmax(finite_delta_rms_values),
+        )
 
     # set x axis to integer values
     ax1.xaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True))
@@ -98,7 +113,7 @@ def plot_eqs_levelling_convergence(
         ax2.axhline(
             y=rms_percent_change_tolerance,
             linewidth=1,
-            color="r",
+            color="g",
             linestyle="dashed",
             label="RMS percent change tolerance",
         )
@@ -106,7 +121,7 @@ def plot_eqs_levelling_convergence(
         ax1.axhline(
             y=rms_tolerance,
             linewidth=1,
-            color="r",
+            color="b",
             linestyle="dashed",
             label="RMS tolerance",
         )
@@ -119,7 +134,7 @@ def plot_eqs_levelling_convergence(
         lines2, labels2 = ax2.get_legend_handles_labels()
         ax2.legend(lines + lines2, labels + labels2, loc="upper right")
 
-    plt.title("Equivalent source iterative levelling")
+    plt.title("Iterative levelling")
     plt.tight_layout()
     plt.show()
 

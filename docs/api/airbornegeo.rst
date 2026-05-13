@@ -11,7 +11,7 @@ API Reference
 
 Trajectories
 --------------------------
-Functions for calculated trajectory or navigation related fields
+Functions for calculating trajectory or navigation related fields
 
 .. autosummary::
     :toctree: generated/
@@ -19,6 +19,7 @@ Functions for calculated trajectory or navigation related fields
     along_track_distance
     relative_distance
     ground_speed
+    directional_velocity
     vertical_acceleration
     track
 
@@ -35,6 +36,9 @@ Functions for performing geospatial operations.
     filter_line
     filter_grid
     sample_grid
+    interpolate_missing
+    resample
+    resample_as
 
 
 Organizing survey data
@@ -73,7 +77,7 @@ Functions for levelling airborne geophysical survey data.
     lines_without_intersections
     calculate_crossover_errors
     update_intersections_with_eq_sources
-    line_levelling
+    crossover_levelling
     iterative_line_levelling
     alternating_iterative_line_levelling
     equivalent_source_levelling
@@ -92,6 +96,7 @@ Functions related specifically to working with potential-fields data
     eotvos_correction_glicken
     eotvos_correction_harlan
     vertical_acceleration
+    igrf
 
 Plotting functions
 ------------------

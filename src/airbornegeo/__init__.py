@@ -72,13 +72,13 @@ from .levelling import (  # noqa: E402
     alternating_iterative_line_levelling,
     calculate_crossover_errors,
     create_intersection_table,
+    crossover_levelling,
     equivalent_source_levelling,
     inspect_intersections,
     interpolate_intersections,
     # calculate_intersection_weights,
     iterative_line_levelling,
     level_to_grid,
-    line_levelling,
     lines_without_intersections,
     plot_levelling_convergence,
     plot_line_and_crosses,
@@ -101,6 +101,7 @@ from .plotting import (  # noqa: E402
 )
 from .potential_fields import (  # noqa: E402
     eq_sources_1d,
+    igrf,
     upward_continue_by_line,
 )
 from .processing import (  # noqa: E402
