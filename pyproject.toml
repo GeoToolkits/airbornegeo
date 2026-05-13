@@ -52,7 +52,9 @@ dependencies = [
   "scooby",
   "nbformat>=4.2.0", # needed for plotly
   "iprogress", # need for progressbars
+  "boule>=0.6",
   "nomkl", # needed to avoid abort from pygmt during filter_line
+  "bordado",
 ]
 
 
@@ -199,6 +201,7 @@ platforms = ["win-64", "linux-64"]#, "osx-64", "osx-arm64"]
 
 [tool.pixi.pypi-dependencies]
 airbornegeo = { path = ".", editable = true }
+harmonica = { path = "../harmonica", editable = true }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
@@ -213,7 +216,7 @@ matplotlib = ">=3.9.0"
 pandas = ">=2.3.0"
 scikit-learn = ">=1.5.0"
 ipython = ">=8.23.0"
-harmonica = ">=0.7.0,<0.8"
+# harmonica = ">=0.7.0,<0.8"
 xrft = ">=1.0.2,<2"
 geopandas = ">=1.1.3,<2"
 pygmt = ">=0.18.0,<0.19"
@@ -228,11 +231,10 @@ pyproj = ">=3.7.2,<4"
 scooby = ">=0.11.0,<0.12"
 nbformat = ">=4.2.0" # needed for plotly
 iprogress = ">=0.4,<0.5"
-polartoolkit = ">=1.5.0,<2"
 boule = ">=0.6"
-cmocean = ">=4.0.3,<5"
 nomkl = "*"
 bordado = ">=0.4.0,<0.5"
+netcdf4 = ">=1.7.4,<2"
 
 
 [tool.pixi.feature.test.tasks.test]
@@ -274,4 +276,5 @@ nbsphinx = ">=0.9.8,<0.10"
 sphinxcontrib-bibtex = ">=2.6.5,<3"
 sphinx-design = ">=0.7.0,<0.8"
 sphinx-autobuild = ">=2025.8.25,<2026"
-polartoolkit = ">=1.5.0,<2"
+cmocean = ">=4.0.3,<5"
+# polartoolkit = ">=1.5.0,<2"
