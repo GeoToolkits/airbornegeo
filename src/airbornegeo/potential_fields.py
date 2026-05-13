@@ -1,3 +1,4 @@
+import boule as bl
 import harmonica as hm
 import numpy as np
 import pandas as pd
@@ -137,3 +138,120 @@ def upward_continue_by_line(
         )
 
     return data.upward_continued
+
+
+def igrf(
+    data: pd.DataFrame,
+    *,
+    datetime_column: str,
+    latitude_column: str,
+    longitude_column: str,
+    height_column: str,
+    groupby_column: str | None = None,
+    ellipsoid=bl.WGS84,
+    min_degree=1,
+    max_degree=13,
+) -> tuple[pd.Series, pd.Series, pd.Series]:
+    """
+    Calculate IGRF intensity, inclication and declination using the time from the first
+    row of the supplied datetime_column. If groupby_column is given, then will use the
+    first row from each group.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the data
+    datetime_column : str
+        name of the column containing the datetime values, of which the first (or first
+        within a group), will be used to calculate the IGRF.
+    latitude_column : str
+        name of the column containing the geodetic latitudes in decimal degrees
+    longitude_column : str
+        name of the column containing the geodetic longitudes in decimal degrees
+    height_column : str
+        name of the column containing the ellipsoidal heights in meters
+    groupby_column : str | None, optional
+        Column name to group by before calculation, by default None
+    ellipsoid:
+        The ellipsoid used to convert geodetic to geocentric spherical coordinates and
+        convert the magnetic field vector from a geocentric spherical to a geodetic
+        system. Default is `boule.WGS84`
+    min_degree:
+        The minimum degree used in the expansion. Default is 1 (magnetic fields don't
+        have the 0 degree term).
+    max_degree:
+        The maximum degree used in the expansion. Default is 13.
+
+    Returns
+    -------
+    tuple[pd.Series, pd.Series, pd.Series]
+        The intensity (nT), inclination (degrees) and declination (degrees) of the IGRF.
+    """
+    data = data.copy()
+
+    col_list = [datetime_column, latitude_column, longitude_column, height_column]
+    if groupby_column is not None:
+        col_list.append(groupby_column)
+    assert all(x in data.columns for x in col_list), (
+        f"dataframe must contain columns {col_list} "
+    )
+
+    if groupby_column is None:
+        # select the first row's datetime
+        datetime = data[datetime_column].iloc[0]
+
+        # initialize a IGRF class with the date
+        igrf_model = hm.IGRF14(
+            datetime,
+            ellipsoid=ellipsoid,
+            min_degree=min_degree,
+            max_degree=max_degree,
+        )
+
+        # predict the IGRF field vectors at all survey locations
+        field = igrf_model.predict(
+            (
+                data[longitude_column],
+                data[latitude_column],
+                data[height_column],
+            )
+        )
+
+        # convert vector to intensity, inclination and declination
+        intensity, inc, dec = hm.magnetic_vec_to_angles(*field)
+
+        return intensity, inc, dec
+
+    # iterate through groups, append values, and concat
+    intensities, incs, decs = [], [], []
+    for _segment_name, segment_data in tqdm(
+        data.groupby(groupby_column), desc="Segments"
+    ):
+        # select the first row's datetime
+        datetime = segment_data[datetime_column].iloc[0]
+
+        # initialize a IGRF class with the date
+        igrf_model = hm.IGRF14(
+            datetime,
+            ellipsoid=ellipsoid,
+            min_degree=min_degree,
+            max_degree=max_degree,
+        )
+
+        # predict the IGRF field vectors at all survey locations
+        field = igrf_model.predict(
+            (
+                segment_data[longitude_column],
+                segment_data[latitude_column],
+                segment_data[height_column],
+            )
+        )
+
+        # convert vector to intensity, inclination and declination
+        intensity, inc, dec = hm.magnetic_vec_to_angles(*field)
+
+        intensities.append(intensity)
+        incs.append(inc)
+        decs.append(dec)
+
+    return np.concatenate(intensities), np.concatenate(incs), np.concatenate(decs)

@@ -92,6 +92,7 @@ Functions related specifically to working with potential-fields data
     eotvos_correction_glicken
     eotvos_correction_harlan
     vertical_acceleration
+    igrf
 
 Plotting functions
 ------------------

@@ -101,6 +101,7 @@ from .plotting import (  # noqa: E402
 )
 from .potential_fields import (  # noqa: E402
     eq_sources_1d,
+    igrf,
     upward_continue_by_line,
 )
 from .processing import (  # noqa: E402
