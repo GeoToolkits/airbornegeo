@@ -390,15 +390,9 @@ def calculate_intersection_weights(
     data_1st_derive_weight: float | None = None,
     data_1st_derive_floor: float | None = None,
     data_1st_derive_col_name: str | None = None,
-    data_2nd_derive_weight: float | None = None,
-    data_2nd_derive_floor: float | None = None,
-    data_2nd_derive_col_name: str | None = None,
     height_1st_derive_weight: float | None = None,
     height_1st_derive_floor: float | None = None,
     height_1st_derive_col_name: str | None = None,
-    height_2nd_derive_weight: float | None = None,
-    height_2nd_derive_floor: float | None = None,
-    height_2nd_derive_col_name: str | None = None,
     height_col_name: str = "height",
     plot: bool = False,
 ) -> gpd.GeoDataFrame:
@@ -546,9 +540,7 @@ def calculate_intersection_weights(
             tie_value = gdf[
                 (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
             ][data_1st_derive_col_name].to_numpy()[0]
-            inters.loc[ind, "data_1st_derive"] = np.mean(
-                np.abs([line_value, tie_value])
-            )
+            inters.loc[ind, "data_1st_derive"] = np.max(np.abs([line_value, tie_value]))
         weight_vals = inters.data_1st_derive
         if data_1st_derive_floor is not None:
             weight_vals = np.where(
@@ -581,54 +573,6 @@ def calculate_intersection_weights(
         weights_dict["data_1st_derive_weight"] = data_1st_derive_weight
         plot_cols.append("data_1st_derive")
 
-    if data_2nd_derive_weight is not None:
-        if data_2nd_derive_col_name is None:
-            msg = "must provide 'data_2nd_derive_col_name'"
-            raise ValueError(msg)
-        # find data gradient at intersection for line and tie
-        for ind, row in inters.iterrows():
-            # search data for values at intersecting lines
-            line_value = gdf[
-                (gdf.line == row.line) & (gdf.intersecting_line == row.tie)
-            ][data_2nd_derive_col_name].to_numpy()[0]
-            tie_value = gdf[
-                (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
-            ][data_2nd_derive_col_name].to_numpy()[0]
-            inters.loc[ind, "data_2nd_derive"] = np.mean(
-                np.abs([line_value, tie_value])
-            )
-        weight_vals = inters.data_2nd_derive
-        if data_2nd_derive_floor is not None:
-            weight_vals = np.where(
-                weight_vals < data_2nd_derive_floor,
-                data_2nd_derive_floor,
-                weight_vals,
-            )
-        inters["data_2nd_derive_weight"] = weight_vals
-
-        if weight_by == "all":
-            inters["data_2nd_derive_weight"] = airbornegeo.normalize_values(
-                inters["data_2nd_derive_weight"],
-                low=1,
-                high=0.001,  # reversed so large gradients are bad
-                # quantiles=(0.02, 0.98),
-            )
-        else:
-            inters["data_2nd_derive_weight"] = inters.groupby(weight_by)[
-                "data_2nd_derive_weight"
-            ].transform(
-                lambda x: airbornegeo.normalize_values(
-                    x,
-                    low=1,
-                    high=0.001,  # reversed so large gradients are bad
-                    # quantiles=(0.02, 0.98),
-                )
-            )
-
-        weights_cols.append("data_2nd_derive_weight")
-        weights_dict["data_2nd_derive_weight"] = data_2nd_derive_weight
-        plot_cols.append("data_2nd_derive")
-
     if height_1st_derive_weight is not None:
         if height_1st_derive_col_name is None:
             msg = "must provide 'height_1st_derive_col_name'"
@@ -642,7 +586,7 @@ def calculate_intersection_weights(
             tie_value = gdf[
                 (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
             ][height_1st_derive_col_name].to_numpy()[0]
-            inters.loc[ind, "height_1st_derive"] = np.mean(
+            inters.loc[ind, "height_1st_derive"] = np.max(
                 np.abs([line_value, tie_value])
             )
         weight_vals = inters.height_1st_derive
@@ -676,54 +620,6 @@ def calculate_intersection_weights(
         weights_cols.append("height_1st_derive_weight")
         weights_dict["height_1st_derive_weight"] = height_1st_derive_weight
         plot_cols.append("height_1st_derive")
-
-    if height_2nd_derive_weight is not None:
-        if height_2nd_derive_col_name is None:
-            msg = "must provide 'height_2nd_derive_col_name'"
-            raise ValueError(msg)
-        # find height gradient at intersection for line and tie
-        for ind, row in inters.iterrows():
-            # search data for values at intersecting lines
-            line_value = gdf[
-                (gdf.line == row.line) & (gdf.intersecting_line == row.tie)
-            ][height_2nd_derive_col_name].to_numpy()[0]
-            tie_value = gdf[
-                (gdf.line == row.tie) & (gdf.intersecting_line == row.line)
-            ][height_2nd_derive_col_name].to_numpy()[0]
-            inters.loc[ind, "height_2nd_derive"] = np.mean(
-                np.abs([line_value, tie_value])
-            )
-        weight_vals = inters.height_2nd_derive
-        if height_2nd_derive_floor is not None:
-            weight_vals = np.where(
-                weight_vals < height_2nd_derive_floor,
-                height_2nd_derive_floor,
-                weight_vals,
-            )
-        inters["height_2nd_derive_weight"] = weight_vals
-
-        if weight_by == "all":
-            inters["height_2nd_derive_weight"] = airbornegeo.normalize_values(
-                inters["height_2nd_derive_weight"],
-                low=1,
-                high=0.001,  # reversed so large gradients are bad
-                # quantiles=(0.02, 0.98),
-            )
-        else:
-            inters["height_2nd_derive_weight"] = inters.groupby(weight_by)[
-                "height_2nd_derive_weight"
-            ].transform(
-                lambda x: airbornegeo.normalize_values(
-                    x,
-                    low=1,
-                    high=0.001,  # reversed so large gradients are bad
-                    # quantiles=(0.02, 0.98),
-                )
-            )
-
-        weights_cols.append("height_2nd_derive_weight")
-        weights_dict["height_2nd_derive_weight"] = height_2nd_derive_weight
-        plot_cols.append("height_2nd_derive")
 
     logger.info(
         "combining individual weight cols with following factors: %s", weights_dict
@@ -793,8 +689,15 @@ def plot_levelling_convergence(
     as_median: bool = False,
 ) -> None:
     # get mistie columns
-    cols = [s for s in results.columns.to_list() if s.startswith("mistie_")]
-
+    cols = [c for c in results.columns if "mistie_" in c]
+    cols = [col.split("_")[-1] for col in cols]
+    mistie_cols = []
+    for c in cols:
+        try:  # noqa: SIM105
+            mistie_cols.append(int(c))
+        except ValueError:
+            pass
+    cols = [f"mistie_{c}" for c in mistie_cols]
     iters = len(cols)
 
     mistie_rmses = [
@@ -1726,18 +1629,25 @@ def calculate_crossover_errors(
     logger.debug("mistie RMSE: %s", airbornegeo.rmse(misties))
 
     cols = [c for c in inters.columns if "mistie_" in c]
-    mistie_col = [int(col.split("_")[-1]) for col in cols]
+    cols = [col.split("_")[-1] for col in cols]
+    mistie_cols = []
+    for c in cols:
+        try:  # noqa: SIM105
+            mistie_cols.append(int(c))
+        except ValueError:
+            pass
+
     try:
-        current_mistie_col = f"mistie_{max(mistie_col)}"
+        current_mistie_col = f"mistie_{max(mistie_cols)}"
     except ValueError:
         current_mistie_col = "mistie_0"
-    next_mistie_col = f"mistie_{len(cols)}"
+    next_mistie_col = f"mistie_{len(mistie_cols)}"
 
     # check if new misties are identical to old misties
-    if len(cols) > 0:
+    if len(mistie_cols) > 0:
         try:
             pd.testing.assert_series_equal(
-                inters[f"mistie_{len(cols) - 1}"],
+                inters[f"mistie_{len(mistie_cols) - 1}"],
                 pd.Series(misties),
                 check_names=False,
                 check_index=False,
@@ -1938,7 +1848,6 @@ def crossover_levelling(
     assert "distance_along_line" in data.columns, (
         "data must have column 'distance_along_line'"
     )
-
     # check if levelling lines to ties or vice versa
     levelling_ties = False
     levelling_lines = False
@@ -1975,8 +1884,9 @@ def crossover_levelling(
         progressbar=False,
     )
     mistie_col = [
-        int(col.split("_")[-1]) for col in inters2.columns if "mistie_" in col
+        c for c in inters2.columns if "mistie_" in c and c != intersection_weight_col
     ]
+    mistie_col = [int(col.split("_")[-1]) for col in mistie_col]
     mistie_col = f"mistie_{max(mistie_col)}"
 
     logger.debug(
@@ -2045,7 +1955,11 @@ def crossover_levelling(
         warn_if_unchanged=warn_if_unchanged,
         progressbar=False,
     )
-    mistie_col = [int(col.split("_")[-1]) for col in inters.columns if "mistie_" in col]
+    mistie_col = [
+        int(col.split("_")[-1])
+        for col in inters.columns
+        if "mistie_" in col and col != intersection_weight_col
+    ]
     mistie_col = f"mistie_{max(mistie_col)}"
 
     logger.debug(
@@ -2191,7 +2105,9 @@ def iterative_line_levelling(
         except UserWarning:
             break
 
-        cols = [c for c in inters.columns if "mistie_" in c]
+        cols = [
+            c for c in inters.columns if "mistie_" in c and c != intersection_weight_col
+        ]
         mistie_col = [int(col.split("_")[-1]) for col in cols]
         try:
             current_mistie_col = f"mistie_{max(mistie_col)}"
@@ -2303,7 +2219,9 @@ def alternating_iterative_line_levelling(
         )
         final_values = data[levelled_col]
 
-        cols = [c for c in inters.columns if "mistie_" in c]
+        cols = [
+            c for c in inters.columns if "mistie_" in c and c != intersection_weight_col
+        ]
         mistie_col = [int(col.split("_")[-1]) for col in cols]
         try:
             current_mistie_col = f"mistie_{max(mistie_col)}"

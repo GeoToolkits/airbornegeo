@@ -71,12 +71,12 @@ from .interpolating import (  # noqa: E402
 from .levelling import (  # noqa: E402
     alternating_iterative_line_levelling,
     calculate_crossover_errors,
+    calculate_intersection_weights,
     create_intersection_table,
     crossover_levelling,
     equivalent_source_levelling,
     inspect_intersections,
     interpolate_intersections,
-    # calculate_intersection_weights,
     iterative_line_levelling,
     level_to_grid,
     lines_without_intersections,
