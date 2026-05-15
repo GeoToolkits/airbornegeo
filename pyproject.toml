@@ -236,6 +236,7 @@ nomkl = "*"
 bordado = ">=0.4.0,<0.5"
 netcdf4 = ">=1.7.4,<2"
 cmocean = ">=4.0.3,<5"
+ipywidgets = ">=8.1.8,<9"
 
 [tool.pixi.feature.test.tasks.test]
 cmd = "pytest {{ target }} -ra --cov --cov-report=xml --cov-report=term --durations=20"
