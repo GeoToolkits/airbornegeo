@@ -503,3 +503,98 @@ def plotly_profiles(
     )
 
     return fig
+
+
+def plot_profiles(
+    data: pd.DataFrame,
+    *,
+    y: list[str] | str,
+    x: str,
+    y_axes: list[str] | None = None,
+    x_lims: tuple[float, float] | None = None,
+    y_lims: tuple[float, float] | None = None,
+    title: str | None = None,
+    y_label: list[str] | None = None,
+    x_title: str | None = None,
+    y_title: str | None = None,
+    marker_sizes: typing.Any = None,
+    marker_symbols: typing.Any = None,
+    marker_scale=6,
+):
+    """
+    plot data profiles with matplotlib
+    currently only allows 3 separate y axes, set with "y_axes", starting with 1
+    """
+    df = data.copy()
+
+    # turn y column name into list
+    if isinstance(y, str):
+        y = [y]
+
+    # list of y axes to use, if none, all will be same
+    y_axes = [1 for _ in y] if y_axes is None else list(y_axes)
+    assert 0 not in y_axes, "No 0 allowed, axes start with 1"
+
+    if y_lims is not None:
+        if isinstance(y_lims[0], list | tuple):  # type: ignore [unreachable]
+            assert len(y_lims) == len(y), "y_lims must be same length as y"  # type: ignore [unreachable]
+        elif isinstance(y_lims[0], int | float):
+            y_lims = tuple(y_lims for _ in y)  # type: ignore [assignment] # pylint: disable=R1728
+
+    # set marker properties
+    if marker_sizes is None:
+        marker_sizes = [1 for _ in y]
+    if marker_symbols is None:
+        marker_symbols = ["." for _ in y]
+    if y_label is None:
+        y_label = list(y)
+    if x_title is None:
+        x_title = x
+
+    fig, ax = plt.subplots(nrows=1, figsize=(10, 5))
+
+    palette = sns.color_palette(None, len(y)).as_hex()
+
+    axs = [ax] if len(pd.Series(y_axes).unique()) == 1 else [ax, ax.twinx()]
+
+    # iterate through data columns
+    elements = []
+    for i, col in enumerate(y):
+        if y_axes[i] == 1:
+            axis = axs[0]
+        elif y_axes[i] == 2:
+            axis = axs[1]
+        else:
+            msg = "Only 2 unique y axes support"
+            raise NotImplementedError(msg)
+        element = axis.scatter(
+            df[x],
+            df[col],
+            s=marker_sizes[i],
+            c=palette[i],
+            marker=marker_symbols[i],
+            label=y_label[i],
+        )
+        elements.append(element)
+        axis.set_xlabel(x_title)
+        axis.set_ylabel(y_title)
+
+        if y_axes[i] > 1:
+            axis.grid(False)
+
+    if x_lims is not None:
+        ax.set_xlim(x_lims)
+    for i, y in enumerate(y_axes):
+        if y_lims is not None:
+            if y == 1:
+                axis = axs[0]
+            elif y == 2:
+                axis = axs[1]
+            axis.set_ylim(y_lims[i])
+
+    labs = [i.get_label() for i in elements]
+    ax.legend(elements, labs, loc=0, markerscale=marker_scale)
+
+    plt.title(title)
+
+    return fig

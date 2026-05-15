@@ -106,4 +106,5 @@ Plotting functions
 
     plotly_points
     plotly_profiles
+    plot_profiles
     inspect_lines

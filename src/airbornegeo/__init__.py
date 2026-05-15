@@ -94,6 +94,7 @@ from .nav import (  # noqa: E402
 )
 from .plotting import (  # noqa: E402
     inspect_lines,
+    plot_profiles,
     # plot_flightlines,
     # plot_flightlines_grids,
     plotly_points,
