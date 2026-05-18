@@ -50,6 +50,7 @@ Functions for working with and organizing survey data.
 
     split_into_segments
     unique_line_id
+    median_line_spacing
 
 
 Quality Control (QC)

@@ -119,6 +119,7 @@ from .resample import (  # noqa: E402
 )
 from .utils import (  # noqa: E402
     get_min_max,
+    median_line_spacing,
     normalize_values,
     rmse,
     sample_grid,

@@ -584,11 +584,11 @@ def plot_profiles(
 
     if x_lims is not None:
         ax.set_xlim(x_lims)
-    for i, y in enumerate(y_axes):
+    for i, j in enumerate(y_axes):
         if y_lims is not None:
-            if y == 1:
+            if j == 1:
                 axis = axs[0]
-            elif y == 2:
+            elif j == 2:
                 axis = axs[1]
             axis.set_ylim(y_lims[i])
 
