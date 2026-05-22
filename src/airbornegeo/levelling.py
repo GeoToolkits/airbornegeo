@@ -1344,6 +1344,35 @@ def get_line_intersections(
     return inters
 
 
+def add_values_to_intersections(
+    df: pd.DataFrame | gpd.GeoDataFrame,
+    intersections: pd.DataFrame | gpd.GeoDataFrame,
+    *,
+    columns: tuple[str],
+) -> pd.DataFrame | gpd.GeoDataFrame:
+    df = df.copy()
+    inters = intersections.copy()
+
+    for column in columns:
+        # add values to intersections table
+        inters[f"flight_{column}"] = np.nan
+        inters[f"tie_{column}"] = np.nan
+        for ind, row in inters.iterrows():
+            # search data for values at intersecting lines
+            flight_values = df[
+                (df.line == row.line) & (df.intersecting_line == row.tie)
+            ][column].to_numpy()
+            tie_values = df[(df.line == row.tie) & (df.intersecting_line == row.line)][
+                column
+            ].to_numpy()
+
+            # add to intersection table
+            inters.loc[ind, f"flight_{column}"] = flight_values
+            inters.loc[ind, f"tie_{column}"] = tie_values
+
+    return inters
+
+
 def interpolate_intersections(
     df: pd.DataFrame | gpd.GeoDataFrame,
     intersections: pd.DataFrame | gpd.GeoDataFrame,

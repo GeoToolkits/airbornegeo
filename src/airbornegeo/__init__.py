@@ -69,6 +69,7 @@ from .interpolating import (  # noqa: E402
     interpolate_missing,
 )
 from .levelling import (  # noqa: E402
+    add_values_to_intersections,
     alternating_iterative_line_levelling,
     calculate_crossover_errors,
     calculate_intersection_weights,
