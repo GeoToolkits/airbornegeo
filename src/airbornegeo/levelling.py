@@ -1354,7 +1354,7 @@ def interpolate_intersections(
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
     window_width: float | None = None,
-) -> pd.DataFrame | gpd.GeoDataFrame:
+) -> tuple[pd.DataFrame | gpd.GeoDataFrame]:
     """
     _summary_
 
@@ -1377,8 +1377,17 @@ def interpolate_intersections(
 
     Returns
     -------
-    pd.DataFrame | gpd.GeoDataFrame
-        the survey dataframe with NaN's filled in the specified columns
+    pd.DataFrame | gpd.GeoDataFrame:
+        the dataframe with new columns 'is_intersection' for booleans,
+        'intersecting_line' containing the name of the intersection line rows which are
+        intersections, '<to_interp>_interpolation_type' with string 'interpolated' or
+        'extrapolated' describing what interpolation type was used for each row, and
+        column specified with to_interp updated with interpolated values at the
+        intersection rows.
+    pd.DataFrame | gpd.GeoDataFrame:
+        the intersection dataframe with new columns 'dist_along_flight_line',
+        'dist_along_flight_tie', 'flight_interpolation_type', 'tie_interpolation_type'.
+        Rows where the interpolation failed will be removed.
     """
     df = df.copy()
     inters = intersections.copy()
@@ -1417,40 +1426,9 @@ def interpolate_intersections(
             groupby_column="line",
         )
 
-    # lines = df.groupby("line")
-    # filled_lines = []
-    # pbar = tqdm(lines, desc="Lines")
-    # for line, line_df in pbar:
-    #     pbar.set_description(f"Line {line}")
-
-    #     if window_width is None:
-    #         filled = airbornegeo.interpolating.interpolate_missing(
-    #             line_df,
-    #             to_interp=to_interp,
-    #             interp_on=interp_on,
-    #             method=method,
-    #             extrapolate=extrapolate,
-    #             fill_value=fill_value,
-    #         )
-    #     else:
-    #         filled = airbornegeo.interpolating.interpolate_missing_with_windows(
-    #             line_df,
-    #             to_interp=to_interp,
-    #             window_width=window_width,
-    #             interp_on=interp_on,
-    #             method=method,
-    #             extrapolate=extrapolate,
-    #             fill_value=fill_value,
-    #         )
-
-    #     filled_lines.append(filled)
-
-    # filled_lines = pd.concat(filled_lines)
-
     inters["flight_interpolation_type"] = "none"
     inters["tie_interpolation_type"] = "none"
-    # inters["flight_height"] = np.nan
-    # inters["tie_height"] = np.nan
+
     # add whether intersection was interpolated or extrapolated with respect to both lines and ties
     for ind, row in inters.iterrows():
         # search data for values at intersecting lines
@@ -1467,14 +1445,10 @@ def interpolate_intersections(
             0
         ]
         tie_interp_type = tie_values[f"{to_interp}_interpolation_type"].to_numpy()[0]
-        # get heights
-        # line_height = line_values.height.to_numpy()[0]
-        # tie_height = tie_values.height.to_numpy()[0]
+
         # add to intersection table
         inters.loc[ind, "flight_interpolation_type"] = flight_interp_type
         inters.loc[ind, "tie_interpolation_type"] = tie_interp_type
-        # inters.loc[ind, "flight_height"] = line_height
-        # inters.loc[ind, "tie_height"] = tie_height
 
     # drop inters rows if the interpolation didn't work for either line or tie
     inters_to_drop = inters[
