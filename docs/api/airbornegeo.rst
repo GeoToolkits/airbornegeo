@@ -50,6 +50,7 @@ Functions for working with and organizing survey data.
 
     split_into_segments
     unique_line_id
+    median_line_spacing
 
 
 Quality Control (QC)
@@ -72,6 +73,7 @@ Functions for levelling airborne geophysical survey data.
     level_to_grid
     create_intersection_table
     interpolate_intersections
+    add_values_to_intersections
     inspect_intersections
     plot_line_and_crosses
     lines_without_intersections
@@ -106,4 +108,5 @@ Plotting functions
 
     plotly_points
     plotly_profiles
+    plot_profiles
     inspect_lines

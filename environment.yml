@@ -1,0 +1,36 @@
+name: default
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - numpy >=2.0
+  - scipy >=1.13.0
+  - matplotlib >=3.9.0
+  - pandas >=2.3.0
+  - scikit-learn >=1.5.0
+  - ipython >=8.23.0
+  - xrft >=1.0.2,<2
+  - geopandas >=1.1.3,<2
+  - pygmt >=0.18.0,<0.19
+  - shapely >=2.1.2,<3
+  - tqdm >=4.67.3,<5
+  - verde >=1.8.1,<2
+  - geographiclib >=2.1,<3
+  - ipykernel >=7.2.0,<8
+  - plotly >=6.6.0,<7
+  - seaborn >=0.13.2,<0.14
+  - pyproj >=3.7.2,<4
+  - scooby >=0.11.0,<0.12
+  - nbformat >=4.2.0
+  - iprogress >=0.4,<0.5
+  - boule >=0.6
+  - nomkl *
+  - bordado >=0.4.0,<0.5
+  - netcdf4 >=1.7.4,<2
+  - cmocean >=4.0.3,<5
+  - ipywidgets >=8.1.8,<9
+  - python >=3.12
+# - pip
+# - pip:
+#   - -e .
+#   - -e ../harmonica

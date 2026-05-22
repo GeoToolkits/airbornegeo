@@ -1344,6 +1344,35 @@ def get_line_intersections(
     return inters
 
 
+def add_values_to_intersections(
+    df: pd.DataFrame | gpd.GeoDataFrame,
+    intersections: pd.DataFrame | gpd.GeoDataFrame,
+    *,
+    columns: tuple[str],
+) -> pd.DataFrame | gpd.GeoDataFrame:
+    df = df.copy()
+    inters = intersections.copy()
+
+    for column in columns:
+        # add values to intersections table
+        inters[f"flight_{column}"] = np.nan
+        inters[f"tie_{column}"] = np.nan
+        for ind, row in inters.iterrows():
+            # search data for values at intersecting lines
+            flight_values = df[
+                (df.line == row.line) & (df.intersecting_line == row.tie)
+            ][column].to_numpy()
+            tie_values = df[(df.line == row.tie) & (df.intersecting_line == row.line)][
+                column
+            ].to_numpy()
+
+            # add to intersection table
+            inters.loc[ind, f"flight_{column}"] = flight_values
+            inters.loc[ind, f"tie_{column}"] = tie_values
+
+    return inters
+
+
 def interpolate_intersections(
     df: pd.DataFrame | gpd.GeoDataFrame,
     intersections: pd.DataFrame | gpd.GeoDataFrame,
@@ -1354,7 +1383,7 @@ def interpolate_intersections(
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
     window_width: float | None = None,
-) -> pd.DataFrame | gpd.GeoDataFrame:
+) -> tuple[pd.DataFrame | gpd.GeoDataFrame]:
     """
     _summary_
 
@@ -1377,8 +1406,17 @@ def interpolate_intersections(
 
     Returns
     -------
-    pd.DataFrame | gpd.GeoDataFrame
-        the survey dataframe with NaN's filled in the specified columns
+    pd.DataFrame | gpd.GeoDataFrame:
+        the dataframe with new columns 'is_intersection' for booleans,
+        'intersecting_line' containing the name of the intersection line rows which are
+        intersections, '<to_interp>_interpolation_type' with string 'interpolated' or
+        'extrapolated' describing what interpolation type was used for each row, and
+        column specified with to_interp updated with interpolated values at the
+        intersection rows.
+    pd.DataFrame | gpd.GeoDataFrame:
+        the intersection dataframe with new columns 'dist_along_flight_line',
+        'dist_along_flight_tie', 'flight_interpolation_type', 'tie_interpolation_type'.
+        Rows where the interpolation failed will be removed.
     """
     df = df.copy()
     inters = intersections.copy()
@@ -1417,40 +1455,9 @@ def interpolate_intersections(
             groupby_column="line",
         )
 
-    # lines = df.groupby("line")
-    # filled_lines = []
-    # pbar = tqdm(lines, desc="Lines")
-    # for line, line_df in pbar:
-    #     pbar.set_description(f"Line {line}")
-
-    #     if window_width is None:
-    #         filled = airbornegeo.interpolating.interpolate_missing(
-    #             line_df,
-    #             to_interp=to_interp,
-    #             interp_on=interp_on,
-    #             method=method,
-    #             extrapolate=extrapolate,
-    #             fill_value=fill_value,
-    #         )
-    #     else:
-    #         filled = airbornegeo.interpolating.interpolate_missing_with_windows(
-    #             line_df,
-    #             to_interp=to_interp,
-    #             window_width=window_width,
-    #             interp_on=interp_on,
-    #             method=method,
-    #             extrapolate=extrapolate,
-    #             fill_value=fill_value,
-    #         )
-
-    #     filled_lines.append(filled)
-
-    # filled_lines = pd.concat(filled_lines)
-
     inters["flight_interpolation_type"] = "none"
     inters["tie_interpolation_type"] = "none"
-    # inters["flight_height"] = np.nan
-    # inters["tie_height"] = np.nan
+
     # add whether intersection was interpolated or extrapolated with respect to both lines and ties
     for ind, row in inters.iterrows():
         # search data for values at intersecting lines
@@ -1467,14 +1474,10 @@ def interpolate_intersections(
             0
         ]
         tie_interp_type = tie_values[f"{to_interp}_interpolation_type"].to_numpy()[0]
-        # get heights
-        # line_height = line_values.height.to_numpy()[0]
-        # tie_height = tie_values.height.to_numpy()[0]
+
         # add to intersection table
         inters.loc[ind, "flight_interpolation_type"] = flight_interp_type
         inters.loc[ind, "tie_interpolation_type"] = tie_interp_type
-        # inters.loc[ind, "flight_height"] = line_height
-        # inters.loc[ind, "tie_height"] = tie_height
 
     # drop inters rows if the interpolation didn't work for either line or tie
     inters_to_drop = inters[
@@ -1619,8 +1622,12 @@ def calculate_crossover_errors(
         tie_value = df[(df.line == row.tie) & (df.intersecting_line == row.line)][
             data_col
         ].to_numpy()[0]
-        assert not np.isnan(line_value)
-        assert not np.isnan(tie_value)
+        assert not np.isnan(line_value), (
+            f"NaN found for line value of line {row.line} / tie {row.tie}"
+        )
+        assert not np.isnan(tie_value), (
+            f"NaN found for tie value of line {row.line} / tie {row.tie}"
+        )
 
         # mistie is line - tie
         misties.append(line_value - tie_value)

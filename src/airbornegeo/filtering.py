@@ -330,7 +330,8 @@ def filter_grid(
         default None
     filter_type : str, optional
         type of filter to use from 'lowpass', 'highpass' 'up_deriv', 'easting_deriv',
-        'northing_deriv', 'up_continue', or 'total_gradient', by default "lowpass"
+        'northing_deriv', 'up_continue', 'horizontal_gradient' or 'total_gradient', by
+        default "lowpass"
     pad_width_factor : int, optional
         factor of grid width to pad the grid by, by default 3, which equates to a pad
         with a width of 1/3 of the grid width.
@@ -425,6 +426,10 @@ def filter_grid(
         ).rename("filt")
     elif filter_type == "total_gradient":
         filt = hm.total_gradient_amplitude(padded).rename("filt")
+    elif filter_type == "horizontal_gradient":
+        east_deriv = hm.derivative_easting(padded).rename("filt")
+        north_deriv = hm.derivative_northing(padded).rename("filt")
+        filt = np.sqrt(east_deriv**2 + north_deriv**2)
     else:
         msg = (
             "filter_type must be 'lowpass', 'highpass' 'up_deriv', 'easting_deriv', "

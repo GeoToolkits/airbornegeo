@@ -69,6 +69,7 @@ from .interpolating import (  # noqa: E402
     interpolate_missing,
 )
 from .levelling import (  # noqa: E402
+    add_values_to_intersections,
     alternating_iterative_line_levelling,
     calculate_crossover_errors,
     calculate_intersection_weights,
@@ -94,6 +95,7 @@ from .nav import (  # noqa: E402
 )
 from .plotting import (  # noqa: E402
     inspect_lines,
+    plot_profiles,
     # plot_flightlines,
     # plot_flightlines_grids,
     plotly_points,
@@ -118,6 +120,7 @@ from .resample import (  # noqa: E402
 )
 from .utils import (  # noqa: E402
     get_min_max,
+    median_line_spacing,
     normalize_values,
     rmse,
     sample_grid,
