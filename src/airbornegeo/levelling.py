@@ -1622,8 +1622,12 @@ def calculate_crossover_errors(
         tie_value = df[(df.line == row.tie) & (df.intersecting_line == row.line)][
             data_col
         ].to_numpy()[0]
-        assert not np.isnan(line_value)
-        assert not np.isnan(tie_value)
+        assert not np.isnan(line_value), (
+            f"NaN found for line value of line {row.line} / tie {row.tie}"
+        )
+        assert not np.isnan(tie_value), (
+            f"NaN found for tie value of line {row.line} / tie {row.tie}"
+        )
 
         # mistie is line - tie
         misties.append(line_value - tie_value)
