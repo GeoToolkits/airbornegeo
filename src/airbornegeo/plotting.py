@@ -36,6 +36,135 @@ def align_yaxis(
     ax2.set_ylim(miny + dy, maxy + dy)
 
 
+def plot_dynamic_levelling_convergence(
+    rms_values: list[float],
+    delta_rms_values: list[float],
+    rms_tolerance: float | None = None,
+    rms_percent_change_tolerance: float | None = None,
+) -> None:
+    """
+    plot a dynamic graph of L2-norm and delta L2-norm vs iteration number.
+    """
+    sns.set_theme()
+
+    clear_output(wait=True)
+
+    # create figure instance
+    _fig, ax1 = plt.subplots(figsize=(5, 3.5))
+
+    # make second y axis for delta RMS
+    ax2 = ax1.twinx()
+
+    iteration = len(rms_values)
+
+    if iteration > 1:
+        # plot RMS convergence
+        ax1.plot(
+            range(1, iteration + 1),
+            rms_values,
+            "b-",
+        )
+
+        # plot delta RMS convergence
+        ax2.plot(
+            range(1, iteration + 1),
+            delta_rms_values,
+            "g-",
+        )
+
+        # plot current values
+        ax1.plot(
+            iteration,
+            rms_values[-1],
+            "^",
+            markersize=6,
+            color=sns.color_palette()[3],
+        )
+        ax2.plot(
+            iteration,
+            delta_rms_values[-1],
+            "^",
+            markersize=6,
+            color=sns.color_palette()[3],
+        )
+
+    # set axis labels, ticks and gridlines
+    ax1.set_xlabel("Iteration")
+    ax1.set_ylabel("levelling correction RMS", color="b")
+    ax1.tick_params(axis="y", colors="b", which="both")
+    ax2.set_ylabel("RMS % change", color="g")
+    ax2.tick_params(axis="y", colors="g", which="both")
+    ax2.grid(False)
+
+    if iteration > 1:
+        rms_range = max(rms_values) - min(rms_values)
+        if rms_tolerance is not None:
+            ax1.set_ylim(rms_tolerance - (rms_range * 0.1), max(rms_values))
+        else:
+            ax1.set_ylim(min(rms_values), max(rms_values))
+
+        finite_delta_rms_values = np.array(delta_rms_values)[
+            np.isfinite(delta_rms_values)
+        ]
+        delta_rms_range = np.nanmax(finite_delta_rms_values) - np.nanmin(
+            finite_delta_rms_values
+        )
+
+        if rms_percent_change_tolerance is not None:
+            ax2.set_ylim(
+                rms_percent_change_tolerance - (delta_rms_range * 0.1),
+                np.nanmax(finite_delta_rms_values),
+            )
+        else:
+            ax2.set_ylim(
+                np.nanmin(finite_delta_rms_values),
+                np.nanmax(finite_delta_rms_values),
+            )
+
+    # set x axis to integer values
+    ax1.xaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True))
+
+    if (rms_tolerance is not None) and (rms_percent_change_tolerance is not None):
+        # make both y axes align at tolerance levels
+        align_yaxis(ax1, rms_tolerance, ax2, rms_percent_change_tolerance)
+        # plot horizontal line of tolerances
+        ax2.axhline(
+            y=rms_percent_change_tolerance,
+            linewidth=1,
+            color="r",
+            linestyle="dashed",
+            label="tolerances",
+        )
+    elif rms_percent_change_tolerance is not None:
+        ax2.axhline(
+            y=rms_percent_change_tolerance,
+            linewidth=1,
+            color="g",
+            linestyle="dashed",
+            label="RMS percent change tolerance",
+        )
+    elif rms_tolerance is not None:
+        ax1.axhline(
+            y=rms_tolerance,
+            linewidth=1,
+            color="b",
+            linestyle="dashed",
+            label="RMS tolerance",
+        )
+
+    if (rms_tolerance is None) and (rms_percent_change_tolerance is None):
+        pass
+    else:
+        # ask matplotlib for the plotted objects and their labels
+        lines, labels = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax2.legend(lines + lines2, labels + labels2, loc="upper right")
+
+    plt.title("Iterative levelling")
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_levelling_convergence(
     rms_values: list[float],
     delta_rms_values: list[float],
