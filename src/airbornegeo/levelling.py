@@ -122,7 +122,7 @@ def equivalent_source_levelling(
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
     seed: int = 42,
-    plot_iterations: bool = True,
+    plot_levelling_convergence: bool = True,
     progressbar: bool = True,
 ) -> pd.Series:
     """
@@ -184,7 +184,7 @@ def equivalent_source_levelling(
     seed : int, optional
         Seed supplied to the random number generator for shuffling the lines so they are
         iterated over in a random order, by default 42
-    plot_iterations : bool, optional
+    plot_levelling_convergence : bool, optional
         Plot the convergence of levelling correction RMS value, by default True
     progressbar : bool, optional
         Show progress bars for both iterations and levelling of lines, by default True
@@ -366,7 +366,7 @@ def equivalent_source_levelling(
     # Reset index and sort
     data = data.set_index("tmp_index").sort_values("tmp_index")
 
-    if plot_iterations and iteration > 2:
+    if plot_levelling_convergence and iteration > 2:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
@@ -2018,7 +2018,7 @@ def iterative_line_levelling(
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
-    plot_iterations: bool = True,
+    plot_levelling_convergence: bool = True,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     """
@@ -2053,17 +2053,7 @@ def iterative_line_levelling(
         End the iterations if the levelling correction RMS of the current iterations is
         more than this percent greater then the minimum RMS of past iterations. This
         helps stop run-away iterations which keep getting worse, by default 20
-    plot_results : bool, optional
-        _description_, by default False
-    plot_convergence : bool, optional
-        _description_, by default False
-    logy : bool, optional
-        _description_, by default False
-    title : str, optional
-        _description_, by default "Levelling convergence"
-    as_median : bool, optional
-        _description_, by default False
-    plot_iterations : bool, optional
+    plot_levelling_convergence : bool, optional
         Plot the convergence of levelling correction RMS value, by default True
     progressbar : bool, optional
         Show progress bars for both iterations and levelling of lines, by default True
@@ -2151,7 +2141,7 @@ def iterative_line_levelling(
         # use levelled column as input for next iteration
         data_col = levelled_col
 
-    if plot_iterations and iteration > 2:
+    if plot_levelling_convergence and iteration > 2:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
@@ -2174,7 +2164,7 @@ def alternating_iterative_line_levelling(
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
-    plot_iterations: bool = True,
+    plot_levelling_convergence: bool = True,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     data = data.copy()
@@ -2265,7 +2255,7 @@ def alternating_iterative_line_levelling(
         # use levelled column as input for next iteration
         data_col = levelled_col
 
-    if plot_iterations and iteration > 2:
+    if plot_levelling_convergence and iteration > 2:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
