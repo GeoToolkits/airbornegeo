@@ -122,7 +122,7 @@ def filter_line(
     pad_width_percentage: float = 10,
     pad_mode: str = "reflect",
     **kwargs: typing.Any,
-) -> pd.DataFrame:
+) -> pd.Series:
     """
     Apply a 1D filter to a column of a pandas DataFrame along values of another column.
     The filter_by_column would typically be either distance along track for a spatial
