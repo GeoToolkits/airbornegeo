@@ -36,10 +36,12 @@ Functions for performing geospatial operations.
     filter_line
     filter_grid
     sample_grid
-    interpolate_missing
     resample
     resample_as
-
+    interpolate_missing
+    interpolate_missing_pointwise
+    interpolate_missing_pointwise_with_windows
+    trend
 
 Organizing survey data
 ----------------------
@@ -63,14 +65,13 @@ Functions for automated and manual quality control of airborne geophysical surve
     inspect_lines
 
 
-Levelling
+Cross-over analysis
 ---------
-Functions for levelling airborne geophysical survey data.
+Functions for finding and examining cross-overs
 
 .. autosummary::
     :toctree: generated/
 
-    level_to_grid
     create_intersection_table
     interpolate_intersections
     add_values_to_intersections
@@ -79,8 +80,19 @@ Functions for levelling airborne geophysical survey data.
     lines_without_intersections
     calculate_crossover_errors
     update_intersections_with_eq_sources
-    crossover_levelling
-    iterative_line_levelling
+    calculate_intersection_weights
+
+
+Levelling
+---------
+Functions for levelling airborne geophysical survey data.
+
+.. autosummary::
+    :toctree: generated/
+
+    level_to_grid
+    crossover_pair_levelling
+    crossover_network_levelling
     alternating_iterative_line_levelling
     equivalent_source_levelling
     plot_levelling_convergence
@@ -95,10 +107,13 @@ Functions related specifically to working with potential-fields data
 
     eq_sources_1d
     upward_continue_by_line
+    eotvos_correction_approx
     eotvos_correction_glicken
     eotvos_correction_harlan
+    eotvos_correction_full
     vertical_acceleration
     igrf
+
 
 Plotting functions
 ------------------
@@ -110,3 +125,14 @@ Plotting functions
     plotly_profiles
     plot_profiles
     inspect_lines
+
+
+Utilities
+---------
+
+.. autosummary::
+    :toctree: generated/
+
+    get_min_max
+    rmse
+    normalize_values
