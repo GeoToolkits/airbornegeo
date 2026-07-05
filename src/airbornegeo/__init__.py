@@ -118,6 +118,9 @@ from .resample import (  # noqa: E402
     resample,
     resample_as,
 )
+from .trend import (  # noqa: E402
+    trend,
+)
 from .utils import (  # noqa: E402
     get_min_max,
     median_line_spacing,
