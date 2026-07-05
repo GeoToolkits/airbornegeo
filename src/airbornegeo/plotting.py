@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import pygmt
 import seaborn as sns
 import verde as vd
-from IPython.display import clear_output
+from IPython.display import clear_output, display
 
 import airbornegeo
 
@@ -36,133 +36,169 @@ def align_yaxis(
     ax2.set_ylim(miny + dy, maxy + dy)
 
 
-def plot_dynamic_levelling_convergence(
-    rms_values: list[float],
-    delta_rms_values: list[float],
-    rms_tolerance: float | None = None,
-    rms_percent_change_tolerance: float | None = None,
-) -> None:
+class LevellingConvergenceMonitor:
     """
-    plot a dynamic graph of L2-norm and delta L2-norm vs iteration number.
+    Live convergence plotter for iterative levelling / inversion workflows.
+    Updates in-place without clearing notebook output.
     """
-    sns.set_theme()
 
-    clear_output(wait=True)
+    def __init__(
+        self,
+        rms_tolerance=None,
+        rms_percent_change_tolerance=None,
+    ):
+        sns.set_theme()
 
-    # create figure instance
-    _fig, ax1 = plt.subplots(figsize=(5, 3.5))
+        self.rms_tolerance = rms_tolerance
+        self.rms_percent_change_tolerance = rms_percent_change_tolerance
 
-    # make second y axis for delta RMS
-    ax2 = ax1.twinx()
+        self.rms_values = []
+        self.delta_rms_values = []
 
-    iteration = len(rms_values)
+        # create persistent figure
+        self.fig, self.ax1 = plt.subplots(figsize=(5, 3.5))
 
-    if iteration > 1:
-        # plot RMS convergence
-        ax1.plot(
-            range(1, iteration + 1),
-            rms_values,
-            "b-",
-        )
+        self.ax2 = self.ax1.twinx()
+        self.fig.suptitle("Iterative levelling")
 
-        # plot delta RMS convergence
-        ax2.plot(
-            range(1, iteration + 1),
-            delta_rms_values,
-            "g-",
-        )
+        plt.close(self.fig)  # prevents auto-render
 
-        # plot current values
-        ax1.plot(
-            iteration,
-            rms_values[-1],
-            "^",
-            markersize=6,
-            color=sns.color_palette()[3],
-        )
-        ax2.plot(
-            iteration,
-            delta_rms_values[-1],
-            "^",
-            markersize=6,
-            color=sns.color_palette()[3],
-        )
+        self._display_handle = None
 
-    # set axis labels, ticks and gridlines
-    ax1.set_xlabel("Iteration")
-    ax1.set_ylabel("levelling correction RMS", color="b")
-    ax1.tick_params(axis="y", colors="b", which="both")
-    ax2.set_ylabel("RMS % change", color="g")
-    ax2.tick_params(axis="y", colors="g", which="both")
-    ax2.grid(False)
+    def update(self, rms_values, delta_rms_values):
+        """
+        Update plot with new data.
+        """
 
-    if iteration > 1:
-        rms_range = max(rms_values) - min(rms_values)
-        if rms_tolerance is not None:
-            ax1.set_ylim(rms_tolerance - (rms_range * 0.1), max(rms_values))
+        if self._display_handle is None:
+            self._display_handle = display(self.fig, display_id=True)
         else:
-            ax1.set_ylim(min(rms_values), max(rms_values))
+            self._display_handle.update(self.fig)
 
-        finite_delta_rms_values = np.array(delta_rms_values)[
-            np.isfinite(delta_rms_values)
-        ]
-        delta_rms_range = np.nanmax(finite_delta_rms_values) - np.nanmin(
-            finite_delta_rms_values
-        )
+        self.rms_values = list(rms_values)
+        self.delta_rms_values = list(delta_rms_values)
 
-        if rms_percent_change_tolerance is not None:
-            ax2.set_ylim(
-                rms_percent_change_tolerance - (delta_rms_range * 0.1),
-                np.nanmax(finite_delta_rms_values),
-            )
-        else:
-            ax2.set_ylim(
-                np.nanmin(finite_delta_rms_values),
-                np.nanmax(finite_delta_rms_values),
+        self._redraw()
+        self._display_handle.update(self.fig)
+        plt.close(self.fig)  # dont replot at the end
+
+    def _redraw(self):
+        iteration = len(self.rms_values)
+
+        ax1 = self.ax1
+        ax2 = self.ax2
+
+        ax1.clear()
+        ax2.clear()
+
+        # set axis labels, ticks and gridlines
+        ax1.set_xlabel("Iteration")
+        ax1.set_ylabel("Levelling correction RMS", color="b")
+        ax2.set_ylabel("RMS % change", color="g")
+        ax1.tick_params(axis="y", colors="b", which="both")
+        ax2.tick_params(axis="y", colors="g", which="both")
+        ax2.yaxis.set_label_position("right")
+        ax2.yaxis.tick_right()
+        ax2.grid(False)
+
+        # integer x-axis
+        ax1.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
+
+        if iteration > 1:
+            # plot RMS convergence
+            ax1.plot(range(1, iteration + 1), self.rms_values, "b-")
+
+            # plot current values
+            ax1.plot(
+                iteration,
+                self.rms_values[-1],
+                "^",
+                color=sns.color_palette()[3],
+                markersize=6,
             )
 
-    # set x axis to integer values
-    ax1.xaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True))
+        if iteration > 2:
+            # plot delta RMS convergence
+            ax2.plot(range(1, iteration + 1), self.delta_rms_values, "g-")
 
-    if (rms_tolerance is not None) and (rms_percent_change_tolerance is not None):
-        # make both y axes align at tolerance levels
-        align_yaxis(ax1, rms_tolerance, ax2, rms_percent_change_tolerance)
-        # plot horizontal line of tolerances
-        ax2.axhline(
-            y=rms_percent_change_tolerance,
-            linewidth=1,
-            color="r",
-            linestyle="dashed",
-            label="tolerances",
-        )
-    elif rms_percent_change_tolerance is not None:
-        ax2.axhline(
-            y=rms_percent_change_tolerance,
-            linewidth=1,
-            color="g",
-            linestyle="dashed",
-            label="RMS percent change tolerance",
-        )
-    elif rms_tolerance is not None:
-        ax1.axhline(
-            y=rms_tolerance,
-            linewidth=1,
-            color="b",
-            linestyle="dashed",
-            label="RMS tolerance",
-        )
+            # plot current values
+            ax2.plot(
+                iteration,
+                self.delta_rms_values[-1],
+                "^",
+                color=sns.color_palette()[3],
+                markersize=6,
+            )
 
-    if (rms_tolerance is None) and (rms_percent_change_tolerance is None):
-        pass
-    else:
-        # ask matplotlib for the plotted objects and their labels
-        lines, labels = ax1.get_legend_handles_labels()
-        lines2, labels2 = ax2.get_legend_handles_labels()
-        ax2.legend(lines + lines2, labels + labels2, loc="upper right")
+        # limits
+        if iteration > 1:
+            rms_range = max(self.rms_values) - min(self.rms_values)
+            if self.rms_tolerance is not None:
+                ax1.set_ylim(
+                    self.rms_tolerance - (rms_range * 0.1), max(self.rms_values)
+                )
+            else:
+                ax1.set_ylim(min(self.rms_values), max(self.rms_values))
 
-    plt.title("Iterative levelling")
-    plt.tight_layout()
-    plt.show()
+            finite_delta_rms_values = np.array(self.delta_rms_values)[
+                np.isfinite(self.delta_rms_values)
+            ]
+            # since delta rms can be very large, limit max values to 200 %
+            delta_rms_range = np.min(
+                [np.nanmax(finite_delta_rms_values), 200]
+            ) - np.nanmin(finite_delta_rms_values)
+
+            if self.rms_percent_change_tolerance is not None:
+                ax2.set_ylim(
+                    self.rms_percent_change_tolerance - (delta_rms_range * 0.1),
+                    np.min([np.nanmax(finite_delta_rms_values), 200]),
+                )
+            else:
+                ax2.set_ylim(
+                    np.nanmin(finite_delta_rms_values),
+                    np.min([np.nanmax(finite_delta_rms_values), 200]),
+                )
+
+        if (self.rms_tolerance is not None) and (
+            self.rms_percent_change_tolerance is not None
+        ):
+            # make both y axes align at tolerance levels
+            align_yaxis(ax1, self.rms_tolerance, ax2, self.rms_percent_change_tolerance)
+            # plot horizontal line of tolerances
+            ax2.axhline(
+                y=self.rms_percent_change_tolerance,
+                linewidth=1,
+                color="r",
+                linestyle="dashed",
+                label="tolerances",
+            )
+        elif self.rms_percent_change_tolerance is not None:
+            ax2.axhline(
+                y=self.rms_percent_change_tolerance,
+                linewidth=1,
+                color="g",
+                linestyle="dashed",
+                label="RMS percent change tolerance",
+            )
+        elif self.rms_tolerance is not None:
+            ax1.axhline(
+                y=self.rms_tolerance,
+                linewidth=1,
+                color="b",
+                linestyle="dashed",
+                label="RMS tolerance",
+            )
+
+        # legend
+        if (self.rms_tolerance is None) and (self.rms_percent_change_tolerance is None):
+            pass
+        else:
+            # ask matplotlib for the plotted objects and their labels
+            lines, labels = ax1.get_legend_handles_labels()
+            lines2, labels2 = ax2.get_legend_handles_labels()
+            ax2.legend(lines + lines2, labels + labels2, loc="upper right")
+
+        self.fig.tight_layout()
 
 
 def plot_levelling_convergence(

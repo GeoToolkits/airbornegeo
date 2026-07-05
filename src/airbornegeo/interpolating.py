@@ -1,3 +1,4 @@
+import typing
 import warnings
 
 import numpy as np
@@ -8,11 +9,96 @@ from tqdm.autonotebook import tqdm
 import airbornegeo
 from airbornegeo import logger
 
+_METHOD_MIN_POINTS = {
+    "cubic": 4,
+    "quadratic": 3,
+    "slinear": 2,
+    "linear": 2,
+    "zero": 1,
+    "previous": 1,
+    "next": 1,
+    "nearest": 1,
+    "nearest-up": 1,
+}
 
-def interpolate_missing(
+
+def _method_fallback_chain(method: str) -> list[str]:
+    """
+    Build the fallback hierarchy `method -> linear -> nearest`, keeping only stages at
+    or below the requested method's point requirement. 'nearest' has nothing simpler
+    to fall back to, so its chain is just itself.
+    """
+    if method not in _METHOD_MIN_POINTS:
+        msg = "not a valid method string"
+        raise ValueError(msg)
+
+    if method == "nearest":
+        return ["nearest"]
+    if method == "linear":
+        return ["linear", "nearest"]
+    return [method, "linear", "nearest"]
+
+
+def _apply_over_groups(
     data: pd.DataFrame,
     *,
-    to_interp: list[str] | str,
+    groupby_column: str | None,
+    progressbar: bool,
+    interp_func: typing.Callable[..., pd.DataFrame],
+    interp_func_kwargs: dict,
+    pass_group_name: bool = False,
+) -> pd.DataFrame:
+    """
+    Shared driver for `interpolate_missing_pointwise`,
+    `interpolate_missing_pointwise_with_windows`, and `interpolate_missing`: applies
+    `interp_func` to the whole dataframe, or to each group in turn if
+    `groupby_column` is provided.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the data to interpolate.
+    groupby_column : str | None
+        Column name to group by before interpolating.
+    progressbar : bool
+        Show progress bar for each group.
+    interp_func : Callable
+        The interpolation function to apply, e.g.
+        `_interpolate_missing_pointwise`.
+    interp_func_kwargs : dict
+        Keyword arguments (other than `data`) to pass through to `interp_func`.
+    pass_group_name : bool, optional
+        If True, also pass the group's key through as `segment_name=` (only used
+        when `groupby_column` is set), so `interp_func` can reference it in log
+        messages. By default False.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe with the interpolated column.
+    """
+    data = data.copy()
+
+    if groupby_column is None:
+        return interp_func(data, **interp_func_kwargs)
+
+    groups = data.groupby(groupby_column, sort=False)
+    pbar = tqdm(groups, desc="Interpolating segments") if progressbar else groups
+
+    filled_segments = [
+        interp_func(segment_data, segment_name=segment_name, **interp_func_kwargs)
+        if pass_group_name
+        else interp_func(segment_data, **interp_func_kwargs)
+        for segment_name, segment_data in pbar
+    ]
+
+    return pd.concat(filled_segments, ignore_index=True)
+
+
+def interpolate_missing_pointwise(
+    data: pd.DataFrame,
+    *,
+    to_interp: str,
     interp_on: str,
     method: str = "cubic",
     extrapolate: bool = False,
@@ -21,16 +107,22 @@ def interpolate_missing(
     progressbar: bool = True,
 ) -> pd.DataFrame:
     """
-    Interpolate NaN's in "to_interp" column(s), based on value(s) from "interp_on". If
+    Interpolate NaN's in the "to_interp" column, based on values from "interp_on". If
     groupby_column is provided, the dataframe will first be grouped by this so only
     data from the group containing the NaN is used to interpolate.
+
+    To interpolate multiple columns, call this function once per column.
+
+    Falls back through the hierarchy `method` -> 'linear' -> 'nearest' per-NaN if the
+    requested method can't be fit (insufficient points, or an actual fit failure). See
+    `_interpolate_missing_pointwise` for details.
 
     Parameters
     ----------
     data : pd.DataFrame
         Dataframe containing the data to interpolate
-    to_interp : list[str] | str
-        Column(s) to interpolate
+    to_interp : str
+        Column to interpolate
     interp_on : str
         Column to interpolate on
     method : str, optional
@@ -47,60 +139,35 @@ def interpolate_missing(
     Returns
     -------
     pd.DataFrame
-        Dataframe with interpolated columns
+        Dataframe with interpolated column
     """
-    data = data.copy()
-
-    if isinstance(to_interp, str):  # type: ignore [unreachable]
-        to_interp = [to_interp]  # type: ignore [unreachable]
-
-    col_list = [interp_on, *to_interp]
-    if groupby_column is not None:
-        col_list.append(groupby_column)
-    assert all(x in data.columns for x in col_list), (
-        f"dataframe must contain columns {col_list} "
+    cols = [interp_on, to_interp]
+    if groupby_column:
+        cols.append(groupby_column)
+    assert all(c in data.columns for c in cols), (
+        f"dataframe must contain columns {cols}"
     )
 
-    if groupby_column is None:
-        # iterate through columns
-        for col in to_interp:
-            filled = interpolate_missing_single_column(
-                data,
-                to_interp=col,
-                interp_on=interp_on,
-                method=method,
-                extrapolate=extrapolate,
-                fill_value=fill_value,
-            )
-            data[col] = filled[col]
-        return data
-
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-
-    filled_segments = []
-    for _segment_name, segment_data in pbar:
-        for col in to_interp:
-            filled = interpolate_missing_single_column(
-                segment_data,
-                to_interp=col,
-                interp_on=interp_on,
-                method=method,
-                extrapolate=extrapolate,
-                fill_value=fill_value,
-            )
-            data[col] = filled[col]
-            filled_segments.append(data)
-    return pd.concat(filled_segments)
+    return _apply_over_groups(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        interp_func=_interpolate_missing_pointwise,
+        interp_func_kwargs={
+            "to_interp": to_interp,
+            "interp_on": interp_on,
+            "method": method,
+            "extrapolate": extrapolate,
+            "fill_value": fill_value,
+        },
+    )
 
 
-def interpolate_missing_with_windows(
+def interpolate_missing_pointwise_with_windows(
     data: pd.DataFrame,
     *,
     window_width: float,
-    to_interp: str | list[str],
+    to_interp: str,
     interp_on: str,
     method: str = "cubic",
     extrapolate: bool = False,
@@ -109,10 +176,17 @@ def interpolate_missing_with_windows(
     progressbar: bool = True,
 ) -> pd.DataFrame:
     """
-    Interpolate NaN's in "to_interp" column(s), based on value(s) from "interp_on" using
-    only values within a window around the NaN. If groupby_column is provided, the
-    dataframe will first be grouped by this so only data from the group containing the
-    NaN is used to interpolate.
+    Interpolate NaN's in the "to_interp" column, based on values from "interp_on"
+    using only values within a window around the NaN. If groupby_column is provided,
+    the dataframe will first be grouped by this so only data from the group
+    containing the NaN is used to interpolate.
+
+    To interpolate multiple columns, call this function once per column.
+
+    For each NaN, the requested `method` is tried first, expanding the window if
+    there aren't enough points, before falling back through the hierarchy `method` ->
+    'linear' -> 'nearest'. See `_interpolate_missing_pointwise_with_windows`
+    for details.
 
     Parameters
     ----------
@@ -121,8 +195,8 @@ def interpolate_missing_with_windows(
     window_width : float
         width of data window around NaN value to use in the interpolation, in units of
         the data provided in the column interp_on
-    to_interp : list[str] | str
-        Column(s) to interpolate
+    to_interp : str
+        Column to interpolate
     interp_on : str
         Column to interpolate on
     method : str, optional
@@ -139,126 +213,258 @@ def interpolate_missing_with_windows(
     Returns
     -------
     pd.DataFrame
-        Dataframe with interpolated columns
+        Dataframe with interpolated column
     """
-
-    data = data.copy()
-
-    if isinstance(to_interp, str):
-        to_interp = [to_interp]
-
-    col_list = [interp_on, *to_interp]
-    if groupby_column is not None:
-        col_list.append(groupby_column)
-    assert all(x in data.columns for x in col_list), (
-        f"dataframe must contain columns {col_list} "
+    cols = [interp_on, to_interp]
+    if groupby_column:
+        cols.append(groupby_column)
+    assert all(c in data.columns for c in cols), (
+        f"dataframe must contain columns {cols}"
     )
 
-    if groupby_column is None:
-        # iterate through columns
-        with airbornegeo.utils.DuplicateFilter(logger):
-            for col in to_interp:
-                logger.debug("Interpolating column: %s", col)
-                filled = interpolate_missing_with_windows_single_column(
-                    data,
-                    to_interp=col,
-                    interp_on=interp_on,
-                    window_width=window_width,
-                    method=method,
-                    extrapolate=extrapolate,
-                    fill_value=fill_value,
-                )
-                data = filled
-        return data
+    with airbornegeo.utils.DuplicateFilter(logger):
+        return _apply_over_groups(
+            data,
+            groupby_column=groupby_column,
+            progressbar=progressbar,
+            interp_func=_interpolate_missing_pointwise_with_windows,
+            interp_func_kwargs={
+                "to_interp": to_interp,
+                "interp_on": interp_on,
+                "window_width": window_width,
+                "method": method,
+                "extrapolate": extrapolate,
+                "fill_value": fill_value,
+            },
+        )
 
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
 
-    filled_segments = []
-    for _segment_name, segment_data in pbar:
-        for col in to_interp:
-            filled = interpolate_missing_with_windows_single_column(
-                segment_data,
-                to_interp=col,
-                interp_on=interp_on,
-                window_width=window_width,
-                method=method,
-                extrapolate=extrapolate,
-                fill_value=fill_value,
+def _resolve_fill_value(
+    fill_value: tuple[float, float] | str | None,
+    y: np.ndarray,
+    method: str,
+    extrapolate: bool,
+) -> tuple[float, float] | str | float:
+    """
+    Translate the user-facing `fill_value` option into the concrete value scipy's
+    `interp1d` expects, given whether extrapolation is enabled and which method is
+    being used.
+
+    - Not extrapolating -> np.nan (out-of-range points stay NaN).
+    - Extrapolating with `fill_value` unset -> 'extrapolate', except for
+      'nearest', where scipy's own extrapolation is unreliable across versions, so
+      we clamp to the edge values manually instead.
+    - Extrapolating with 'edge' -> clamp to the first/last y values.
+    - Extrapolating with 'mean' -> fill with the mean of y on both sides.
+    - Anything else -> passed through as-is (e.g. an explicit (lo, hi) tuple).
+    """
+    if not extrapolate:
+        return np.nan
+    if method == "nearest" and fill_value in (None, "extrapolate"):
+        return (y[0], y[-1])
+    if fill_value is None:
+        return "extrapolate"
+    if fill_value == "edge":
+        return (y[0], y[-1])
+    if fill_value == "mean":
+        m = np.nanmean(y)
+        return (m, m)
+    return fill_value
+
+
+def _fit_method(
+    x: np.ndarray,
+    y: np.ndarray,
+    method: str,
+    *,
+    extrapolate: bool,
+    fill_value: tuple[float, float] | str | None,
+) -> typing.Callable | None:
+    """
+    Fit a single scipy `interp1d` for `method` on deduped, sorted (x, y). Returns the
+    fitted callable, or None if there aren't enough points, or the fit itself fails.
+    """
+    min_points = _METHOD_MIN_POINTS.get(method, 2)
+    if len(x) < min_points:
+        return None
+
+    local_fill_value = _resolve_fill_value(fill_value, y, method, extrapolate)
+
+    try:
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="The number of derivatives at boundaries does not match:",
             )
-            # segment_data[col] = filled[col]
-            filled_segments.append(filled)
-    return pd.concat(filled_segments)
+            f = scipy.interpolate.interp1d(
+                x,
+                y,
+                kind=method,
+                bounds_error=False,
+                fill_value=local_fill_value,
+                assume_sorted=True,
+            )
+    except Exception as e:  # noqa: BLE001 # pylint: disable=broad-exception-caught
+        logger.debug("Method '%s' failed to fit (%s points): %s", method, len(x), e)
+        return None
+
+    return f
 
 
-def scipy_interpolate_missing(
+def _deduplicate_and_sort(
+    x: np.ndarray, y: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    De-duplicate x (keeping the first occurrence of each value) and sort by x, since
+    spline-based methods (cubic, quadratic, slinear) require strictly increasing x.
+    """
+    x, unique_idx = np.unique(x, return_index=True)
+    return x, y[unique_idx]
+
+
+def _fit_interp1d_with_fallback(
+    x: np.ndarray,
+    y: np.ndarray,
+    method: str,
+    *,
+    extrapolate: bool,
+    fill_value: tuple[float, float] | str | None,
+) -> tuple[typing.Callable | None, str]:
+    """
+    Try each method in the fallback chain (`method` -> 'linear' -> 'nearest'),
+    building a scipy interp1d function on (x, y). A fit is only accepted if it also
+    produces finite output on its own training data. Returns (callable,
+    used_method), or (None, "none") if every method in the chain fails.
+    """
+    x, y = _deduplicate_and_sort(x, y)
+
+    for candidate_method in _method_fallback_chain(method):
+        f = _fit_method(
+            x,
+            y,
+            candidate_method,
+            extrapolate=extrapolate,
+            fill_value=fill_value,
+        )
+        if f is None:
+            continue
+
+        if candidate_method != method:
+            logger.debug("Falling back from '%s' to '%s'", method, candidate_method)
+        return f, candidate_method
+
+    return None, "none"
+
+
+def interpolate_missing(
     data: pd.DataFrame,
     *,
     to_interp: str,
     interp_on: str,
-    method: str = "linear",
+    method: str = "cubic",
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
+    groupby_column: str | None = None,
+    progressbar: bool = True,
 ) -> pd.DataFrame:
     """
-    interpolate NaN's in "to_interp" column, based on values from "interp_on" column
+    Interpolate NaN's in a dataframe's "to_interp" column, based on values from the
+    "interp_on" column. Falls back through `method` -> 'linear' -> 'nearest' if the
+    requested method can't be fit (insufficient points, or an actual fit failure),
+    trying each in turn rather than deciding once from point count alone.
+
+    To interpolate multiple columns, call this function once per column.
+
     method:
         'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic',
         'previous', 'next'
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the data to interpolate
+    to_interp : str
+        Column to interpolate
+    interp_on : str
+        Column to interpolate on
+    method : str, optional
+        Interpolation method to use, by default "cubic"
+    extrapolate : bool, optional
+        Whether to extrapolate beyond the data range, by default False
+    fill_value : tuple[float, float] | str | None, optional
+        Value to use for filling gaps, by default None
+    groupby_column : str | None, optional
+        Column name to group by before interpolating, by default None
+    progressbar : bool, optional
+        Show progress bar for each group, by default True
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe with interpolated column
     """
     data = data.copy()
 
-    col_list = [to_interp, interp_on]
-    assert all(x in data.columns for x in col_list), (
-        f"dataframe must contain columns {col_list} "
+    cols = [to_interp, interp_on]
+    if groupby_column is not None:
+        cols.append(groupby_column)
+    assert all(x in data.columns for x in cols), (
+        f"dataframe must contain columns {cols} "
     )
 
-    # drop NaN's
-    data_no_nans = data.dropna(subset=[to_interp, interp_on], how="any")
+    def _interp_segment(
+        segment_data: pd.DataFrame, segment_name: typing.Any = None
+    ) -> pd.DataFrame:
+        segment_data = segment_data.copy()
 
-    if extrapolate is True:
-        bounds_error = False
-        if fill_value is None:
-            fill_value = "extrapolate"
-        elif fill_value == "edge":
-            fill_value = (
-                data_no_nans[to_interp].iloc[0],
-                data_no_nans[to_interp].iloc[-1],
+        # drop NaN's
+        segment_no_nans = segment_data.dropna(subset=[to_interp, interp_on], how="any")
+        n_valid = len(segment_no_nans)
+
+        # nothing to interpolate from at all: leave as-is (still NaN)
+        if n_valid == 0:
+            logger.warning(
+                "No valid points available to interpolate '%s'%s; returning "
+                "unchanged (still NaN)",
+                to_interp,
+                f" for group '{segment_name}'" if segment_name is not None else "",
             )
-        elif fill_value == "mean":
-            fill_value = (np.nanmean(data[to_interp]), np.nanmean(data[to_interp]))
-        logger.debug("extrapolating with fill_value: %s", fill_value)
-    else:
-        bounds_error = False
-        fill_value = np.nan
+            return segment_data
 
-    # define interpolation function
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message="The number of derivatives at boundaries does not match:",
-        )
-        # this is legacy! Info here https://docs.scipy.org/doc/scipy/tutorial/interpolate/1D.html#tutorial-interpolate-1dsection
-        f = scipy.interpolate.interp1d(
-            data_no_nans[interp_on],
-            data_no_nans[to_interp],
-            kind=method,
-            bounds_error=bounds_error,
+        f, _used_method = _fit_interp1d_with_fallback(
+            segment_no_nans[interp_on].to_numpy(),
+            segment_no_nans[to_interp].to_numpy(),
+            method,
+            extrapolate=extrapolate,
             fill_value=fill_value,
         )
 
-    # get interpolated values at points with NaN's
-    values = f(data[data[to_interp].isna()][interp_on])
+        if f is None:
+            logger.warning(
+                "All methods (%s) failed to fit '%s'%s; returning unchanged",
+                _method_fallback_chain(method),
+                to_interp,
+                f" for group '{segment_name}'" if segment_name is not None else "",
+            )
+            return segment_data
 
-    # fill NaN's  with values
-    data.loc[data[to_interp].isna(), to_interp] = values
+        nan_mask = segment_data[to_interp].isna()
+        values = f(segment_data.loc[nan_mask, interp_on])
+        segment_data.loc[nan_mask, to_interp] = values
 
-    return data
+        return segment_data
+
+    return _apply_over_groups(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        interp_func=_interp_segment,
+        interp_func_kwargs={},
+        pass_group_name=True,
+    )
 
 
-def interpolate_missing_single_column(
+def _interpolate_missing_pointwise(
     data: pd.DataFrame,
     *,
     to_interp: str,
@@ -268,31 +474,214 @@ def interpolate_missing_single_column(
     fill_value: tuple[float, float] | str | None = None,
 ) -> pd.DataFrame:
     """
-    interpolate NaN's in "to_interp" column, based on value(s) from "interp_on"
+    Interpolate NaN's in "to_interp" column, based on value(s) from "interp_on"
     column(s).
+
+    For each NaN, tries each method in the fallback hierarchy `method` -> 'linear' ->
+    'nearest' in turn (without extrapolation first, then with extrapolation if
+    `extrapolate` is True and nothing succeeded), using whichever is the first
+    method that actually produces a valid result -- not just whichever the point
+    count alone suggests should work (e.g. cubic needs >= 4 points, linear needs >=
+    2, nearest needs >= 1, but a method can still fail for other reasons, such as
+    numerical instability during extrapolation).
+
     method:
         'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic',
         'cubic', 'previous', 'next'
     """
+    data = data.copy()
 
     col_list = [to_interp, interp_on]
     assert all(x in data.columns for x in col_list), (
         f"dataframe must contain columns {col_list} "
     )
 
-    args = {
-        "data": data,
-        "to_interp": to_interp,
-        "interp_on": interp_on,
-        "method": method,
-        "extrapolate": extrapolate,
-        "fill_value": fill_value,
-    }
+    data = data.sort_values(interp_on)
 
-    return scipy_interpolate_missing(**args)
+    x = data[interp_on].to_numpy()
+    y = data[to_interp].to_numpy()
+
+    out = y.copy()
+    interp_type = np.full(len(y), "none", dtype=object)
+
+    valid_mask = ~np.isnan(y)
+    n_valid = int(valid_mask.sum())
+
+    # no valid points at all: nothing can be interpolated, return as-is
+    if n_valid == 0:
+        data[to_interp] = out
+        data[f"{to_interp}_interpolation_type"] = interp_type
+        return data
+
+    xs_all = x[valid_mask]
+    ys_all = y[valid_mask]
+
+    method_chain = _method_fallback_chain(method)
+
+    # iterate through NaNs
+    for idx in np.where(np.isnan(y))[0]:
+        xi = x[idx]
+
+        value, used_method, used_type = _fill_one_nan(
+            xs_all,
+            ys_all,
+            xi,
+            method_chain=method_chain,
+            fill_value=fill_value,
+            extrapolate=extrapolate,
+        )
+
+        if used_method is not None and used_method != method:
+            logger.debug(
+                "'%s' failed for value at %s=%s; fell back to '%s' (%s)",
+                method,
+                interp_on,
+                xi,
+                used_method,
+                used_type,
+            )
+
+        out[idx] = value
+        interp_type[idx] = used_type
+
+    data[to_interp] = out
+    data[f"{to_interp}_interpolation_type"] = interp_type
+
+    return data
 
 
-def interpolate_missing_with_windows_single_column(
+def _windowed_attempt(
+    x: np.ndarray,
+    y: np.ndarray,
+    xi: float,
+    *,
+    window_width: float,
+    method: str,
+    extrapolate: bool,
+    fill_value: tuple[float, float] | str | None,
+    max_window_doublings: int = 1,
+) -> tuple[float, str]:
+    """
+    Attempt to fill a single NaN at `xi` using a window of `window_width` either
+    side, doubling the window up to `max_window_doublings` times if there aren't
+    enough points for `method`. Returns (value, used_type), where used_type is
+    'interpolated', 'extrapolated', or 'none'.
+    """
+    min_points = _METHOD_MIN_POINTS.get(method, 2)
+
+    win = window_width
+    for _ in range(max_window_doublings + 1):
+        llim, ulim = xi - win, xi + win
+        left = np.searchsorted(x, llim, side="left")
+        right = np.searchsorted(x, ulim, side="right")
+
+        xs = x[left:right]
+        ys = y[left:right]
+
+        # remove other NaNs in window (only interpolate 1 at a time)
+        m = ~np.isnan(ys)
+        xs = xs[m]
+        ys = ys[m]
+
+        if len(xs) < min_points:
+            win *= 2
+            logger.debug(
+                "Not enough points in window for '%s' (need >= %s, have %s); "
+                "doubling window size to %s",
+                method,
+                min_points,
+                len(xs),
+                win,
+            )
+            continue
+
+        try:
+            value = interpolate_1d_single_nan(
+                xs,
+                ys,
+                xi,
+                method=method,
+                extrapolate=extrapolate,
+                fill_value=fill_value,
+            )
+            if np.isnan(value):
+                msg = "filled value is NaN"
+                raise ValueError(msg)  # noqa: TRY301
+        except Exception:  # noqa: BLE001 # pylint: disable=broad-exception-caught
+            win *= 2
+            logger.debug(
+                "Error during '%s' interpolation; doubling window size to %s",
+                method,
+                win,
+            )
+            continue
+
+        return value, ("extrapolated" if extrapolate else "interpolated")
+
+    return np.nan, "none"
+
+
+def _fill_one_nan(
+    x: np.ndarray,
+    y: np.ndarray,
+    xi: float,
+    *,
+    method_chain: list[str],
+    fill_value: tuple[float, float] | str | None,
+    extrapolate: bool,
+    window_width: float | None = None,
+    max_window_doublings: int = 1,
+) -> tuple[float, str | None, str]:
+    """
+    Shared driver for filling a single NaN at `xi`, used by both
+    `_interpolate_missing_pointwise` (window_width=None) and
+    `_interpolate_missing_pointwise_with_windows` (window_width set).
+
+    Tries each method in `method_chain` in turn without extrapolation; if none
+    succeed and `extrapolate` is True, retries the whole chain with extrapolation
+    allowed. When `window_width` is given, each attempt uses only points within that
+    window of `xi`, expanding the window (up to `max_window_doublings` times) if
+    there aren't enough points before moving to the next method in the chain.
+
+    Returns (value, used_method, used_type), where used_type is 'interpolated',
+    'extrapolated', or 'none', and used_method is None if every method failed.
+    """
+    stages = [(False, "interpolated")]
+    if extrapolate:
+        stages.append((True, "extrapolated"))
+
+    for do_extrapolate, type_label in stages:
+        for candidate_method in method_chain:
+            if window_width is None:
+                value = interpolate_1d_single_nan(
+                    x,
+                    y,
+                    xi,
+                    method=candidate_method,
+                    extrapolate=do_extrapolate,
+                    fill_value=fill_value,
+                )
+                succeeded = not np.isnan(value)
+            else:
+                value, kind = _windowed_attempt(
+                    x,
+                    y,
+                    xi,
+                    window_width=window_width,
+                    method=candidate_method,
+                    extrapolate=do_extrapolate,
+                    fill_value=fill_value,
+                    max_window_doublings=max_window_doublings,
+                )
+                succeeded = kind != "none"
+
+            if succeeded:
+                return value, candidate_method, type_label
+
+    return np.nan, None, "none"
+
+
+def _interpolate_missing_pointwise_with_windows(
     data: pd.DataFrame,
     *,
     window_width: float,
@@ -303,8 +692,14 @@ def interpolate_missing_with_windows_single_column(
     fill_value: tuple[float, float] | str | None = None,
 ) -> pd.DataFrame:
     """
-    Create a window of data either side of NaN's based on "distance_along_line" column and
-    interpolate the value. Useful when NaN's are sparse, or lines are long.
+    Create a window of data either side of NaN's based on "distance_along_line" column
+    and interpolate the value. Useful when NaN's are sparse, or lines are long.
+
+    For each NaN, the requested `method` is tried first, expanding the window (up to
+    2x `window_width`) if there aren't enough points. Only once window expansion has
+    been fully exhausted for `method` does it fall back to a simpler method in the
+    hierarchy `method` -> 'linear' -> 'nearest', repeating the same window-expansion
+    process for each fallback method in turn.
     """
     data = data.copy()
 
@@ -313,155 +708,110 @@ def interpolate_missing_with_windows_single_column(
         f"dataframe must contain columns {col_list} "
     )
 
-    data[f"{to_interp}_interpolation_type"] = "none"
+    data = data.sort_values(interp_on)
+
+    x = data[interp_on].to_numpy()
+    y = data[to_interp].to_numpy()
+
+    out = y.copy()
+    interp_type = np.full(len(y), "none", dtype=object)
+
+    method_chain = _method_fallback_chain(method)
 
     # iterate through NaNs
-    for i in data[data[to_interp].isna()].index:  # pylint: disable=too-many-nested-blocks
-        # get value to interpolate on (e.g. distance along line) for NaN
-        dist_at_nan = data[interp_on].loc[i]
+    for idx in np.where(np.isnan(y))[0]:
+        xi = x[idx]
 
-        # try interpolation with set window width, if there's not enough data (bounds
-        # error), double the width up to 2 times.
-        # if 2 attempts fail and extrapolate is True, allow extrapolation, if False, return NaN
-        # if extrapolating, start with original window width and double up to 2 times, if fails, return NaN
-        win = window_width
-        while win <= window_width * 2:
-            try:
-                # get data inside window
-                llim, ulim = dist_at_nan - win, dist_at_nan + win
-                data_inside = data[data[interp_on].between(llim, ulim)]
+        value, used_method, used_type = _fill_one_nan(
+            x,
+            y,
+            xi,
+            method_chain=method_chain,
+            fill_value=fill_value,
+            extrapolate=extrapolate,
+            window_width=window_width,
+            max_window_doublings=1,
+        )
 
-                if len(data_inside) <= 1:
-                    win += win
-                    logger.debug(
-                        "Error during interpolation, doubling window size to %s",
-                        win,
-                    )
-                    continue
+        if used_type == "none":
+            logger.debug(
+                "All methods (%s) and window expansions failed for value at %s=%s; "
+                "returning NaN",
+                method_chain,
+                interp_on,
+                xi,
+            )
+        elif used_method != method:
+            logger.debug(
+                "'%s' failed for value at %s=%s even after window expansion; fell "
+                "back to '%s' (%s)",
+                method,
+                interp_on,
+                xi,
+                used_method,
+                used_type,
+            )
 
-                # may be multiple NaN's within window (some outside of bounds)
-                # but we only extract the fill value for loc[i]
-                filled = interpolate_missing(
-                    data_inside,
-                    to_interp=[to_interp],
-                    interp_on=interp_on,
-                    method=method,
-                    extrapolate=False,
-                    fill_value=fill_value,
-                )
-                # extract just the filled value
-                value = filled[to_interp].loc[i]
-                if np.isnan(value):
-                    msg = "filled value is NaN"
-                    raise ValueError(msg)  # noqa: TRY301
+        out[idx] = value
+        interp_type[idx] = used_type
 
-                interp_type = "interpolated"
-
-            except Exception:  # noqa: BLE001 pylint: disable=broad-exception-caught
-                # logger.error(e)
-                win += win
-                logger.debug(
-                    "Error with interpolation, doubling window size to %s",
-                    win,
-                )
-                # # error messages for too few points in window
-                # few_points_errors = [
-                #     "cannot reshape array of",
-                #     "Found array with",
-                #     "The number of derivatives at boundaries does not match:",
-                # ]
-                # # error message for bounds error
-                # bounds_errors = [
-                #     "in x_new is above the interpolation range",
-                #     "in x_new is below the interpolation range",
-                # ]
-                # if any(item in str(e) for item in few_points_errors):
-                #     win += win
-                #     logger.warning(
-                #         "too few points in window,"
-                #         "doubling window size to %s",
-                #         win,
-                #     )
-                # elif any(item in str(e) for item in bounds_errors):
-                #     win += win
-                #     logger.warning(
-                #         "bounds error for interpolation,"
-                #         "doubling window size to %s",
-                #         win,
-                #     )
-                # else:  # raise other errors
-                #     win += win
-                #     logger.error(e)
-                #     logger.warning(
-                #         "Error for interpolation, "
-                #         "doubling window size to %s",
-                #         win,
-                #     )
-                continue
-            break
-        else:
-            if extrapolate:
-                # try extrapolation with set window width, if there's not enough data, double the width up to 2 times.
-                win = window_width
-                while win <= window_width * (2):
-                    try:
-                        # get data inside window
-                        llim, ulim = dist_at_nan - win, dist_at_nan + win
-                        data_inside = data[data[interp_on].between(llim, ulim)]
-
-                        if len(data_inside) <= 1:
-                            win += win
-                            logger.debug(
-                                "Error with interpolation, doubling window size to %s",
-                                win,
-                            )
-                            continue
-
-                        # may be multiple NaN's within window (some outside of bounds)
-                        # but we only extract the fill value for loc[i]
-                        filled = interpolate_missing(
-                            data_inside,
-                            to_interp=[to_interp],
-                            interp_on=interp_on,
-                            method=method,
-                            extrapolate=True,
-                            fill_value=fill_value,
-                        )
-                        # extract just the filled value
-                        value = filled[to_interp].loc[i]
-                        if np.isnan(value):
-                            msg = "filled value is NaN"
-                            raise ValueError(msg)  # noqa: TRY301
-
-                        interp_type = "extrapolated"
-
-                    except Exception:  # noqa: BLE001 pylint: disable=broad-exception-caught
-                        win += win
-                        logger.debug(
-                            "Error with interpolation, doubling window size to %s",
-                            win,
-                        )
-                        continue
-                    break
-                else:
-                    logger.debug(
-                        "Extrapolation failed after window expanded 2 times, to %s "
-                        "returning NaN for interpolated value",
-                        win,
-                    )
-                    value = np.nan
-                    interp_type = "none"
-            else:
-                logger.debug(
-                    "Window expanded 2 times, to %s, without success and `extrapolate` "
-                    "set to False, returning NaN for interpolated value",
-                    win,
-                )
-                value = np.nan
-                interp_type = "none"
-
-        # add values into dataframe
-        data.at[i, to_interp] = value  # noqa: PD008
-        data.at[i, f"{to_interp}_interpolation_type"] = interp_type  # noqa: PD008
+    data[to_interp] = out
+    data[f"{to_interp}_interpolation_type"] = interp_type
 
     return data
+
+
+def interpolate_1d_single_nan(
+    x,
+    y,
+    x_index,
+    method: str = "cubic",
+    extrapolate: bool = False,
+    fill_value: tuple[float, float] | str | None = None,
+):
+    """
+    Fit an interpolator to (x, y) and evaluate it at `x_index`, returning a single
+    scalar value (or NaN if the method can't be fit given the available points, or
+    the fit fails for some other reason).
+    """
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    # remove NaNs once (important)
+    mask = ~np.isnan(y)
+    x = x[mask]
+    y = y[mask]
+
+    # remove duplicate x-values, which break strictly-increasing requirements for
+    # spline-based methods (cubic, quadratic, slinear) -- keep the first occurrence.
+    # Without this, cubic spline construction can raise or silently produce a
+    # singular/garbage fit even though the point count looks sufficient.
+    x, y = _deduplicate_and_sort(x, y)
+
+    f = _fit_method(
+        x,
+        y,
+        method,
+        extrapolate=extrapolate,
+        fill_value=fill_value,
+    )
+    if f is None:
+        logger.debug(
+            "Only %s unique valid point(s) available for method '%s' (needs >= %s), "
+            "or fit failed; returning NaN",
+            len(x),
+            method,
+            _METHOD_MIN_POINTS.get(method, 2),
+        )
+        return np.nan
+
+    try:
+        return f(x_index).item()
+    except Exception as e:  # noqa: BLE001 # pylint: disable=broad-exception-caught
+        logger.debug(
+            "Evaluating method '%s' at x_index=%s failed: %s; returning NaN",
+            method,
+            x_index,
+            e,
+        )
+        return np.nan

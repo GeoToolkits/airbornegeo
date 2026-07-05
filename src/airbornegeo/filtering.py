@@ -213,12 +213,14 @@ def filter_line(
         )
 
         # filter the padded data
+        # this resets the index, and drops and rows with NaNs
         filtered = pygmt.filter1d(
             padded[[filter_by_column, data_column]],
             end=True,
             time_col=0,
             filter_type=filter_type,
-        ).rename(columns={0: filter_by_column, 1: data_column})
+        )
+        filtered.columns = [filter_by_column, data_column]
 
         # un-pad the data
         filtered["original_index"] = padded.true_index
@@ -405,12 +407,18 @@ def filter_grid(
         if filter_width is None:
             msg = "filter_width must be provided if filter_type is 'lowpass'"
             raise ValueError(msg)
-        filt = hm.gaussian_lowpass(padded, wavelength=filter_width).rename("filt")
+        filt = hm.gaussian_lowpass(
+            padded,
+            wavelength=filter_width,
+        ).rename("filt")
     elif filter_type == "highpass":
         if filter_width is None:
             msg = "filter_width must be provided if filter_type is 'highpass'"
             raise ValueError(msg)
-        filt = hm.gaussian_highpass(padded, wavelength=filter_width).rename("filt")
+        filt = hm.gaussian_highpass(
+            padded,
+            wavelength=filter_width,
+        ).rename("filt")
     elif filter_type == "up_deriv":
         filt = hm.derivative_upward(padded).rename("filt")
     elif filter_type == "easting_deriv":

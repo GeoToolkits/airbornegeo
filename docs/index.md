@@ -46,11 +46,11 @@ potential_field_processing.md
 levelling.md
 ```
 
-```{toctree}
+<!-- ```{toctree}
 :hidden:
 :caption: 🫧 Cleaning and Quality Control
 quality_control.md
-```
+``` -->
 
 
 

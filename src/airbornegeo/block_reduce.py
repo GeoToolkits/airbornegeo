@@ -53,9 +53,6 @@ def block_reduce(
     """
     data = data.copy()
 
-    # get only numeric columns
-    data = data.select_dtypes(include="number")
-
     if isinstance(reduce_by, str):
         reduce_by = (reduce_by,)
 
@@ -67,6 +64,10 @@ def block_reduce(
         f"{reduce_by} must be in the dataframe"
     )
 
+    # get only numeric columns
+    numeric_cols = data.select_dtypes(include="number").columns
+    input_data_names = [c for c in numeric_cols if c not in [*reduce_by, "geometry"]]
+
     # define verde reducer function
     reducer = vd.BlockReduce(
         reduction,
@@ -74,17 +75,9 @@ def block_reduce(
         **kwargs,
     )
 
-    # get list of data columns to reduce
-    input_data_names = tuple(
-        data.columns.drop(
-            [*list(reduce_by), groupby_column, "geometry"], errors="ignore"
-        )
-    )
-
-    if groupby_column is None:
-        # get tuples of pd.Series
-        input_coords = tuple([data[col].to_numpy() for col in reduce_by])  # pylint: disable=consider-using-generator
-        input_data = tuple([data[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator
+    def run_reduce(df):
+        input_coords = tuple(df[c].to_numpy() for c in reduce_by)
+        input_data = tuple(df[c].to_numpy() for c in input_data_names)
 
         # apply reduction
         coordinates, blocked_data = reducer.filter(
@@ -92,55 +85,28 @@ def block_reduce(
             data=input_data,
         )
 
-        # add reduced coordinates to a dictionary
-        coord_cols = dict(zip(reduce_by, coordinates, strict=False))
+        out = {c: coordinates[i] for i, c in enumerate(reduce_by)}
 
-        # add reduced data to a dictionary
-        if len(input_data_names) < 2:
-            data_cols = {input_data_names[0]: blocked_data}
+        if len(input_data_names) == 1:
+            out[input_data_names[0]] = blocked_data
         else:
-            data_cols = dict(zip(input_data_names, blocked_data, strict=False))
+            out.update({c: blocked_data[i] for i, c in enumerate(input_data_names)})
 
-        # merge dicts and create dataframe
-        blocked = pd.DataFrame(data=coord_cols | data_cols)
+        return pd.DataFrame(out)
 
-        blocked = blocked.drop(columns=["tmp"], errors="ignore")
+    if groupby_column is None:
+        return run_reduce(data).reset_index(drop=True)
 
-        return blocked.reset_index(drop=True)
+    assert groupby_column in data.columns
 
-    assert groupby_column in data.columns, "groupby_column must be in the dataframe"
+    groups = data.groupby(groupby_column, sort=False)
 
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
+    pbar = tqdm(groups, desc="Block-reducing segments") if progressbar else groups
 
     blocked_dfs = []
     for segment_name, segment_data in pbar:
-        # get tuples of pd.Series
-        input_coords = tuple([segment_data[col].to_numpy() for col in reduce_by])  # pylint: disable=consider-using-generator
-        input_data = tuple([segment_data[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator
-
-        # apply reduction
-        coordinates, blocked_data = reducer.filter(
-            coordinates=input_coords,
-            data=input_data,
-        )
-
-        # add reduced coordinates to a dictionary
-        coord_cols = dict(zip(reduce_by, coordinates, strict=False))
-
-        # add reduced data to a dictionary
-        if len(input_data_names) < 2:
-            data_cols = {input_data_names[0]: blocked_data}
-        else:
-            data_cols = dict(zip(input_data_names, blocked_data, strict=False))
-
-        # merge dicts and create dataframe
-        blocked = pd.DataFrame(data=coord_cols | data_cols)
-
+        blocked = run_reduce(segment_data)
         blocked[groupby_column] = segment_name
-        blocked = blocked.drop(columns=["tmp"], errors="ignore")
         blocked_dfs.append(blocked)
 
-    return pd.concat(blocked_dfs).reset_index(drop=True)
+    return pd.concat(blocked_dfs, ignore_index=True)

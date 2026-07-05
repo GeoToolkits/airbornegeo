@@ -55,35 +55,43 @@ class Report(scooby.Report):  # type: ignore[misc] # pylint: disable=missing-cla
 from .block_reduce import (  # noqa: E402
     block_reduce,
 )
+from .crossover_levelling import (  # noqa: E402
+    alternating_iterative_line_levelling,
+    calculate_intersection_weights,
+    crossover_network_levelling,
+    crossover_pair_levelling,
+    plot_levelling_convergence,
+)
+from .crossovers import (  # noqa: E402
+    add_values_to_intersections,
+    calculate_crossover_errors,
+    create_intersection_table,
+    inspect_intersections,
+    interpolate_intersections,
+    lines_without_intersections,
+    plot_line_and_crosses,
+    update_intersections_with_eq_sources,
+)
 from .eotvos import (  # noqa: E402
     eotvos_correction_approx,
     eotvos_correction_full,
     eotvos_correction_glicken,
     eotvos_correction_harlan,
 )
+from .eq_source_levelling import (  # noqa: E402
+    equivalent_source_levelling,
+)
 from .filtering import (  # noqa: E402
     filter_grid,
     filter_line,
 )
+from .grid_levelling import (  # noqa: E402
+    level_to_grid,
+)
 from .interpolating import (  # noqa: E402
     interpolate_missing,
-)
-from .levelling import (  # noqa: E402
-    add_values_to_intersections,
-    alternating_iterative_line_levelling,
-    calculate_crossover_errors,
-    calculate_intersection_weights,
-    create_intersection_table,
-    crossover_levelling,
-    equivalent_source_levelling,
-    inspect_intersections,
-    interpolate_intersections,
-    iterative_line_levelling,
-    level_to_grid,
-    lines_without_intersections,
-    plot_levelling_convergence,
-    plot_line_and_crosses,
-    update_intersections_with_eq_sources,
+    interpolate_missing_pointwise,
+    interpolate_missing_pointwise_with_windows,
 )
 from .nav import (  # noqa: E402
     along_track_distance,
@@ -117,6 +125,9 @@ from .reproject import (  # noqa: E402
 from .resample import (  # noqa: E402
     resample,
     resample_as,
+)
+from .trend import (  # noqa: E402
+    trend,
 )
 from .utils import (  # noqa: E402
     get_min_max,
