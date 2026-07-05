@@ -199,6 +199,9 @@ def sample_grid(
 
 def median_line_spacing(
     data: pd.DataFrame,
+    easting_column="easting",
+    northing_column="northing",
+    line_column="line",
 ) -> float:
     """
     Estimate the flight line spacing by first, for each point on a specific line,
@@ -221,23 +224,27 @@ def median_line_spacing(
 
     """
     # check columns are present
-    cols = ["easting", "northing", "line"]
+    cols = [easting_column, northing_column, line_column]
 
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
     data = data.copy()
 
     min_distances = []
-    for line_name in data.line.unique():
+    for line_name in data[line_column].unique():
         # get line data
-        line_df = data[data.line == line_name]
+        line_df = data[data[line_column] == line_name]
 
         # get rest of survey data
-        survey_df = data[data.line != line_name]
+        survey_df = data[data[line_column] != line_name]
 
         # for each line point, find the distance to the nearest non-line point
-        kdtree = scipy.spatial.KDTree(survey_df[["easting", "northing"]].to_numpy())
-        min_dist, _ = kdtree.query(line_df[["easting", "northing"]].to_numpy(), k=1)
+        kdtree = scipy.spatial.KDTree(
+            survey_df[[easting_column, northing_column]].to_numpy()
+        )
+        min_dist, _ = kdtree.query(
+            line_df[[easting_column, northing_column]].to_numpy(), k=1
+        )
 
         min_distances.append(min_dist)
 
