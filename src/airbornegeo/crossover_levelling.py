@@ -18,6 +18,7 @@ def crossover_network_levelling(
     data_col: str,
     levelled_col: str,
     line_column: str,
+    distance_column: str,
     degree: int | None = None,
     filter: str | None = None,
     lines_to_level: list[float] | None = None,
@@ -63,6 +64,8 @@ def crossover_network_levelling(
         Column name to store the levelled values in.
     line_column : str
         Column containing the line / flight / segment names.
+    distance_column : str
+        Column containing the distance along each line / segment.
     degree : int | None, optional
         Polynomial degree used to fit a trend to the misties along each line.
     filter : str | None, optional
@@ -138,6 +141,7 @@ def crossover_network_levelling(
                 data_col=data_col,
                 levelled_col=levelled_col,
                 line_column=line_column,
+                distance_column=distance_column,
                 lines_to_level=lines_to_level,
                 intersection_weight_col=intersection_weight_col,
                 mistie_interp_method=mistie_interp_method,
@@ -243,6 +247,7 @@ def _crossover_network_levelling(
     data_col: str,
     levelled_col: str,
     line_column: str,
+    distance_column: str,
     degree: int | None = None,
     filter: str | None = None,
     lines_to_level: list[float] | None = None,
@@ -272,8 +277,8 @@ def _crossover_network_levelling(
     assert line_column in data.columns, (
         "data must have column specified by `line_column`"
     )
-    assert "distance_along_line" in data.columns, (
-        "data must have column 'distance_along_line'"
+    assert distance_column in data.columns, (
+        "data must have column denote by distance_column"
     )
 
     # drop lines without intersections
@@ -320,7 +325,7 @@ def _crossover_network_levelling(
                     data_to_fit=line_ints,
                     cols_to_fit=["dist_along_line", "network_mistie"],
                     data_to_predict=line_df,
-                    cols_to_predict=["distance_along_line", "levelling_correction"],
+                    cols_to_predict=[distance_column, "levelling_correction"],
                     degree=degree,
                     intersection_weight_col=intersection_weight_col,
                 )
@@ -335,7 +340,7 @@ def _crossover_network_levelling(
             # add signed misties to line dataframe at each intersection row
             for ind, row in line_df[line_df.is_intersection].iterrows():
                 match = line_ints[
-                    np.isclose(line_ints.dist_along_line, row.distance_along_line)
+                    np.isclose(line_ints.dist_along_line, row[distance_column])
                 ]
                 if len(match) == 0:
                     continue
@@ -358,7 +363,7 @@ def _crossover_network_levelling(
                 line_df = airbornegeo.interpolate_missing(
                     line_df,
                     to_interp=mistie_col,
-                    interp_on="distance_along_line",
+                    interp_on=distance_column,
                     method=mistie_interp_method,
                     extrapolate=False,
                     groupby_column=None,
@@ -366,7 +371,7 @@ def _crossover_network_levelling(
                 line_df = airbornegeo.interpolate_missing(
                     line_df,
                     to_interp=mistie_col,
-                    interp_on="distance_along_line",
+                    interp_on=distance_column,
                     method="nearest",
                     extrapolate=True,
                     groupby_column=None,
@@ -376,7 +381,7 @@ def _crossover_network_levelling(
                     line_df,
                     filter_type=filter,
                     data_column=mistie_col,
-                    filter_by_column="distance_along_line",
+                    filter_by_column=distance_column,
                     groupby_column=None,
                     progressbar=False,
                 )
@@ -545,6 +550,7 @@ def crossover_pair_levelling(
     data_col: str,
     levelled_col: str,
     line_column: str,
+    distance_column: str,
     degree: int | None = None,
     filter: str | None = None,
     intersection_weight_col: str | None = None,
@@ -599,6 +605,7 @@ def crossover_pair_levelling(
                 data_col=data_col,
                 levelled_col=levelled_col,
                 line_column=line_column,
+                distance_column=distance_column,
                 intersection_weight_col=intersection_weight_col,
                 mistie_interp_method=mistie_interp_method,
                 warn_if_unchanged=warn_if_unchanged,
@@ -672,6 +679,7 @@ def _crossover_pair_levelling(
     data_col: str,
     levelled_col: str,
     line_column: str,
+    distance_column: str,
     degree: int | None = None,
     filter: str | None = None,
     intersection_weight_col: str | None = None,
@@ -703,8 +711,8 @@ def _crossover_pair_levelling(
     assert line_column in data.columns, (
         "data must have column specified by `line_column`"
     )
-    assert "distance_along_line" in data.columns, (
-        "data must have column 'distance_along_line'"
+    assert distance_column in data.columns, (
+        "data must have column denote by distance_column"
     )
     # check if levelling lines to ties or vice versa
     levelling_lines2 = False
@@ -766,7 +774,7 @@ def _crossover_pair_levelling(
                     cols_to_fit=cols_to_fit  # noqa: RUF005
                     + [mistie_col],  # column names for distance/mistie
                     data_to_predict=line_df,  # data with line data
-                    cols_to_predict=["distance_along_line"]  # noqa: RUF005
+                    cols_to_predict=[distance_column]  # noqa: RUF005
                     + [
                         "levelling_correction"
                     ],  # column names for distance/ levelling correction
@@ -811,7 +819,7 @@ def _crossover_pair_levelling(
                 line_df = airbornegeo.interpolate_missing(
                     line_df,
                     to_interp=mistie_col,
-                    interp_on="distance_along_line",
+                    interp_on=distance_column,
                     method=mistie_interp_method,
                     extrapolate=False,
                     groupby_column=None,
@@ -819,7 +827,7 @@ def _crossover_pair_levelling(
                 line_df = airbornegeo.interpolate_missing(
                     line_df,
                     to_interp=mistie_col,
-                    interp_on="distance_along_line",
+                    interp_on=distance_column,
                     method="nearest",
                     extrapolate=True,
                     groupby_column=None,
@@ -830,7 +838,7 @@ def _crossover_pair_levelling(
                     line_df,
                     filter_type=filter,
                     data_column=mistie_col,
-                    filter_by_column="distance_along_line",
+                    filter_by_column=distance_column,
                     groupby_column=None,  # already giving a single group
                     progressbar=False,
                 )
@@ -886,6 +894,7 @@ def alternating_iterative_line_levelling(
     data_col: str,
     levelled_col: str,
     line_column: str,
+    distance_column: str,
     lines_to_level: list[str] | None = None,
     degree: int | None = None,
     filter: str | None = None,
@@ -910,7 +919,7 @@ def alternating_iterative_line_levelling(
         raise UserWarning(msg)
 
     # check columns are present
-    cols = [line_column, "line_type", "distance_along_line", data_col]
+    cols = [line_column, "line_type", distance_column, data_col]
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
     lines1_to_level = data[data.line_type == 0][line_column].unique()
@@ -954,6 +963,7 @@ def alternating_iterative_line_levelling(
             data_col=data_col,
             line_column=line_column,
             levelled_col=levelled_col,
+            distance_column=distance_column,
             intersection_weight_col=intersection_weight_col,
             mistie_interp_method=mistie_interp_method,
             max_iterations=1,
@@ -968,6 +978,7 @@ def alternating_iterative_line_levelling(
             data_col=levelled_col,
             line_column=line_column,
             levelled_col=levelled_col,
+            distance_column=distance_column,
             intersection_weight_col=intersection_weight_col,
             mistie_interp_method=mistie_interp_method,
             max_iterations=1,
