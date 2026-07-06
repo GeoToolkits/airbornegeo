@@ -692,7 +692,7 @@ def _interpolate_missing_pointwise_with_windows(
     fill_value: tuple[float, float] | str | None = None,
 ) -> pd.DataFrame:
     """
-    Create a window of data either side of NaN's based on "distance_along_line" column
+    Create a window of data either side of NaN's based on the interp_on column
     and interpolate the value. Useful when NaN's are sparse, or lines are long.
 
     For each NaN, the requested `method` is tried first, expanding the window (up to

@@ -505,7 +505,9 @@ def interpolate_intersections(
     df = df.dropna(subset=to_interp, how="any")
 
     # add empty rows at each intersection to the df
-    df, inters = add_intersections(df, inters, line_column=line_column)
+    df, inters = add_intersections(
+        df, inters, line_column=line_column, distance_column=interp_on
+    )
 
     # perform interpolation
     if window_width is None:
@@ -602,6 +604,7 @@ def add_intersections(
     data: gpd.GeoDataFrame,
     intersections: gpd.GeoDataFrame,
     line_column: str,
+    distance_column: str,
 ) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Add new rows to the dataframe for each intersection point and columns
@@ -623,6 +626,8 @@ def add_intersections(
         Intersections table created by `create_intersection_table()`
     line_column : str
         Column name containing the line / flight / segment names
+    distance_column : str
+        Column name containing the distance along the lines
 
     Returns
     -------
@@ -632,7 +637,7 @@ def add_intersections(
     data = data.copy()
     inters = intersections.copy()
 
-    cols = [line_column, "geometry"]
+    cols = [line_column, distance_column, "geometry"]
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
     # remove existing is_intersection column and intersection rows
@@ -654,7 +659,7 @@ def add_intersections(
     line_groups = {}
     for line, df in data.groupby(line_column):
         coords = np.column_stack([df.geometry.x.to_numpy(), df.geometry.y.to_numpy()])
-        dist_along_line = df["distance_along_line"].to_numpy()
+        dist_along_line = df[distance_column].to_numpy()
         line_groups[line] = (coords, dist_along_line)
 
     pbar = tqdm(
@@ -698,25 +703,23 @@ def add_intersections(
                     "geometry": row.geometry,
                     "is_intersection": True,
                     "intersecting_line": other,
-                    "distance_along_line": min_dist_along_line + dist_to_point,
+                    distance_column: min_dist_along_line + dist_to_point,
                 }
             )
 
     # add new intersection rows to dataframe
     new_df = gpd.GeoDataFrame(new_rows, crs=data.crs)
     data = pd.concat([data, new_df], ignore_index=True)
-    data = data.sort_values([line_column, "distance_along_line"]).reset_index(drop=True)
+    data = data.sort_values([line_column, distance_column]).reset_index(drop=True)
 
     # check new dataframe is correct length
     assert len(data) == prior_length + (2 * len(inters))
 
     # build intersection lookup table
-    lookup = new_df.groupby([line_column, "intersecting_line"])[
-        "distance_along_line"
-    ].first()
+    lookup = new_df.groupby([line_column, "intersecting_line"])[distance_column].first()
     # lookup = new_df.set_index(
     #     [line_column, "intersecting_line"]
-    # )["distance_along_line"]
+    # )[distance_column]
 
     inters = inters.copy()
     inters["dist_along_line1"] = [
@@ -956,6 +959,7 @@ def update_intersections_with_eq_sources(
     fitted_equivalent_sources: dict,
     data_column: str,
     line_column: str,
+    distance_column: str,
     groupby_column: str = "line",
 ) -> pd.Series:
     """
@@ -974,6 +978,8 @@ def update_intersections_with_eq_sources(
         each line, which can be created using the function `eq_sources_1d`
     line_column : str
         Column containing the line / flight / segment names.
+    distance_column : str
+        Column containing the distance along line.
     data_column : str
         name of the column containing the field values to update at the intersection
         points, this should be the same as the column that use used as 'data_column'
@@ -1018,7 +1024,7 @@ def update_intersections_with_eq_sources(
             cross_height = cross_inter.height.to_numpy()[0]
 
             coords = (
-                np.array([row.distance_along_line]),
+                np.array([row[distance_column]]),
                 np.array([0]),
                 np.array([np.max([cross_height, row.height])]),
             )
