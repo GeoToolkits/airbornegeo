@@ -541,13 +541,25 @@ def cumulative_distance(
         Returns an array of the cumulative distances which can be assigned to a new
         column.
     """
-    return relative_distance(
+    distances = relative_distance(
         data,
         easting_column=easting_column,
         northing_column=northing_column,
         groupby_column=groupby_column,
         progressbar=progressbar,
-    ).cumsum()
+    )
+
+    if groupby_column is None:
+        return np.cumsum(distances)
+
+    # reset the cumulative sum at the start of each group, rather than continuing
+    # to accumulate across groups
+    return (
+        pd.Series(distances, index=data.index)
+        .groupby(data[groupby_column])
+        .cumsum()
+        .to_numpy()
+    )
 
 
 def along_track_distance(
