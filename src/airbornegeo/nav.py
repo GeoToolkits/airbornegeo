@@ -672,30 +672,15 @@ def along_track_distance(
                 "original_index"
             )
             data.loc[data[groupby_column] == _segment_name, "tmp"] = horizontal_df.tmp
-        return data.tmp
+        return data.tmp.to_numpy()
 
-    if groupby_column is None:
-        return cumulative_distance(
-            data,
-            easting_column=easting_column,
-            northing_column=northing_column,
-            groupby_column=None,
-            progressbar=False,
-        )
-
-    # iterate through groups, append distances, and concat
-    groups = []
-    for _segment_name, segment_data in data.groupby(groupby_column):
-        groups.append(
-            cumulative_distance(
-                segment_data,
-                easting_column=easting_column,
-                northing_column=northing_column,
-                groupby_column=None,
-                progressbar=False,
-            )
-        )
-    return np.concatenate(groups)
+    return cumulative_distance(
+        data,
+        easting_column=easting_column,
+        northing_column=northing_column,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+    )
 
 
 def _azimuth_between_points(
