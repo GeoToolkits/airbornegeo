@@ -21,7 +21,7 @@ def directional_velocity(
     coordinate_column: str = "easting",
     groupby_column: str | None = None,
     progressbar: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate one component of velocity, which is the change in coordinate values
     divided by the change in time between each successive row in the dataframe. For
@@ -51,7 +51,7 @@ def directional_velocity(
 
     Returns
     -------
-    pd.Series
+    NDArray
         The velocity component in units of the provided coordinate and time columns
     """
     data = data.copy()
@@ -72,7 +72,7 @@ def ground_speed(
     northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     TODO: do calculation forward for 1st points so they aren't 0
     Calculate the ground speed in meters per second. This is change in distance divided by the
@@ -101,7 +101,7 @@ def ground_speed(
 
     Returns
     -------
-    pd.Series
+    NDArray
         The groundspeed in units of meters per second
     """
     data = data.copy()
@@ -173,7 +173,7 @@ def vertical_acceleration(
     progressbar: bool = True,
     time_threshold: float | None = None,
     smoothing_window: int | None = None,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate the 2nd derivative of height change with respect to time for each line.
     If there is a gap between points greater than time_threshold in seconds, the line
@@ -201,8 +201,8 @@ def vertical_acceleration(
 
     Returns
     -------
-    pd.Series
-        Series containing the vertical acceleration in m/s^2 for each point in the
+    NDArray
+        Array containing the vertical acceleration in m/s^2 for each point in the
         dataframe.
     """
     data = data.copy()
@@ -375,7 +375,7 @@ def track(
     groupby_column: str | None = None,
     progressbar: bool = True,
     ellipsoid: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate the track between each successive row in a dataframe. Track is the angle
     from geographic north (positive clockwise) that and aircraft travels over the
@@ -395,7 +395,7 @@ def track(
 
     Returns
     -------
-    pd.Series
+    NDArray
         The track in degrees, in the range 0 to 360, positive clockwise from geographic
         north
     """
@@ -457,7 +457,7 @@ def relative_distance(
     northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate distance between successive points in a dataframe. This assumes the data
     have been sorted by time, and that there are not flights which overlap in time. If
@@ -481,8 +481,8 @@ def relative_distance(
 
     Returns
     -------
-    pandas.Series
-        Returns a pandas Series of the relative distances which can be assigned to a new
+    NDArray
+        Returns an array of the relative distances which can be assigned to a new
         column.
     """
     col_list = [easting_column, northing_column]
@@ -509,7 +509,7 @@ def cumulative_distance(
     northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate the cumulative distance along track in a dataframe. This assumes the data
     have been sorted by time, and that there are not flights which overlap in time. If
@@ -533,8 +533,8 @@ def cumulative_distance(
 
     Returns
     -------
-    pandas.Series
-        Returns a pandas Series of the relative distances which can be assigned to a new
+    NDArray
+        Returns an array of the cumulative distances which can be assigned to a new
         column.
     """
     return relative_distance(
@@ -554,7 +554,7 @@ def along_track_distance(
     groupby_column: str | None = None,
     progressbar: bool = True,
     guess_start_position: bool = False,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate the distances along track in meters. This assumes the data have been
     sorted by time, and that there are not flights which overlap in time. If there are,
@@ -583,7 +583,7 @@ def along_track_distance(
 
     Returns
     -------
-    pd.Series
+    NDArray
         The along track distance in meters
     """
     if guess_start_position:

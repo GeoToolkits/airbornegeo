@@ -143,7 +143,7 @@ def igrf(
     ellipsoid=bl.WGS84,
     min_degree=1,
     max_degree=13,
-) -> tuple[pd.Series, pd.Series, pd.Series]:
+) -> tuple[NDArray, NDArray, NDArray]:
     """
     Calculate IGRF intensity, inclication and declination using the time from the first
     row of the supplied datetime_column. If groupby_column is given, then will use the
@@ -178,7 +178,7 @@ def igrf(
 
     Returns
     -------
-    tuple[pd.Series, pd.Series, pd.Series]
+    tuple[NDArray, NDArray, NDArray]
         The intensity (nT), inclination (degrees) and declination (degrees) of the IGRF.
     """
     data = data.copy()
