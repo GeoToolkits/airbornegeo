@@ -233,7 +233,7 @@ def vertical_acceleration(
 
         groupby_column = "tmp_segment"
 
-    if (groupby_column is not None) and (time_threshold is not None):
+    elif (groupby_column is not None) and (time_threshold is not None):
         # split data into segments where there is a gap in time greater than
         # time_threshold
         # Calculate time difference between each point
