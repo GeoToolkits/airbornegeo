@@ -8,7 +8,8 @@ import shapely
 from geographiclib.geodesic import Geodesic
 from numpy.typing import NDArray
 from shapely.geometry import LineString
-from tqdm.autonotebook import tqdm
+
+from airbornegeo.utils import _apply_grouped, _iter_groups
 
 sns.set_theme()
 
@@ -55,22 +56,12 @@ def directional_velocity(
     """
     data = data.copy()
 
-    if groupby_column is None:
-        return np.gradient(data[coordinate_column], data[time_column])
-
-    # iterate through groups, append speeds, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-
-    groups = []
-    for _segment_name, segment_data in pbar:
-        groups.append(
-            np.gradient(segment_data[coordinate_column], segment_data[time_column])
-        )
-
-    return np.concatenate(groups)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda d: np.gradient(d[coordinate_column], d[time_column]),
+    )
 
 
 def ground_speed(
@@ -120,23 +111,15 @@ def ground_speed(
         easting_column=easting_column,
         northing_column=northing_column,
         groupby_column=groupby_column,
+        progressbar=progressbar,
     )
 
-    if groupby_column is None:
-        return np.gradient(data.cumulative_distance, data[time_column])
-
-    # iterate through groups, append speeds, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-
-    groups = []
-    for _segment_name, segment_data in pbar:
-        groups.append(
-            np.gradient(segment_data.cumulative_distance, segment_data[time_column])
-        )
-    return np.concatenate(groups)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda d: np.gradient(d.cumulative_distance, d[time_column]),
+    )
 
 
 # def _vertical_acceleration(
@@ -271,9 +254,9 @@ def vertical_acceleration(
 
         groupby_column = [groupby_column, "tmp_segment"]
 
-    if groupby_column is None:
-        times = data[time_column]
-        heights = data[height_column]
+    def _accel(segment: pd.DataFrame) -> pd.Series:
+        times = segment[time_column]
+        heights = segment[height_column]
         vertical_vel = np.gradient(heights, times)
         vertical_accel = pd.Series(np.gradient(vertical_vel, times))
 
@@ -281,25 +264,12 @@ def vertical_acceleration(
             return vertical_accel.rolling(window=smoothing_window, min_periods=1).mean()
         return vertical_accel
 
-    # iterate through groups, append accelerations, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    accels = []
-    for _segment_name, segment_data in pbar:
-        times = segment_data[time_column]
-        heights = segment_data[height_column]
-        vertical_vel = np.gradient(heights, times)
-        vertical_accel = pd.Series(np.gradient(vertical_vel, times))
-
-        if smoothing_window is not None:
-            vertical_accel = vertical_accel.rolling(
-                window=smoothing_window, min_periods=1
-            ).mean()
-        accels.append(vertical_accel)
-
-    return np.concatenate(accels)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=_accel,
+    )
 
 
 def relative_track_ellipsoid(
@@ -431,25 +401,15 @@ def track(
     """
     track_func = relative_track_ellipsoid if ellipsoid else relative_track_spheroid
 
-    if groupby_column is None:
-        return track_func(
-            lat=data[latitude_column].values,
-            lon=data[longitude_column].values,
-        )
-
-    # iterate through groups, append tracks, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    tracks = []
-    for _segment_name, segment_data in pbar:
-        calc_track = track_func(
-            lat=segment_data[latitude_column].values,
-            lon=segment_data[longitude_column].values,
-        )
-        tracks.append(calc_track)
-    return np.concatenate(tracks)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda d: track_func(
+            lat=d[latitude_column].to_numpy(),
+            lon=d[longitude_column].to_numpy(),
+        ),
+    )
 
 
 def _relative_distance(
@@ -532,23 +492,14 @@ def relative_distance(
         f"dataframe must contain columns {col_list} "
     )
 
-    if groupby_column is None:
-        return _relative_distance(
-            data[easting_column].values, data[northing_column].values
-        )
-
-    # iterate through groups, append distances, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    dists = []
-    for _segment_name, segment_data in pbar:
-        distances = _relative_distance(
-            segment_data[easting_column].values, segment_data[northing_column].values
-        )
-        dists.append(distances)
-    return np.concatenate(dists)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda d: _relative_distance(
+            d[easting_column].to_numpy(), d[northing_column].to_numpy()
+        ),
+    )
 
 
 def cumulative_distance(
@@ -669,14 +620,12 @@ def along_track_distance(
             horizontal_df = horizontal_df.sort_values("original_index").set_index(
                 "original_index"
             )
-            return horizontal_df.tmp
+            return horizontal_df.tmp.loc[data.index].to_numpy()
 
         data = data.copy()
-        if progressbar:
-            pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-        else:
-            pbar = data.groupby(groupby_column)
-        for _segment_name, segment_data in pbar:
+        for _segment_name, segment_data in _iter_groups(
+            data, groupby_column, progressbar
+        ):
             # turn point data into line
             line = gpd.GeoSeries(LineString(segment_data.geometry.tolist()))
 

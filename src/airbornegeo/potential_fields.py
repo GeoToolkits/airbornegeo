@@ -3,7 +3,9 @@ import harmonica as hm
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from tqdm.autonotebook import tqdm
+from numpy.typing import NDArray
+
+from airbornegeo.utils import _apply_grouped, _iter_groups
 
 sns.set_theme()
 
@@ -55,50 +57,31 @@ def eq_sources_1d(
 
     data["tmp"] = 0
 
-    if groupby_column is None:
+    def _fit(segment: pd.DataFrame) -> hm.EquivalentSources:
         coords = (
-            data.distance_along_line,
-            data.tmp,
-            data.height,
+            segment.distance_along_line,
+            segment.tmp,
+            segment.height,
         )
-
-        # define equivalent source parameters
         eqs_line = hm.EquivalentSources(
             damping=damping,
             depth=depth,
             block_size=block_size,
         )
-
-        eqs_line.fit(coords, data[data_column])
-
+        eqs_line.fit(coords, segment[data_column])
         return eqs_line
+
+    if groupby_column is None:
+        return _fit(data)
 
     assert groupby_column in data.columns, "groupby_column must be in dataframe"
 
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    fitted_eqs = {}
-    for segment_name, segment_data in pbar:
-        coords = (
-            segment_data.distance_along_line,
-            segment_data.tmp,
-            segment_data.height,
+    return {
+        segment_name: _fit(segment_data)
+        for segment_name, segment_data in _iter_groups(
+            data, groupby_column, progressbar
         )
-
-        # define equivalent source parameters
-        eqs_line = hm.EquivalentSources(
-            damping=damping,
-            depth=depth,
-            block_size=block_size,
-        )
-
-        eqs_line.fit(coords, segment_data[data_column])
-
-        fitted_eqs[segment_name] = eqs_line
-
-    return fitted_eqs
+    }
 
 
 def upward_continue_by_line(
@@ -121,11 +104,7 @@ def upward_continue_by_line(
 
     data["tmp"] = 0
 
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    for segment_name, segment_data in pbar:
+    for segment_name, segment_data in _iter_groups(data, groupby_column, progressbar):
         eqs = fitted_equivalent_sources[segment_name]
 
         upward = np.full_like(segment_data.tmp, height)
@@ -211,9 +190,9 @@ def igrf(
         f"dataframe must contain columns {col_list} "
     )
 
-    if groupby_column is None:
-        # select the first row's datetime
-        datetime = data[datetime_column].iloc[0]
+    def _predict(segment: pd.DataFrame) -> tuple[NDArray, NDArray, NDArray]:
+        # select the first row's datetime (or first within the group)
+        datetime = segment[datetime_column].iloc[0]
 
         # initialize a IGRF class with the date
         igrf_model = hm.IGRF14(
@@ -226,49 +205,18 @@ def igrf(
         # predict the IGRF field vectors at all survey locations
         field = igrf_model.predict(
             (
-                data[longitude_column],
-                data[latitude_column],
-                data[height_column],
+                segment[longitude_column],
+                segment[latitude_column],
+                segment[height_column],
             )
         )
 
         # convert vector to intensity, inclination and declination
-        intensity, inc, dec = hm.magnetic_vec_to_angles(*field)
+        return hm.magnetic_vec_to_angles(*field)
 
-        return intensity, inc, dec
-
-    # iterate through groups, append values, and concat
-    intensities, incs, decs = [], [], []
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    for _segment_name, segment_data in pbar:
-        # select the first row's datetime
-        datetime = segment_data[datetime_column].iloc[0]
-
-        # initialize a IGRF class with the date
-        igrf_model = hm.IGRF14(
-            datetime,
-            ellipsoid=ellipsoid,
-            min_degree=min_degree,
-            max_degree=max_degree,
-        )
-
-        # predict the IGRF field vectors at all survey locations
-        field = igrf_model.predict(
-            (
-                segment_data[longitude_column],
-                segment_data[latitude_column],
-                segment_data[height_column],
-            )
-        )
-
-        # convert vector to intensity, inclination and declination
-        intensity, inc, dec = hm.magnetic_vec_to_angles(*field)
-
-        intensities.append(intensity)
-        incs.append(inc)
-        decs.append(dec)
-
-    return np.concatenate(intensities), np.concatenate(incs), np.concatenate(decs)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=_predict,
+    )

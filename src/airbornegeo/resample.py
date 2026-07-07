@@ -4,7 +4,8 @@ import pandas as pd
 import verde as vd
 from numpy.typing import NDArray
 from scipy.interpolate import interp1d
-from tqdm.autonotebook import tqdm
+
+from airbornegeo.utils import _iter_groups
 
 
 def resample(
@@ -112,12 +113,8 @@ def resample(
 
     assert groupby_column in data.columns, "groupby_column must be in the dataframe"
 
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
     resampled_dfs = []
-    for segment_name, segment_data in pbar:
+    for segment_name, segment_data in _iter_groups(data, groupby_column, progressbar):
         # get tuples of pd.Series
         original_values = segment_data[resample_by].to_numpy()
         input_data = tuple([segment_data[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator
@@ -246,12 +243,8 @@ def resample_as(
 
     assert groupby_column in data.columns, "groupby_column must be in the dataframe"
 
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
     resampled_dfs = []
-    for segment_name, segment_data in pbar:
+    for segment_name, segment_data in _iter_groups(data, groupby_column, progressbar):
         # get tuples of pd.Series
         original_values = segment_data[resample_by].to_numpy()
         input_data = tuple([segment_data[col].to_numpy() for col in input_data_names])  # pylint: disable=consider-using-generator

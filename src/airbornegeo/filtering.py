@@ -8,7 +8,8 @@ import pygmt
 import verde as vd
 import xarray as xr
 import xrft
-from tqdm.autonotebook import tqdm
+
+from airbornegeo.utils import _iter_groups
 
 
 def pad1d(
@@ -196,12 +197,7 @@ def filter_line(
 
         return filtered[data_column]
 
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-
-    for segment_name, segment_data in pbar:
+    for segment_name, segment_data in _iter_groups(data, groupby_column, progressbar):
         # pad the data with pad_mode, and the filter_by_column by extrapolation
         padded = pad1d(
             segment_data,
