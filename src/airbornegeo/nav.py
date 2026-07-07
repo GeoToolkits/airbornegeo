@@ -360,8 +360,9 @@ def relative_track_spheroid(
     track_rad = np.atan2(y, x)
     track_deg = np.rad2deg(track_rad)
 
-    # replace first values with second value
-    track_deg = np.insert(track_deg, 0, track_deg[1])
+    # duplicate the last computed track for the final point, consistent
+    # with relative_track_ellipsoid
+    track_deg = np.append(track_deg, track_deg[-1])
 
     # make tracks in range of 0 to 360
     return track_deg % 360
