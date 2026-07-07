@@ -434,6 +434,9 @@ def _relative_distance(
     """
     assert len(x) == len(y)
 
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+
     # shift the arrays by 1
     x_lag = np.empty_like(x)
     x_lag[:1] = np.nan
