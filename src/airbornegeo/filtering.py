@@ -12,11 +12,11 @@ import xrft
 from airbornegeo.utils import _iter_groups
 
 try:
-    import rioxarray  # noqa: F401
+    import rioxarray  # noqa: F401 # pylint: disable=unused-import
 
-    _has_rioxarray = True
+    _HAS_RIOXARRAY = True
 except ImportError:
-    _has_rioxarray = False
+    _HAS_RIOXARRAY = False
 
 
 def pad1d(
@@ -272,7 +272,7 @@ def _nearest_grid_fill(
     original_name = grid.name
 
     if method == "rioxarray":
-        if not _has_rioxarray:
+        if not _HAS_RIOXARRAY:
             msg = (
                 "The 'rioxarray' method requires the optional dependency 'rioxarray'. "
                 "Install it with `pip install rioxarray` or `mamba install rioxarray`, "
