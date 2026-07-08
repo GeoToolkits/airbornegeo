@@ -42,6 +42,12 @@ potential_field_processing.md
 
 ```{toctree}
 :hidden:
+:caption: ⛌ Crossovers
+crossovers.md
+```
+
+```{toctree}
+:hidden:
 :caption: 📈 Levelling
 levelling.md
 ```
