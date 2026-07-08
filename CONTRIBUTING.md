@@ -37,26 +37,37 @@ contributions.
 
 ## Contents
 
-* [What Can I Do?](#what-can-i-do)
-* [Reporting a Bug](#reporting-a-bug)
-* [Editing the Documentation](#editing-the-documentation)
-* [Contributing Code](#contributing-code)
-  - [General guidelines](#general-guidelines)
-  - [Fork the repository](#fork-the-repository)
-  - [Clone the repository](#clone-the-repository)
-  - [Setting up your environment](#setting-up-your-environment)
-  - [Make a branch](#make-a-branch)
-  - [Make your changes](#make-your-changes)
-  - [Testing your code](#testing-your-code)
-  - [Documentation](#documentation)
-  - [Committing changes](#committing-changes)
-  - [Push your changes](#push-your-changes)
-  - [Open a PR](#open-a-pr)
-  - [Code review](#code-review)
-  - [Sync your fork and local](#sync-your-fork-and-local)
-  - [Add yourself as an author](#add-yourself-as-an-author)
-* [Publish a new release](#publish-a-new-release)
-* [Update the Dependencies](#update-the-dependencies)
+- [How to contribute](#how-to-contribute)
+  - [TLDR (Too long; didn't read)](#tldr-too-long-didnt-read)
+  - [Contents](#contents)
+  - [What Can I Do?](#what-can-i-do)
+  - [Reporting a Bug](#reporting-a-bug)
+  - [Editing the Documentation](#editing-the-documentation)
+  - [Contributing Code](#contributing-code)
+    - [General guidelines](#general-guidelines)
+    - [Fork the repository](#fork-the-repository)
+    - [Clone the repository](#clone-the-repository)
+    - [Setting up your environment](#setting-up-your-environment)
+    - [Make a branch](#make-a-branch)
+    - [Make your changes](#make-your-changes)
+      - [Code style and linting](#code-style-and-linting)
+      - [Docstrings](#docstrings)
+      - [Type hints](#type-hints)
+      - [Logging](#logging)
+    - [Testing your code](#testing-your-code)
+    - [Documentation](#documentation)
+      - [Check the build manually (optional)](#check-the-build-manually-optional)
+      - [Automatically build the docs](#automatically-build-the-docs)
+    - [Committing changes](#committing-changes)
+    - [Push your changes](#push-your-changes)
+    - [Open a PR](#open-a-pr)
+    - [Code review](#code-review)
+    - [Sync your fork and local](#sync-your-fork-and-local)
+    - [Add yourself as an author](#add-yourself-as-an-author)
+  - [Publish a new release](#publish-a-new-release)
+    - [PyPI (pip)](#pypi-pip)
+    - [Conda-Forge](#conda-forge)
+  - [Update the dependencies](#update-the-dependencies)
 
 ## What Can I Do?
 
@@ -260,6 +271,10 @@ pixi run test tests/test_levelling.py
 To run only an individual test:
 ```
 pixi run test tests/test_levelling.py::test_name
+```
+To run only an individual test which is part of a class:
+```
+pixi run test tests/test_levelling.py::class_name::test_name
 ```
 
 The coverage report will let you know which lines of code are touched by the tests.
