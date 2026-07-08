@@ -558,7 +558,7 @@ def cumulative_distance(
 
 
 def along_track_distance(
-    data: gpd.DataFrame,
+    data: gpd.GeoDataFrame,
     *,
     groupby_column: str | None = None,
     progressbar: bool = True,
