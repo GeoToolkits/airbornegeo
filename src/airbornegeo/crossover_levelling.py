@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from tqdm.autonotebook import tqdm
 
 import airbornegeo
 from airbornegeo import logger
+from airbornegeo.utils import _init_iteration_progressbar
 
 sns.set_theme()
 
@@ -106,13 +106,9 @@ def crossover_network_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if max_iterations == 1:
-        progressbar = False
-
-    if progressbar:
-        pbar_iterations = tqdm(range(1, max_iterations + 1))
-    else:
-        pbar_iterations = range(1, max_iterations + 1)
+    progressbar, pbar_iterations = _init_iteration_progressbar(
+        max_iterations, progressbar
+    )
 
     if plot_dynamic_convergence:
         monitor = airbornegeo.plotting.LevellingConvergenceMonitor(
@@ -567,13 +563,9 @@ def crossover_pair_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if max_iterations == 1:
-        progressbar = False
-
-    if progressbar:
-        pbar_iterations = tqdm(range(1, max_iterations + 1))
-    else:
-        pbar_iterations = range(1, max_iterations + 1)
+    progressbar, pbar_iterations = _init_iteration_progressbar(
+        max_iterations, progressbar
+    )
 
     if plot_dynamic_convergence:
         # initialize figure
@@ -921,13 +913,9 @@ def alternating_iterative_line_levelling(
         lines1_to_level = [x for x in lines1_to_level if x in lines_to_level]
         lines2_to_level = [x for x in lines2_to_level if x in lines_to_level]
 
-    if max_iterations == 1:
-        progressbar = False
-
-    if progressbar:
-        pbar_iterations = tqdm(range(1, max_iterations + 1))
-    else:
-        pbar_iterations = range(1, max_iterations + 1)
+    progressbar, pbar_iterations = _init_iteration_progressbar(
+        max_iterations, progressbar
+    )
 
     if plot_dynamic_convergence:
         # initialize figure

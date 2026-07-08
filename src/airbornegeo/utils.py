@@ -272,6 +272,34 @@ def _check_coord_columns(
     )
 
 
+def _init_iteration_progressbar(
+    max_iterations: int,
+    progressbar: bool,
+) -> tuple[bool, typing.Iterable[int]]:
+    """
+    Build the iterator to loop over iterations 1..max_iterations, optionally wrapped
+    in a progress bar, disabling the progress bar when there's only 1 iteration.
+
+    Parameters
+    ----------
+    max_iterations : int
+        Number of iterations to loop over.
+    progressbar : bool
+        Whether to show a progress bar over the iterations.
+
+    Returns
+    -------
+    tuple[bool, Iterable[int]]
+        The (possibly disabled) progressbar flag, and the iterable of iteration
+        numbers to loop over.
+    """
+    if max_iterations == 1:
+        progressbar = False
+
+    iterations = range(1, max_iterations + 1)
+    return progressbar, (tqdm(iterations) if progressbar else iterations)
+
+
 def _iter_groups(
     data: pd.DataFrame,
     groupby_column: str | list[str],

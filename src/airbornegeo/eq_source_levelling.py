@@ -8,7 +8,7 @@ import verde as vd
 from tqdm.autonotebook import tqdm
 
 import airbornegeo
-from airbornegeo.utils import _check_coord_columns
+from airbornegeo.utils import _check_coord_columns, _init_iteration_progressbar
 
 sns.set_theme()
 
@@ -118,13 +118,9 @@ def equivalent_source_levelling(
     else:
         line_list = data.line.unique()
 
-    if max_iterations == 1:
-        progressbar = False
-
-    if progressbar:
-        pbar_iterations = tqdm(range(1, max_iterations + 1))
-    else:
-        pbar_iterations = range(1, max_iterations + 1)
+    progressbar, pbar_iterations = _init_iteration_progressbar(
+        max_iterations, progressbar
+    )
 
     correction_rms_values = []
     correction_delta_rms_values = []
