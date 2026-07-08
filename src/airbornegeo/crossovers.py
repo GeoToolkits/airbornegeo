@@ -134,6 +134,22 @@ def get_line_intersections(
     If ``lines2_gdf`` is None, intersections are calculated between every
     unique pair of lines in ``lines1_gdf`` (network levelling).
 
+    Effect of buffer_dist:
+    Original (no intersection):
+        A ----------------
+
+                    |
+                    |
+                    B
+
+    With buffer (1 intersection):
+                    |
+        A ----------x----------
+                    |
+                    |
+                    |
+                    B
+
     Parameters
     ----------
     lines1_gdf : GeoDataFrame
@@ -172,13 +188,14 @@ def get_line_intersections(
     grouped1 = lines1_gdf.groupby(line_column, as_index=False)["geometry"].apply(
         lambda x: LineString(x.tolist())
     )
-
+    grouped1["original_geometry"] = grouped1.geometry.copy()
     if network:
         grouped2 = grouped1
     else:
         grouped2 = lines2_gdf.groupby(line_column, as_index=False)["geometry"].apply(
             lambda x: LineString(x.tolist())
         )
+        grouped2["original_geometry"] = grouped2.geometry.copy()
 
     # extend ends of lines by buffer_dist to account for expected intersections just
     # beyond lines
@@ -218,6 +235,18 @@ def get_line_intersections(
         )
         total = len(grouped1) * len(grouped2)
 
+    # dicts used to keep track if intersections were only find via buffer_dist
+    original_lines1 = dict(
+        zip(grouped1[line_column], grouped1["original_geometry"], strict=True)
+    )
+    original_lines2 = dict(
+        zip(
+            grouped2[line_column],
+            grouped2["original_geometry"],
+            strict=True,
+        )
+    )
+
     # calculate intersections
     intersections = []
     for line1, line2 in tqdm(iterator, total=total, desc="Line pairs"):
@@ -228,13 +257,40 @@ def get_line_intersections(
             line2.geometry,
             grid_size=grid_size,
         )
-        coords = shapely.get_coordinates(inter)
+
+        if inter.geom_type == "Point":
+            points = [inter]
+        elif inter.geom_type == "MultiPoint":
+            points = list(inter.geoms)
+        else:
+            if inter.is_empty:
+                continue
+            points = [inter.representative_point()]
+
+        coords = shapely.get_coordinates(points)
 
         if len(coords) == 0:
             continue
 
         for coord in coords:
             point = Point(coord)
+            # point = shapely.set_precision(
+            #     Point(coord),
+            #     grid_size,
+            # )
+            # Determine whether the intersection is only possible because of buffering
+            is_buffered = False
+
+            if buffer_dist is not None:
+                # is_buffered = (
+                #     not original_lines1[line1_name].intersects(point)
+                #     or not original_lines2[line2_name].intersects(point)
+                # )
+                tol = grid_size / 2
+                is_buffered = (
+                    original_lines1[line1_name].distance(point) > tol
+                    or original_lines2[line2_name].distance(point) > tol
+                )
             intersections.append(
                 {
                     "line1": line1_name,
@@ -245,6 +301,7 @@ def get_line_intersections(
                     "line2_dist": (
                         point_groups2[line2_name].geometry.distance(point).min()
                     ),
+                    "is_buffered": is_buffered,
                     "geometry": point,
                 }
             )
