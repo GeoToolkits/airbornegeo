@@ -11,6 +11,13 @@ import xrft
 
 from airbornegeo.utils import _iter_groups
 
+try:
+    import rioxarray  # noqa: F401
+
+    _has_rioxarray = True
+except ImportError:
+    _has_rioxarray = False
+
 
 def pad1d(
     data: pd.DataFrame,
@@ -265,6 +272,13 @@ def _nearest_grid_fill(
     original_name = grid.name
 
     if method == "rioxarray":
+        if not _has_rioxarray:
+            msg = (
+                "The 'rioxarray' method requires the optional dependency 'rioxarray'. "
+                "Install it with `pip install rioxarray` or `mamba install rioxarray`, "
+                "or use method='verde' instead."
+            )
+            raise ImportError(msg)
         filled: xr.DataArray = (
             grid.rio.write_crs(crs)
             .rio.set_spatial_dims(original_dims[1], original_dims[0])
