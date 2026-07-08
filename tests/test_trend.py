@@ -6,7 +6,7 @@ from airbornegeo.trend import _resolve_fallback_degree, trend
 
 
 @pytest.mark.parametrize(
-    "degree,n_points,expected",
+    ("degree", "n_points", "expected"),
     [
         (3, 5, 3),
         (3, 2, 1),

@@ -323,14 +323,14 @@ def test_track_groupby(progressbar):
 def test__relative_distance_mismatched_lengths_raises():
     """Mismatched x/y array lengths should raise AssertionError."""
     with pytest.raises(AssertionError):
-        nav._relative_distance(np.array([0.0, 1.0]), np.array([0.0]))
+        nav._relative_distance(np.array([0.0, 1.0]), np.array([0.0]))  # pylint: disable=protected-access
 
 
 def test__relative_distance_values():
     """_relative_distance() should compute the exact Euclidean distance between successive points."""
     x = np.array([0.0, 3.0, 6.0])
     y = np.array([0.0, 4.0, 8.0])
-    result = nav._relative_distance(x, y)
+    result = nav._relative_distance(x, y)  # pylint: disable=protected-access
     assert result == pytest.approx([0.0, 5.0, 5.0])
 
 
@@ -514,17 +514,17 @@ def test_along_track_distance_missing_geometry_raises():
 
 def test_azimuth_between_points_positive_angle():
     """A point to the upper-right should give a positive azimuth angle."""
-    assert nav._azimuth_between_points((0, 0), (1, 1)) == pytest.approx(45.0)
+    assert nav._azimuth_between_points((0, 0), (1, 1)) == pytest.approx(45.0)  # pylint: disable=protected-access
 
 
 def test_azimuth_between_points_negative_angle():
     """A point to the lower-right should give an azimuth angle shifted into the 0-180 range."""
-    assert nav._azimuth_between_points((0, 0), (1, -1)) == pytest.approx(135.0)
+    assert nav._azimuth_between_points((0, 0), (1, -1)) == pytest.approx(135.0)  # pylint: disable=protected-access
 
 
 def test_dist():
     """_dist() should compute the exact Euclidean distance between two points."""
-    assert nav._dist((0, 0), (1, 1)) == pytest.approx(1.4142135623730951)
+    assert nav._dist((0, 0), (1, 1)) == pytest.approx(1.4142135623730951)  # pylint: disable=protected-access
 
 
 def test_azimuth_short_axis1():

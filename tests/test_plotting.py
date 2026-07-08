@@ -1,6 +1,6 @@
-import matplotlib
+import matplotlib as mpl
 
-matplotlib.use("Agg")
+mpl.use("Agg")
 
 import numpy as np
 import pandas as pd
@@ -24,14 +24,14 @@ from airbornegeo.plotting import (
 
 @pytest.fixture(autouse=True)
 def _no_gui_plots(monkeypatch):
-    monkeypatch.setattr(plotting_mod.plt, "show", lambda *a, **k: None)
+    monkeypatch.setattr(plotting_mod.plt, "show", lambda *_a, **_k: None)
     yield
     plotting_mod.plt.close("all")
 
 
 def test_align_yaxis_already_aligned_stays_unchanged():
     """Aligning two axes whose reference values already sit at the same relative position should leave both ylims unchanged."""
-    fig, ax1 = plotting_mod.plt.subplots()
+    _, ax1 = plotting_mod.plt.subplots()
     ax2 = ax1.twinx()
     ax1.set_ylim(0, 10)
     ax2.set_ylim(0, 100)
@@ -42,7 +42,7 @@ def test_align_yaxis_already_aligned_stays_unchanged():
 
 def test_align_yaxis_shifts_misaligned_axis():
     """Aligning two axes with misaligned reference values should shift the second axis's ylim, keeping its span constant."""
-    fig, ax1 = plotting_mod.plt.subplots()
+    _, ax1 = plotting_mod.plt.subplots()
     ax2 = ax1.twinx()
     ax1.set_ylim(0, 10)
     ax2.set_ylim(0, 100)
@@ -59,14 +59,14 @@ class _FakeDisplayHandle:
     def __init__(self):
         self.update_calls = 0
 
-    def update(self, *args, **kwargs):
+    def update(self, *_args, **_kwargs):
         self.update_calls += 1
 
 
 def test_levelling_convergence_monitor_update_sets_axis_data(monkeypatch):
     """update() should store the rms/delta_rms history and plot a line on the monitor's first axis."""
     fake_handle = _FakeDisplayHandle()
-    monkeypatch.setattr(plotting_mod, "display", lambda *a, **k: fake_handle)
+    monkeypatch.setattr(plotting_mod, "display", lambda *_a, **_k: fake_handle)
 
     monitor = LevellingConvergenceMonitor(
         rms_tolerance=1.0, rms_percent_change_tolerance=5.0
@@ -83,11 +83,12 @@ def test_levelling_convergence_monitor_update_sets_axis_data(monkeypatch):
 def test_levelling_convergence_monitor_without_tolerances(monkeypatch):
     """update() should run without error when no tolerance lines are configured."""
     fake_handle = _FakeDisplayHandle()
-    monkeypatch.setattr(plotting_mod, "display", lambda *a, **k: fake_handle)
+    monkeypatch.setattr(plotting_mod, "display", lambda *_a, **_k: fake_handle)
 
     monitor = LevellingConvergenceMonitor()
+    # no tolerance lines are configured, so this should run without raising;
+    # reaching this point without an exception is the assertion
     monitor.update([10.0, 5.0, 2.0], [np.nan, 50.0, 10.0])
-    assert monitor.ax1.get_legend() is None or True  # no crash is the main assertion
 
 
 def test_plot_levelling_convergence_runs_and_sets_labels():
@@ -242,7 +243,9 @@ def test_plot_flightlines_grids_invalid_direction_raises():
 def test_plotly_points_easting_northing_autodetect(monkeypatch):
     """With no explicit coord_names, plotly_points() should autodetect the easting/northing columns for the x data."""
     captured = []
-    monkeypatch.setattr(go.Figure, "show", lambda self, *a, **k: captured.append(self))
+    monkeypatch.setattr(
+        go.Figure, "show", lambda self, *_a, **_k: captured.append(self)
+    )
 
     data = pd.DataFrame(
         {
@@ -258,7 +261,7 @@ def test_plotly_points_easting_northing_autodetect(monkeypatch):
 
 def test_plotly_points_all_nan_color_column_raises(monkeypatch):
     """A color_col that is entirely NaN should raise an AssertionError."""
-    monkeypatch.setattr(go.Figure, "show", lambda self, *a, **k: None)
+    monkeypatch.setattr(go.Figure, "show", lambda _self, *_a, **_k: None)
     data = pd.DataFrame(
         {"easting": [0.0, 1.0], "northing": [0.0, 1.0], "val": [np.nan, np.nan]}
     )
@@ -269,9 +272,13 @@ def test_plotly_points_all_nan_color_column_raises(monkeypatch):
 def test_inspect_lines_iterates_all_lines(monkeypatch):
     """inspect_lines() should show one figure per unique line value, each titled with its line number."""
     shown = []
-    monkeypatch.setattr(go.Figure, "show", lambda self, *a, **k: shown.append(self))
-    monkeypatch.setattr(plotting_mod, "clear_output", lambda wait=False: None)
-    monkeypatch.setattr("builtins.input", lambda prompt="": "")
+    monkeypatch.setattr(go.Figure, "show", lambda self, *_a, **_k: shown.append(self))
+    monkeypatch.setattr(
+        plotting_mod,
+        "clear_output",
+        lambda wait=False: None,  # noqa: ARG005
+    )
+    monkeypatch.setattr("builtins.input", lambda _prompt="": "")
 
     df = pd.DataFrame(
         {
@@ -288,9 +295,13 @@ def test_inspect_lines_iterates_all_lines(monkeypatch):
 def test_inspect_lines_accepts_list_of_plot_variables(monkeypatch):
     """A list of plot_variable columns should each be added as a trace on the shown figure."""
     shown = []
-    monkeypatch.setattr(go.Figure, "show", lambda self, *a, **k: shown.append(self))
-    monkeypatch.setattr(plotting_mod, "clear_output", lambda wait=False: None)
-    monkeypatch.setattr("builtins.input", lambda prompt="": "")
+    monkeypatch.setattr(go.Figure, "show", lambda self, *_a, **_k: shown.append(self))
+    monkeypatch.setattr(
+        plotting_mod,
+        "clear_output",
+        lambda wait=False: None,  # noqa: ARG005
+    )
+    monkeypatch.setattr("builtins.input", lambda _prompt="": "")
 
     df = pd.DataFrame(
         {

@@ -7,13 +7,13 @@ from airbornegeo.block_reduce import block_reduce
 
 def test_block_reduce_tuple_reduce_by_single_data_column():
     """2D block reduction (reduce_by as a tuple of two columns) with a single data column."""
-    np.random.seed(0)
+    rng = np.random.default_rng(0)
     n = 20
     data = pd.DataFrame(
         {
-            "easting": np.linspace(0, 1000, n) + np.random.rand(n),
-            "northing": np.linspace(0, 500, n) + np.random.rand(n),
-            "value": np.random.rand(n) * 10,
+            "easting": np.linspace(0, 1000, n) + rng.random(n),
+            "northing": np.linspace(0, 500, n) + rng.random(n),
+            "value": rng.random(n) * 10,
         }
     )
     result = block_reduce(
@@ -24,19 +24,19 @@ def test_block_reduce_tuple_reduce_by_single_data_column():
         progressbar=False,
     )
     assert list(result.columns) == ["easting", "northing", "value"]
-    assert result["easting"].iloc[0] == pytest.approx(79.550281, abs=1e-5)
-    assert len(result) == 6
+    assert result["easting"].iloc[0] == pytest.approx(79.188431, abs=1e-5)
+    assert len(result) == 7
 
 
 def test_block_reduce_string_reduce_by_two_data_columns():
     """1D block reduction (reduce_by as a single column name) with two data columns."""
-    np.random.seed(1)
+    rng = np.random.default_rng(1)
     n = 15
     data = pd.DataFrame(
         {
-            "dist": np.linspace(0, 1000, n) + np.random.rand(n),
-            "value": np.random.rand(n) * 10,
-            "value2": np.random.rand(n) * 5,
+            "dist": np.linspace(0, 1000, n) + rng.random(n),
+            "value": rng.random(n) * 10,
+            "value2": rng.random(n) * 5,
         }
     )
     result = block_reduce(
@@ -44,9 +44,9 @@ def test_block_reduce_string_reduce_by_two_data_columns():
     )
     assert list(result.columns) == ["dist", "tmp", "value", "value2"]
     assert (result["tmp"] == 0.0).all()
-    assert result["dist"].iloc[0] == pytest.approx(71.807725, abs=1e-5)
-    assert result["value"].iloc[0] == pytest.approx(5.488207, abs=1e-5)
-    assert result["value2"].iloc[0] == pytest.approx(2.462240, abs=1e-5)
+    assert result["dist"].iloc[0] == pytest.approx(71.964053, abs=1e-5)
+    assert result["value"].iloc[0] == pytest.approx(3.302175, abs=1e-5)
+    assert result["value2"].iloc[0] == pytest.approx(2.092373, abs=1e-5)
     assert len(result) == 5
 
 
@@ -92,12 +92,12 @@ def test_block_reduce_does_not_mutate_original_dataframe():
 
 def test_block_reduce_groupby_preserves_first_appearance_order():
     """Grouped output should follow the groups' first-appearance order in the input, not sorted order."""
-    np.random.seed(2)
+    rng = np.random.default_rng(2)
     data = pd.DataFrame(
         {
             "line": ["B"] * 5 + ["A"] * 5 + ["C"] * 5,
             "dist": list(np.linspace(0, 400, 5)) * 3,
-            "value": np.random.rand(15) * 10,
+            "value": rng.random(15) * 10,
         }
     )
     result = block_reduce(
@@ -176,14 +176,14 @@ def test_block_reduce_groupby_single_row_group():
 
 def test_block_reduce_excludes_geometry_column_even_if_numeric():
     """A numeric 'geometry' column should be excluded from the reduced output."""
-    np.random.seed(3)
+    rng = np.random.default_rng(3)
     n = 10
     data = pd.DataFrame(
         {
-            "easting": np.linspace(0, 1000, n) + np.random.rand(n),
-            "northing": np.linspace(0, 500, n) + np.random.rand(n),
-            "value": np.random.rand(n) * 10,
-            "geometry": np.random.rand(n) * 5,
+            "easting": np.linspace(0, 1000, n) + rng.random(n),
+            "northing": np.linspace(0, 500, n) + rng.random(n),
+            "value": rng.random(n) * 10,
+            "geometry": rng.random(n) * 5,
         }
     )
     result = block_reduce(
@@ -215,13 +215,13 @@ def test_block_reduce_excludes_non_numeric_columns():
 
 def test_block_reduce_center_coordinates_kwarg_changes_coordinates():
     """The center_coordinates kwarg should be passed through to verde.BlockReduce and change the output coordinates."""
-    np.random.seed(4)
+    rng = np.random.default_rng(4)
     n = 10
     data = pd.DataFrame(
         {
-            "easting": np.linspace(0, 1000, n) + np.random.rand(n),
-            "northing": np.linspace(0, 500, n) + np.random.rand(n),
-            "value": np.random.rand(n) * 10,
+            "easting": np.linspace(0, 1000, n) + rng.random(n),
+            "northing": np.linspace(0, 500, n) + rng.random(n),
+            "value": rng.random(n) * 10,
         }
     )
     default_result = block_reduce(
@@ -311,7 +311,7 @@ def test_block_reduce_empty_dataframe_no_groupby_raises_valueerror():
     data = pd.DataFrame(
         {"dist": pd.Series(dtype=float), "value": pd.Series(dtype=float)}
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="zero-size array to reduction operation"):
         block_reduce(data, np.mean, spacing=200, reduce_by="dist", progressbar=False)
 
 

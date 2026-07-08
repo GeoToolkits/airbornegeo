@@ -28,9 +28,11 @@ def test_fetch_agap_gravity_reads_retrieved_file(tmp_path):
 
 def test_fetch_agap_gravity_calls_pooch_with_expected_hash_and_url():
     """pooch.retrieve should be called with the expected dataset URL, filename, and hash."""
-    with patch.object(fetch.pooch, "retrieve", return_value=None) as mock_retrieve:
-        with pytest.raises(ValueError):  # pd.read_csv(None) raises
-            fetch.fetch_agap_gravity()
+    with (
+        patch.object(fetch.pooch, "retrieve", return_value=None) as mock_retrieve,
+        pytest.raises(ValueError, match="Invalid file path or buffer object type"),
+    ):
+        fetch.fetch_agap_gravity()
 
     _, kwargs = mock_retrieve.call_args
     assert kwargs["url"].startswith("https://ramadda.data.bas.ac.uk/")

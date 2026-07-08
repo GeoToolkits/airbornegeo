@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pandas as pd
 import pygmt
@@ -270,7 +272,7 @@ def test_nearest_grid_fill_verde_fills_all_nans_and_preserves_metadata():
     assert filled.dims == ("northing", "easting")
     assert filled.shape == (15, 15)
     assert filled.name == "z"
-    assert not filled.isnull().any()
+    assert not filled.isnull().any()  # noqa: PD003 (xarray.DataArray has no .isna())
 
 
 def test_nearest_grid_fill_invalid_method_raises_valueerror():
@@ -287,9 +289,11 @@ def test_nearest_grid_fill_rioxarray_method_unavailable(monkeypatch):
     grid = _linear_ramp_grid_with_nan_patch()
     with pytest.raises(
         ImportError,
-        match="The 'rioxarray' method requires the optional dependency 'rioxarray'. "
-        "Install it with `pip install rioxarray` or `mamba install rioxarray`, "
-        "or use method='verde' instead.",
+        match=re.escape(
+            "The 'rioxarray' method requires the optional dependency 'rioxarray'. "
+            "Install it with `pip install rioxarray` or `mamba install rioxarray`, "
+            "or use method='verde' instead."
+        ),
     ):
         _nearest_grid_fill(grid, method="rioxarray")
 
@@ -299,7 +303,7 @@ def test_nearest_grid_fill_rioxarray_method_success():
     pytest.importorskip("rioxarray")
     grid = _linear_ramp_grid_with_nan_patch()
     filled = _nearest_grid_fill(grid, method="rioxarray", crs="epsg:4326")
-    assert not filled.isnull().any()
+    assert not filled.isnull().any()  # noqa: PD003 (xarray.DataArray has no .isna())
 
 
 def _low_high_grid(ny=41, nx=41, domain=4000.0):
@@ -320,7 +324,7 @@ def _low_high_grid(ny=41, nx=41, domain=4000.0):
 
 
 @pytest.mark.parametrize(
-    "filter_type,kwargs",
+    ("filter_type", "kwargs"),
     [
         ("lowpass", {"filter_width": 1000}),
         ("highpass", {"filter_width": 1000}),
@@ -338,7 +342,7 @@ def test_filter_grid_all_filter_types_run(filter_type, kwargs):
     result = filter_grid(grid, filter_type=filter_type, **kwargs)
     assert result.shape == (41, 41)
     assert result.name == "z"
-    assert not result.isnull().any()
+    assert not result.isnull().any()  # noqa: PD003 (xarray.DataArray has no .isna())
 
 
 def test_filter_grid_lowpass_removes_short_wavelength_noise():
@@ -372,11 +376,11 @@ def test_filter_grid_nan_mask_round_trips_exactly():
         name="z",
     )
     result = filter_grid(grid, filter_type="lowpass", filter_width=500)
-    assert (result.isnull() == grid.isnull()).all()
+    assert (result.isnull() == grid.isnull()).all()  # noqa: PD003 (xarray has no .isna())
 
 
 @pytest.mark.parametrize(
-    "filter_type,msg",
+    ("filter_type", "msg"),
     [
         ("lowpass", "filter_width must be provided if filter_type is 'lowpass'"),
         ("highpass", "filter_width must be provided if filter_type is 'highpass'"),

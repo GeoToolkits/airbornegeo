@@ -1,8 +1,8 @@
 import logging
 
-import matplotlib
+import matplotlib as mpl
 
-matplotlib.use("Agg")
+mpl.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,7 +14,7 @@ from airbornegeo.processing import detect_outliers, split_into_segments, unique_
 
 @pytest.fixture(autouse=True)
 def _no_gui_plots(monkeypatch):
-    monkeypatch.setattr(plt, "show", lambda *a, **k: None)
+    monkeypatch.setattr(plt, "show", lambda *_a, **_k: None)
     yield
     plt.close("all")
 
@@ -250,7 +250,7 @@ def test_detect_outliers_no_outliers_logs_info(caplog):
     """A column with no IQR outliers should log an info message and create no figure."""
     data = pd.DataFrame({"no_outliers": [1, 2, 3, 4, 5]})
     with caplog.at_level(logging.INFO, logger="airbornegeo"):
-        result = detect_outliers(data)
+        result = detect_outliers(data)  # pylint: disable=assignment-from-no-return
     assert result is None
     assert "No outliers detected in column: no_outliers" in caplog.text
     assert plt.get_fignums() == []
@@ -259,9 +259,11 @@ def test_detect_outliers_no_outliers_logs_info(caplog):
 def test_detect_outliers_with_outliers_creates_figure(caplog):
     """A column with an IQR outlier should create a boxplot figure and log no 'no outliers' message."""
     data = pd.DataFrame({"has_outliers": [1, 2, 3, 4, 1000]})
-    with caplog.at_level(logging.INFO, logger="airbornegeo"):
-        with pytest.warns(PendingDeprecationWarning, match="vert"):
-            result = detect_outliers(data)
+    with (
+        caplog.at_level(logging.INFO, logger="airbornegeo"),
+        pytest.warns(PendingDeprecationWarning, match="vert"),
+    ):
+        result = detect_outliers(data)  # pylint: disable=assignment-from-no-return
     assert result is None
     assert len(plt.get_fignums()) == 1
     assert "No outliers detected" not in caplog.text
@@ -271,7 +273,7 @@ def test_detect_outliers_non_numeric_column_skipped(caplog):
     """A non-numeric column should be skipped entirely - no log message, no figure."""
     data = pd.DataFrame({"label": ["a", "b", "c", "d", "e"]})
     with caplog.at_level(logging.INFO, logger="airbornegeo"):
-        result = detect_outliers(data)
+        result = detect_outliers(data)  # pylint: disable=assignment-from-no-return
     assert result is None
     assert caplog.text == ""
     assert plt.get_fignums() == []
@@ -286,9 +288,11 @@ def test_detect_outliers_mixed_dataframe(caplog):
             "label": ["a", "b", "c", "d", "e"],
         }
     )
-    with caplog.at_level(logging.INFO, logger="airbornegeo"):
-        with pytest.warns(PendingDeprecationWarning, match="vert"):
-            detect_outliers(data)
+    with (
+        caplog.at_level(logging.INFO, logger="airbornegeo"),
+        pytest.warns(PendingDeprecationWarning, match="vert"),
+    ):
+        detect_outliers(data)
     assert "No outliers detected in column: no_outliers" in caplog.text
     assert "has_outliers" not in caplog.text
     assert "label" not in caplog.text
@@ -298,9 +302,11 @@ def test_detect_outliers_mixed_dataframe(caplog):
 def test_detect_outliers_nan_containing_column_still_detects_outlier(caplog):
     """NaN values should be ignored by the IQR calculation, but a real outlier should still be detected."""
     data = pd.DataFrame({"col": [1.0, 2.0, np.nan, 4.0, 100.0]})
-    with caplog.at_level(logging.INFO, logger="airbornegeo"):
-        with pytest.warns(PendingDeprecationWarning, match="vert"):
-            detect_outliers(data)
+    with (
+        caplog.at_level(logging.INFO, logger="airbornegeo"),
+        pytest.warns(PendingDeprecationWarning, match="vert"),
+    ):
+        detect_outliers(data)
     assert "No outliers detected" not in caplog.text
     assert len(plt.get_fignums()) == 1
 
@@ -309,7 +315,7 @@ def test_detect_outliers_all_nan_column_reports_no_outliers(caplog):
     """An all-NaN numeric column should report no outliers rather than erroring."""
     data = pd.DataFrame({"all_nan": [np.nan, np.nan, np.nan]})
     with caplog.at_level(logging.INFO, logger="airbornegeo"):
-        result = detect_outliers(data)
+        result = detect_outliers(data)  # pylint: disable=assignment-from-no-return
     assert result is None
     assert "No outliers detected in column: all_nan" in caplog.text
     assert plt.get_fignums() == []
@@ -317,7 +323,7 @@ def test_detect_outliers_all_nan_column_reports_no_outliers(caplog):
 
 def test_detect_outliers_empty_dataframe():
     """An empty dataframe should return None without error."""
-    result = detect_outliers(pd.DataFrame())
+    result = detect_outliers(pd.DataFrame())  # pylint: disable=assignment-from-no-return
     assert result is None
 
 

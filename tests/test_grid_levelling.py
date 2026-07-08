@@ -147,7 +147,6 @@ def test_level_to_grid_groupby_missing_columns_raises():
 
 def test_level_to_grid_groupby_filter_correction():
     """A per-line low-pass filter correction should remove each line's added noise/offset."""
-    rng = np.random.default_rng(0)
     dfs = []
     for line, offset in [("A", 50.0), ("B", -30.0)]:
         n = 100
