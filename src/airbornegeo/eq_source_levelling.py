@@ -8,6 +8,7 @@ import verde as vd
 from tqdm.autonotebook import tqdm
 
 import airbornegeo
+from airbornegeo.utils import _check_coord_columns
 
 sns.set_theme()
 
@@ -102,7 +103,8 @@ def equivalent_source_levelling(
         The levelled data column, which can be assigned back to the original dataframe.
     """
     # check columns are present
-    cols = ["easting", "northing", "height", "line", distance_column, data_column]
+    _check_coord_columns(data)
+    cols = ["height", "line", distance_column, data_column]
 
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 

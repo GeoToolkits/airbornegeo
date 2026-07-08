@@ -200,8 +200,6 @@ def sample_grid(
 
 def median_line_spacing(
     data: pd.DataFrame,
-    easting_column="easting",
-    northing_column="northing",
     line_column="line",
 ) -> float:
     """
@@ -225,7 +223,8 @@ def median_line_spacing(
 
     """
     # check columns are present
-    cols = [easting_column, northing_column, line_column]
+    _check_coord_columns(data)
+    cols = [line_column]
 
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
@@ -240,18 +239,35 @@ def median_line_spacing(
         survey_df = data[data[line_column] != line_name]
 
         # for each line point, find the distance to the nearest non-line point
-        kdtree = scipy.spatial.KDTree(
-            survey_df[[easting_column, northing_column]].to_numpy()
-        )
-        min_dist, _ = kdtree.query(
-            line_df[[easting_column, northing_column]].to_numpy(), k=1
-        )
+        kdtree = scipy.spatial.KDTree(survey_df[["easting", "northing"]].to_numpy())
+        min_dist, _ = kdtree.query(line_df[["easting", "northing"]].to_numpy(), k=1)
 
         min_distances.append(min_dist)
 
     min_distances = np.concat(min_distances)
 
     return np.median(min_distances)
+
+
+def _check_coord_columns(
+    data: pd.DataFrame,
+) -> None:
+    """
+    Check that the dataframe contains the columns 'easting' and 'northing' and if not
+    inform users about `.rename()`.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe which should contain the columns
+    """
+
+    # check columns are present
+    cols = ["easting", "northing"]
+
+    assert all(col in data.columns for col in cols), (
+        f"Project coordinates columns ({cols}) must be in the dataframe. If you have them with other names (e.g. 'x','y'), you can rename your dataframe (df) with df = df.rename(columns={'x':'easting','y':'northing'})"
+    )
 
 
 def _iter_groups(

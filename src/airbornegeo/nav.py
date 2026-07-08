@@ -9,7 +9,7 @@ from geographiclib.geodesic import Geodesic
 from numpy.typing import NDArray
 from shapely.geometry import LineString
 
-from airbornegeo.utils import _apply_grouped, _iter_groups
+from airbornegeo.utils import _apply_grouped, _check_coord_columns, _iter_groups
 
 sns.set_theme()
 
@@ -68,8 +68,6 @@ def ground_speed(
     data: pd.DataFrame,
     *,
     time_column: str = "unixtime",
-    easting_column: str = "easting",
-    northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
 ) -> NDArray:
@@ -86,14 +84,10 @@ def ground_speed(
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe containing the data points to calculate the ground speed for,
-        must have columns 'unixtime' and 'relative_distance'.
+        Dataframe containing the data points to calculate the ground speed for, must
+        have columns 'easting' and 'northing'.
     time_column : str
         name of the column containing the time in seconds
-    easting_column : str
-        name of the column containing the easting coordinates in meters
-    northing_column : str
-        name of the column containing the northing coordinates in meters
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -105,11 +99,10 @@ def ground_speed(
         The groundspeed in units of meters per second
     """
     data = data.copy()
+    _check_coord_columns(data)
 
     data["cumulative_distance"] = cumulative_distance(
         data,
-        easting_column=easting_column,
-        northing_column=northing_column,
         groupby_column=groupby_column,
         progressbar=progressbar,
     )
@@ -457,8 +450,6 @@ def _relative_distance(
 def relative_distance(
     data: pd.DataFrame,
     *,
-    easting_column: str = "easting",
-    northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
 ) -> NDArray:
@@ -473,11 +464,7 @@ def relative_distance(
     Parameters
     ----------
     data : pandas.DataFrame
-        Dataframe containing the data.
-    easting_column : str
-        name of the column containing the easting coordinates in meters
-    northing_column : str
-        name of the column containing the northing coordinates in meters
+        Dataframe containing the data, must have columns 'easting' and 'northing'.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -489,7 +476,8 @@ def relative_distance(
         Returns an array of the relative distances which can be assigned to a new
         column.
     """
-    col_list = [easting_column, northing_column]
+    _check_coord_columns(data)
+    col_list = []
     if groupby_column is not None:
         col_list.append(groupby_column)
     assert all(x in data.columns for x in col_list), (
@@ -501,7 +489,7 @@ def relative_distance(
         groupby_column=groupby_column,
         progressbar=progressbar,
         func=lambda d: _relative_distance(
-            d[easting_column].to_numpy(), d[northing_column].to_numpy()
+            d["easting"].to_numpy(), d["northing"].to_numpy()
         ),
     )
 
@@ -509,8 +497,6 @@ def relative_distance(
 def cumulative_distance(
     data: pd.DataFrame,
     *,
-    easting_column: str = "easting",
-    northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
 ) -> NDArray:
@@ -525,11 +511,7 @@ def cumulative_distance(
     Parameters
     ----------
     data : pandas.DataFrame
-        Dataframe containing the data.
-    easting_column : str
-        name of the column containing the easting coordinates in meters
-    northing_column : str
-        name of the column containing the northing coordinates in meters
+        Dataframe containing the data, must have columns 'easting' and 'northing'.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -541,10 +523,9 @@ def cumulative_distance(
         Returns an array of the cumulative distances which can be assigned to a new
         column.
     """
+    _check_coord_columns(data)
     distances = relative_distance(
         data,
-        easting_column=easting_column,
-        northing_column=northing_column,
         groupby_column=groupby_column,
         progressbar=progressbar,
     )
@@ -565,8 +546,6 @@ def cumulative_distance(
 def along_track_distance(
     data: pd.DataFrame,
     *,
-    easting_column: str = "easting",
-    northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
     guess_start_position: bool = False,
@@ -583,11 +562,8 @@ def along_track_distance(
     ----------
     data : pd.DataFrame
         Dataframe containing the data points to calculate the distance along each line,
-        must have a set geometry column.
-    easting_column : str
-        name of the column containing the easting coordinates in meters
-    northing_column : str
-        name of the column containing the northing coordinates in meters
+        must have columns 'easting' and 'northing', and (if guess_start_position is
+        True) a set geometry column.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -602,6 +578,7 @@ def along_track_distance(
     NDArray
         The along track distance in meters
     """
+    _check_coord_columns(data)
     if guess_start_position:
         assert isinstance(data, gpd.GeoDataFrame), (
             "if `guess_start_position` is True, `data` must be a geopandas geodataframe."
@@ -626,10 +603,11 @@ def along_track_distance(
             )
             horizontal_df["original_index"] = data.index
             horizontal_df = horizontal_df.sort_values("x").reset_index(drop=True)
+            horizontal_df = horizontal_df.rename(
+                columns={"x": "easting", "y": "northing"}
+            )
             horizontal_df["tmp"] = cumulative_distance(
                 horizontal_df,
-                easting_column="x",
-                northing_column="y",
                 groupby_column=None,
                 progressbar=False,
             )
@@ -661,10 +639,11 @@ def along_track_distance(
             )
             horizontal_df["original_index"] = segment_data.index
             horizontal_df = horizontal_df.sort_values("x").reset_index(drop=True)
+            horizontal_df = horizontal_df.rename(
+                columns={"x": "easting", "y": "northing"}
+            )
             horizontal_df["tmp"] = cumulative_distance(
                 horizontal_df,
-                easting_column="x",
-                northing_column="y",
                 groupby_column=None,
                 progressbar=False,
             )
@@ -676,8 +655,6 @@ def along_track_distance(
 
     return cumulative_distance(
         data,
-        easting_column=easting_column,
-        northing_column=northing_column,
         groupby_column=groupby_column,
         progressbar=progressbar,
     )

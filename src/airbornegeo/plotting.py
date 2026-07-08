@@ -14,6 +14,7 @@ import verde as vd
 from IPython.display import clear_output, display
 
 import airbornegeo
+from airbornegeo.utils import _check_coord_columns
 
 sns.set_theme()
 
@@ -337,6 +338,7 @@ def plot_flightlines(
     line_style: str = "p.5p",
     font: str = "8p,black",
 ) -> None:
+    _check_coord_columns(df)
     # group lines by their line number
     lines = [v for _, v in df.groupby("line")]
 
@@ -395,6 +397,7 @@ def plot_flightlines_grids(
     fill: str = "gray",
     style: str = "p.5p",
 ) -> None:
+    _check_coord_columns(df)
     # group lines by their line number
     lines = [v for _, v in df.groupby("line")]
 
@@ -489,6 +492,7 @@ def plotly_points(
     Create a scatterplot of spatial data. By default, coordinates are extracted from
     geopandas geometry column, or from user specified columns given by 'coord_names'.
     """
+    _check_coord_columns(df)
     data = df[df[color_col].notna()].copy()
     assert len(data) > 0, "supplied column of data has no non nan values!"
     if coord_names is None:
