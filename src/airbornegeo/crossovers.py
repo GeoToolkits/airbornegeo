@@ -305,6 +305,9 @@ def get_line_intersections(
                     "geometry": point,
                 }
             )
+    if len(intersections) == 0:
+        msg = "No intersections found"
+        raise ValueError(msg)
 
     return gpd.GeoDataFrame(
         intersections,
