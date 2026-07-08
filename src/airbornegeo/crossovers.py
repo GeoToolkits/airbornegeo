@@ -779,14 +779,14 @@ def calculate_crossover_errors(
     *,
     data_col: str,
     line_column: str,
-    warn_if_unchanged: bool = False,
+    raise_error_if_unchanged: bool = False,
 ) -> gpd.GeoDataFrame:
     """
     Calculate mistie values for all intersections. For each intersection, find the data
     values for the line and tie from the survey dataframe and add those values to the
     intersection table as `line_value` and `tie_value`. If they exist, overwrite them.
     Calculate the mistie value as line_value - tie_value, and save this to a column
-    `mistie_0`. If `mistie_0` exists, make a new column `mistie_1`, and keep incrementing
+    `crossover_error_0`. If `crossover_error_0` exists, make a new column `crossover_error_1`, and keep incrementing
     the number. If the new mistie values exactly match previous, don't make a new
     column. This allow to run the function multiple times without changing anything and
     not building up a large number of mistie columns.
@@ -803,14 +803,14 @@ def calculate_crossover_errors(
         Column name for data values to calculate misties for
     line_column : str
         Column name containing the line / flight / segment names
-    warn_if_unchanged : bool, optional
+    raise_error_if_unchanged : bool, optional
         If true, raise a UserWarning if misties haven't changed from previous column, by
         default False.
 
     Returns
     -------
     gpd.GeoDataFrame
-        An intersections table with new columns `line_value`, `tie_value` and `mistie_x`
+        An intersections table with new columns `line_value`, `tie_value` and `crossover_error_x`
         where x is incremented each time a new mistie is calculated.
     """
 
@@ -820,12 +820,19 @@ def calculate_crossover_errors(
     cols = [line_column]
     assert all(col in df.columns for col in cols), f"{cols} must be in the dataframe"
 
-    # build lookup table
-    lookup = df.groupby([line_column, "intersecting_line"])[data_col].first()
+    # build lookup table, keyed on the intersection's exact location so that repeat
+    # crossings between the same line pair don't collapse onto a single value
+    lookup = df.set_index([line_column, "intersecting_line", "easting", "northing"])[
+        data_col
+    ]
 
     # find data values at intersection for each intersecting line
-    line1_vals = [lookup[(r.line1, r.line2)] for r in inters.itertuples()]
-    line2_vals = [lookup[(r.line2, r.line1)] for r in inters.itertuples()]
+    line1_vals = [
+        lookup[(r.line1, r.line2, r.easting, r.northing)] for r in inters.itertuples()
+    ]
+    line2_vals = [
+        lookup[(r.line2, r.line1, r.easting, r.northing)] for r in inters.itertuples()
+    ]
 
     line1_vals = np.asarray(line1_vals).flatten()
     line2_vals = np.asarray(line2_vals).flatten()
@@ -841,33 +848,33 @@ def calculate_crossover_errors(
     logger.debug("mistie RMSE: %s", airbornegeo.rmse(misties))
 
     # manage mistie column names
-    cols = [c for c in inters.columns if "mistie_" in c]
-    mistie_cols = []
+    cols = [c for c in inters.columns if "crossover_error_" in c]
+    crossover_error_cols = []
     for c in cols:
         try:  # noqa: SIM105
-            mistie_cols.append(int(c.split("_")[-1]))
+            crossover_error_cols.append(int(c.split("_")[-1]))
         except ValueError:
             pass
-    if len(mistie_cols) == 0:
-        next_mistie_col = "mistie_0"
+    if len(crossover_error_cols) == 0:
+        next_crossover_error_col = "crossover_error_0"
     else:
-        next_mistie_col = f"mistie_{max(mistie_cols) + 1}"
-    if len(mistie_cols) > 0:
-        prev_col = f"mistie_{max(mistie_cols)}"
+        next_crossover_error_col = f"crossover_error_{max(crossover_error_cols) + 1}"
+    if len(crossover_error_cols) > 0:
+        prev_col = f"crossover_error_{max(crossover_error_cols)}"
         if np.allclose(
             inters[prev_col].to_numpy(),
             misties,
             equal_nan=True,
         ):
             logger.debug("Mistie values are unchanged")
-            if warn_if_unchanged:
+            if raise_error_if_unchanged:
                 msg = "Mistie hasn't changed"
                 raise UserWarning(msg)
 
             return inters
 
     # store new misties
-    inters[next_mistie_col] = misties
+    inters[next_crossover_error_col] = misties
     return inters
 
 
