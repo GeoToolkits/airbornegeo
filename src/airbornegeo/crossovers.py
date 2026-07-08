@@ -264,19 +264,37 @@ def create_intersection_table(
     exclude_ints: list[list[float, float] | list[float] | float] | None = None,
     cutoff_dist: float | None = None,
     buffer_dist: float | None = None,
+    block_size: float | None = None,
     grid_size: float = 1,
 ) -> gpd.GeoDataFrame:
     """
-    create a dataframe which contains the intersections between all combinations of
+    Create a dataframe which contains the intersections between all combinations of
     lines. For each intersection point, find the distance to the closest data point of
     each line. If the further of these two distances is greater than "cutoff_dist", the
     intersection is excluded. The intersections are calculated by representing the point
     data as lines, and finding the hypothetical crossover.
-    By default crossovers will only be between the first and last point of a line. If
+    By default crossovers will only be within the endpoints of each line. If
     there is an expected crossover just beyond the end of a line which should be
     included, use the `buffer_dist` arg to extend the line representation of the data,
     but note that extrapolation of data at these points will likely be inaccurate if
-    buffer distance is too large.
+    buffer distance is too large. If lines intersection very often, duplicate
+    intersections within a window, specified by grid_size, can be excluded.
+
+    Effect of buffer_dist:
+    Original (no intersection):
+        A ----------------
+
+                    |
+                    |
+                    B
+
+    With buffer (1 intersection):
+                    |
+        A ----------x----------
+                    |
+                    |
+                    |
+                    B
 
     Parameters
     ----------
@@ -285,10 +303,10 @@ def create_intersection_table(
     line_column : str
         Column name containing the line / flight / segment names
     method : str
-        Choose between 'pairs' where two categories of lines are supplied, such as
+        Choose between "groups" where two categories of lines are supplied, such as
         survey lines and tie lines, and intersections are only found between these two
         groups, or 'network' where all intersections between any supplied lines are
-        found. If 'pairs', column 'line_type' must be provided with possible values 0,
+        found. If "groups", column 'line_type' must be provided with possible values 0,
         1, or 2, where 0 denotes the first category, 1 denotes the second category, and
         2 denotes lines to be excluded.
     exclude_ints : list[tuple[int]] | None, optional
@@ -301,6 +319,10 @@ def create_intersection_table(
     buffer_dist : float, optional
         The distance to extend the line representation of the data points, useful for
         creating intersection which are just beyond the end of a line, by default None
+    block_size : float, optional
+        For a spatial block of this width, intersection within with the same pairs of
+        lines (duplicates) will be dropped, except the intersection with the lowest
+        min_dist. This is useful for when lines cross very often.
     grid_size : float, optional
         The resolution to snap the intersection coordinates to.  by default 1
 
@@ -314,7 +336,7 @@ def create_intersection_table(
     data = data.copy()
 
     cols = [line_column]
-    if method == "pairs":
+    if method == "groups":
         cols.append("line_type")
 
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
@@ -328,7 +350,7 @@ def create_intersection_table(
         data = data.drop(index=rows_to_drop.index)
     data = data.drop(columns="is_intersection", errors="ignore")
 
-    if method == "pairs":
+    if method == "groups":
         # get intersection points just between two line types
         inters = get_line_intersections(
             lines1_gdf=data[data.line_type == 0],
@@ -347,29 +369,76 @@ def create_intersection_table(
             buffer_dist=buffer_dist,
         )
     else:
-        msg = "method must be either 'pairs' or 'network"
+        msg = "method must be either 'groups' or 'network'"
         raise ValueError(msg)
+
+    # get coords from geometry column
+    inters["easting"] = inters.geometry.x
+    inters["northing"] = inters.geometry.y
 
     # get the largest of the two distance to each lines' nearest data point to the
     # theoretical intersection
     inters["max_dist"] = inters[["line1_dist", "line2_dist"]].max(axis=1)
 
-    # keep only the closest of duplicated intersections
-    a = len(inters)
-    inters = (
-        inters.sort_values(
-            "max_dist",
-            ascending=False,
-        )
-        .drop_duplicates(
-            subset=["line1", "line2"],
-            keep="last",
-        )
-        .sort_index()
-    )
-    b = len(inters)
-    if a != b:
-        logger.debug("Dropped %s duplicate intersections", a - b)
+    # remove duplicate intersections within a block
+    if block_size is not None:
+        a = len(inters)
+        kept = []
+        # process each line pair independently
+        for (_, _), group in inters.groupby(["line1", "line2"], sort=False):
+            # process lowest max_dist first
+            group_sorted = group.sort_values("max_dist")
+            selected = []
+            for idx, row in group_sorted.iterrows():
+                point = row.geometry
+                # keep if it is not within block_size of an already-kept intersection
+                if all(
+                    point.distance(group_sorted.loc[i].geometry) >= block_size
+                    for i in selected
+                ):
+                    selected.append(idx)
+            kept.extend(selected)
+        inters = inters.loc[kept].sort_index()
+        b = len(inters)
+        if a != b:
+            logger.debug(
+                "Dropped %s duplicate intersections within %.1f m blocks",
+                a - b,
+                block_size,
+            )
+
+    # deduplicate on line names and coordinates
+    # inters = (
+    #     inters.sort_values(
+    #         "max_dist",
+    #         ascending=False,
+    #     )
+    #     .drop_duplicates(
+    #         subset=["line1", "line2", "easting", "northing"],
+    #         keep="last",
+    #     )
+    #     .sort_index()
+    # )
+    # deduplicate on bins of coordinates
+    # inters["geometry"] = inters.geometry.set_precision(grid_size)
+    # inters = (
+    #     inters.sort_values(
+    #         "max_dist",
+    #         ascending=False,
+    #     )
+    #     .drop_duplicates(
+    #         subset=[
+    #             "line1",
+    #             "line2",
+    #             "geometry",
+    #         ]
+    #     )
+    #     .sort_index()
+    # )
+
+    # b = len(inters)
+    # if a != b:
+    #     logger.debug("Dropped %s duplicate intersections", a - b)
 
     logger.info("found %s intersections", len(inters))
 
@@ -382,10 +451,6 @@ def create_intersection_table(
             prior_len - len(inters),
             int(cutoff_dist / 1000),
         )
-
-    # get coords from geometry column
-    inters["easting"] = inters.geometry.x
-    inters["northing"] = inters.geometry.y
 
     if exclude_ints is not None:
         prior_len = len(inters)
