@@ -472,10 +472,9 @@ def plot_flightlines_grids(
 
 
 def plotly_points(
-    df: pd.DataFrame | gpd.GeoDataFrame,
+    df: pd.DataFrame,
     *,
     color_col: str,
-    coord_names: tuple[str, str] | None = None,
     hover_cols: list[str] | None = None,
     size: int = 4,
     edge_width: int | None = None,
@@ -489,27 +488,11 @@ def plotly_points(
     title: str | None = None,
 ) -> None:
     """
-    Create a scatterplot of spatial data. By default, coordinates are extracted from
-    geopandas geometry column, or from user specified columns given by 'coord_names'.
+    Create a scatterplot of spatial data using columns 'easting' and 'northing'.
     """
     _check_coord_columns(df)
     data = df[df[color_col].notna()].copy()
     assert len(data) > 0, "supplied column of data has no non nan values!"
-    if coord_names is None:
-        try:
-            x = data.geometry.x
-            y = data.geometry.y
-        except AttributeError:
-            try:
-                x = data["easting"]
-                y = data["northing"]
-            except KeyError:
-                try:
-                    x = data["x"]
-                    y = data["y"]
-                except AttributeError:
-                    pass
-        coord_names = (x, y)
 
     # either
     if cmap_lims is None and color_col is not None:
@@ -538,8 +521,8 @@ def plotly_points(
 
     fig = px.scatter(
         data,
-        x=coord_names[0],
-        y=coord_names[1],
+        x="easting",
+        y="northing",
         color=data[color_col],
         color_continuous_scale=cmap,
         color_continuous_midpoint=cmap_middle,
