@@ -591,10 +591,6 @@ def along_track_distance(
     NDArray
         The along track distance in meters
     """
-    col_list = ["geometry"]
-    assert all(x in data.columns for x in col_list), (
-        f"dataframe must contain columns {col_list} "
-    )
     if guess_start_position:
         assert isinstance(data, gpd.GeoDataFrame), (
             "if `guess_start_position` is True, `data` must be a geopandas geodataframe."
