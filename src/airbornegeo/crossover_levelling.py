@@ -1059,7 +1059,7 @@ def calculate_intersection_weights(
     height_1st_derive_weight: float | None = None,
     height_1st_derive_floor: float | None = None,
     height_1st_derive_col_name: str | None = None,
-    height_col_name: str = "height",
+    height_col_name: str | None = None,
     plot: bool = False,
 ) -> gpd.GeoDataFrame:
     """
@@ -1119,6 +1119,9 @@ def calculate_intersection_weights(
         plot_cols.append("max_dist")
 
     if height_difference_weight is not None:
+        if height_col_name is None:
+            msg = "must provide 'height_col_name'"
+            raise ValueError(msg)
         # find height at intersection for line and tie
         for ind, row in inters.iterrows():
             # search data for values at intersecting lines

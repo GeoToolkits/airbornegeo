@@ -200,7 +200,7 @@ def sample_grid(
 
 def median_line_spacing(
     data: pd.DataFrame,
-    line_column="line",
+    line_column: str,
 ) -> float:
     """
     Estimate the flight line spacing by first, for each point on a specific line,
@@ -212,8 +212,10 @@ def median_line_spacing(
     Parameters
     ----------
     data : pd.DataFrame
-        The dataframe containing columns 'easting', 'northing', and 'line' columns to
-        compute the median line spacing for.
+        The dataframe containing columns 'easting', 'northing', and the column given by
+        line_column, to compute the median line spacing for.
+    line_column : str
+        name of the column containing the line number/name
 
     Returns
     -------

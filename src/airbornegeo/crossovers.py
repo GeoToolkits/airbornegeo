@@ -389,7 +389,7 @@ def inspect_intersections(
     *,
     plot_variable: str | list[str],
     line_column: str,
-    interp_on: str = "distance_along_line",
+    interp_on: str,
     plot_all: bool = False,
 ) -> None:
     if isinstance(plot_variable, str):
@@ -835,8 +835,8 @@ def plot_line_and_crosses(
     *,
     y: list[str],
     line_column: str,
+    x: str,
     line: float | None = None,
-    x: str = "distance_along_line",
     plot_inters: bool | list[bool] = False,
     use_intersection_y: bool = True,
     y_axes: list[str] | None = None,
@@ -960,7 +960,7 @@ def update_intersections_with_eq_sources(
     data_column: str,
     line_column: str,
     distance_column: str,
-    groupby_column: str = "line",
+    groupby_column: str,
 ) -> pd.Series:
     """
     At each theoretical intersection point, replace the interpolated field value with a

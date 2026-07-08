@@ -309,7 +309,7 @@ def inspect_lines(
     df: pd.DataFrame | gpd.GeoDataFrame,
     *,
     plot_variable: str | list[str],
-    interp_on: str = "distance_along_line",
+    interp_on: str,
 ) -> None:
     if isinstance(plot_variable, str):
         plot_variable = [plot_variable]
@@ -570,7 +570,7 @@ def plotly_profiles(
     data: pd.DataFrame,
     *,
     y: list[str] | str,
-    x: str = "dist_along_line",
+    x: str,
     y_axes: list[str] | None = None,
     x_lims: tuple[float, float] | None = None,
     y_lims: tuple[float, float] | None = None,

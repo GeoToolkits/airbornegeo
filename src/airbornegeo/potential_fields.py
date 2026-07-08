@@ -88,7 +88,7 @@ def upward_continue_by_line(
     data: pd.DataFrame,
     fitted_equivalent_sources: dict,
     height: float,
-    groupby_column: str = "line",
+    groupby_column: str,
     progressbar: bool = True,
     no_downward_continuation: bool = True,
 ) -> pd.Series:

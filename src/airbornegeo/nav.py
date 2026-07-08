@@ -56,6 +56,13 @@ def directional_velocity(
     """
     data = data.copy()
 
+    col_list = [time_column, coordinate_column]
+    if groupby_column is not None:
+        col_list.append(groupby_column)
+    assert all(x in data.columns for x in col_list), (
+        f"dataframe must contain columns {col_list} "
+    )
+
     return _apply_grouped(
         data,
         groupby_column=groupby_column,
@@ -67,7 +74,7 @@ def directional_velocity(
 def ground_speed(
     data: pd.DataFrame,
     *,
-    time_column: str = "unixtime",
+    time_column: str,
     groupby_column: str | None = None,
     progressbar: bool = True,
 ) -> NDArray:
@@ -100,6 +107,13 @@ def ground_speed(
     """
     data = data.copy()
     _check_coord_columns(data)
+
+    col_list = [time_column]
+    if groupby_column is not None:
+        col_list.append(groupby_column)
+    assert all(x in data.columns for x in col_list), (
+        f"dataframe must contain columns {col_list} "
+    )
 
     data["cumulative_distance"] = cumulative_distance(
         data,

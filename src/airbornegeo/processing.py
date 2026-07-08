@@ -149,7 +149,7 @@ def split_into_segments(
 
 def unique_line_id(
     df: pd.DataFrame,
-    line_col_name: str = "line",
+    line_col_name: str,
 ) -> pd.Series:
     """
     Convert supplied lines names into integers.
@@ -159,8 +159,8 @@ def unique_line_id(
     gdf : gpd.GeoDataFrame
         Dataframe containing the data points and the line labels.
         must have a set geometry column.
-    line_col_name : str, optional
-        Column name specifying the line number, by default "line"
+    line_col_name : str
+        Column name specifying the line number
 
     Returns
     -------
