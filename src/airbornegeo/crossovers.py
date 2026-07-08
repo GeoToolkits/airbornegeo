@@ -428,22 +428,22 @@ def create_intersection_table(
 def inspect_intersections(
     data: pd.DataFrame | gpd.GeoDataFrame,
     *,
+    x: str,
     plot_variable: str | list[str],
     line_column: str,
-    interp_on: str,
     plot_all: bool = False,
 ) -> None:
     if isinstance(plot_variable, str):
         plot_variable = [plot_variable]
 
-    for line, line_df in data.groupby("line"):
+    for line, line_df in data.groupby(line_column):
         if len(line_df[line_df.is_intersection]) == 0:
             continue
 
         fig = plot_line_and_crosses(
             data,
             line=line,
-            x=interp_on,
+            x=x,
             y=plot_variable,
             y_axes=[str(i + 1) for i in range(len(plot_variable))],
             plot_inters=True,
