@@ -25,35 +25,27 @@ def extend_line(
     plot: bool = False,
 ) -> LineString:
     """extend line in either direction by distance"""
-    # find minimum rotated rectangle around line
-    rect = line.minimum_rotated_rectangle
-    angle = airbornegeo.nav.azimuth(rect)
+    coords = np.asarray(line.coords)
 
-    rect_center = shapely.centroid(rect).x, shapely.centroid(rect).y
+    # remove consecutive duplicate points
+    mask = np.any(np.diff(coords, axis=0) != 0, axis=1)
+    coords = np.vstack([coords[0], coords[1:][mask]])
 
-    # get length of long edge
-    x, y = rect.exterior.coords.xy
-    length = max(
-        (
-            Point(x[0], y[0]).distance(Point(x[1], y[1])),
-            Point(x[1], y[1]).distance(Point(x[2], y[2])),
-        )
-    )
+    if len(coords) < 2:
+        return line
 
-    # make new start and end points extended by distance
-    start = Point(rect_center[0] - (length / 2) - distance, rect_center[1])
-    end = Point(rect_center[0] + (length / 2) + distance, rect_center[1])
+    # first non-zero segment
+    start_vec = coords[0] - coords[1]
+    start_vec /= np.linalg.norm(start_vec)
 
-    # turn into a line and rotate back
-    extended_line = shapely.affinity.rotate(
-        LineString([start, end]), angle, origin=rect_center
-    )
+    # last non-zero segment
+    end_vec = coords[-1] - coords[-2]
+    end_vec /= np.linalg.norm(end_vec)
 
-    # add new endpoints to original line
-    # extended_line = shapely.unary_union()
-    extended_line = LineString(
-        [extended_line.coords[0], *line.coords, extended_line.coords[-1]]
-    )
+    start = coords[0] + distance * start_vec
+    end = coords[-1] + distance * end_vec
+
+    extended_line = LineString(np.vstack([start, coords, end]))
 
     if plot:
         l_coords = list(line.coords)
@@ -65,14 +57,63 @@ def extend_line(
         x = [p[0] for p in longl_coords]
         y = [p[1] for p in longl_coords]
         plt.plot(x, y, "g.", markersize=2, label="extended line")
-
+        plt.gca().set_aspect("equal")
         plt.legend()
 
-        # make plot aspect same
-        x_range = plt.xlim()[1] - plt.xlim()[0]
-        plt.ylim(np.mean(y) - x_range / 2, np.mean(y) + x_range / 2)
-
     return extended_line
+
+
+# def extend_line_alternative_method(
+#     line: LineString,
+#     distance: float,
+#     plot: bool = False,
+# ) -> LineString:
+#     """extend line in either direction by distance"""
+#     # find minimum rotated rectangle around line
+#     rect = line.minimum_rotated_rectangle
+#     angle = airbornegeo.nav.azimuth(rect)
+
+#     rect_center = shapely.centroid(rect).x, shapely.centroid(rect).y
+
+#     # get length of long edge
+#     x, y = rect.exterior.coords.xy
+#     length = max(
+#         (
+#             Point(x[0], y[0]).distance(Point(x[1], y[1])),
+#             Point(x[1], y[1]).distance(Point(x[2], y[2])),
+#         )
+#     )
+
+#     # make new start and end points extended by distance
+#     start = Point(rect_center[0] - (length / 2) - distance, rect_center[1])
+#     end = Point(rect_center[0] + (length / 2) + distance, rect_center[1])
+
+#     # turn into a line and rotate back
+#     extended_line = shapely.affinity.rotate(
+#         LineString([start, end]), angle, origin=rect_center
+#     )
+
+#     # add new endpoints to original line
+#     # extended_line = shapely.unary_union()
+#     extended_line = LineString(
+#         [extended_line.coords[0], *line.coords, extended_line.coords[-1]]
+#     )
+
+#     if plot:
+#         l_coords = list(line.coords)
+#         x = [p[0] for p in l_coords]
+#         y = [p[1] for p in l_coords]
+#         plt.plot(x, y, "r.", markersize=10, label="original line")
+
+#         longl_coords = list(extended_line.coords)
+#         x = [p[0] for p in longl_coords]
+#         y = [p[1] for p in longl_coords]
+#         plt.plot(x, y, "g.", markersize=2, label="extended line")
+
+#         plt.legend()
+#         plt.gca().set_aspect("equal")
+
+#     return extended_line
 
 
 def get_line_intersections(
