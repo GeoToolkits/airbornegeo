@@ -1001,7 +1001,6 @@ def update_intersections_with_eq_sources(
     data_column: str,
     line_column: str,
     distance_column: str,
-    groupby_column: str,
 ) -> pd.Series:
     """
     At each theoretical intersection point, replace the interpolated field value with a
@@ -1037,11 +1036,11 @@ def update_intersections_with_eq_sources(
     data = data.copy()
 
     # check columns are present
-    cols = [line_column, groupby_column]
+    cols = [line_column]
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
     for segment_name, segment_data in tqdm(
-        data.groupby(groupby_column), desc="Equivalent source segments"
+        data.groupby(line_column), desc="Equivalent source segments"
     ):
         # get fitted equivalent sources for this line
         eqs = fitted_equivalent_sources[segment_name]
@@ -1075,6 +1074,6 @@ def update_intersections_with_eq_sources(
             up_cont_value = eqs.predict(coords)
 
             # add predicted value to dataframe at intersection point
-            data.at[i, data_column] = up_cont_value  # noqa: PD008
+            data.at[i, data_column] = up_cont_value[0]  # noqa: PD008
 
     return data[data_column]
