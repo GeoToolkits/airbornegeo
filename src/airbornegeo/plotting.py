@@ -19,6 +19,39 @@ from airbornegeo.utils import _check_coord_columns
 sns.set_theme()
 
 
+def add_scalebar(ax, scale_length, position="bottom left"):
+    y_start = ax.get_ylim()[0] + 0.05 * (ax.get_ylim()[1] - ax.get_ylim()[0])
+    x_width = ax.get_xlim()[1] - ax.get_xlim()[0]
+
+    if position == "bottom left":
+        x_start = ax.get_xlim()[0] + (0.1 * x_width)
+    elif position == "bottom right":
+        x_start = ax.get_xlim()[1] - (0.1 * x_width)
+    else:
+        msg = "invalid string for position"
+        raise ValueError(msg)
+
+    ax.plot(
+        [x_start, x_start + scale_length],
+        [y_start, y_start],
+        color="black",
+        linewidth=2,
+    )
+    if scale_length > 1e3:
+        unit = "km"
+        scale_len = scale_length / 1000
+    else:
+        unit = "m"
+        scale_len = scale_length
+    ax.text(
+        x_start + scale_length / 2,
+        y_start,
+        f"{scale_len:g} {unit}",
+        ha="center",
+        va="bottom",
+    )
+
+
 def align_yaxis(
     ax1: mpl.axes.Axes,
     v1: float,
