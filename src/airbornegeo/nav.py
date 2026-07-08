@@ -558,26 +558,25 @@ def cumulative_distance(
 
 
 def along_track_distance(
-    data: pd.DataFrame,
+    data: gpd.DataFrame,
     *,
     groupby_column: str | None = None,
     progressbar: bool = True,
     guess_start_position: bool = False,
 ) -> NDArray:
     """
-    Calculate the distances along track in meters. This assumes the data have been
-    sorted by time, and that there are not flights which overlap in time. If there are,
-    you can first sort by flight, then by time. For example, if you have columns
-    'flight' and 'unixtime', you can accomplish this with
+    Calculate the distances along track in meters. This assumes the data is a G
+    eoDataFrame and it has been sorted by time, and that there are not flights which
+    overlap in time. If there are, you can first sort by flight, then by time. For
+    example, if you have columns 'flight' and 'unixtime', you can accomplish this with
     `data = data.sort_values(["flight", "unixtime"])`. If groupby_column is provided,
     the dataframe will first be grouped by this.
 
     Parameters
     ----------
-    data : pd.DataFrame
-        Dataframe containing the data points to calculate the distance along each line,
-        must have columns 'easting' and 'northing', and (if guess_start_position is
-        True) a set geometry column.
+    data : gpd.DataFrame
+        GeoDataframe containing the data points to calculate the distance along each line,
+        must have a preset geometry column with projected coordinates.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -592,7 +591,10 @@ def along_track_distance(
     NDArray
         The along track distance in meters
     """
-    _check_coord_columns(data)
+    col_list = ["geometry"]
+    assert all(x in data.columns for x in col_list), (
+        f"dataframe must contain columns {col_list} "
+    )
     if guess_start_position:
         assert isinstance(data, gpd.GeoDataFrame), (
             "if `guess_start_position` is True, `data` must be a geopandas geodataframe."

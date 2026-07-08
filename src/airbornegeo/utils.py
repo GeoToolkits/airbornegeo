@@ -268,7 +268,7 @@ def _check_coord_columns(
     cols = ["easting", "northing"]
 
     assert all(col in data.columns for col in cols), (
-        f"Project coordinates columns ({cols}) must be in the dataframe. If you have them with other names (e.g. 'x','y'), you can rename your dataframe (df) with df = df.rename(columns={'x':'easting','y':'northing'})"
+        f"Projected coordinates columns ({cols}) must be in the dataframe. If you have them with other names (e.g. 'x','y'), you can rename your dataframe (df) with df = df.rename(columns={{'x':'easting','y':'northing'}})"
     )
 
 
