@@ -537,10 +537,10 @@ def interpolate_intersections(
     df = df.copy()
     inters = intersections.copy()
 
+    assert isinstance(to_interp, str), "to_interp should be a single string"
+
     cols = [line_column, to_interp, interp_on]
     assert all(col in df.columns for col in cols), f"{cols} must be in the dataframe"
-
-    assert isinstance(to_interp, str), "to_interp should be a single string"
 
     # remove NaNs from target variable
     df = df.dropna(subset=to_interp, how="any")
@@ -578,15 +578,21 @@ def interpolate_intersections(
     # create lookup table
     interp_col = f"{to_interp}_interpolation_type"
 
+    # keyed on the intersection's exact location so that repeat crossings between the
+    # same line pair don't collapse onto a single (non-unique) index entry
     intersection_rows = (
         filled_lines[filled_lines.is_intersection]
-        .set_index([line_column, "intersecting_line"])
+        .set_index([line_column, "intersecting_line", "easting", "northing"])
         .sort_index()
     )
 
     # perform lookups
-    keys1 = pd.MultiIndex.from_arrays([inters.line1, inters.line2])
-    keys2 = pd.MultiIndex.from_arrays([inters.line2, inters.line1])
+    keys1 = pd.MultiIndex.from_arrays(
+        [inters.line1, inters.line2, inters.easting, inters.northing]
+    )
+    keys2 = pd.MultiIndex.from_arrays(
+        [inters.line2, inters.line1, inters.easting, inters.northing]
+    )
 
     inters["line1_interpolation_type"] = (
         intersection_rows[interp_col].reindex(keys1).to_numpy()
