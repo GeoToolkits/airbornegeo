@@ -8,7 +8,8 @@ import shapely
 from geographiclib.geodesic import Geodesic
 from numpy.typing import NDArray
 from shapely.geometry import LineString
-from tqdm.autonotebook import tqdm
+
+from airbornegeo.utils import _apply_grouped, _check_coord_columns, _iter_groups
 
 sns.set_theme()
 
@@ -20,7 +21,7 @@ def directional_velocity(
     coordinate_column: str = "easting",
     groupby_column: str | None = None,
     progressbar: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate one component of velocity, which is the change in coordinate values
     divided by the change in time between each successive row in the dataframe. For
@@ -50,38 +51,33 @@ def directional_velocity(
 
     Returns
     -------
-    pd.Series
+    NDArray
         The velocity component in units of the provided coordinate and time columns
     """
     data = data.copy()
 
-    if groupby_column is None:
-        return np.gradient(data[coordinate_column], data[time_column])
+    col_list = [time_column, coordinate_column]
+    if groupby_column is not None:
+        col_list.append(groupby_column)
+    assert all(x in data.columns for x in col_list), (
+        f"dataframe must contain columns {col_list} "
+    )
 
-    # iterate through groups, append speeds, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-
-    groups = []
-    for _segment_name, segment_data in pbar:
-        groups.append(
-            np.gradient(segment_data[coordinate_column], segment_data[time_column])
-        )
-
-    return np.concatenate(groups)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda d: np.gradient(d[coordinate_column], d[time_column]),
+    )
 
 
 def ground_speed(
     data: pd.DataFrame,
     *,
-    time_column: str = "unixtime",
-    easting_column: str = "easting",
-    northing_column: str = "northing",
+    time_column: str,
     groupby_column: str | None = None,
     progressbar: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     TODO: do calculation forward for 1st points so they aren't 0
     Calculate the ground speed in meters per second. This is change in distance divided by the
@@ -95,14 +91,10 @@ def ground_speed(
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe containing the data points to calculate the ground speed for,
-        must have columns 'unixtime' and 'relative_distance'.
+        Dataframe containing the data points to calculate the ground speed for, must
+        have columns 'easting' and 'northing'.
     time_column : str
         name of the column containing the time in seconds
-    easting_column : str
-        name of the column containing the easting coordinates in meters
-    northing_column : str
-        name of the column containing the northing coordinates in meters
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -110,33 +102,31 @@ def ground_speed(
 
     Returns
     -------
-    pd.Series
+    NDArray
         The groundspeed in units of meters per second
     """
     data = data.copy()
+    _check_coord_columns(data)
+
+    col_list = [time_column]
+    if groupby_column is not None:
+        col_list.append(groupby_column)
+    assert all(x in data.columns for x in col_list), (
+        f"dataframe must contain columns {col_list} "
+    )
 
     data["cumulative_distance"] = cumulative_distance(
         data,
-        easting_column=easting_column,
-        northing_column=northing_column,
         groupby_column=groupby_column,
+        progressbar=progressbar,
     )
 
-    if groupby_column is None:
-        return np.gradient(data.cumulative_distance, data[time_column])
-
-    # iterate through groups, append speeds, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-
-    groups = []
-    for _segment_name, segment_data in pbar:
-        groups.append(
-            np.gradient(segment_data.cumulative_distance, segment_data[time_column])
-        )
-    return np.concatenate(groups)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda d: np.gradient(d.cumulative_distance, d[time_column]),
+    )
 
 
 # def _vertical_acceleration(
@@ -190,7 +180,7 @@ def vertical_acceleration(
     progressbar: bool = True,
     time_threshold: float | None = None,
     smoothing_window: int | None = None,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate the 2nd derivative of height change with respect to time for each line.
     If there is a gap between points greater than time_threshold in seconds, the line
@@ -218,8 +208,8 @@ def vertical_acceleration(
 
     Returns
     -------
-    pd.Series
-        Series containing the vertical acceleration in m/s^2 for each point in the
+    NDArray
+        Array containing the vertical acceleration in m/s^2 for each point in the
         dataframe.
     """
     data = data.copy()
@@ -250,7 +240,7 @@ def vertical_acceleration(
 
         groupby_column = "tmp_segment"
 
-    if (groupby_column is not None) and (time_threshold is not None):
+    elif (groupby_column is not None) and (time_threshold is not None):
         # split data into segments where there is a gap in time greater than
         # time_threshold
         # Calculate time difference between each point
@@ -271,9 +261,9 @@ def vertical_acceleration(
 
         groupby_column = [groupby_column, "tmp_segment"]
 
-    if groupby_column is None:
-        times = data[time_column]
-        heights = data[height_column]
+    def _accel(segment: pd.DataFrame) -> pd.Series:
+        times = segment[time_column]
+        heights = segment[height_column]
         vertical_vel = np.gradient(heights, times)
         vertical_accel = pd.Series(np.gradient(vertical_vel, times))
 
@@ -281,25 +271,12 @@ def vertical_acceleration(
             return vertical_accel.rolling(window=smoothing_window, min_periods=1).mean()
         return vertical_accel
 
-    # iterate through groups, append accelerations, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    accels = []
-    for _segment_name, segment_data in pbar:
-        times = segment_data[time_column]
-        heights = segment_data[height_column]
-        vertical_vel = np.gradient(heights, times)
-        vertical_accel = pd.Series(np.gradient(vertical_vel, times))
-
-        if smoothing_window is not None:
-            vertical_accel = vertical_accel.rolling(
-                window=smoothing_window, min_periods=1
-            ).mean()
-        accels.append(vertical_accel)
-
-    return np.concatenate(accels)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=_accel,
+    )
 
 
 def relative_track_ellipsoid(
@@ -390,8 +367,9 @@ def relative_track_spheroid(
     track_rad = np.atan2(y, x)
     track_deg = np.rad2deg(track_rad)
 
-    # replace first values with second value
-    track_deg = np.insert(track_deg, 0, track_deg[1])
+    # duplicate the last computed track for the final point, consistent
+    # with relative_track_ellipsoid
+    track_deg = np.append(track_deg, track_deg[-1])
 
     # make tracks in range of 0 to 360
     return track_deg % 360
@@ -405,7 +383,7 @@ def track(
     groupby_column: str | None = None,
     progressbar: bool = True,
     ellipsoid: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate the track between each successive row in a dataframe. Track is the angle
     from geographic north (positive clockwise) that and aircraft travels over the
@@ -425,31 +403,21 @@ def track(
 
     Returns
     -------
-    pd.Series
+    NDArray
         The track in degrees, in the range 0 to 360, positive clockwise from geographic
         north
     """
     track_func = relative_track_ellipsoid if ellipsoid else relative_track_spheroid
 
-    if groupby_column is None:
-        return track_func(
-            lat=data[latitude_column].values,
-            lon=data[longitude_column].values,
-        )
-
-    # iterate through groups, append tracks, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    tracks = []
-    for _segment_name, segment_data in pbar:
-        calc_track = track_func(
-            lat=segment_data[latitude_column].values,
-            lon=segment_data[longitude_column].values,
-        )
-        tracks.append(calc_track)
-    return np.concatenate(tracks)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda d: track_func(
+            lat=d[latitude_column].to_numpy(),
+            lon=d[longitude_column].to_numpy(),
+        ),
+    )
 
 
 def _relative_distance(
@@ -473,6 +441,9 @@ def _relative_distance(
     """
     assert len(x) == len(y)
 
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+
     # shift the arrays by 1
     x_lag = np.empty_like(x)
     x_lag[:1] = np.nan
@@ -493,11 +464,9 @@ def _relative_distance(
 def relative_distance(
     data: pd.DataFrame,
     *,
-    easting_column: str = "easting",
-    northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate distance between successive points in a dataframe. This assumes the data
     have been sorted by time, and that there are not flights which overlap in time. If
@@ -509,11 +478,7 @@ def relative_distance(
     Parameters
     ----------
     data : pandas.DataFrame
-        Dataframe containing the data.
-    easting_column : str
-        name of the column containing the easting coordinates in meters
-    northing_column : str
-        name of the column containing the northing coordinates in meters
+        Dataframe containing the data, must have columns 'easting' and 'northing'.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -521,44 +486,34 @@ def relative_distance(
 
     Returns
     -------
-    pandas.Series
-        Returns a pandas Series of the relative distances which can be assigned to a new
+    NDArray
+        Returns an array of the relative distances which can be assigned to a new
         column.
     """
-    col_list = [easting_column, northing_column]
+    _check_coord_columns(data)
+    col_list = []
     if groupby_column is not None:
         col_list.append(groupby_column)
     assert all(x in data.columns for x in col_list), (
         f"dataframe must contain columns {col_list} "
     )
 
-    if groupby_column is None:
-        return _relative_distance(
-            data[easting_column].values, data[northing_column].values
-        )
-
-    # iterate through groups, append distances, and concat
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-    dists = []
-    for _segment_name, segment_data in pbar:
-        distances = _relative_distance(
-            segment_data[easting_column].values, segment_data[northing_column].values
-        )
-        dists.append(distances)
-    return np.concatenate(dists)
+    return _apply_grouped(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda d: _relative_distance(
+            d["easting"].to_numpy(), d["northing"].to_numpy()
+        ),
+    )
 
 
 def cumulative_distance(
     data: pd.DataFrame,
     *,
-    easting_column: str = "easting",
-    northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
-) -> pd.Series:
+) -> NDArray:
     """
     Calculate the cumulative distance along track in a dataframe. This assumes the data
     have been sorted by time, and that there are not flights which overlap in time. If
@@ -570,11 +525,7 @@ def cumulative_distance(
     Parameters
     ----------
     data : pandas.DataFrame
-        Dataframe containing the data.
-    easting_column : str
-        name of the column containing the easting coordinates in meters
-    northing_column : str
-        name of the column containing the northing coordinates in meters
+        Dataframe containing the data, must have columns 'easting' and 'northing'.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -582,45 +533,50 @@ def cumulative_distance(
 
     Returns
     -------
-    pandas.Series
-        Returns a pandas Series of the relative distances which can be assigned to a new
+    NDArray
+        Returns an array of the cumulative distances which can be assigned to a new
         column.
     """
-    return relative_distance(
+    _check_coord_columns(data)
+    distances = relative_distance(
         data,
-        easting_column=easting_column,
-        northing_column=northing_column,
         groupby_column=groupby_column,
         progressbar=progressbar,
-    ).cumsum()
+    )
+
+    if groupby_column is None:
+        return np.cumsum(distances)
+
+    # reset the cumulative sum at the start of each group, rather than continuing
+    # to accumulate across groups
+    return (
+        pd.Series(distances, index=data.index)
+        .groupby(data[groupby_column])
+        .cumsum()
+        .to_numpy()
+    )
 
 
 def along_track_distance(
-    data: pd.DataFrame,
+    data: gpd.GeoDataFrame,
     *,
-    easting_column: str = "easting",
-    northing_column: str = "northing",
     groupby_column: str | None = None,
     progressbar: bool = True,
     guess_start_position: bool = False,
-) -> pd.Series:
+) -> NDArray:
     """
-    Calculate the distances along track in meters. This assumes the data have been
-    sorted by time, and that there are not flights which overlap in time. If there are,
-    you can first sort by flight, then by time. For example, if you have columns
-    'flight' and 'unixtime', you can accomplish this with
+    Calculate the distances along track in meters. This assumes the data is a G
+    eoDataFrame and it has been sorted by time, and that there are not flights which
+    overlap in time. If there are, you can first sort by flight, then by time. For
+    example, if you have columns 'flight' and 'unixtime', you can accomplish this with
     `data = data.sort_values(["flight", "unixtime"])`. If groupby_column is provided,
     the dataframe will first be grouped by this.
 
     Parameters
     ----------
-    data : pd.DataFrame
-        Dataframe containing the data points to calculate the distance along each line,
-        must have a set geometry column.
-    easting_column : str
-        name of the column containing the easting coordinates in meters
-    northing_column : str
-        name of the column containing the northing coordinates in meters
+    data : gpd.DataFrame
+        GeoDataframe containing the data points to calculate the distance along each line,
+        must have a preset geometry column with projected coordinates.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -632,7 +588,7 @@ def along_track_distance(
 
     Returns
     -------
-    pd.Series
+    NDArray
         The along track distance in meters
     """
     if guess_start_position:
@@ -659,24 +615,23 @@ def along_track_distance(
             )
             horizontal_df["original_index"] = data.index
             horizontal_df = horizontal_df.sort_values("x").reset_index(drop=True)
+            horizontal_df = horizontal_df.rename(
+                columns={"x": "easting", "y": "northing"}
+            )
             horizontal_df["tmp"] = cumulative_distance(
                 horizontal_df,
-                easting_column="x",
-                northing_column="y",
                 groupby_column=None,
                 progressbar=False,
             )
             horizontal_df = horizontal_df.sort_values("original_index").set_index(
                 "original_index"
             )
-            return horizontal_df.tmp
+            return horizontal_df.tmp.loc[data.index].to_numpy()
 
         data = data.copy()
-        if progressbar:
-            pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-        else:
-            pbar = data.groupby(groupby_column)
-        for _segment_name, segment_data in pbar:
+        for _segment_name, segment_data in _iter_groups(
+            data, groupby_column, progressbar
+        ):
             # turn point data into line
             line = gpd.GeoSeries(LineString(segment_data.geometry.tolist()))
 
@@ -696,10 +651,11 @@ def along_track_distance(
             )
             horizontal_df["original_index"] = segment_data.index
             horizontal_df = horizontal_df.sort_values("x").reset_index(drop=True)
+            horizontal_df = horizontal_df.rename(
+                columns={"x": "easting", "y": "northing"}
+            )
             horizontal_df["tmp"] = cumulative_distance(
                 horizontal_df,
-                easting_column="x",
-                northing_column="y",
                 groupby_column=None,
                 progressbar=False,
             )
@@ -707,30 +663,13 @@ def along_track_distance(
                 "original_index"
             )
             data.loc[data[groupby_column] == _segment_name, "tmp"] = horizontal_df.tmp
-        return data.tmp
+        return data.tmp.to_numpy()
 
-    if groupby_column is None:
-        return cumulative_distance(
-            data,
-            easting_column=easting_column,
-            northing_column=northing_column,
-            groupby_column=None,
-            progressbar=False,
-        )
-
-    # iterate through groups, append distances, and concat
-    groups = []
-    for _segment_name, segment_data in data.groupby(groupby_column):
-        groups.append(
-            cumulative_distance(
-                segment_data,
-                easting_column=easting_column,
-                northing_column=northing_column,
-                groupby_column=None,
-                progressbar=False,
-            )
-        )
-    return np.concatenate(groups)
+    return cumulative_distance(
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+    )
 
 
 def _azimuth_between_points(

@@ -14,8 +14,42 @@ import verde as vd
 from IPython.display import clear_output, display
 
 import airbornegeo
+from airbornegeo.utils import _check_coord_columns
 
 sns.set_theme()
+
+
+def add_scalebar(ax, scale_length, position="bottom left"):
+    y_start = ax.get_ylim()[0] + 0.05 * (ax.get_ylim()[1] - ax.get_ylim()[0])
+    x_width = ax.get_xlim()[1] - ax.get_xlim()[0]
+
+    if position == "bottom left":
+        x_start = ax.get_xlim()[0] + (0.1 * x_width)
+    elif position == "bottom right":
+        x_start = ax.get_xlim()[1] - (0.1 * x_width)
+    else:
+        msg = "invalid string for position"
+        raise ValueError(msg)
+
+    ax.plot(
+        [x_start, x_start + scale_length],
+        [y_start, y_start],
+        color="black",
+        linewidth=2,
+    )
+    if scale_length > 1e3:
+        unit = "km"
+        scale_len = scale_length / 1000
+    else:
+        unit = "m"
+        scale_len = scale_length
+    ax.text(
+        x_start + scale_length / 2,
+        y_start,
+        f"{scale_len:g} {unit}",
+        ha="center",
+        va="bottom",
+    )
 
 
 def align_yaxis(
@@ -308,7 +342,7 @@ def inspect_lines(
     df: pd.DataFrame | gpd.GeoDataFrame,
     *,
     plot_variable: str | list[str],
-    interp_on: str = "distance_along_line",
+    interp_on: str,
 ) -> None:
     if isinstance(plot_variable, str):
         plot_variable = [plot_variable]
@@ -337,6 +371,7 @@ def plot_flightlines(
     line_style: str = "p.5p",
     font: str = "8p,black",
 ) -> None:
+    _check_coord_columns(df)
     # group lines by their line number
     lines = [v for _, v in df.groupby("line")]
 
@@ -395,6 +430,7 @@ def plot_flightlines_grids(
     fill: str = "gray",
     style: str = "p.5p",
 ) -> None:
+    _check_coord_columns(df)
     # group lines by their line number
     lines = [v for _, v in df.groupby("line")]
 
@@ -469,10 +505,9 @@ def plot_flightlines_grids(
 
 
 def plotly_points(
-    df: pd.DataFrame | gpd.GeoDataFrame,
+    df: pd.DataFrame,
     *,
     color_col: str,
-    coord_names: tuple[str, str] | None = None,
     hover_cols: list[str] | None = None,
     size: int = 4,
     edge_width: int | None = None,
@@ -486,26 +521,11 @@ def plotly_points(
     title: str | None = None,
 ) -> None:
     """
-    Create a scatterplot of spatial data. By default, coordinates are extracted from
-    geopandas geometry column, or from user specified columns given by 'coord_names'.
+    Create a scatterplot of spatial data using columns 'easting' and 'northing'.
     """
+    _check_coord_columns(df)
     data = df[df[color_col].notna()].copy()
     assert len(data) > 0, "supplied column of data has no non nan values!"
-    if coord_names is None:
-        try:
-            x = data.geometry.x
-            y = data.geometry.y
-        except AttributeError:
-            try:
-                x = data["easting"]
-                y = data["northing"]
-            except KeyError:
-                try:
-                    x = data["x"]
-                    y = data["y"]
-                except AttributeError:
-                    pass
-        coord_names = (x, y)
 
     # either
     if cmap_lims is None and color_col is not None:
@@ -534,8 +554,8 @@ def plotly_points(
 
     fig = px.scatter(
         data,
-        x=coord_names[0],
-        y=coord_names[1],
+        x="easting",
+        y="northing",
         color=data[color_col],
         color_continuous_scale=cmap,
         color_continuous_midpoint=cmap_middle,
@@ -566,7 +586,7 @@ def plotly_profiles(
     data: pd.DataFrame,
     *,
     y: list[str] | str,
-    x: str = "dist_along_line",
+    x: str,
     y_axes: list[str] | None = None,
     x_lims: tuple[float, float] | None = None,
     y_lims: tuple[float, float] | None = None,

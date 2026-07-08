@@ -8,7 +8,15 @@ import pygmt
 import verde as vd
 import xarray as xr
 import xrft
-from tqdm.autonotebook import tqdm
+
+from airbornegeo.utils import _iter_groups
+
+try:
+    import rioxarray  # noqa: F401 # pylint: disable=unused-import
+
+    _HAS_RIOXARRAY = True
+except ImportError:
+    _HAS_RIOXARRAY = False
 
 
 def pad1d(
@@ -196,12 +204,7 @@ def filter_line(
 
         return filtered[data_column]
 
-    if progressbar:
-        pbar = tqdm(data.groupby(groupby_column), desc="Segments")
-    else:
-        pbar = data.groupby(groupby_column)
-
-    for segment_name, segment_data in pbar:
+    for segment_name, segment_data in _iter_groups(data, groupby_column, progressbar):
         # pad the data with pad_mode, and the filter_by_column by extrapolation
         padded = pad1d(
             segment_data,
@@ -269,6 +272,13 @@ def _nearest_grid_fill(
     original_name = grid.name
 
     if method == "rioxarray":
+        if not _HAS_RIOXARRAY:
+            msg = (
+                "The 'rioxarray' method requires the optional dependency 'rioxarray'. "
+                "Install it with `pip install rioxarray` or `mamba install rioxarray`, "
+                "or use method='verde' instead."
+            )
+            raise ImportError(msg)
         filled: xr.DataArray = (
             grid.rio.write_crs(crs)
             .rio.set_spatial_dims(original_dims[1], original_dims[0])

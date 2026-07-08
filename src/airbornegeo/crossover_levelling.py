@@ -1,12 +1,12 @@
-import geopandas as gpd
+import geopandas as gpd  # pylint: disable=too-many-lines
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from tqdm.autonotebook import tqdm
 
 import airbornegeo
 from airbornegeo import logger
+from airbornegeo.utils import _init_iteration_progressbar
 
 sns.set_theme()
 
@@ -20,18 +20,18 @@ def crossover_network_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     lines_to_level: list[float] | None = None,
     intersection_weight_col: str | None = None,
-    mistie_interp_method: str = "linear",
+    crossover_error_interp_method: str = "linear",
     relaxation_factor: float = 0.5,
-    warn_if_unchanged: bool = True,
+    raise_error_if_unchanged: bool = True,
     max_iterations: int = 5,
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
-    plot_levelling_convergence: bool = True,
-    plot_dynamic_levelling_convergence: bool = False,
+    plot_convergence: bool = True,
+    plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     """
@@ -41,7 +41,7 @@ def crossover_network_levelling(
     `create_intersection_table`).
 
     This differs from `crossover_pair_levelling`, which levels one group of lines onto a
-    second, fixed, reference group (`method='pairs'`). In a network, every line can
+    second, fixed, reference group (`method='groups'`). In a network, every line can
     intersect many other lines, all of which are simultaneously being adjusted, so a
     line's correction is derived from *all* of its misties (signed so that a positive
     mistie always means "this line is higher than the intersecting line"), and only a
@@ -68,23 +68,23 @@ def crossover_network_levelling(
         Column containing the distance along each line / segment.
     degree : int | None, optional
         Polynomial degree used to fit a trend to the misties along each line.
-    filter : str | None, optional
+    filter_type : str | None, optional
         Alternative to `degree`; low-pass filter type applied to the misties along
         each line.
     lines_to_level : list[float] | None
         All lines in the network to be levelled together. By default is all lines.
     intersection_weight_col : str | None, optional
         Column in `inters` with per-intersection weights.
-    mistie_interp_method : str, optional
+    crossover_error_interp_method : str, optional
         Method used to fill gaps between misties along a line before filtering (only
-        used when `filter` is given), by default "linear".
+        used when `filter_type` is given), by default "linear".
     relaxation_factor : float, optional
         Fraction of each line's fitted mistie trend to remove per iteration, by
         default 0.5 (i.e. split the mistie evenly between the two lines at each
         crossover). Values close to 1 correct faster but are more likely to
         overshoot/oscillate; values closer to 0 converge more slowly but more
         stably.
-    warn_if_unchanged : bool, optional
+    raise_error_if_unchanged : bool, optional
         Raise a UserWarning if misties are unchanged from the previous iteration, by
         default True.
     max_iterations : int, optional
@@ -93,7 +93,7 @@ def crossover_network_levelling(
         the network.
     rms_tolerance, rms_percent_change_tolerance, rms_percent_increase_tolerance : float, optional
         Convergence criteria, as in `crossover_pair_levelling`.
-    plot_levelling_convergence, plot_dynamic_levelling_convergence : bool, optional
+    plot_convergence, plot_dynamic_convergence : bool, optional
         Plot convergence of the levelling corrections.
     progressbar : bool, optional
         Show a progress bar over iterations.
@@ -106,15 +106,11 @@ def crossover_network_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if max_iterations == 1:
-        progressbar = False
+    progressbar, pbar_iterations = _init_iteration_progressbar(
+        max_iterations, progressbar
+    )
 
-    if progressbar:
-        pbar_iterations = tqdm(range(1, max_iterations + 1))
-    else:
-        pbar_iterations = range(1, max_iterations + 1)
-
-    if plot_dynamic_levelling_convergence:
+    if plot_dynamic_convergence:
         monitor = airbornegeo.plotting.LevellingConvergenceMonitor(
             rms_tolerance=rms_tolerance,
             rms_percent_change_tolerance=rms_percent_change_tolerance,
@@ -125,7 +121,7 @@ def crossover_network_levelling(
 
     correction_rms_values = []
     correction_delta_rms_values = []
-    mistie_values = []
+    crossover_error_values = []
     iteration = 1
     for iteration in pbar_iterations:
         if progressbar:
@@ -137,35 +133,41 @@ def crossover_network_levelling(
                 data,
                 inters,
                 degree=degree,
-                filter=filter,
+                filter_type=filter_type,
                 data_col=data_col,
                 levelled_col=levelled_col,
                 line_column=line_column,
                 distance_column=distance_column,
                 lines_to_level=lines_to_level,
                 intersection_weight_col=intersection_weight_col,
-                mistie_interp_method=mistie_interp_method,
+                crossover_error_interp_method=crossover_error_interp_method,
                 relaxation_factor=relaxation_factor,
-                warn_if_unchanged=warn_if_unchanged,
+                raise_error_if_unchanged=raise_error_if_unchanged,
             )
             final_values = data[levelled_col]
         except UserWarning:
             break
 
         cols = [
-            c for c in inters.columns if "mistie_" in c and c != intersection_weight_col
+            c
+            for c in inters.columns
+            if "crossover_error_" in c and c != intersection_weight_col
         ]
-        mistie_col = [int(col.split("_")[-1]) for col in cols]
+        crossover_error_col = [int(col.split("_")[-1]) for col in cols]
         try:
-            current_mistie_col = f"mistie_{max(mistie_col)}"
+            current_crossover_error_col = f"crossover_error_{max(crossover_error_col)}"
         except ValueError:
-            current_mistie_col = "mistie_0"
-        mistie_values.append(airbornegeo.rmse(inters[current_mistie_col]))
+            current_crossover_error_col = "crossover_error_0"
+        crossover_error_values.append(
+            airbornegeo.rmse(inters[current_crossover_error_col])
+        )
 
         levelling_correction = original_values - final_values
         rms = airbornegeo.rmse(levelling_correction)
         delta_rms = (
-            (correction_rms_values[-1] / rms - 1) * 100 if iteration > 1 else np.inf
+            (correction_rms_values[-1] / rms - 1) * 100
+            if iteration > 1 and rms != 0
+            else np.inf
         )
         correction_rms_values.append(rms)
         correction_delta_rms_values.append(delta_rms)
@@ -174,13 +176,13 @@ def crossover_network_levelling(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
             max_iterations=max_iterations,
-            mistie_values=mistie_values,
+            crossover_error_values=crossover_error_values,
             rms_tolerance=rms_tolerance,
             rms_percent_change_tolerance=rms_percent_change_tolerance,
             rms_percent_increase_tolerance=rms_percent_increase_tolerance,
         )
 
-        if plot_dynamic_levelling_convergence:
+        if plot_dynamic_convergence:
             monitor.update(correction_rms_values, correction_delta_rms_values)
 
         if end:
@@ -193,11 +195,7 @@ def crossover_network_levelling(
         # use levelled column as input for next iteration
         data_col = levelled_col
 
-    if (
-        plot_levelling_convergence
-        and iteration > 2
-        and not plot_dynamic_levelling_convergence
-    ):
+    if plot_convergence and iteration > 2 and not plot_dynamic_convergence:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
@@ -208,10 +206,10 @@ def crossover_network_levelling(
     return data, inters
 
 
-def _line_network_misties(
+def _line_network_crossover_errors(
     inters: pd.DataFrame | gpd.GeoDataFrame,
     line: float,
-    mistie_col: str,
+    crossover_error_col: str,
     intersection_weight_col: str | None = None,
 ) -> pd.DataFrame:
     """
@@ -228,11 +226,11 @@ def _line_network_misties(
 
     as_line1 = inters[inters.line1 == line].copy()
     as_line1["dist_along_line"] = as_line1["dist_along_line1"]
-    as_line1["network_mistie"] = as_line1[mistie_col]
+    as_line1["network_mistie"] = as_line1[crossover_error_col]
 
     as_line2 = inters[inters.line2 == line].copy()
     as_line2["dist_along_line"] = as_line2["dist_along_line2"]
-    as_line2["network_mistie"] = -as_line2[mistie_col]
+    as_line2["network_mistie"] = -as_line2[crossover_error_col]
 
     return pd.concat(
         [as_line1[cols_out], as_line2[cols_out]],
@@ -249,16 +247,16 @@ def _crossover_network_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     lines_to_level: list[float] | None = None,
     intersection_weight_col: str | None = None,
-    mistie_interp_method: str = "linear",
+    crossover_error_interp_method: str = "linear",
     relaxation_factor: float = 0.5,
-    warn_if_unchanged: bool = False,
+    raise_error_if_unchanged: bool = False,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     """
     Single iteration of network levelling: fit a trend / filter to the (signed)
-    cross-over misties of every line against all lines it intersects, and remove a
+    crossover errors of every line against all lines it intersects, and remove a
     damped fraction (`relaxation_factor`) of that trend from `data_col`.
     """
     data = data.copy()
@@ -267,11 +265,11 @@ def _crossover_network_levelling(
     if lines_to_level is None:
         lines_to_level = data[line_column].unique()
 
-    if (filter is not None) and (degree is not None):
-        msg = "only provide either `filter` or `degree`, not both"
+    if (filter_type is not None) and (degree is not None):
+        msg = "only provide either `filter_type` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter is None) and (degree is None):
-        msg = "must provide either `filter` or `degree`"
+    if (filter_type is None) and (degree is None):
+        msg = "must provide either `filter_type` or `degree`"
         raise UserWarning(msg)
 
     assert line_column in data.columns, (
@@ -291,7 +289,7 @@ def _crossover_network_levelling(
 
     data["levelling_correction"] = np.nan
 
-    # get the latest mistie column, calculated from current data_col
+    # get the latest crossover error column, calculated from current data_col
     inters2 = airbornegeo.calculate_crossover_errors(
         data,
         inters,
@@ -299,24 +297,27 @@ def _crossover_network_levelling(
         line_column=line_column,
     )
 
-    mistie_col = [
-        c for c in inters2.columns if "mistie_" in c and c != intersection_weight_col
+    crossover_error_col = [
+        c
+        for c in inters2.columns
+        if "crossover_error_" in c and c != intersection_weight_col
     ]
-    mistie_col = [int(col.split("_")[-1]) for col in mistie_col]
-    mistie_col = f"mistie_{max(mistie_col)}"
+    crossover_error_col = [int(col.split("_")[-1]) for col in crossover_error_col]
+    crossover_error_col = f"crossover_error_{max(crossover_error_col)}"
 
     logger.debug(
-        "network mistie before levelling: %s", airbornegeo.rmse(inters2[mistie_col])
+        "network mistie before levelling: %s",
+        airbornegeo.rmse(inters2[crossover_error_col]),
     )
 
-    # fit a trend/filter to each line's (signed) misties, independently, using the
+    # fit a trend/filter to each line's (signed) crossover errors, independently, using the
     # mistie table computed above (i.e. Jacobi-style: all lines corrected relative to
     # the same starting state, not sequentially against each other's updated values)
     for line in lines_to_level:
         line_df = data[data[line_column] == line].copy()
 
-        line_ints = _line_network_misties(
-            inters2, line, mistie_col, intersection_weight_col
+        line_ints = _line_network_crossover_errors(
+            inters2, line, crossover_error_col, intersection_weight_col
         )
 
         if degree is not None:
@@ -336,17 +337,19 @@ def _crossover_network_levelling(
                 else:
                     raise ValueError from e
 
-        if filter is not None:
-            # add signed misties to line dataframe at each intersection row
+        if filter_type is not None:
+            # add signed crossover errors to line dataframe at each intersection row
             for ind, row in line_df[line_df.is_intersection].iterrows():
                 match = line_ints[
                     np.isclose(line_ints.dist_along_line, row[distance_column])
                 ]
                 if len(match) == 0:
                     continue
-                line_df.loc[ind, mistie_col] = match["network_mistie"].to_numpy()[0]
+                line_df.loc[ind, crossover_error_col] = match[
+                    "network_mistie"
+                ].to_numpy()[0]
 
-            n_valid_misties = line_df[mistie_col].notna().sum()
+            n_valid_misties = line_df[crossover_error_col].notna().sum()
             if n_valid_misties == 0:
                 # line was flagged as having intersections, but none of them could be
                 # matched to a mistie value (e.g. distance mismatch between `data` and
@@ -358,19 +361,19 @@ def _crossover_network_levelling(
                 )
                 line_df["levelling_correction"] = 0
             else:
-                # `interpolate_missing` falls back internally (mistie_interp_method ->
-                # linear -> nearest) based on how many misties this line has
+                # `interpolate_missing` falls back internally (crossover_error_interp_method ->
+                # linear -> nearest) based on how many crossovers this line has
                 line_df = airbornegeo.interpolate_missing(
                     line_df,
-                    to_interp=mistie_col,
+                    to_interp=crossover_error_col,
                     interp_on=distance_column,
-                    method=mistie_interp_method,
+                    method=crossover_error_interp_method,
                     extrapolate=False,
                     groupby_column=None,
                 )
                 line_df = airbornegeo.interpolate_missing(
                     line_df,
-                    to_interp=mistie_col,
+                    to_interp=crossover_error_col,
                     interp_on=distance_column,
                     method="nearest",
                     extrapolate=True,
@@ -379,8 +382,8 @@ def _crossover_network_levelling(
 
                 line_df["levelling_correction"] = airbornegeo.filter_line(
                     line_df,
-                    filter_type=filter,
-                    data_column=mistie_col,
+                    filter_type=filter_type,
+                    data_column=crossover_error_col,
                     filter_by_column=distance_column,
                     groupby_column=None,
                     progressbar=False,
@@ -409,17 +412,18 @@ def _crossover_network_levelling(
         inters,
         data_col=levelled_col,
         line_column=line_column,
-        warn_if_unchanged=warn_if_unchanged,
+        raise_error_if_unchanged=raise_error_if_unchanged,
     )
-    mistie_col = [
+    crossover_error_col = [
         int(col.split("_")[-1])
         for col in inters.columns
-        if "mistie_" in col and col != intersection_weight_col
+        if "crossover_error_" in col and col != intersection_weight_col
     ]
-    mistie_col = f"mistie_{max(mistie_col)}"
+    crossover_error_col = f"crossover_error_{max(crossover_error_col)}"
 
     logger.debug(
-        "network mistie after levelling: %s", airbornegeo.rmse(inters[mistie_col])
+        "network mistie after levelling: %s",
+        airbornegeo.rmse(inters[crossover_error_col]),
     )
 
     return data.drop(columns=["levelling_correction"]), inters
@@ -429,7 +433,7 @@ def _end_iterations(
     rms_values: list[float],
     delta_rms_values: list[float],
     max_iterations: int,
-    mistie_values: list[float] | None = None,
+    crossover_error_values: list[float] | None = None,
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float | None = None,
     rms_percent_increase_tolerance: float | None = None,
@@ -442,16 +446,18 @@ def _end_iterations(
     delta_rms = delta_rms_values[-1]
     previous_delta_rms = delta_rms_values[-2] if iteration > 2 else np.inf
 
-    if mistie_values is not None:
-        mistie = mistie_values[-1]
-        previous_mistie = mistie_values[-2] if iteration > 2 else np.inf
+    if crossover_error_values is not None:
+        mistie = crossover_error_values[-1]
+        previous_mistie = crossover_error_values[-2] if iteration > 2 else np.inf
 
     # ignore for first iteration
     if iteration == 1:
         pass
     else:
         # end because RMS is increasing above a unreasonable amount
-        if rms > np.min(rms_values) * (1 + rms_percent_increase_tolerance / 100):
+        if (rms_percent_increase_tolerance is not None) and (
+            rms > np.min(rms_values) * (1 + rms_percent_increase_tolerance / 100)
+        ):
             logger.info(  # pylint: disable=logging-fstring-interpolation
                 f"\nLevelling terminated after {iteration} iterations because the RMS of the levelling corrections ({round(rms, 4)}) \n"
                 f"was over {rms_percent_increase_tolerance}% greater than minimum RMS ({round(np.min(rms_values), 4)}) \n"
@@ -482,7 +488,7 @@ def _end_iterations(
             end = True
             termination_reason.append("RMS tolerance")
         # end because RMS of cross-overs is increasing
-        if (mistie_values is not None) and (mistie > previous_mistie):  # pylint: disable=possibly-used-before-assignment
+        if (crossover_error_values is not None) and (mistie > previous_mistie):  # pylint: disable=possibly-used-before-assignment
             logger.info(  # pylint: disable=logging-fstring-interpolation
                 f"\nLevelling terminated after {iteration} iterations because the RMS of the cross-over errors ({rms}) "
                 f"began to increase.",
@@ -511,19 +517,19 @@ def plot_levelling_convergence(
     title: str = "Levelling convergence",
     as_median: bool = False,
 ) -> None:
-    # get mistie columns
-    cols = [c for c in results.columns if "mistie_" in c]
+    # get crossover error columns
+    cols = [c for c in results.columns if "crossover_error_" in c]
     cols = [col.split("_")[-1] for col in cols]
-    mistie_cols = []
+    crossover_error_cols = []
     for c in cols:
         try:  # noqa: SIM105
-            mistie_cols.append(int(c))
+            crossover_error_cols.append(int(c))
         except ValueError:
             pass
-    cols = [f"mistie_{c}" for c in mistie_cols]
+    cols = [f"crossover_error_{c}" for c in crossover_error_cols]
     iters = len(cols)
 
-    mistie_rmses = [
+    crossover_error_rmses = [
         airbornegeo.rmse(
             results[i],
             as_median=as_median,
@@ -532,7 +538,7 @@ def plot_levelling_convergence(
     ]
     _fig, ax1 = plt.subplots(figsize=(5, 3.5))
     plt.title(title)
-    ax1.plot(range(iters), mistie_rmses, "bo-")
+    ax1.plot(range(iters), crossover_error_rmses, "bo-")
     ax1.set_xlabel("Iteration")
     if logy:
         ax1.set_yscale("log")
@@ -552,16 +558,16 @@ def crossover_pair_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     intersection_weight_col: str | None = None,
-    mistie_interp_method: str = "linear",
-    warn_if_unchanged: bool = True,
+    crossover_error_interp_method: str = "linear",
+    raise_error_if_unchanged: bool = True,
     max_iterations: int = 1,
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
-    plot_levelling_convergence: bool = True,
-    plot_dynamic_levelling_convergence: bool = False,
+    plot_convergence: bool = True,
+    plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     """
@@ -571,15 +577,11 @@ def crossover_pair_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if max_iterations == 1:
-        progressbar = False
+    progressbar, pbar_iterations = _init_iteration_progressbar(
+        max_iterations, progressbar
+    )
 
-    if progressbar:
-        pbar_iterations = tqdm(range(1, max_iterations + 1))
-    else:
-        pbar_iterations = range(1, max_iterations + 1)
-
-    if plot_dynamic_levelling_convergence:
+    if plot_dynamic_convergence:
         # initialize figure
         monitor = airbornegeo.plotting.LevellingConvergenceMonitor(
             rms_tolerance=rms_tolerance,
@@ -588,7 +590,7 @@ def crossover_pair_levelling(
 
     correction_rms_values = []
     correction_delta_rms_values = []
-    mistie_values = []
+    crossover_error_values = []
     iteration = 1
     for iteration in pbar_iterations:
         if progressbar:
@@ -601,34 +603,40 @@ def crossover_pair_levelling(
                 inters,
                 lines_to_level=lines_to_level,
                 degree=degree,
-                filter=filter,
+                filter_type=filter_type,
                 data_col=data_col,
                 levelled_col=levelled_col,
                 line_column=line_column,
                 distance_column=distance_column,
                 intersection_weight_col=intersection_weight_col,
-                mistie_interp_method=mistie_interp_method,
-                warn_if_unchanged=warn_if_unchanged,
+                crossover_error_interp_method=crossover_error_interp_method,
+                raise_error_if_unchanged=raise_error_if_unchanged,
             )
             final_values = data[levelled_col]
         except UserWarning:
             break
 
         cols = [
-            c for c in inters.columns if "mistie_" in c and c != intersection_weight_col
+            c
+            for c in inters.columns
+            if "crossover_error_" in c and c != intersection_weight_col
         ]
-        mistie_col = [int(col.split("_")[-1]) for col in cols]
+        crossover_error_col = [int(col.split("_")[-1]) for col in cols]
         try:
-            current_mistie_col = f"mistie_{max(mistie_col)}"
+            current_crossover_error_col = f"crossover_error_{max(crossover_error_col)}"
         except ValueError:
-            current_mistie_col = "mistie_0"
-        mistie_values.append(airbornegeo.rmse(inters[current_mistie_col]))
+            current_crossover_error_col = "crossover_error_0"
+        crossover_error_values.append(
+            airbornegeo.rmse(inters[current_crossover_error_col])
+        )
 
         # add RMS and delta RMS of correction values for iteration to lists
         levelling_correction = original_values - final_values
         rms = airbornegeo.rmse(levelling_correction)
         delta_rms = (
-            (correction_rms_values[-1] / rms - 1) * 100 if iteration > 1 else np.inf
+            (correction_rms_values[-1] / rms - 1) * 100
+            if iteration > 1 and rms != 0
+            else np.inf
         )
         correction_rms_values.append(rms)
         correction_delta_rms_values.append(delta_rms)
@@ -637,13 +645,13 @@ def crossover_pair_levelling(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
             max_iterations=max_iterations,
-            mistie_values=mistie_values,
+            crossover_error_values=crossover_error_values,
             rms_tolerance=rms_tolerance,
             rms_percent_change_tolerance=rms_percent_change_tolerance,
             rms_percent_increase_tolerance=rms_percent_increase_tolerance,
         )
 
-        if plot_dynamic_levelling_convergence:
+        if plot_dynamic_convergence:
             monitor.update(correction_rms_values, correction_delta_rms_values)
 
         if end:
@@ -656,11 +664,7 @@ def crossover_pair_levelling(
         # use levelled column as input for next iteration
         data_col = levelled_col
 
-    if (
-        plot_levelling_convergence
-        and iteration > 2
-        and not plot_dynamic_levelling_convergence
-    ):
+    if plot_convergence and iteration > 2 and not plot_dynamic_convergence:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
@@ -681,10 +685,10 @@ def _crossover_pair_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     intersection_weight_col: str | None = None,
-    mistie_interp_method: str = "linear",
-    warn_if_unchanged: bool = False,
+    crossover_error_interp_method: str = "linear",
+    raise_error_if_unchanged: bool = False,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     """
     Level lines by fitting a trend of specified order to cross-over errors and apply
@@ -693,11 +697,11 @@ def _crossover_pair_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if (filter is not None) and (degree is not None):
-        msg = "only provide either `filter` or `degree`, not both"
+    if (filter_type is not None) and (degree is not None):
+        msg = "only provide either `filter_type` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter is None) and (degree is None):
-        msg = "must provide either `filter` or `degree`"
+    if (filter_type is None) and (degree is None):
+        msg = "must provide either `filter_type` or `degree`"
         raise UserWarning(msg)
 
     # drop lines without intersections
@@ -748,14 +752,17 @@ def _crossover_pair_levelling(
         line_column=line_column,
     )
 
-    mistie_col = [
-        c for c in inters2.columns if "mistie_" in c and c != intersection_weight_col
+    crossover_error_col = [
+        c
+        for c in inters2.columns
+        if "crossover_error_" in c and c != intersection_weight_col
     ]
-    mistie_col = [int(col.split("_")[-1]) for col in mistie_col]
-    mistie_col = f"mistie_{max(mistie_col)}"
+    crossover_error_col = [int(col.split("_")[-1]) for col in crossover_error_col]
+    crossover_error_col = f"crossover_error_{max(crossover_error_col)}"
 
     logger.debug(
-        "mistie before levelling: %s mGal", airbornegeo.rmse(inters2[mistie_col])
+        "mistie before levelling: %s mGal",
+        airbornegeo.rmse(inters2[crossover_error_col]),
     )
 
     # fit a trend to the misfits on line-by-line basis
@@ -772,7 +779,7 @@ def _crossover_pair_levelling(
                 line_df = airbornegeo.trend(
                     data_to_fit=ints,  # data with mistie values
                     cols_to_fit=cols_to_fit  # noqa: RUF005
-                    + [mistie_col],  # column names for distance/mistie
+                    + [crossover_error_col],  # column names for distance/mistie
                     data_to_predict=line_df,  # data with line data
                     cols_to_predict=[distance_column]  # noqa: RUF005
                     + [
@@ -788,20 +795,22 @@ def _crossover_pair_levelling(
                 else:
                     raise ValueError from e
 
-        if filter is not None:
-            # add misties to line dataframe from intersections dataframe
+        if filter_type is not None:
+            # add crossover errors to line dataframe from intersections dataframe
             for ind, row in line_df[line_df.is_intersection].iterrows():
                 # search intersections for mistie values
-                mistie_row = ints[
+                crossover_error_row = ints[
                     ((ints.line1 == line) & (ints.line2 == row.intersecting_line))
                     | ((ints.line1 == row.intersecting_line) & (ints.line2 == line))
                 ]
-                assert len(mistie_row) >= 1
+                assert len(crossover_error_row) >= 1
 
-                # add misties to line dataframe
-                line_df.loc[ind, mistie_col] = mistie_row[mistie_col].to_numpy()
+                # add crossover errors to line dataframe
+                line_df.loc[ind, crossover_error_col] = crossover_error_row[
+                    crossover_error_col
+                ].to_numpy()
 
-            n_valid_misties = line_df[mistie_col].notna().sum()
+            n_valid_misties = line_df[crossover_error_col].notna().sum()
             if n_valid_misties == 0:
                 # line was flagged as having intersections, but none of them could be
                 # matched to a mistie value (e.g. distance mismatch between `data` and
@@ -814,19 +823,19 @@ def _crossover_pair_levelling(
                 line_df["levelling_correction"] = 0
             else:
                 # interpolate mistie NaNs along the line. `interpolate_missing` falls
-                # back internally (mistie_interp_method -> linear -> nearest) based on how
+                # back internally (crossover_error_interp_method -> linear -> nearest) based on how
                 # many mistie values this line actually has
                 line_df = airbornegeo.interpolate_missing(
                     line_df,
-                    to_interp=mistie_col,
+                    to_interp=crossover_error_col,
                     interp_on=distance_column,
-                    method=mistie_interp_method,
+                    method=crossover_error_interp_method,
                     extrapolate=False,
                     groupby_column=None,
                 )
                 line_df = airbornegeo.interpolate_missing(
                     line_df,
-                    to_interp=mistie_col,
+                    to_interp=crossover_error_col,
                     interp_on=distance_column,
                     method="nearest",
                     extrapolate=True,
@@ -836,8 +845,8 @@ def _crossover_pair_levelling(
                 # calculate levelling correction by low pass filtering the misfits values
                 line_df["levelling_correction"] = airbornegeo.filter_line(
                     line_df,
-                    filter_type=filter,
-                    data_column=mistie_col,
+                    filter_type=filter_type,
+                    data_column=crossover_error_col,
                     filter_by_column=distance_column,
                     groupby_column=None,  # already giving a single group
                     progressbar=False,
@@ -871,17 +880,17 @@ def _crossover_pair_levelling(
         inters,
         data_col=levelled_col,
         line_column=line_column,
-        warn_if_unchanged=warn_if_unchanged,
+        raise_error_if_unchanged=raise_error_if_unchanged,
     )
-    mistie_col = [
+    crossover_error_col = [
         int(col.split("_")[-1])
         for col in inters.columns
-        if "mistie_" in col and col != intersection_weight_col
+        if "crossover_error_" in col and col != intersection_weight_col
     ]
-    mistie_col = f"mistie_{max(mistie_col)}"
+    crossover_error_col = f"crossover_error_{max(crossover_error_col)}"
 
     logger.debug(
-        "mistie after levelling: %s mGal", airbornegeo.rmse(inters[mistie_col])
+        "mistie after levelling: %s mGal", airbornegeo.rmse(inters[crossover_error_col])
     )
 
     return data.drop(columns=["levelling_correction"]), inters
@@ -897,25 +906,25 @@ def alternating_iterative_line_levelling(
     distance_column: str,
     lines_to_level: list[str] | None = None,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     intersection_weight_col: str | None = None,
-    mistie_interp_method: str = "linear",
+    crossover_error_interp_method: str = "linear",
     max_iterations: int = 5,
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
-    plot_levelling_convergence: bool = True,
-    plot_dynamic_levelling_convergence: bool = False,
+    plot_convergence: bool = True,
+    plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     data = data.copy()
     inters = inters.copy()
 
-    if (filter is not None) and (degree is not None):
-        msg = "only provide either `filter` or `degree`, not both"
+    if (filter_type is not None) and (degree is not None):
+        msg = "only provide either `filter_type` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter is None) and (degree is None):
-        msg = "must provide either `filter` or `degree`"
+    if (filter_type is None) and (degree is None):
+        msg = "must provide either `filter_type` or `degree`"
         raise UserWarning(msg)
 
     # check columns are present
@@ -929,15 +938,11 @@ def alternating_iterative_line_levelling(
         lines1_to_level = [x for x in lines1_to_level if x in lines_to_level]
         lines2_to_level = [x for x in lines2_to_level if x in lines_to_level]
 
-    if max_iterations == 1:
-        progressbar = False
+    progressbar, pbar_iterations = _init_iteration_progressbar(
+        max_iterations, progressbar
+    )
 
-    if progressbar:
-        pbar_iterations = tqdm(range(1, max_iterations + 1))
-    else:
-        pbar_iterations = range(1, max_iterations + 1)
-
-    if plot_dynamic_levelling_convergence:
+    if plot_dynamic_convergence:
         # initialize figure
         monitor = airbornegeo.plotting.LevellingConvergenceMonitor(
             rms_tolerance=rms_tolerance,
@@ -946,7 +951,7 @@ def alternating_iterative_line_levelling(
 
     correction_rms_values = []
     correction_delta_rms_values = []
-    mistie_values = []
+    crossover_error_values = []
     iteration = 1
     for iteration in pbar_iterations:
         if progressbar:
@@ -959,13 +964,13 @@ def alternating_iterative_line_levelling(
             inters,
             lines_to_level=lines1_to_level,
             degree=degree,
-            filter=filter,
+            filter_type=filter_type,
             data_col=data_col,
             line_column=line_column,
             levelled_col=levelled_col,
             distance_column=distance_column,
             intersection_weight_col=intersection_weight_col,
-            mistie_interp_method=mistie_interp_method,
+            crossover_error_interp_method=crossover_error_interp_method,
             max_iterations=1,
         )
         # level lines2 to lines1
@@ -974,48 +979,53 @@ def alternating_iterative_line_levelling(
             inters,
             lines_to_level=lines2_to_level,
             degree=degree,
-            filter=filter,
+            filter_type=filter_type,
             data_col=levelled_col,
             line_column=line_column,
             levelled_col=levelled_col,
             distance_column=distance_column,
             intersection_weight_col=intersection_weight_col,
-            mistie_interp_method=mistie_interp_method,
+            crossover_error_interp_method=crossover_error_interp_method,
             max_iterations=1,
         )
         final_values = data[levelled_col]
 
         cols = [
-            c for c in inters.columns if "mistie_" in c and c != intersection_weight_col
+            c
+            for c in inters.columns
+            if "crossover_error_" in c and c != intersection_weight_col
         ]
-        mistie_col = [int(col.split("_")[-1]) for col in cols]
+        crossover_error_col = [int(col.split("_")[-1]) for col in cols]
         try:
-            current_mistie_col = f"mistie_{max(mistie_col)}"
+            current_crossover_error_col = f"crossover_error_{max(crossover_error_col)}"
         except ValueError:
-            current_mistie_col = "mistie_0"
-        mistie_values.append(airbornegeo.rmse(inters[current_mistie_col]))
+            current_crossover_error_col = "crossover_error_0"
+        crossover_error_values.append(
+            airbornegeo.rmse(inters[current_crossover_error_col])
+        )
 
         # add RMS and delta RMS of correction values for iteration to lists
         levelling_correction = original_values - final_values
         rms = airbornegeo.rmse(levelling_correction)
         delta_rms = (
-            (correction_rms_values[-1] / rms - 1) * 100 if iteration > 1 else np.inf
+            (correction_rms_values[-1] / rms - 1) * 100
+            if iteration > 1 and rms != 0
+            else np.inf
         )
         correction_rms_values.append(rms)
         correction_delta_rms_values.append(delta_rms)
-        # print(f"\t{rms=}")
-        # print(f"\t{delta_rms=}")
+
         end, termination_reason = _end_iterations(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
             max_iterations=max_iterations,
-            mistie_values=mistie_values,
+            crossover_error_values=crossover_error_values,
             rms_tolerance=rms_tolerance,
             rms_percent_change_tolerance=rms_percent_change_tolerance,
             rms_percent_increase_tolerance=rms_percent_increase_tolerance,
         )
 
-        if plot_dynamic_levelling_convergence:
+        if plot_dynamic_convergence:
             monitor.update(correction_rms_values, correction_delta_rms_values)
 
         if end:
@@ -1028,11 +1038,7 @@ def alternating_iterative_line_levelling(
         # use levelled column as input for next iteration
         data_col = levelled_col
 
-    if (
-        plot_levelling_convergence
-        and iteration > 2
-        and not plot_dynamic_levelling_convergence
-    ):
+    if plot_convergence and iteration > 2 and not plot_dynamic_convergence:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
@@ -1297,18 +1303,18 @@ def calculate_intersection_weights(
     ) -> pd.Series:
         return df[list(weights)].mul(weights).sum(axis=1) / sum(weights.values())
 
-    # inters["mistie_weight"] = weighted_average(inters, weights_dict)
-    # inters["mistie_weights"] = inters[weights_cols].mean(axis=1)
+    # inters["crossover_error_weight"] = weighted_average(inters, weights_dict)
+    # inters["crossover_error_weights"] = inters[weights_cols].mean(axis=1)
 
     if weight_by == "all":
-        inters["mistie_weight"] = weighted_average(inters, weights_dict)
-        inters["mistie_weight"] = airbornegeo.normalize_values(
-            inters["mistie_weight"],
+        inters["crossover_error_weight"] = weighted_average(inters, weights_dict)
+        inters["crossover_error_weight"] = airbornegeo.normalize_values(
+            inters["crossover_error_weight"],
             low=0.001,
             high=1,
         )
     else:
-        inters["mistie_weight"] = (
+        inters["crossover_error_weight"] = (
             inters.groupby(weight_by)
             .apply(
                 lambda x: pd.Series(weighted_average(x, weights_dict), index=x.index),
@@ -1316,10 +1322,12 @@ def calculate_intersection_weights(
             )
             .reset_index(drop=True)
         )
-        # inters["mistie_weight"] = inters.groupby(weight_by).transform(
+        # inters["crossover_error_weight"] = inters.groupby(weight_by).transform(
         #     lambda x: weighted_average(x, weights_dict),
         # )
-        inters["mistie_weight"] = inters.groupby(weight_by)["mistie_weight"].transform(
+        inters["crossover_error_weight"] = inters.groupby(weight_by)[
+            "crossover_error_weight"
+        ].transform(
             lambda x: airbornegeo.normalize_values(
                 x,
                 low=0.001,
@@ -1330,11 +1338,11 @@ def calculate_intersection_weights(
     if plot:
         airbornegeo.plotly_points(
             inters,
-            color_col="mistie_weight",
+            color_col="crossover_error_weight",
             hover_cols=[
                 "line",
                 "tie",
-                "mistie_weight",
+                "crossover_error_weight",
                 *weights_cols,
                 *plot_cols,
             ],

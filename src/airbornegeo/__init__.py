@@ -102,6 +102,7 @@ from .nav import (  # noqa: E402
     vertical_acceleration,
 )
 from .plotting import (  # noqa: E402
+    add_scalebar,
     inspect_lines,
     plot_profiles,
     # plot_flightlines,

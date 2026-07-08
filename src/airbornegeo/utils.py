@@ -8,6 +8,7 @@ import scipy.spatial
 import verde as vd
 import xarray as xr
 from numpy.typing import NDArray
+from tqdm.autonotebook import tqdm
 
 from airbornegeo import logger
 
@@ -199,9 +200,7 @@ def sample_grid(
 
 def median_line_spacing(
     data: pd.DataFrame,
-    easting_column="easting",
-    northing_column="northing",
-    line_column="line",
+    line_column: str,
 ) -> float:
     """
     Estimate the flight line spacing by first, for each point on a specific line,
@@ -213,8 +212,10 @@ def median_line_spacing(
     Parameters
     ----------
     data : pd.DataFrame
-        The dataframe containing columns 'easting', 'northing', and 'line' columns to
-        compute the median line spacing for.
+        The dataframe containing columns 'easting', 'northing', and the column given by
+        line_column, to compute the median line spacing for.
+    line_column : str
+        name of the column containing the line number/name
 
     Returns
     -------
@@ -224,7 +225,8 @@ def median_line_spacing(
 
     """
     # check columns are present
-    cols = [easting_column, northing_column, line_column]
+    _check_coord_columns(data)
+    cols = [line_column]
 
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
@@ -239,15 +241,158 @@ def median_line_spacing(
         survey_df = data[data[line_column] != line_name]
 
         # for each line point, find the distance to the nearest non-line point
-        kdtree = scipy.spatial.KDTree(
-            survey_df[[easting_column, northing_column]].to_numpy()
-        )
-        min_dist, _ = kdtree.query(
-            line_df[[easting_column, northing_column]].to_numpy(), k=1
-        )
+        kdtree = scipy.spatial.KDTree(survey_df[["easting", "northing"]].to_numpy())
+        min_dist, _ = kdtree.query(line_df[["easting", "northing"]].to_numpy(), k=1)
 
         min_distances.append(min_dist)
 
     min_distances = np.concat(min_distances)
 
     return np.median(min_distances)
+
+
+def _check_coord_columns(
+    data: pd.DataFrame,
+) -> None:
+    """
+    Check that the dataframe contains the columns 'easting' and 'northing' and if not
+    inform users about `.rename()`.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe which should contain the columns
+    """
+
+    # check columns are present
+    cols = ["easting", "northing"]
+
+    assert all(col in data.columns for col in cols), (
+        f"Projected coordinates columns ({cols}) must be in the dataframe. If you have them with other names (e.g. 'x','y'), you can rename your dataframe (df) with df = df.rename(columns={{'x':'easting','y':'northing'}})"
+    )
+
+
+def _init_iteration_progressbar(
+    max_iterations: int,
+    progressbar: bool,
+) -> tuple[bool, typing.Iterable[int]]:
+    """
+    Build the iterator to loop over iterations 1..max_iterations, optionally wrapped
+    in a progress bar, disabling the progress bar when there's only 1 iteration.
+
+    Parameters
+    ----------
+    max_iterations : int
+        Number of iterations to loop over.
+    progressbar : bool
+        Whether to show a progress bar over the iterations.
+
+    Returns
+    -------
+    tuple[bool, Iterable[int]]
+        The (possibly disabled) progressbar flag, and the iterable of iteration
+        numbers to loop over.
+    """
+    if max_iterations == 1:
+        progressbar = False
+
+    iterations = range(1, max_iterations + 1)
+    return progressbar, (tqdm(iterations) if progressbar else iterations)
+
+
+def _iter_groups(
+    data: pd.DataFrame,
+    groupby_column: str | list[str],
+    progressbar: bool,
+    desc: str = "Segments",
+) -> typing.Iterable[tuple[typing.Any, pd.DataFrame]]:
+    """
+    Group `data` by `groupby_column`, preserving the order groups first appear in
+    `data` (instead of pandas' default sorted-by-key order), and optionally wrap the
+    resulting iterator in a progress bar.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe to group.
+    groupby_column : str | list[str]
+        Column name(s) to group by.
+    progressbar : bool
+        Show a progress bar while iterating over groups.
+    desc : str, optional
+        Progress bar description, by default "Segments".
+
+    Returns
+    -------
+    Iterable[tuple[Any, pd.DataFrame]]
+        Iterable of (group key, group dataframe) pairs.
+    """
+    groups = data.groupby(groupby_column, sort=False)
+    return tqdm(groups, desc=desc) if progressbar else groups
+
+
+def _apply_grouped(
+    data: pd.DataFrame,
+    *,
+    groupby_column: str | list[str] | None,
+    progressbar: bool,
+    func: typing.Callable[[pd.DataFrame], typing.Any],
+    desc: str = "Segments",
+) -> typing.Any:
+    """
+    Apply `func` to `data` as a whole, or independently to each group defined by
+    `groupby_column`, and combine the results in `data`'s original row order.
+
+    `func` is given a dataframe (all of `data`, or one group's rows) and must return
+    either a single array-like, or a tuple of array-likes, each with one value per
+    row of the dataframe it was given. Results are combined by their original row
+    index rather than by group-iteration order, so the output stays aligned with
+    `data` even when the group labels don't sort into the order they first appear in
+    `data`.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe to apply `func` to.
+    groupby_column : str | list[str] | None
+        Column name(s) to group by before applying `func`, or None to apply it to
+        the whole dataframe at once.
+    progressbar : bool
+        Show a progress bar for each group.
+    func : Callable[[pd.DataFrame], Any]
+        Function to apply to `data`, or to each group's dataframe.
+    desc : str, optional
+        Progress bar description, by default "Segments".
+
+    Returns
+    -------
+    Any
+        A numpy array (or tuple of numpy arrays, matching what `func` returns), with
+        one value per row of `data`.
+    """
+    if groupby_column is None:
+        result = func(data)
+        if isinstance(result, tuple):
+            return tuple(np.asarray(r) for r in result)
+        return np.asarray(result)
+
+    segments = list(_iter_groups(data, groupby_column, progressbar, desc=desc))
+    results = [func(segment) for _, segment in segments]
+    indices = [segment.index for _, segment in segments]
+
+    is_tuple = isinstance(results[0], tuple)
+    if not is_tuple:
+        results = [(r,) for r in results]
+
+    combined = tuple(
+        pd.concat(
+            [
+                pd.Series(np.asarray(r[i]), index=idx)
+                for r, idx in zip(results, indices, strict=True)
+            ]
+        )
+        .loc[data.index]
+        .to_numpy()
+        for i in range(len(results[0]))
+    )
+    return combined if is_tuple else combined[0]
