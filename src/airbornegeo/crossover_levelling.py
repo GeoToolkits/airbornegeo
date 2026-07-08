@@ -1,4 +1,4 @@
-import geopandas as gpd
+import geopandas as gpd  # pylint: disable=too-many-lines
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

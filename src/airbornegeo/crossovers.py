@@ -1,4 +1,4 @@
-import itertools
+import itertools  # pylint: disable=too-many-lines
 import typing
 
 import geopandas as gpd
