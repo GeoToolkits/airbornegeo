@@ -20,7 +20,7 @@ def crossover_network_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     lines_to_level: list[float] | None = None,
     intersection_weight_col: str | None = None,
     mistie_interp_method: str = "linear",
@@ -68,7 +68,7 @@ def crossover_network_levelling(
         Column containing the distance along each line / segment.
     degree : int | None, optional
         Polynomial degree used to fit a trend to the misties along each line.
-    filter : str | None, optional
+    filter_type : str | None, optional
         Alternative to `degree`; low-pass filter type applied to the misties along
         each line.
     lines_to_level : list[float] | None
@@ -77,7 +77,7 @@ def crossover_network_levelling(
         Column in `inters` with per-intersection weights.
     mistie_interp_method : str, optional
         Method used to fill gaps between misties along a line before filtering (only
-        used when `filter` is given), by default "linear".
+        used when `filter_type` is given), by default "linear".
     relaxation_factor : float, optional
         Fraction of each line's fitted mistie trend to remove per iteration, by
         default 0.5 (i.e. split the mistie evenly between the two lines at each
@@ -137,7 +137,7 @@ def crossover_network_levelling(
                 data,
                 inters,
                 degree=degree,
-                filter=filter,
+                filter_type=filter_type,
                 data_col=data_col,
                 levelled_col=levelled_col,
                 line_column=line_column,
@@ -249,7 +249,7 @@ def _crossover_network_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     lines_to_level: list[float] | None = None,
     intersection_weight_col: str | None = None,
     mistie_interp_method: str = "linear",
@@ -267,11 +267,11 @@ def _crossover_network_levelling(
     if lines_to_level is None:
         lines_to_level = data[line_column].unique()
 
-    if (filter is not None) and (degree is not None):
-        msg = "only provide either `filter` or `degree`, not both"
+    if (filter_type is not None) and (degree is not None):
+        msg = "only provide either `filter_type` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter is None) and (degree is None):
-        msg = "must provide either `filter` or `degree`"
+    if (filter_type is None) and (degree is None):
+        msg = "must provide either `filter_type` or `degree`"
         raise UserWarning(msg)
 
     assert line_column in data.columns, (
@@ -336,7 +336,7 @@ def _crossover_network_levelling(
                 else:
                     raise ValueError from e
 
-        if filter is not None:
+        if filter_type is not None:
             # add signed misties to line dataframe at each intersection row
             for ind, row in line_df[line_df.is_intersection].iterrows():
                 match = line_ints[
@@ -379,7 +379,7 @@ def _crossover_network_levelling(
 
                 line_df["levelling_correction"] = airbornegeo.filter_line(
                     line_df,
-                    filter_type=filter,
+                    filter_type=filter_type,
                     data_column=mistie_col,
                     filter_by_column=distance_column,
                     groupby_column=None,
@@ -552,7 +552,7 @@ def crossover_pair_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     intersection_weight_col: str | None = None,
     mistie_interp_method: str = "linear",
     warn_if_unchanged: bool = True,
@@ -601,7 +601,7 @@ def crossover_pair_levelling(
                 inters,
                 lines_to_level=lines_to_level,
                 degree=degree,
-                filter=filter,
+                filter_type=filter_type,
                 data_col=data_col,
                 levelled_col=levelled_col,
                 line_column=line_column,
@@ -681,7 +681,7 @@ def _crossover_pair_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     intersection_weight_col: str | None = None,
     mistie_interp_method: str = "linear",
     warn_if_unchanged: bool = False,
@@ -693,11 +693,11 @@ def _crossover_pair_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if (filter is not None) and (degree is not None):
-        msg = "only provide either `filter` or `degree`, not both"
+    if (filter_type is not None) and (degree is not None):
+        msg = "only provide either `filter_type` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter is None) and (degree is None):
-        msg = "must provide either `filter` or `degree`"
+    if (filter_type is None) and (degree is None):
+        msg = "must provide either `filter_type` or `degree`"
         raise UserWarning(msg)
 
     # drop lines without intersections
@@ -788,7 +788,7 @@ def _crossover_pair_levelling(
                 else:
                     raise ValueError from e
 
-        if filter is not None:
+        if filter_type is not None:
             # add misties to line dataframe from intersections dataframe
             for ind, row in line_df[line_df.is_intersection].iterrows():
                 # search intersections for mistie values
@@ -836,7 +836,7 @@ def _crossover_pair_levelling(
                 # calculate levelling correction by low pass filtering the misfits values
                 line_df["levelling_correction"] = airbornegeo.filter_line(
                     line_df,
-                    filter_type=filter,
+                    filter_type=filter_type,
                     data_column=mistie_col,
                     filter_by_column=distance_column,
                     groupby_column=None,  # already giving a single group
@@ -897,7 +897,7 @@ def alternating_iterative_line_levelling(
     distance_column: str,
     lines_to_level: list[str] | None = None,
     degree: int | None = None,
-    filter: str | None = None,
+    filter_type: str | None = None,
     intersection_weight_col: str | None = None,
     mistie_interp_method: str = "linear",
     max_iterations: int = 5,
@@ -911,11 +911,11 @@ def alternating_iterative_line_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if (filter is not None) and (degree is not None):
-        msg = "only provide either `filter` or `degree`, not both"
+    if (filter_type is not None) and (degree is not None):
+        msg = "only provide either `filter_type` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter is None) and (degree is None):
-        msg = "must provide either `filter` or `degree`"
+    if (filter_type is None) and (degree is None):
+        msg = "must provide either `filter_type` or `degree`"
         raise UserWarning(msg)
 
     # check columns are present
@@ -959,7 +959,7 @@ def alternating_iterative_line_levelling(
             inters,
             lines_to_level=lines1_to_level,
             degree=degree,
-            filter=filter,
+            filter_type=filter_type,
             data_col=data_col,
             line_column=line_column,
             levelled_col=levelled_col,
@@ -974,7 +974,7 @@ def alternating_iterative_line_levelling(
             inters,
             lines_to_level=lines2_to_level,
             degree=degree,
-            filter=filter,
+            filter_type=filter_type,
             data_col=levelled_col,
             line_column=line_column,
             levelled_col=levelled_col,
