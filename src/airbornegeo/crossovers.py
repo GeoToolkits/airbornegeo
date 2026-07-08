@@ -676,7 +676,7 @@ def add_intersections(
         The updated flight survey dataframe and intersections table.
     """
     data = data.copy()
-    inters = intersections.copy()
+    inters = intersections.copy().reset_index(drop=True)
 
     cols = [line_column, distance_column, "geometry"]
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
@@ -703,17 +703,18 @@ def add_intersections(
         dist_along_line = df[distance_column].to_numpy()
         line_groups[line] = (coords, dist_along_line)
 
+    new_rows = []
+
+    # Track calculated distances map structured as: (intersection_idx, line_name) -> calculated_distance
+    distance_lookup = {}
+
     pbar = tqdm(
-        inters.itertuples(index=False),
+        enumerate(inters.itertuples(index=False)),
         desc="Collecting intersections",
         total=len(inters),
     )
 
-    # collect intersections to be added
-    new_rows = []
-    # iterate over each intersection
-    for row in pbar:
-        # get intersection coordinates
+    for inter_idx, row in pbar:
         px, py = row.geometry.x, row.geometry.y
 
         for line, other in [(row.line1, row.line2), (row.line2, row.line1)]:
@@ -736,6 +737,9 @@ def add_intersections(
             # calculate distance to intersection
             dist_to_point = np.sqrt(dist[min_point_idx])
 
+            calculated_dist = min_dist_along_line + dist_to_point
+            distance_lookup[(inter_idx, line)] = calculated_dist
+
             new_rows.append(
                 {
                     line_column: line,
@@ -744,7 +748,7 @@ def add_intersections(
                     "geometry": row.geometry,
                     "is_intersection": True,
                     "intersecting_line": other,
-                    distance_column: min_dist_along_line + dist_to_point,
+                    distance_column: calculated_dist,
                 }
             )
 
@@ -756,18 +760,12 @@ def add_intersections(
     # check new dataframe is correct length
     assert len(data) == prior_length + (2 * len(inters))
 
-    # build intersection lookup table
-    lookup = new_df.groupby([line_column, "intersecting_line"])[distance_column].first()
-    # lookup = new_df.set_index(
-    #     [line_column, "intersecting_line"]
-    # )[distance_column]
-
-    inters = inters.copy()
+    # Safely assign distances to inters based on the exact matching unique index loop
     inters["dist_along_line1"] = [
-        lookup[(r.line1, r.line2)] for r in inters.itertuples()
+        distance_lookup[(idx, r.line1)] for idx, r in enumerate(inters.itertuples())
     ]
     inters["dist_along_line2"] = [
-        lookup[(r.line2, r.line1)] for r in inters.itertuples()
+        distance_lookup[(idx, r.line2)] for idx, r in enumerate(inters.itertuples())
     ]
 
     return data, inters
