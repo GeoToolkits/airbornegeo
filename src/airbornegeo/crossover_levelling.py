@@ -30,8 +30,8 @@ def crossover_network_levelling(
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
-    plot_levelling_convergence: bool = True,
-    plot_dynamic_levelling_convergence: bool = False,
+    plot_convergence: bool = True,
+    plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     """
@@ -93,7 +93,7 @@ def crossover_network_levelling(
         the network.
     rms_tolerance, rms_percent_change_tolerance, rms_percent_increase_tolerance : float, optional
         Convergence criteria, as in `crossover_pair_levelling`.
-    plot_levelling_convergence, plot_dynamic_levelling_convergence : bool, optional
+    plot_convergence, plot_dynamic_convergence : bool, optional
         Plot convergence of the levelling corrections.
     progressbar : bool, optional
         Show a progress bar over iterations.
@@ -114,7 +114,7 @@ def crossover_network_levelling(
     else:
         pbar_iterations = range(1, max_iterations + 1)
 
-    if plot_dynamic_levelling_convergence:
+    if plot_dynamic_convergence:
         monitor = airbornegeo.plotting.LevellingConvergenceMonitor(
             rms_tolerance=rms_tolerance,
             rms_percent_change_tolerance=rms_percent_change_tolerance,
@@ -180,7 +180,7 @@ def crossover_network_levelling(
             rms_percent_increase_tolerance=rms_percent_increase_tolerance,
         )
 
-        if plot_dynamic_levelling_convergence:
+        if plot_dynamic_convergence:
             monitor.update(correction_rms_values, correction_delta_rms_values)
 
         if end:
@@ -193,11 +193,7 @@ def crossover_network_levelling(
         # use levelled column as input for next iteration
         data_col = levelled_col
 
-    if (
-        plot_levelling_convergence
-        and iteration > 2
-        and not plot_dynamic_levelling_convergence
-    ):
+    if plot_convergence and iteration > 2 and not plot_dynamic_convergence:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
@@ -560,8 +556,8 @@ def crossover_pair_levelling(
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
-    plot_levelling_convergence: bool = True,
-    plot_dynamic_levelling_convergence: bool = False,
+    plot_convergence: bool = True,
+    plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     """
@@ -579,7 +575,7 @@ def crossover_pair_levelling(
     else:
         pbar_iterations = range(1, max_iterations + 1)
 
-    if plot_dynamic_levelling_convergence:
+    if plot_dynamic_convergence:
         # initialize figure
         monitor = airbornegeo.plotting.LevellingConvergenceMonitor(
             rms_tolerance=rms_tolerance,
@@ -643,7 +639,7 @@ def crossover_pair_levelling(
             rms_percent_increase_tolerance=rms_percent_increase_tolerance,
         )
 
-        if plot_dynamic_levelling_convergence:
+        if plot_dynamic_convergence:
             monitor.update(correction_rms_values, correction_delta_rms_values)
 
         if end:
@@ -656,11 +652,7 @@ def crossover_pair_levelling(
         # use levelled column as input for next iteration
         data_col = levelled_col
 
-    if (
-        plot_levelling_convergence
-        and iteration > 2
-        and not plot_dynamic_levelling_convergence
-    ):
+    if plot_convergence and iteration > 2 and not plot_dynamic_convergence:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
@@ -904,8 +896,8 @@ def alternating_iterative_line_levelling(
     rms_tolerance: float | None = None,
     rms_percent_change_tolerance: float = 10,
     rms_percent_increase_tolerance: float = 20,
-    plot_levelling_convergence: bool = True,
-    plot_dynamic_levelling_convergence: bool = False,
+    plot_convergence: bool = True,
+    plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
     data = data.copy()
@@ -937,7 +929,7 @@ def alternating_iterative_line_levelling(
     else:
         pbar_iterations = range(1, max_iterations + 1)
 
-    if plot_dynamic_levelling_convergence:
+    if plot_dynamic_convergence:
         # initialize figure
         monitor = airbornegeo.plotting.LevellingConvergenceMonitor(
             rms_tolerance=rms_tolerance,
@@ -1015,7 +1007,7 @@ def alternating_iterative_line_levelling(
             rms_percent_increase_tolerance=rms_percent_increase_tolerance,
         )
 
-        if plot_dynamic_levelling_convergence:
+        if plot_dynamic_convergence:
             monitor.update(correction_rms_values, correction_delta_rms_values)
 
         if end:
@@ -1028,11 +1020,7 @@ def alternating_iterative_line_levelling(
         # use levelled column as input for next iteration
         data_col = levelled_col
 
-    if (
-        plot_levelling_convergence
-        and iteration > 2
-        and not plot_dynamic_levelling_convergence
-    ):
+    if plot_convergence and iteration > 2 and not plot_dynamic_convergence:
         airbornegeo.plotting.plot_levelling_convergence(
             rms_values=correction_rms_values,
             delta_rms_values=correction_delta_rms_values,
