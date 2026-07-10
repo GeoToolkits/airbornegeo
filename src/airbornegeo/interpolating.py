@@ -1,9 +1,12 @@
+import copy
 import typing
 import warnings
 
 import numpy as np
 import pandas as pd
 import scipy
+import sklearn
+import verde as vd
 from tqdm.autonotebook import tqdm
 
 import airbornegeo
@@ -815,3 +818,142 @@ def interpolate_1d_single_nan(
             e,
         )
         return np.nan
+
+
+def optimal_spline_damping(
+    coordinates: tuple[pd.Series | np.ndarray, pd.Series | np.ndarray],
+    data: pd.Series | np.ndarray,
+    weights: pd.Series | np.ndarray | None = None,
+    **kwargs: typing.Any,
+) -> vd.Spline:
+    """
+    Find the best damping parameter for a verde.SplineCV() fit. All kwargs are passed to
+    the verde.SplineCV class.
+
+    Parameters
+    ----------
+    coordinates : tuple[pandas.Series  |  numpy.ndarray, pandas.Series  |  \
+            numpy.ndarray]
+        easting and northing coordinates of the data
+    data : pandas.Series | numpy.ndarray
+        data for fitting the spline to
+    weights : pandas.Series | numpy.ndarray | None, optional
+        if not None, then the weights assigned to each data point. Typically, this
+        should be 1 over the data uncertainty squared, by default None
+
+    Keyword Arguments
+    -----------------
+    dampings : float | None
+        The positive damping regularization parameter. Controls how much smoothness is
+        imposed on the estimated forces. If None, no regularization is used, by default
+        None
+    force_coords : bool
+        The easting and northing coordinates of the point forces. If None (default),
+        then will be set to the data coordinates.
+    cv : None | cross-validation generator
+        Any scikit-learn cross-validation generator. If not given, will use the
+        default set by :func:`verde.cross_val_score`.
+    delayed : bool
+        If True, will use :func:`dask.delayed.delayed` to dispatch computations and
+        allow :mod:`dask` to execute the grid search in parallel (see note
+        above).
+    scoring : None | str | Callable
+        The scoring function (or name of a function) used for cross-validation.
+        Must be known to scikit-learn. See the description of *scoring* in
+        :func:`sklearn.model_selection.cross_val_score` for details. If None,
+        will fall back to the :meth:`verde.Spline.score` method.
+
+    Returns
+    -------
+    verde.Spline
+        the spline which best fits the data
+    """
+    kwargs = copy.deepcopy(kwargs)
+
+    dampings = kwargs.pop("dampings", None)
+
+    # if single damping value provided, convert to list
+    if isinstance(dampings, typing.Iterable):
+        pass
+    else:
+        dampings = [dampings]
+
+    n_splits = 5
+    while n_splits > 0:
+        try:
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r".*mindist parameter of verde\.Spline.*",
+                    category=FutureWarning,
+                )
+                spline = vd.SplineCV(
+                    dampings=dampings,
+                    cv=sklearn.model_selection.KFold(
+                        n_splits=n_splits,
+                        shuffle=True,
+                        random_state=0,
+                    ),
+                    scoring="neg_root_mean_squared_error",
+                    **kwargs,
+                )
+                spline.fit(
+                    coordinates,
+                    data,
+                    weights=weights,
+                )
+            break
+        except ValueError as e:
+            logger.error(e)
+            msg = "decreasing number of splits by 1 until ValueError is resolved"
+            logger.warning(msg)
+        if n_splits == 1:
+            msg = "ValueError not resolved, fitting spline with no damping"
+            logger.warning(msg)
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r".*mindist parameter of verde\.Spline.*",
+                    category=FutureWarning,
+                )
+                spline = vd.Spline(
+                    damping=None,
+                    scoring="neg_root_mean_squared_error",
+                    **kwargs,
+                )
+                spline.fit(
+                    coordinates,
+                    data,
+                    weights=weights,
+                )
+        n_splits -= 1
+
+    # if len(dampings) > 1:
+    # try:
+    # logger.info("Best SplineCV score: %s", spline.scores_.max())
+    # except AttributeError:
+    # logger.info("Best SplineCV score: %s", max(dask.compute(spline.scores_)[0]))
+
+    # logger.info("Best damping: %s", spline.damping_)
+
+    dampings_without_none = [i for i in dampings if i is not None]
+
+    try:
+        if spline.damping_ is None:
+            pass
+        elif len(dampings) > 2 and spline.damping_ in [
+            np.min(dampings_without_none),
+            np.max(dampings_without_none),
+        ]:
+            logger.warning(
+                "Best damping value (%s) is at the limit of provided values (%s, %s) "
+                "and thus is likely not a global minimum, expand the range of values "
+                "test to ensure the best parameter value value is found.",
+                spline.damping_,
+                np.nanmin(dampings_without_none),
+                np.nanmax(dampings_without_none),
+            )
+    except AttributeError:
+        pass
+
+    return spline
