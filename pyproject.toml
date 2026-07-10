@@ -87,6 +87,11 @@ strict = true
 filterwarnings = [
   "error",
   "ignore::SyntaxWarning",
+  # harmonica's FFT filters (via xrft) emit FutureWarnings from deprecated xarray/xrft
+  # APIs that are outside our control:
+  # https://github.com/fatiando/harmonica/blob/main/harmonica/filters/_fft.py
+  "ignore:dropping variables using `drop` is deprecated; use drop_vars\\.:FutureWarning",
+  "ignore:Default ifft's behaviour \\(lag=None\\) changed!.*:FutureWarning",
 ]
 log_cli_level = "INFO"
 testpaths = [

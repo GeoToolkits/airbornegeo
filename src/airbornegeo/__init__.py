@@ -92,6 +92,7 @@ from .interpolating import (  # noqa: E402
     interpolate_missing,
     interpolate_missing_pointwise,
     interpolate_missing_pointwise_with_windows,
+    optimal_spline_damping,
 )
 from .nav import (  # noqa: E402
     along_track_distance,

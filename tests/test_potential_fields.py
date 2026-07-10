@@ -6,6 +6,11 @@ import pytest
 
 from airbornegeo.potential_fields import eq_sources_1d, igrf, upward_continue_by_line
 
+requires_igrf = pytest.mark.skipif(
+    not hasattr(hm, "IGRF14"),
+    reason="requires a harmonica release with the IGRF14 class, not yet on PyPI",
+)
+
 RNG_SEED = 0
 
 
@@ -368,6 +373,7 @@ def test_igrf_missing_groupby_column_raises_assertionerror():
         )
 
 
+@requires_igrf
 def test_igrf_returns_tuple_of_arrays_no_groupby():
     """igrf() should return a 3-tuple of plausible-magnitude intensity/inclination/declination arrays."""
     data = _igrf_df()
@@ -390,6 +396,7 @@ def test_igrf_returns_tuple_of_arrays_no_groupby():
     assert np.all((declination >= -180) & (declination <= 180))
 
 
+@requires_igrf
 def test_igrf_returns_tuple_of_arrays_groupby():
     """igrf() should still return a 3-tuple of arrays (not a dict) when groupby_column is set."""
     data = _igrf_df()
@@ -407,6 +414,7 @@ def test_igrf_returns_tuple_of_arrays_groupby():
     assert result[0].shape == (10,)
 
 
+@requires_igrf
 def test_igrf_only_uses_first_row_datetime_per_group():
     """Only each group's first-row datetime should affect the result, even if later rows have very different datetimes."""
     data = pd.DataFrame(
@@ -438,6 +446,7 @@ def test_igrf_only_uses_first_row_datetime_per_group():
     assert declination[0] == pytest.approx(declination[2])
 
 
+@requires_igrf
 def test_igrf_row_order_safety_interleaved_groups():
     """Grouped and ungrouped results should agree exactly, row for row, even with interleaved/unsorted group labels."""
     data = pd.DataFrame(
@@ -474,6 +483,7 @@ def test_igrf_row_order_safety_interleaved_groups():
     assert grouped[2] == pytest.approx(ungrouped[2])
 
 
+@requires_igrf
 def test_igrf_single_row_segment_raises_typeerror():
     """Documents a real harmonica/numpy interaction limitation: any single-row segment crashes IGRF14.predict."""
     data = pd.DataFrame(
@@ -496,6 +506,7 @@ def test_igrf_single_row_segment_raises_typeerror():
         )
 
 
+@requires_igrf
 def test_igrf_ellipsoid_kwarg_forwarded():
     """The ellipsoid kwarg should be forwarded to IGRF14 and produce slightly different results for different ellipsoids."""
     data = _igrf_df()
@@ -523,6 +534,7 @@ def test_igrf_ellipsoid_kwarg_forwarded():
 
 
 @pytest.mark.parametrize("progressbar", [True, False])
+@requires_igrf
 def test_igrf_progressbar_does_not_affect_result(progressbar):
     """The progressbar setting should not affect the returned result."""
     data = _igrf_df()

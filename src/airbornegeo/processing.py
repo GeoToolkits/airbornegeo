@@ -156,16 +156,15 @@ def unique_line_id(
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    df : pd.DataFrame
         Dataframe containing the data points and the line labels.
-        must have a set geometry column.
     line_col_name : str
         Column name specifying the line number
 
     Returns
     -------
     pd.Series
-        The line names for each point in the GeoDataFrame
+        The line names for each point in the dataframe
     """
     df1 = df.copy()
 

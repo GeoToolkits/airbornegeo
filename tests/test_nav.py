@@ -462,11 +462,14 @@ def test_along_track_distance_no_guess_groupby():
     assert result == pytest.approx([0.0, 5.0, 0.0, 10.0])
 
 
-def test_along_track_distance_guess_start_requires_geodataframe():
-    """guess_start_position=True should require a GeoDataFrame input."""
-    data = pd.DataFrame({"easting": [0.0, 3.0], "northing": [0.0, 4.0]})
-    with pytest.raises(AssertionError):
-        nav.along_track_distance(data, guess_start_position=True)
+def test_along_track_distance_guess_start_constructs_geometry_from_coords():
+    """guess_start_position=True should build a geometry column from easting/northing
+    when the input is a plain DataFrame without one."""
+    data = pd.DataFrame({"easting": [2.0, 0.0, 1.0], "northing": [0.0, 0.0, 0.5]})
+    result = nav.along_track_distance(
+        data, guess_start_position=True, groupby_column=None, progressbar=False
+    )
+    assert result == pytest.approx([2.23606797749979, 0.0, 1.118033988749895])
 
 
 def test_along_track_distance_guess_start_no_groupby():
@@ -500,16 +503,17 @@ def test_along_track_distance_guess_start_groupby(progressbar):
     assert result == pytest.approx(expected)
 
 
-def test_along_track_distance_missing_geometry_raises():
-    """A dataframe with no geometry column should raise AssertionError."""
+def test_along_track_distance_no_guess_works_without_geometry():
+    """Without guess_start_position, a plain DataFrame with only easting/northing
+    (no geometry column) should work fine, since no geometry is needed."""
     data = pd.DataFrame({"easting": [0.0, 3.0, 6.0], "northing": [0.0, 4.0, 8.0]})
-    with pytest.raises(AssertionError):
-        nav.along_track_distance(
-            data,
-            groupby_column=None,
-            progressbar=False,
-            guess_start_position=False,
-        )
+    result = nav.along_track_distance(
+        data,
+        groupby_column=None,
+        progressbar=False,
+        guess_start_position=False,
+    )
+    assert result == pytest.approx([0.0, 5.0, 10.0])
 
 
 def test_azimuth_between_points_positive_angle():

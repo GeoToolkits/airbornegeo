@@ -656,6 +656,180 @@ def test_crossover_pair_levelling_plot_convergence_runs_with_multiple_iterations
     assert not data.value_leveled.isna().any()
 
 
+def test_crossover_pair_levelling_trend_found_array_error_zeroes_correction(
+    monkeypatch,
+):
+    """When airbornegeo.trend raises a ValueError whose message contains 'Found array with'
+    (sklearn's empty-array error), the except (ValueError, UserWarning) handler logs and
+    falls back to a zero levelling_correction instead of propagating, matching the same
+    handling as a UserWarning."""
+    filled, inters_valid = _leveling_ready(BIAS, method="groups")
+
+    def fake_trend(*_args, **_kwargs):
+        msg = "Found array with 0 sample(s) (shape=(0, 1)) while a minimum of 1 is required by LinearRegression."
+        raise ValueError(msg)
+
+    monkeypatch.setattr(clv_mod.airbornegeo, "trend", fake_trend)
+
+    data, _inters = _crossover_pair_levelling(
+        filled,
+        inters_valid,
+        lines_to_level=["F1", "F2"],
+        data_col="value",
+        levelled_col="value_leveled",
+        line_column="line",
+        distance_column="dist_along_line",
+        degree=1,
+        raise_error_if_unchanged=False,
+    )
+    for line in ["F1", "F2"]:
+        subset = data[data.line == line]
+        assert subset.value_leveled.to_numpy() == pytest.approx(subset.value.to_numpy())
+
+
+def test_crossover_pair_levelling_trend_other_valueerror_is_reraised(monkeypatch):
+    """A ValueError from airbornegeo.trend that isn't the 'Found array with' sklearn
+    message should be re-raised (wrapped in a new ValueError) rather than silently
+    swallowed."""
+    filled, inters_valid = _leveling_ready(BIAS, method="groups")
+
+    def fake_trend(*_args, **_kwargs):
+        msg = "some unrelated failure"
+        raise ValueError(msg)
+
+    monkeypatch.setattr(clv_mod.airbornegeo, "trend", fake_trend)
+
+    # the source re-raises via `raise ValueError from e` with no message of its own
+    with pytest.raises(ValueError):  # noqa: PT011
+        _crossover_pair_levelling(
+            filled,
+            inters_valid,
+            lines_to_level=["F1", "F2"],
+            data_col="value",
+            levelled_col="value_leveled",
+            line_column="line",
+            distance_column="dist_along_line",
+            degree=1,
+            raise_error_if_unchanged=False,
+        )
+
+
+def _mismatched_pair_fixture():
+    """Minimal hand-built data/inters for an F1/T1 crossing plus an unrelated, untouched
+    F2/T2 crossing, bypassing the real create_intersection_table/interpolate_intersections
+    pipeline. calculate_crossover_errors matches purely on (line, intersecting_line,
+    easting, northing), so a NaN data_col value at the intersection row on F1 propagates
+    straight into a NaN crossover_error_0 for that pair, letting us trigger the
+    'matched-but-NaN' no-valid-misties path deterministically. The extra F2/T2 crossing
+    (left out of lines_to_level, so passed through unchanged) keeps at least one
+    non-NaN mistie in the final inters table, avoiding an all-NaN RMSE warning."""
+    data = pd.DataFrame(
+        {
+            "line": ["F1", "F1", "T1", "T1", "F2", "F2", "T2", "T2"],
+            "line_type": [0, 0, 1, 1, 0, 0, 1, 1],
+            "dist_along_line": [0.0, 50.0, 0.0, 50.0, 0.0, 50.0, 0.0, 50.0],
+            "value": [1.0, np.nan, 3.0, 4.0, 10.0, 20.0, 30.0, 40.0],
+            "easting": [10.0, 100.0, 200.0, 100.0, 20.0, 300.0, 400.0, 300.0],
+            "northing": [10.0, 100.0, 200.0, 100.0, 20.0, 300.0, 400.0, 300.0],
+            "is_intersection": [False, True, False, True, False, True, False, True],
+            "intersecting_line": [None, "T1", None, "F1", None, "T2", None, "F2"],
+        }
+    )
+    inters = pd.DataFrame(
+        {
+            "line1": ["F1", "F2"],
+            "line2": ["T1", "T2"],
+            "easting": [100.0, 300.0],
+            "northing": [100.0, 300.0],
+            "dist_along_line1": [50.0, 50.0],
+            "dist_along_line2": [50.0, 50.0],
+        }
+    )
+    return data, inters
+
+
+def test_crossover_pair_levelling_filter_type_no_valid_misties_zeroes_correction(
+    caplog,
+):
+    """When the matched mistie value for a line's only intersection is NaN (e.g. the
+    underlying data value at that crossing is missing), n_valid_misties ends up 0 and the
+    filter_type branch logs a warning and zero-fills the levelling correction rather than
+    interpolating/filtering."""
+    data, inters = _mismatched_pair_fixture()
+    result, _inters = _crossover_pair_levelling(
+        data,
+        inters,
+        lines_to_level=["F1"],
+        data_col="value",
+        levelled_col="value_leveled",
+        line_column="line",
+        distance_column="dist_along_line",
+        filter_type="g300",
+        raise_error_if_unchanged=False,
+    )
+    f1 = result[result.line == "F1"]
+    assert f1.value_leveled.to_numpy() == pytest.approx(
+        f1.value.to_numpy(), nan_ok=True
+    )
+    assert "no mistie values could be matched" in caplog.text
+
+
+def test_crossover_pair_levelling_no_matching_line_type_raises_valueerror():
+    """lines_to_level containing a line absent from both inters.line1 and inters.line2
+    should hit the final 'else: raise ValueError' branch used when neither type could be
+    determined."""
+    data, inters = _mismatched_pair_fixture()
+    with pytest.raises(
+        ValueError, match="need to supplied either lines of type 0 or 1"
+    ):
+        _crossover_pair_levelling(
+            data,
+            inters,
+            lines_to_level=["NOPE"],
+            data_col="value",
+            levelled_col="value_leveled",
+            line_column="line",
+            distance_column="dist_along_line",
+            degree=1,
+        )
+
+
+def test_crossover_pair_levelling_wrapper_crossover_error_col_fallback(monkeypatch):
+    """Regression coverage for the `except ValueError: current_crossover_error_col =
+    'crossover_error_0'` fallback in the public crossover_pair_levelling wrapper: if
+    `intersection_weight_col` happens to equal the sole crossover_error_* column name,
+    that column gets excluded from the max()-search list, so max() raises ValueError and
+    the code falls back to the literal name 'crossover_error_0' (which, in this contrived
+    case, is exactly the excluded column, so the subsequent lookup still succeeds)."""
+    filled, inters_valid = _leveling_ready(BIAS, method="groups")
+
+    def fake_private(data, inters, **_kwargs):
+        d = data.copy()
+        d["value_leveled"] = d["value"]
+        i = inters.copy()
+        i["crossover_error_0"] = 0.0
+        return d, i
+
+    monkeypatch.setattr(clv_mod, "_crossover_pair_levelling", fake_private)
+
+    data, inters = crossover_pair_levelling(
+        filled,
+        inters_valid,
+        lines_to_level=["F1", "F2"],
+        data_col="value",
+        levelled_col="value_leveled",
+        line_column="line",
+        distance_column="dist_along_line",
+        degree=1,
+        intersection_weight_col="crossover_error_0",
+        max_iterations=1,
+        plot_convergence=False,
+        progressbar=False,
+    )
+    assert "crossover_error_0" in inters.columns
+    assert not data["value_leveled"].isna().any()
+
+
 # --------------------------------------------------------------------------- #
 # crossover_network_levelling / _crossover_network_levelling
 # --------------------------------------------------------------------------- #
@@ -937,6 +1111,191 @@ def test_network_levelling_plot_dynamic_convergence_smoke_test(monkeypatch):
     )
 
 
+def test_crossover_network_levelling_trend_found_array_error_zeroes_correction(
+    monkeypatch,
+):
+    """When airbornegeo.trend raises a ValueError whose message contains 'Found array with'
+    (sklearn's empty-array error), the network levelling except (ValueError, UserWarning)
+    handler logs and falls back to a zero levelling_correction instead of propagating."""
+    filled, inters = _leveling_ready(BIAS, method="network")
+
+    def fake_trend(*_args, **_kwargs):
+        msg = "Found array with 0 sample(s) (shape=(0, 1)) while a minimum of 1 is required by LinearRegression."
+        raise ValueError(msg)
+
+    monkeypatch.setattr(clv_mod.airbornegeo, "trend", fake_trend)
+
+    data, _inters = _crossover_network_levelling(
+        filled,
+        inters,
+        data_col="value",
+        levelled_col="value_leveled",
+        line_column="line",
+        distance_column="dist_along_line",
+        degree=1,
+        lines_to_level=["F1"],
+        raise_error_if_unchanged=False,
+    )
+    f1 = data[data.line == "F1"]
+    assert f1.value_leveled.to_numpy() == pytest.approx(f1.value.to_numpy())
+
+
+def test_crossover_network_levelling_trend_other_valueerror_is_reraised(monkeypatch):
+    """A ValueError from airbornegeo.trend that isn't the 'Found array with' sklearn
+    message should be re-raised (wrapped in a new ValueError) rather than silently
+    swallowed, mirroring the same behaviour in the pair-levelling helper."""
+    filled, inters = _leveling_ready(BIAS, method="network")
+
+    def fake_trend(*_args, **_kwargs):
+        msg = "some unrelated failure"
+        raise ValueError(msg)
+
+    monkeypatch.setattr(clv_mod.airbornegeo, "trend", fake_trend)
+
+    # the source re-raises via `raise ValueError from e` with no message of its own
+    with pytest.raises(ValueError):  # noqa: PT011
+        _crossover_network_levelling(
+            filled,
+            inters,
+            data_col="value",
+            levelled_col="value_leveled",
+            line_column="line",
+            distance_column="dist_along_line",
+            degree=1,
+            lines_to_level=["F1"],
+            raise_error_if_unchanged=False,
+        )
+
+
+def _mismatched_network_fixture():
+    """Minimal hand-built data/inters for an F1/T1 crossing plus an unrelated, untouched
+    F2/T2 crossing, bypassing the real create_intersection_table/interpolate_intersections
+    pipeline. calculate_crossover_errors matches purely on (line, intersecting_line,
+    easting, northing) so it computes a valid crossover_error_0 for both pairs, but the
+    hand-set dist_along_line1/2 in `inters` for F1/T1 deliberately don't match the
+    distance_column value on F1's is_intersection row in `data`, so the np.isclose
+    distance-match inside the filter_type branch fails to find any match. The extra
+    F2/T2 crossing (left out of lines_to_level, so passed through unchanged) keeps at
+    least one non-NaN mistie in the mistie table, avoiding an all-NaN RMSE warning."""
+    data = pd.DataFrame(
+        {
+            "line": ["F1", "F1", "T1", "T1", "F2", "F2", "T2", "T2"],
+            "dist_along_line": [0.0, 50.0, 0.0, 30.0, 0.0, 50.0, 0.0, 30.0],
+            "value": [1.0, 2.0, 3.0, 4.0, 10.0, 20.0, 30.0, 40.0],
+            "easting": [10.0, 100.0, 200.0, 100.0, 20.0, 300.0, 400.0, 300.0],
+            "northing": [10.0, 100.0, 200.0, 100.0, 20.0, 300.0, 400.0, 300.0],
+            "is_intersection": [False, True, False, True, False, True, False, True],
+            "intersecting_line": [None, "T1", None, "F1", None, "T2", None, "F2"],
+        }
+    )
+    inters = pd.DataFrame(
+        {
+            "line1": ["F1", "F2"],
+            "line2": ["T1", "T2"],
+            "easting": [100.0, 300.0],
+            "northing": [100.0, 300.0],
+            "dist_along_line1": [999.0, 50.0],
+            "dist_along_line2": [999.0, 30.0],
+        }
+    )
+    return data, inters
+
+
+def test_crossover_network_levelling_filter_type_no_match_continues():
+    """When one of a line's intersection rows has a distance_column value that doesn't
+    np.isclose-match the dist_along_line1 stored in inters, the match lookup for that row
+    returns empty and the loop 'continue's (skipping the mistie assignment for that row)
+    without raising, while the line's other, correctly-matched crossing still gets a
+    mistie value so the branch completes normally rather than falling into the
+    zero-correction path."""
+    filled, inters = _leveling_ready(BIAS, method="network")
+    corrupt = inters.copy()
+    row_mask = (corrupt.line1 == "F1") & (corrupt.line2 == "T1")
+    corrupt.loc[row_mask, "dist_along_line1"] += 12345.0
+
+    result, _inters = _crossover_network_levelling(
+        filled,
+        corrupt,
+        data_col="value",
+        levelled_col="value_leveled",
+        line_column="line",
+        distance_column="dist_along_line",
+        filter_type="g300",
+        lines_to_level=["F1"],
+        raise_error_if_unchanged=False,
+    )
+    f1 = result[result.line == "F1"]
+    assert not f1.value_leveled.isna().any()
+
+
+def test_crossover_network_levelling_filter_type_matched_nan_mistie_zeroes_correction(
+    caplog,
+):
+    """When a data row's distance value correctly matches its intersection's
+    dist_along_line1/2, but the underlying data value at that crossing is NaN, the
+    resulting network_mistie is NaN too, so `match` is found (no 'continue') but the
+    single assigned mistie value is NaN. n_valid_misties then ends up 0, triggering the
+    warning + zero-fill fallback rather than interpolating/filtering."""
+    data, inters = _mismatched_network_fixture()
+    # correct the F1/T1 distances so the row matches (only the mistie value is NaN)
+    inters = inters.copy()
+    inters.loc[inters.line1 == "F1", "dist_along_line1"] = 50.0
+    inters.loc[inters.line1 == "F1", "dist_along_line2"] = 30.0
+    data = data.copy()
+    data.loc[(data.line == "F1") & (data.dist_along_line == 50.0), "value"] = np.nan
+
+    result, _inters = _crossover_network_levelling(
+        data,
+        inters,
+        data_col="value",
+        levelled_col="value_leveled",
+        line_column="line",
+        distance_column="dist_along_line",
+        filter_type="g300",
+        lines_to_level=["F1"],
+        raise_error_if_unchanged=False,
+    )
+    f1 = result[result.line == "F1"]
+    assert f1.value_leveled.to_numpy() == pytest.approx(
+        f1.value.to_numpy(), nan_ok=True
+    )
+    assert "no mistie values could be matched" in caplog.text
+
+
+def test_crossover_network_levelling_wrapper_crossover_error_col_fallback(monkeypatch):
+    """Regression coverage for the `except ValueError: current_crossover_error_col =
+    'crossover_error_0'` fallback in the public crossover_network_levelling wrapper: if
+    `intersection_weight_col` happens to equal the sole crossover_error_* column name,
+    that column gets excluded from the max()-search list, so max() raises ValueError and
+    the code falls back to the literal name 'crossover_error_0'."""
+    filled, inters = _leveling_ready(BIAS, method="network")
+
+    def fake_private(data, inters, **_kwargs):
+        d = data.copy()
+        d["value_leveled"] = d["value"]
+        i = inters.copy()
+        i["crossover_error_0"] = 0.0
+        return d, i
+
+    monkeypatch.setattr(clv_mod, "_crossover_network_levelling", fake_private)
+
+    data, inters = crossover_network_levelling(
+        filled,
+        inters,
+        data_col="value",
+        levelled_col="value_leveled",
+        line_column="line",
+        distance_column="dist_along_line",
+        degree=1,
+        intersection_weight_col="crossover_error_0",
+        max_iterations=1,
+        plot_convergence=False,
+        progressbar=False,
+    )
+    assert "crossover_error_0" in inters.columns
+    assert not data["value_leveled"].isna().any()
+
+
 # --------------------------------------------------------------------------- #
 # alternating_iterative_line_levelling
 # --------------------------------------------------------------------------- #
@@ -1028,6 +1387,41 @@ def test_alternating_iterative_line_levelling_no_degree_no_filter_type_raises():
             plot_convergence=False,
             progressbar=False,
         )
+
+
+def test_alternating_iterative_line_levelling_crossover_error_col_fallback(monkeypatch):
+    """Regression coverage for the `except ValueError: current_crossover_error_col =
+    'crossover_error_0'` fallback inside alternating_iterative_line_levelling: if the
+    inner crossover_pair_levelling calls return inters whose only crossover_error_*
+    column equals intersection_weight_col, that column is excluded from the max()-search
+    list, max() raises ValueError, and the loop falls back to the literal name
+    'crossover_error_0'."""
+    filled, inters_valid = _leveling_ready(BIAS, method="groups")
+
+    def fake_pair(data, inters, **_kwargs):
+        d = data.copy()
+        d["value_leveled"] = d["value"]
+        i = inters.copy()
+        i["crossover_error_0"] = 0.0
+        return d, i
+
+    monkeypatch.setattr(clv_mod, "crossover_pair_levelling", fake_pair)
+
+    data, inters = alternating_iterative_line_levelling(
+        filled,
+        inters_valid,
+        data_col="value",
+        levelled_col="value_leveled",
+        line_column="line",
+        distance_column="dist_along_line",
+        degree=1,
+        intersection_weight_col="crossover_error_0",
+        max_iterations=1,
+        plot_convergence=False,
+        progressbar=False,
+    )
+    assert "crossover_error_0" in inters.columns
+    assert not data["value_leveled"].isna().any()
 
 
 def test_alternating_iterative_line_levelling_lines_to_level_subset():
@@ -1208,6 +1602,136 @@ def test_data_1st_derive_weight_with_col_name():
     assert result["data_1st_derive"].to_numpy() == pytest.approx([2.0, 3.0, 4.0])
     assert result["data_1st_derive_weight"].to_numpy() == pytest.approx(
         [1.0, 0.5005, 0.001], abs=1e-3
+    )
+
+
+def test_max_dist_weight_weight_by_tie_normalizes_per_group():
+    """weight_by='tie' should normalize max_dist_weight within each 'tie' group rather than across all rows."""
+    gdf, inters = _weights_fixture()
+    result = calculate_intersection_weights(
+        gdf, inters, weight_by="tie", max_dist_weight=1.0
+    )
+    group_x = result[result.tie == "X"]
+    # tie 'X' has two distinct distances (10.0 and 5.0), so they end up at opposite
+    # ends of the range
+    assert sorted(group_x["max_dist_weight"].to_numpy()) == pytest.approx(
+        [0.001, 1.0], abs=1e-3
+    )
+    group_y = result[result.tie == "Y"]
+    # tie 'Y' has a single row, a degenerate normalize_values case that falls back to
+    # 'low' (1.0 for this intermediate column, reversed axis)
+    assert group_y["max_dist_weight"].to_numpy() == pytest.approx([1.0], abs=1e-3)
+
+
+def test_height_difference_weight_floor_clamps_before_normalizing_weight_by_line():
+    """height_difference_floor should clamp small differences before per-'line'-group normalization."""
+    gdf, inters = _weights_fixture()
+    result = calculate_intersection_weights(
+        gdf,
+        inters,
+        weight_by="line",
+        height_difference_weight=1.0,
+        height_difference_floor=15.0,
+    )
+    # raw height_difference [10, 20, 3] clamped to [15, 20, 15] before per-group
+    # normalization; group A (rows 0,1) has two distinct clamped values so they end up
+    # at opposite ends, group B (row 2) is a single-row degenerate case
+    group_a = result[result.line == "A"]
+    assert sorted(group_a["height_difference_weight"].to_numpy()) == pytest.approx(
+        [0.001, 1.0], abs=1e-3
+    )
+    group_b = result[result.line == "B"]
+    assert group_b["height_difference_weight"].to_numpy() == pytest.approx(
+        [1.0], abs=1e-3
+    )
+
+
+def test_interpolation_type_weight_weight_by_line():
+    """weight_by='line' should normalize interpolation_type_weight within each 'line' group."""
+    gdf, inters = _weights_fixture()
+    inters["line1_interpolation_type"] = ["interpolated", "extrapolated", "none"]
+    inters["line2_interpolation_type"] = ["extrapolated", "extrapolated", "none"]
+    result = calculate_intersection_weights(
+        gdf, inters, weight_by="line", interpolation_type_weight=1.0
+    )
+    group_a = result[result.line == "A"]
+    # group A extrapolation counts [1, 2] -> opposite ends of range within the group
+    assert sorted(group_a["interpolation_type_weight"].to_numpy()) == pytest.approx(
+        [0.001, 1.0], abs=1e-3
+    )
+    group_b = result[result.line == "B"]
+    assert group_b["interpolation_type_weight"].to_numpy() == pytest.approx(
+        [1.0], abs=1e-3
+    )
+
+
+def test_data_1st_derive_weight_floor_and_weight_by_line():
+    """data_1st_derive_floor should clamp small gradients before per-'line'-group normalization."""
+    gdf, inters = _weights_fixture()
+    gdf["grad"] = [1.0, -2.0, 3.0, -0.5, -4.0, 2.0]
+    result = calculate_intersection_weights(
+        gdf,
+        inters,
+        weight_by="line",
+        data_1st_derive_weight=1.0,
+        data_1st_derive_floor=2.5,
+        data_1st_derive_col_name="grad",
+    )
+    # raw data_1st_derive [2.0, 3.0, 4.0] clamped to [2.5, 3.0, 4.0]; group A (rows 0,1)
+    # has two distinct clamped values, group B (row 2) is single-row degenerate
+    group_a = result[result.line == "A"]
+    assert sorted(group_a["data_1st_derive_weight"].to_numpy()) == pytest.approx(
+        [0.001, 1.0], abs=1e-3
+    )
+    group_b = result[result.line == "B"]
+    assert group_b["data_1st_derive_weight"].to_numpy() == pytest.approx(
+        [1.0], abs=1e-3
+    )
+
+
+def test_height_1st_derive_weight_with_col_name_weight_by_all():
+    """height_1st_derive should be the max absolute height-gradient of the line/tie pair at each crossing, mirroring data_1st_derive_weight."""
+    gdf, inters = _weights_fixture()
+    gdf["height_grad"] = [1.0, -2.0, 3.0, -0.5, -4.0, 2.0]
+    result = calculate_intersection_weights(
+        gdf,
+        inters,
+        weight_by="all",
+        height_1st_derive_weight=1.0,
+        height_1st_derive_col_name="height_grad",
+    )
+    # (A,X): max(|1.0|,|-2.0|)=2.0, (A,Y): max(|3.0|,|-0.5|)=3.0, (B,X): max(|-4.0|,|2.0|)=4.0
+    assert result["height_1st_derive"].to_numpy() == pytest.approx([2.0, 3.0, 4.0])
+    assert result["height_1st_derive_weight"].to_numpy() == pytest.approx(
+        [1.0, 0.5005, 0.001], abs=1e-3
+    )
+    assert result["crossover_error_weight"].to_numpy() == pytest.approx(
+        [1.0, 0.5005, 0.001], abs=1e-3
+    )
+
+
+def test_height_1st_derive_weight_floor_and_weight_by_line():
+    """height_1st_derive_floor should clamp small gradients before per-'line'-group normalization, exercising the height_1st_derive_weight kwarg's 'else' (weight_by='line') branch."""
+    gdf, inters = _weights_fixture()
+    gdf["height_grad"] = [1.0, -2.0, 3.0, -0.5, -4.0, 2.0]
+    result = calculate_intersection_weights(
+        gdf,
+        inters,
+        weight_by="line",
+        height_1st_derive_weight=1.0,
+        height_1st_derive_floor=2.5,
+        height_1st_derive_col_name="height_grad",
+    )
+    # raw height_1st_derive [2.0, 3.0, 4.0] clamped to [2.5, 3.0, 4.0]; group A (rows
+    # 0,1) has two distinct clamped values so they land at opposite ends, group B (row
+    # 2) is a single-row degenerate case
+    group_a = result[result.line == "A"]
+    assert sorted(group_a["height_1st_derive_weight"].to_numpy()) == pytest.approx(
+        [0.001, 1.0], abs=1e-3
+    )
+    group_b = result[result.line == "B"]
+    assert group_b["height_1st_derive_weight"].to_numpy() == pytest.approx(
+        [1.0], abs=1e-3
     )
 
 

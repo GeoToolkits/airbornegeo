@@ -1,16 +1,20 @@
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pytest
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
 
+from airbornegeo import crossovers as cx_module
 from airbornegeo.crossovers import (
     add_intersections,
+    add_values_to_intersections,
     calculate_crossover_errors,
     create_intersection_table,
     extend_line,
     get_line_intersections,
     interpolate_intersections,
     lines_without_intersections,
+    update_intersections_with_eq_sources,
 )
 
 CRS = "EPSG:3431"
@@ -44,6 +48,13 @@ def test_extend_line_extends_both_ends_by_distance():
     assert coords[0] == pytest.approx((-5, 0))
     assert coords[-1] == pytest.approx((15, 0))
     assert coords[1:-1] == [(0.0, 0.0), (10.0, 0.0)]
+
+
+def test_extend_line_returns_unchanged_for_degenerate_line():
+    """A line collapsing to fewer than 2 unique points after removing consecutive duplicates should be returned unchanged."""
+    line = LineString([(5, 5), (5, 5)])
+    result = extend_line(line, distance=10)
+    assert result is line
 
 
 def test_extend_line_removes_consecutive_duplicate_points():
@@ -89,6 +100,23 @@ def test_get_line_intersections_buffer_dist_finds_extended_crossing():
     data = pd.concat([line_a, line_b], ignore_index=True)
 
     result = get_line_intersections(data, line_column="line", buffer_dist=20)
+    assert len(result) == 1
+    assert result.iloc[0].is_buffered
+
+
+def test_get_line_intersections_builds_geometry_from_plain_dataframes_and_buffers_second_group():
+    """Plain DataFrames (no geometry column) supplied for both lines1_gdf and lines2_gdf
+    should have geometry built from their easting/northing columns, and buffer_dist
+    should extend the ends of both groups' lines (not just the first)."""
+    line_a = pd.DataFrame(
+        {"easting": [0, 20, 40], "northing": [50, 50, 50], "line": ["A"] * 3}
+    )
+    line_b = pd.DataFrame(
+        {"easting": [50, 50, 50], "northing": [0, 20, 40], "line": ["B"] * 3}
+    )
+    result = get_line_intersections(
+        line_a, line_b, line_column="line", buffer_dist=20, progressbar=False
+    )
     assert len(result) == 1
     assert result.iloc[0].is_buffered
 
@@ -160,9 +188,59 @@ def test_create_intersection_table_exclude_ints_removes_specified_pairs():
     assert "B" not in pair_excluded[["line1", "line2"]].to_numpy()
 
     line_excluded = create_intersection_table(
-        data, line_column="line", method="network", exclude_ints=[["A"]]
+        data, line_column="line", method="network", exclude_ints=["A"]
     )
     assert len(line_excluded) == 0
+
+
+def test_create_intersection_table_drops_preexisting_is_intersection_rows():
+    """Rows already flagged is_intersection (e.g. left over from a prior
+    add_intersections call) should be dropped before recomputing intersections, so
+    running the function again on already-processed data doesn't accumulate
+    duplicates or feed synthetic rows back into the calculation."""
+    data = _crossing_lines_gdf()
+    data["is_intersection"] = False
+    result1 = create_intersection_table(data, line_column="line", method="network")
+    assert len(result1) == 1
+
+    # simulate data that has already had intersection rows added
+    fake_intersection_row = data.iloc[[0]].copy()
+    fake_intersection_row["is_intersection"] = True
+    data_with_inter_rows = pd.concat([data, fake_intersection_row], ignore_index=True)
+
+    result2 = create_intersection_table(
+        data_with_inter_rows, line_column="line", method="network"
+    )
+    assert len(result2) == 1
+
+
+def test_create_intersection_table_block_size_drops_near_duplicates(monkeypatch):
+    """Intersections between the same line pair within block_size of each other should
+    be deduplicated (keeping the lowest max_dist one), and a debug log should report
+    how many were dropped."""
+    fake_inters = gpd.GeoDataFrame(
+        {
+            "line1": ["A", "A", "A"],
+            "line2": ["B", "B", "B"],
+            "line1_dist": [1.0, 2.0, 1.0],
+            "line2_dist": [1.0, 2.0, 1.0],
+            "is_buffered": [False, False, False],
+            "geometry": [Point(0, 0), Point(0.5, 0), Point(100, 100)],
+        },
+        geometry="geometry",
+        crs=CRS,
+    )
+    monkeypatch.setattr(
+        cx_module, "get_line_intersections", lambda **_kwargs: fake_inters
+    )
+
+    data = _crossing_lines_gdf()
+    result = create_intersection_table(
+        data, line_column="line", method="network", block_size=5
+    )
+    # the two near-duplicate points (0,0) and (0.5,0) collapse into one, the far
+    # point at (100, 100) is kept separately
+    assert len(result) == 2
 
 
 # ---------------------------------------------------------------------------
@@ -201,6 +279,62 @@ def test_add_intersections_adds_two_rows_with_correct_distance():
     assert added.dist_along_line.to_numpy() == pytest.approx([50, 50], abs=1)
     assert new_inters.loc[0, "dist_along_line1"] == pytest.approx(50, abs=1)
     assert new_inters.loc[0, "dist_along_line2"] == pytest.approx(50, abs=1)
+
+
+def test_add_intersections_called_twice_does_not_duplicate():
+    """Calling add_intersections again on data that already has intersection rows
+    should drop the existing intersection rows first and replace them, rather than
+    accumulating duplicates."""
+    line_a = _line_points(
+        "A",
+        [0, 20, 40, 60, 80, 100],
+        [50] * 6,
+        dist_along_line=[0, 20, 40, 60, 80, 100],
+    )
+    line_b = _line_points(
+        "B",
+        [50] * 6,
+        [0, 20, 40, 60, 80, 100],
+        dist_along_line=[0, 20, 40, 60, 80, 100],
+    )
+    data = pd.concat([line_a, line_b], ignore_index=True)
+    inters = create_intersection_table(data, line_column="line", method="network")
+
+    data1, inters1 = add_intersections(
+        data, inters, line_column="line", distance_column="dist_along_line"
+    )
+    assert len(data1) == len(data) + 2
+
+    data2, _inters2 = add_intersections(
+        data1, inters1, line_column="line", distance_column="dist_along_line"
+    )
+    assert len(data2) == len(data) + 2
+    assert data2.is_intersection.sum() == 2
+
+
+# ---------------------------------------------------------------------------
+# add_values_to_intersections
+# ---------------------------------------------------------------------------
+
+
+def test_add_values_to_intersections_looks_up_values_from_each_side():
+    """add_values_to_intersections should look up each line's value at the
+    intersection from the survey dataframe using the intersecting_line match, and
+    write both sides' values back onto the intersection table."""
+    df = pd.DataFrame(
+        {
+            "line": ["A", "B"],
+            "intersecting_line": ["B", "A"],
+            "mag": [12.0, 10.0],
+        }
+    )
+    inters = pd.DataFrame({"line1": ["A"], "line2": ["B"]})
+
+    result = add_values_to_intersections(
+        df, inters, line_column="line", columns=("mag",)
+    )
+    assert result.loc[0, "line1_mag"] == 12.0
+    assert result.loc[0, "line2_mag"] == 10.0
 
 
 # ---------------------------------------------------------------------------
@@ -267,6 +401,68 @@ def test_interpolate_intersections_handles_repeated_line_pair_crossings():
     assert len(set(dist2)) == 2
 
 
+def test_interpolate_intersections_window_width_uses_windowed_interpolation():
+    """Passing window_width should route through
+    interpolate_missing_pointwise_with_windows instead of interpolate_missing_pointwise."""
+    data = _crossing_lines_gdf()
+    data["dist_along_line"] = data.groupby("line")["easting"].transform(
+        lambda s: s - s.min()
+    ) + data.groupby("line")["northing"].transform(lambda s: s - s.min())
+    data["value"] = data["easting"] + data["northing"]
+
+    inters = create_intersection_table(data, line_column="line", method="network")
+    filled, inters_valid = interpolate_intersections(
+        data,
+        inters,
+        line_column="line",
+        to_interp="value",
+        interp_on="dist_along_line",
+        method="linear",
+        window_width=50,
+    )
+    assert len(inters_valid) == 1
+    intersection_rows = filled[filled.is_intersection]
+    assert len(intersection_rows) == 2
+    assert not intersection_rows.value.isna().any()
+
+
+def test_interpolate_intersections_drops_rows_with_failed_interpolation(monkeypatch):
+    """If a value can't be interpolated at an intersection (interpolation_type stays
+    'none'), the intersection should be excluded from the returned intersections table
+    and its intersection rows removed from the returned dataframe."""
+
+    def fake_interpolate(df, *, to_interp, interp_on, groupby_column, **kwargs):  # noqa: ARG001
+        df = df.copy()
+        df[f"{to_interp}_interpolation_type"] = np.where(
+            df["is_intersection"], "none", "interpolated"
+        )
+        return df
+
+    monkeypatch.setattr(
+        cx_module.airbornegeo.interpolating,
+        "interpolate_missing_pointwise",
+        fake_interpolate,
+    )
+
+    data = _crossing_lines_gdf()
+    data["dist_along_line"] = data.groupby("line")["easting"].transform(
+        lambda s: s - s.min()
+    ) + data.groupby("line")["northing"].transform(lambda s: s - s.min())
+    data["value"] = data["easting"] + data["northing"]
+
+    inters = create_intersection_table(data, line_column="line", method="network")
+    filled, inters_valid = interpolate_intersections(
+        data,
+        inters,
+        line_column="line",
+        to_interp="value",
+        interp_on="dist_along_line",
+        method="linear",
+    )
+    assert len(inters_valid) == 0
+    assert filled[filled.is_intersection].empty
+
+
 # ---------------------------------------------------------------------------
 # calculate_crossover_errors
 # ---------------------------------------------------------------------------
@@ -331,6 +527,19 @@ def test_calculate_crossover_errors_skips_unchanged_recompute():
     assert list(second.columns) == list(first.columns)
 
 
+def test_calculate_crossover_errors_ignores_non_numeric_suffix_column():
+    """A pre-existing column matching the 'crossover_error_' prefix but with a
+    non-numeric suffix (e.g. manually added) should be ignored when determining the
+    next column name, rather than raising or being treated as a numbered mistie
+    column."""
+    df, inters = _single_crossing_frames(12.0, 10.0)
+    inters["crossover_error_manual"] = [5.0]
+    result = calculate_crossover_errors(df, inters, data_col="mag", line_column="line")
+    assert "crossover_error_0" in result.columns
+    assert result["crossover_error_0"].to_numpy() == pytest.approx([2.0])
+    assert result["crossover_error_manual"].to_numpy() == pytest.approx([5.0])
+
+
 def test_calculate_crossover_errors_raises_if_unchanged_when_requested():
     """raise_error_if_unchanged=True should raise UserWarning when misties match the previous run."""
     df, inters = _single_crossing_frames(12.0, 10.0)
@@ -352,3 +561,45 @@ def test_lines_without_intersections_returns_unmatched_lines():
     intersections = pd.DataFrame({"line1": ["A"], "line2": ["B"]})
     result = lines_without_intersections(data, intersections, line_column="line")
     assert sorted(result) == ["C", "D"]
+
+
+# ---------------------------------------------------------------------------
+# update_intersections_with_eq_sources
+# ---------------------------------------------------------------------------
+
+
+class _FakeEquivalentSource:
+    """Stand-in for a fitted harmonica.EquivalentSources: just returns a fixed value."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def predict(self, coords):  # noqa: ARG002
+        return np.array([self.value])
+
+
+def test_update_intersections_with_eq_sources_writes_predicted_values():
+    """Each intersection row's field value should be replaced by the fitted
+    equivalent source's prediction for that line, evaluated at the intersection
+    location and the higher of the two crossing lines' elevations."""
+    data = pd.DataFrame(
+        {
+            "line": ["A", "B"],
+            "intersecting_line": ["B", "A"],
+            "is_intersection": [True, True],
+            "dist_along_line": [10.0, 20.0],
+            "height": [100.0, 120.0],
+            "mag": [np.nan, np.nan],
+        }
+    )
+    fitted = {"A": _FakeEquivalentSource(1.0), "B": _FakeEquivalentSource(2.0)}
+
+    result = update_intersections_with_eq_sources(
+        data,
+        fitted_equivalent_sources=fitted,
+        data_column="mag",
+        line_column="line",
+        distance_column="dist_along_line",
+        progressbar=False,
+    )
+    assert result.to_numpy() == pytest.approx([1.0, 2.0])
