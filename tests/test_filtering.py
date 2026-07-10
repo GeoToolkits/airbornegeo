@@ -1,4 +1,7 @@
+import builtins
+import importlib
 import re
+import sys
 
 import numpy as np
 import pandas as pd
@@ -6,6 +9,7 @@ import pygmt
 import pytest
 import xarray as xr
 
+import airbornegeo.filtering as filtering_module
 from airbornegeo.filtering import _nearest_grid_fill, filter_grid, filter_line, pad1d
 
 
@@ -296,6 +300,27 @@ def test_nearest_grid_fill_rioxarray_method_unavailable(monkeypatch):
         ),
     ):
         _nearest_grid_fill(grid, method="rioxarray")
+
+
+def test_module_sets_has_rioxarray_false_when_import_fails(monkeypatch):
+    """If importing rioxarray fails, the module should set _HAS_RIOXARRAY=False instead of raising."""
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "rioxarray":
+            msg = "simulated missing rioxarray"
+            raise ImportError(msg)
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    monkeypatch.delitem(sys.modules, "rioxarray", raising=False)
+
+    try:
+        importlib.reload(filtering_module)
+        assert filtering_module._HAS_RIOXARRAY is False
+    finally:
+        monkeypatch.setattr(builtins, "__import__", real_import)
+        importlib.reload(filtering_module)
 
 
 def test_nearest_grid_fill_rioxarray_method_success():
