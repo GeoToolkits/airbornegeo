@@ -124,6 +124,7 @@ def get_line_intersections(
     line_column: str,
     grid_size: float = 1,
     buffer_dist: float | None = None,
+    progressbar: bool = True,
 ) -> gpd.GeoDataFrame:
     """
     Find intersections between flight lines.
@@ -166,6 +167,8 @@ def get_line_intersections(
     buffer_dist : float | None, optional
         Distance to extend the ends of each line before calculating
         intersections.
+    progressbar : bool, optional
+        Show a progress bar while calculating intersections, by default True.
 
     Returns
     -------
@@ -267,7 +270,9 @@ def get_line_intersections(
 
     # calculate intersections
     intersections = []
-    for line1, line2 in tqdm(iterator, total=total, desc="Line pairs"):
+    for line1, line2 in (
+        tqdm(iterator, total=total, desc="Line pairs") if progressbar else iterator
+    ):
         line1_name = getattr(line1, line_column)
         line2_name = getattr(line2, line_column)
         inter = shapely.intersection(
@@ -275,7 +280,6 @@ def get_line_intersections(
             line2.geometry,
             grid_size=grid_size,
         )
-
         if inter.geom_type == "Point":
             points = [inter]
         elif inter.geom_type == "MultiPoint":
@@ -371,6 +375,7 @@ def create_intersection_table(
     buffer_dist: float | None = None,
     block_size: float | None = None,
     grid_size: float = 1,
+    progressbar: bool = True,
 ) -> gpd.GeoDataFrame:
     """
     Create a dataframe which contains the intersections between all combinations of
@@ -431,6 +436,8 @@ def create_intersection_table(
         min_dist. This is useful for when lines cross very often.
     grid_size : float, optional
         The resolution to snap the intersection coordinates to.  by default 1
+    progressbar : bool, optional
+        Show a progress bar while calculating intersections, by default True.
 
     Returns
     -------
@@ -468,14 +475,7 @@ def create_intersection_table(
                 line_column=line_column,
                 grid_size=grid_size,
                 buffer_dist=buffer_dist,
-    if method == "groups":
-        # get intersection points just between two line types
-        inters = get_line_intersections(
-            lines1_gdf=data[data.line_type == 0],
-            lines2_gdf=data[data.line_type == 1],
-            line_column=line_column,
-            grid_size=grid_size,
-            buffer_dist=buffer_dist,
+                progressbar=progressbar,
             )
         elif method == "network":
             # get intersection points of all lines
@@ -485,27 +485,7 @@ def create_intersection_table(
                 line_column=line_column,
                 grid_size=grid_size,
                 buffer_dist=buffer_dist,
-    if method == "groups":
-        # get intersection points just between two line types
-        inters = get_line_intersections(
-            lines1_gdf=data[data.line_type == 0],
-            lines2_gdf=data[data.line_type == 1],
-            line_column=line_column,
-            grid_size=grid_size,
-            buffer_dist=buffer_dist,
-        )
-    elif method == "network":
-        # get intersection points of all lines
-        inters = get_line_intersections(
-            lines1_gdf=data,
-            lines2_gdf=None,
-            line_column=line_column,
-            grid_size=grid_size,
-            buffer_dist=buffer_dist,
-        )
-    else:
-        msg = "method must be either 'groups' or 'network'"
-        raise ValueError(msg)
+                progressbar=progressbar,
             )
         else:
             msg = "method must be either 'groups' or 'network'"
@@ -707,6 +687,7 @@ def interpolate_intersections(
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
     window_width: float | None = None,
+    progressbar: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     _summary_
@@ -729,6 +710,8 @@ def interpolate_intersections(
         "cubic"
     window_width : float, optional
         window width around each NaN to use for interpolation fitting, by default None
+    progressbar : bool, optional
+        Show progress bars for the underlying steps, by default True.
 
     Returns
     -------
@@ -757,7 +740,11 @@ def interpolate_intersections(
 
     # add empty rows at each intersection to the df
     df, inters = add_intersections(
-        df, inters, line_column=line_column, distance_column=interp_on
+        df,
+        inters,
+        line_column=line_column,
+        distance_column=interp_on,
+        progressbar=progressbar,
     )
 
     # perform interpolation
@@ -770,6 +757,7 @@ def interpolate_intersections(
             extrapolate=extrapolate,
             fill_value=fill_value,
             groupby_column=line_column,
+            progressbar=progressbar,
         )
     else:
         filled_lines = (
@@ -782,6 +770,7 @@ def interpolate_intersections(
                 extrapolate=extrapolate,
                 fill_value=fill_value,
                 groupby_column=line_column,
+                progressbar=progressbar,
             )
         )
 
@@ -862,6 +851,7 @@ def add_intersections(
     intersections: pd.DataFrame,
     line_column: str,
     distance_column: str,
+    progressbar: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Add new rows to the dataframe for each intersection point and columns
@@ -885,6 +875,8 @@ def add_intersections(
         Column name containing the line / flight / segment names
     distance_column : str
         Column name containing the distance along the lines
+    progressbar : bool, optional
+        Show a progress bar while collecting intersections, by default True.
 
     Returns
     -------
@@ -925,10 +917,11 @@ def add_intersections(
     # Track calculated distances map structured as: (intersection_idx, line_name) -> calculated_distance
     distance_lookup = {}
 
-    pbar = tqdm(
-        enumerate(inters.itertuples(index=False)),
-        desc="Collecting intersections",
-        total=len(inters),
+    pairs = enumerate(inters.itertuples(index=False))
+    pbar = (
+        tqdm(pairs, desc="Collecting intersections", total=len(inters))
+        if progressbar
+        else pairs
     )
 
     for inter_idx, row in pbar:
@@ -1222,6 +1215,7 @@ def update_intersections_with_eq_sources(
     data_column: str,
     line_column: str,
     distance_column: str,
+    progressbar: bool = True,
 ) -> pd.Series:
     """
     At each theoretical intersection point, replace the interpolated field value with a
@@ -1245,6 +1239,8 @@ def update_intersections_with_eq_sources(
         name of the column containing the field values to update at the intersection
         points, this should be the same as the column that use used as 'data_column'
         when fitting the equivalent sources for each line with `eq_sources_1d`.
+    progressbar : bool, optional
+        Show a progress bar over equivalent source segments, by default True.
 
     Returns
     -------
@@ -1260,9 +1256,11 @@ def update_intersections_with_eq_sources(
     cols = [line_column]
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
-    for segment_name, segment_data in tqdm(
-        data.groupby(line_column), desc="Equivalent source segments"
-    ):
+    segments = data.groupby(line_column)
+    segments = (
+        tqdm(segments, desc="Equivalent source segments") if progressbar else segments
+    )
+    for segment_name, segment_data in segments:
         # get fitted equivalent sources for this line
         eqs = fitted_equivalent_sources[segment_name]
 
