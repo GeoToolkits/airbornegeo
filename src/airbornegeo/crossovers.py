@@ -15,6 +15,7 @@ from tqdm.autonotebook import tqdm
 
 import airbornegeo
 from airbornegeo import logger
+from airbornegeo.utils import _check_coord_columns
 
 sns.set_theme()
 
@@ -117,8 +118,8 @@ def extend_line(
 
 
 def get_line_intersections(
-    lines1_gdf: gpd.GeoDataFrame,
-    lines2_gdf: gpd.GeoDataFrame | None = None,
+    lines1_gdf: pd.DataFrame | gpd.GeoDataFrame,
+    lines2_gdf: pd.DataFrame | gpd.GeoDataFrame | None = None,
     *,
     line_column: str,
     grid_size: float = 1,
@@ -152,9 +153,11 @@ def get_line_intersections(
 
     Parameters
     ----------
-    lines1_gdf : GeoDataFrame
-        First set of flight lines as point observations.
-    lines2_gdf : GeoDataFrame | None, optional
+    lines1_gdf : pd.DataFrame | GeoDataFrame
+        First set of flight lines as point observations, with columns 'easting' and
+        'northing'. If it doesn't already have a 'geometry' column, one is created from
+        these coordinates.
+    lines2_gdf : pd.DataFrame | GeoDataFrame | None, optional
         Second set of flight lines. If None, all unique line pairs are used.
     line_column : str
         Column containing the line identifiers.
@@ -179,10 +182,25 @@ def get_line_intersections(
 
     network = lines2_gdf is None
 
+    if "geometry" not in lines1_gdf.columns:
+        _check_coord_columns(lines1_gdf)
+        lines1_gdf = gpd.GeoDataFrame(
+            lines1_gdf,
+            geometry=gpd.points_from_xy(lines1_gdf.easting, lines1_gdf.northing),
+            crs=getattr(lines1_gdf, "crs", None),
+        )
+
     if network:
         lines2_gdf = lines1_gdf
     else:
         assert line_column in lines2_gdf.columns
+        if "geometry" not in lines2_gdf.columns:
+            _check_coord_columns(lines2_gdf)
+            lines2_gdf = gpd.GeoDataFrame(
+                lines2_gdf,
+                geometry=gpd.points_from_xy(lines2_gdf.easting, lines2_gdf.northing),
+                crs=getattr(lines2_gdf, "crs", None),
+            )
 
     # convert points to LineStrings
     grouped1 = lines1_gdf.groupby(line_column, as_index=False)["geometry"].apply(
@@ -317,7 +335,7 @@ def get_line_intersections(
 
 
 def create_intersection_table(
-    data: gpd.GeoDataFrame,
+    data: pd.DataFrame | gpd.GeoDataFrame,
     *,
     line_column: str,
     method: str,
@@ -358,8 +376,9 @@ def create_intersection_table(
 
     Parameters
     ----------
-    data : gpd.GeoDataFrame
-        Dataframe with survey data.
+    data : pd.DataFrame | gpd.GeoDataFrame
+        Dataframe with survey data, with columns 'easting' and 'northing' (or an
+        existing 'geometry' column of points).
     line_column : str
         Column name containing the line / flight / segment names
     method : str
@@ -400,9 +419,6 @@ def create_intersection_table(
         cols.append("line_type")
 
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
-
-    assert isinstance(data, gpd.GeoDataFrame), "data must be a GeoDataFrame"
-    assert data.geometry.geom_type.isin(["Point"]).all(), "geometry must be points"
 
     # if is_intersection column exists, delete it and rows where it's true
     if "is_intersection" in data.columns:
@@ -551,7 +567,7 @@ def create_intersection_table(
 
 
 def inspect_intersections(
-    data: pd.DataFrame | gpd.GeoDataFrame,
+    data: pd.DataFrame,
     *,
     x: str,
     plot_variable: str | list[str],
@@ -582,12 +598,12 @@ def inspect_intersections(
 
 
 def add_values_to_intersections(
-    df: pd.DataFrame | gpd.GeoDataFrame,
-    intersections: pd.DataFrame | gpd.GeoDataFrame,
+    df: pd.DataFrame,
+    intersections: pd.DataFrame,
     *,
     line_column: str,
     columns: tuple[str],
-) -> pd.DataFrame | gpd.GeoDataFrame:
+) -> pd.DataFrame:
     df = df.copy()
     inters = intersections.copy()
 
@@ -612,8 +628,8 @@ def add_values_to_intersections(
 
 
 def interpolate_intersections(
-    df: pd.DataFrame | gpd.GeoDataFrame,
-    intersections: pd.DataFrame | gpd.GeoDataFrame,
+    df: pd.DataFrame,
+    intersections: pd.DataFrame,
     *,
     line_column: str,
     to_interp: str,
@@ -622,15 +638,15 @@ def interpolate_intersections(
     extrapolate: bool = False,
     fill_value: tuple[float, float] | str | None = None,
     window_width: float | None = None,
-) -> tuple[pd.DataFrame | gpd.GeoDataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     _summary_
 
     Parameters
     ----------
-    df : pd.DataFrame | gpd.GeoDataFrame
+    df : pd.DataFrame
         Dataframe containing the data to interpolate
-    intersections : pd.DataFrame | gpd.GeoDataFrame
+    intersections : pd.DataFrame
         Dataframe containing the intersection points
     line_column : str
         Column name containing the line / flight / segment names
@@ -647,14 +663,14 @@ def interpolate_intersections(
 
     Returns
     -------
-    pd.DataFrame | gpd.GeoDataFrame:
+    pd.DataFrame:
         the dataframe with new columns 'is_intersection' for booleans,
         'intersecting_line' containing the name of the intersection line rows which are
         intersections, '<to_interp>_interpolation_type' with string 'interpolated' or
         'extrapolated' describing what interpolation type was used for each row, and
         column specified with to_interp updated with interpolated values at the
         intersection rows.
-    pd.DataFrame | gpd.GeoDataFrame:
+    pd.DataFrame:
         the intersection dataframe with new columns 'dist_along_flight_line',
         'dist_along_flight_tie', 'line1_interpolation_type', 'line2_interpolation_type'.
         Rows where the interpolation failed will be removed.
@@ -773,11 +789,11 @@ def interpolate_intersections(
 
 
 def add_intersections(
-    data: gpd.GeoDataFrame,
-    intersections: gpd.GeoDataFrame,
+    data: pd.DataFrame,
+    intersections: pd.DataFrame,
     line_column: str,
     distance_column: str,
-) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Add new rows to the dataframe for each intersection point and columns
     `is_intersection` and `intersection_line` to identify these intersections. All of
@@ -786,15 +802,15 @@ def add_intersections(
     distance along each line (flight and tie) to the intersection point. During
     levelling, levelling corrections are calculated using mistie values at intersections
     and interpolated along the entire lines based on these distances. Distances are
-    calculate using the geometry column, and the time column informs which end of the
-    line is the start.
+    calculated using the easting/northing columns, and the time column informs which end
+    of the line is the start.
 
     Parameters
     ----------
-    data : gpd.GeoDataFrame
+    data : pd.DataFrame
         Flight survey dataframe containing the data points to add intersections to.
-        Must contain a geometry column and columns 'line' and `time_col_name`
-    intersections : gpd.GeoDataFrame
+        Must contain columns 'easting', 'northing', 'line' and `time_col_name`
+    intersections : pd.DataFrame
         Intersections table created by `create_intersection_table()`
     line_column : str
         Column name containing the line / flight / segment names
@@ -803,14 +819,15 @@ def add_intersections(
 
     Returns
     -------
-    tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]
+    tuple[pd.DataFrame, pd.DataFrame]
         The updated flight survey dataframe and intersections table.
     """
     data = data.copy()
     inters = intersections.copy().reset_index(drop=True)
 
-    cols = [line_column, distance_column, "geometry"]
+    cols = [line_column, distance_column]
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
+    _check_coord_columns(data)
 
     # remove existing is_intersection column and intersection rows
     if "is_intersection" in data.columns:
@@ -830,7 +847,7 @@ def add_intersections(
     # pre-group and get numpy arrays for each line
     line_groups = {}
     for line, df in data.groupby(line_column):
-        coords = np.column_stack([df.geometry.x.to_numpy(), df.geometry.y.to_numpy()])
+        coords = np.column_stack([df.easting.to_numpy(), df.northing.to_numpy()])
         dist_along_line = df[distance_column].to_numpy()
         line_groups[line] = (coords, dist_along_line)
 
@@ -846,7 +863,7 @@ def add_intersections(
     )
 
     for inter_idx, row in pbar:
-        px, py = row.geometry.x, row.geometry.y
+        px, py = row.easting, row.northing
 
         for line, other in [(row.line1, row.line2), (row.line2, row.line1)]:
             # get coords and along line distances of the line
@@ -876,7 +893,6 @@ def add_intersections(
                     line_column: line,
                     "easting": px,
                     "northing": py,
-                    "geometry": row.geometry,
                     "is_intersection": True,
                     "intersecting_line": other,
                     distance_column: calculated_dist,
@@ -884,7 +900,7 @@ def add_intersections(
             )
 
     # add new intersection rows to dataframe
-    new_df = gpd.GeoDataFrame(new_rows, crs=data.crs)
+    new_df = pd.DataFrame(new_rows)
     data = pd.concat([data, new_df], ignore_index=True)
     data = data.sort_values([line_column, distance_column]).reset_index(drop=True)
 
@@ -903,13 +919,13 @@ def add_intersections(
 
 
 def calculate_crossover_errors(
-    data: gpd.GeoDataFrame,
-    intersections: gpd.GeoDataFrame,
+    data: pd.DataFrame,
+    intersections: pd.DataFrame,
     *,
     data_col: str,
     line_column: str,
     raise_error_if_unchanged: bool = False,
-) -> gpd.GeoDataFrame:
+) -> pd.DataFrame:
     """
     Calculate mistie values for all intersections. For each intersection, find the data
     values for the line and tie from the survey dataframe and add those values to the
@@ -922,10 +938,10 @@ def calculate_crossover_errors(
 
     Parameters
     ----------
-    intersections : gpd.GeoDataFrame
+    intersections : pd.DataFrame
         Intersections table created by `create_intersection_table()`, then supplied to
         `add_intersections()`.
-    data : gpd.GeoDataFrame
+    data : pd.DataFrame
         Survey dataframe with intersection rows added by `add_intersections()` and
         interpolated with `interpolate_intersections()`.
     data_col : str
@@ -938,7 +954,7 @@ def calculate_crossover_errors(
 
     Returns
     -------
-    gpd.GeoDataFrame
+    pd.DataFrame
         An intersections table with new columns `line_value`, `tie_value` and `crossover_error_x`
         where x is incremented each time a new mistie is calculated.
     """
@@ -1008,7 +1024,7 @@ def calculate_crossover_errors(
 
 
 def plot_line_and_crosses(
-    df: pd.DataFrame | gpd.GeoDataFrame,
+    df: pd.DataFrame,
     *,
     y: list[str],
     line_column: str,
@@ -1131,7 +1147,7 @@ def lines_without_intersections(
 
 
 def update_intersections_with_eq_sources(
-    data: pd.DataFrame | gpd.GeoDataFrame,
+    data: pd.DataFrame,
     *,
     fitted_equivalent_sources: dict,
     data_column: str,
@@ -1147,7 +1163,7 @@ def update_intersections_with_eq_sources(
 
     Parameters
     ----------
-    data : pd.DataFrame | gpd.GeoDataFrame
+    data : pd.DataFrame
         dataframe containing the data to update
     fitted_equivalent_sources : dict
         a dictionary with keys of line names and values of fitted equivalent sources for

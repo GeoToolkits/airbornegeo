@@ -1,6 +1,5 @@
 import typing
 
-import geopandas as gpd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -339,7 +338,7 @@ def plot_levelling_convergence(
 
 
 def inspect_lines(
-    df: pd.DataFrame | gpd.GeoDataFrame,
+    df: pd.DataFrame,
     *,
     plot_variable: str | list[str],
     interp_on: str,

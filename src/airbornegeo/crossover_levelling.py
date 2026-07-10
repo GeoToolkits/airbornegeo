@@ -1,5 +1,4 @@
-import geopandas as gpd  # pylint: disable=too-many-lines
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # pylint: disable=too-many-lines
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -12,8 +11,8 @@ sns.set_theme()
 
 
 def crossover_network_levelling(
-    data: gpd.GeoDataFrame | pd.DataFrame,
-    inters: gpd.GeoDataFrame | pd.DataFrame,
+    data: pd.DataFrame,
+    inters: pd.DataFrame,
     *,
     data_col: str,
     levelled_col: str,
@@ -33,7 +32,7 @@ def crossover_network_levelling(
     plot_convergence: bool = True,
     plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
-) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Level a network of lines by fitting a trend (or low-pass filter) to the cross-over
     errors at every intersection each line participates in, whether it appears as
@@ -53,10 +52,10 @@ def crossover_network_levelling(
 
     Parameters
     ----------
-    data : gpd.GeoDataFrame | pd.DataFrame
+    data : pd.DataFrame
         Survey dataframe with intersection rows added by `add_intersections()` and
         interpolated with `interpolate_intersections()`.
-    inters : gpd.GeoDataFrame | pd.DataFrame
+    inters : pd.DataFrame
         Intersection table created with `create_intersection_table(..., method='network')`.
     data_col : str
         Column containing the values to level.
@@ -100,7 +99,7 @@ def crossover_network_levelling(
 
     Returns
     -------
-    tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]
+    tuple[pd.DataFrame, pd.DataFrame]
         The levelled dataframe and updated intersections table.
     """
     data = data.copy()
@@ -207,7 +206,7 @@ def crossover_network_levelling(
 
 
 def _line_network_crossover_errors(
-    inters: pd.DataFrame | gpd.GeoDataFrame,
+    inters: pd.DataFrame,
     line: float,
     crossover_error_col: str,
     intersection_weight_col: str | None = None,
@@ -239,8 +238,8 @@ def _line_network_crossover_errors(
 
 
 def _crossover_network_levelling(
-    data: gpd.GeoDataFrame | pd.DataFrame,
-    inters: gpd.GeoDataFrame | pd.DataFrame,
+    data: pd.DataFrame,
+    inters: pd.DataFrame,
     *,
     data_col: str,
     levelled_col: str,
@@ -253,7 +252,7 @@ def _crossover_network_levelling(
     crossover_error_interp_method: str = "linear",
     relaxation_factor: float = 0.5,
     raise_error_if_unchanged: bool = False,
-) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Single iteration of network levelling: fit a trend / filter to the (signed)
     crossover errors of every line against all lines it intersects, and remove a
@@ -511,7 +510,7 @@ def _end_iterations(
 
 
 def plot_levelling_convergence(
-    results: gpd.GeoDataFrame | pd.DataFrame,
+    results: pd.DataFrame,
     *,
     logy: bool = False,
     title: str = "Levelling convergence",
@@ -549,8 +548,8 @@ def plot_levelling_convergence(
 
 
 def crossover_pair_levelling(
-    data: gpd.GeoDataFrame | pd.DataFrame,
-    inters: gpd.GeoDataFrame | pd.DataFrame,
+    data: pd.DataFrame,
+    inters: pd.DataFrame,
     *,
     lines_to_level: list[float],
     data_col: str,
@@ -569,7 +568,7 @@ def crossover_pair_levelling(
     plot_convergence: bool = True,
     plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
-) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Level lines by fitting a trend of specified order to cross-over errors and apply
     the correction to the `data_col` column.
@@ -676,8 +675,8 @@ def crossover_pair_levelling(
 
 
 def _crossover_pair_levelling(
-    data: gpd.GeoDataFrame | pd.DataFrame,
-    inters: gpd.GeoDataFrame | pd.DataFrame,
+    data: pd.DataFrame,
+    inters: pd.DataFrame,
     *,
     lines_to_level: list[float],
     data_col: str,
@@ -689,7 +688,7 @@ def _crossover_pair_levelling(
     intersection_weight_col: str | None = None,
     crossover_error_interp_method: str = "linear",
     raise_error_if_unchanged: bool = False,
-) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Level lines by fitting a trend of specified order to cross-over errors and apply
     the correction to the `data_col` column.
@@ -897,8 +896,8 @@ def _crossover_pair_levelling(
 
 
 def alternating_iterative_line_levelling(
-    data: gpd.GeoDataFrame | pd.DataFrame,
-    inters: gpd.GeoDataFrame | pd.DataFrame,
+    data: pd.DataFrame,
+    inters: pd.DataFrame,
     *,
     data_col: str,
     levelled_col: str,
@@ -916,7 +915,7 @@ def alternating_iterative_line_levelling(
     plot_convergence: bool = True,
     plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
-) -> tuple[pd.DataFrame | gpd.GeoDataFrame, pd.DataFrame | gpd.GeoDataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     data = data.copy()
     inters = inters.copy()
 
@@ -1050,8 +1049,8 @@ def alternating_iterative_line_levelling(
 
 
 def calculate_intersection_weights(
-    gdf: gpd.GeoDataFrame,
-    inters: gpd.GeoDataFrame,
+    gdf: pd.DataFrame,
+    inters: pd.DataFrame,
     *,
     weight_by: str,
     max_dist_weight: float | None = None,
@@ -1067,7 +1066,7 @@ def calculate_intersection_weights(
     height_1st_derive_col_name: str | None = None,
     height_col_name: str = "height",
     plot: bool = False,
-) -> gpd.GeoDataFrame:
+) -> pd.DataFrame:
     """
     Calculate weights for each intersection based on various criteria.
     """
@@ -1298,9 +1297,7 @@ def calculate_intersection_weights(
     )
 
     # calculated weighted mean of the weights
-    def weighted_average(
-        df: pd.DataFrame | gpd.GeoDataFrame, weights: dict[str, float]
-    ) -> pd.Series:
+    def weighted_average(df: pd.DataFrame, weights: dict[str, float]) -> pd.Series:
         return df[list(weights)].mul(weights).sum(axis=1) / sum(weights.values())
 
     # inters["crossover_error_weight"] = weighted_average(inters, weights_dict)

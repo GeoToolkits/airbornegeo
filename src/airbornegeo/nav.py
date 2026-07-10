@@ -558,25 +558,27 @@ def cumulative_distance(
 
 
 def along_track_distance(
-    data: gpd.GeoDataFrame,
+    data: pd.DataFrame,
     *,
     groupby_column: str | None = None,
     progressbar: bool = True,
     guess_start_position: bool = False,
 ) -> NDArray:
     """
-    Calculate the distances along track in meters. This assumes the data is a G
-    eoDataFrame and it has been sorted by time, and that there are not flights which
-    overlap in time. If there are, you can first sort by flight, then by time. For
-    example, if you have columns 'flight' and 'unixtime', you can accomplish this with
+    Calculate the distances along track in meters. This assumes the data has been
+    sorted by time, and that there are not flights which overlap in time. If there
+    are, you can first sort by flight, then by time. For example, if you have columns
+    'flight' and 'unixtime', you can accomplish this with
     `data = data.sort_values(["flight", "unixtime"])`. If groupby_column is provided,
     the dataframe will first be grouped by this.
 
     Parameters
     ----------
-    data : gpd.DataFrame
-        GeoDataframe containing the data points to calculate the distance along each line,
-        must have a preset geometry column with projected coordinates.
+    data : pd.DataFrame
+        Dataframe containing the data points to calculate the distance along each
+        line, with columns 'easting' and 'northing' of projected coordinates. If
+        `guess_start_position` is True and data doesn't already have a 'geometry'
+        column, one is created from these coordinates.
     groupby_column : str | None, optional
         Column name to group by before calculation, by default None
     progressbar : bool, optional
@@ -592,9 +594,13 @@ def along_track_distance(
         The along track distance in meters
     """
     if guess_start_position:
-        assert isinstance(data, gpd.GeoDataFrame), (
-            "if `guess_start_position` is True, `data` must be a geopandas geodataframe."
-        )
+        if "geometry" not in data.columns:
+            _check_coord_columns(data)
+            data = gpd.GeoDataFrame(
+                data,
+                geometry=gpd.points_from_xy(data.easting, data.northing),
+                crs=getattr(data, "crs", None),
+            )
         if groupby_column is None:
             # turn point data into line
             line = gpd.GeoSeries(LineString(data.geometry.tolist()))
