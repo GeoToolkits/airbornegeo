@@ -334,12 +334,39 @@ def get_line_intersections(
     )
 
 
+def _split_exclude_ints(
+    exclude_ints: typing.Sequence[typing.Any],
+) -> tuple[list[typing.Any], list[tuple[typing.Any, typing.Any]]]:
+    """
+    Split ``exclude_ints`` into single line numbers (whose intersections should
+    all be excluded) and line-number pairs (whose specific intersection should
+    be excluded). Each element must be either a single line number, or a
+    list/tuple/array of the two line numbers of the intersection to exclude, in
+    either order.
+    """
+    assert isinstance(exclude_ints, tuple | list | np.ndarray), (
+        "exclude_ints must be a tuple, list or array"
+    )
+    single_lines = []
+    line_pairs = []
+    for item in exclude_ints:
+        if isinstance(item, tuple | list | np.ndarray):
+            assert len(item) == 2, (
+                "line-pair elements of exclude_ints must contain exactly the 2 "
+                "line numbers of the intersection to exclude"
+            )
+            line_pairs.append(tuple(item))
+        else:
+            single_lines.append(item)
+    return single_lines, line_pairs
+
+
 def create_intersection_table(
     data: pd.DataFrame | gpd.GeoDataFrame,
     *,
     line_column: str,
     method: str,
-    exclude_ints: list[list[float, float] | list[float] | float] | None = None,
+    exclude_ints: list[typing.Any | tuple[typing.Any, typing.Any]] | None = None,
     cutoff_dist: float | None = None,
     buffer_dist: float | None = None,
     block_size: float | None = None,
@@ -388,10 +415,10 @@ def create_intersection_table(
         found. If "groups", column 'line_type' must be provided with possible values 0,
         1, or 2, where 0 denotes the first category, 1 denotes the second category, and
         2 denotes lines to be excluded.
-    exclude_ints : list[tuple[int]] | None, optional
-        List of tuples where each tuple is either a single line number to exclude from
-        all intersections, or a pair of line numbers specifying specific intersections
-        to exclude, by default None
+    exclude_ints : list[Any | tuple[Any, Any]] | None, optional
+        Iterable where each element is either a single line number, to exclude all of
+        that line's intersections, or a list/tuple/array of the two line numbers
+        (in either order) of a specific intersection to exclude, by default None
     cutoff_dist : float, optional
         The maximum allowed distance from a theoretical intersection to the further of
         nearest data point of each intersecting line, by default None
@@ -426,6 +453,38 @@ def create_intersection_table(
         data = data.drop(index=rows_to_drop.index)
     data = data.drop(columns="is_intersection", errors="ignore")
 
+    # if individual lines are given to exclude_ints, remove them now so
+    # intersections aren't needlessly computed only to be discarded below
+    if exclude_ints is not None:
+        lines_to_drop, line_pairs_to_drop = _split_exclude_ints(exclude_ints)
+        data = data[~data[line_column].isin(lines_to_drop)]
+
+    try:
+        if method == "groups":
+            # get intersection points just between two line types
+            inters = get_line_intersections(
+                lines1_gdf=data[data.line_type == 0],
+                lines2_gdf=data[data.line_type == 1],
+                line_column=line_column,
+                grid_size=grid_size,
+                buffer_dist=buffer_dist,
+    if method == "groups":
+        # get intersection points just between two line types
+        inters = get_line_intersections(
+            lines1_gdf=data[data.line_type == 0],
+            lines2_gdf=data[data.line_type == 1],
+            line_column=line_column,
+            grid_size=grid_size,
+            buffer_dist=buffer_dist,
+            )
+        elif method == "network":
+            # get intersection points of all lines
+            inters = get_line_intersections(
+                lines1_gdf=data,
+                lines2_gdf=None,
+                line_column=line_column,
+                grid_size=grid_size,
+                buffer_dist=buffer_dist,
     if method == "groups":
         # get intersection points just between two line types
         inters = get_line_intersections(
@@ -447,6 +506,28 @@ def create_intersection_table(
     else:
         msg = "method must be either 'groups' or 'network'"
         raise ValueError(msg)
+            )
+        else:
+            msg = "method must be either 'groups' or 'network'"
+            raise ValueError(msg)  # noqa: TRY301
+    except ValueError as e:
+        # a line excluded via exclude_ints can legitimately leave no
+        # intersections at all; get_line_intersections raises in that case, so
+        # translate it into an empty result instead of propagating the error
+        if "No intersections found" not in str(e):
+            raise
+        inters = gpd.GeoDataFrame(
+            columns=[
+                "line1",
+                "line2",
+                "line1_dist",
+                "line2_dist",
+                "is_buffered",
+                "geometry",
+            ],
+            geometry="geometry",
+            crs=getattr(data, "crs", None),
+        )
 
     # get coords from geometry column
     inters["easting"] = inters.geometry.x
@@ -530,33 +611,21 @@ def create_intersection_table(
 
     if exclude_ints is not None:
         prior_len = len(inters)
-
-        assert isinstance(exclude_ints, tuple | list), (
-            "exclude ints must be a tuple or a list"
-        )
-
         exclude_inds = []
-        for i in exclude_ints:
-            assert isinstance(i, tuple | list), (
-                "elements of exclude_ints must be lists or tuples"
-            )
-
-            # if pair of lines numbers given, get those indices
-            if len(i) == 2:
-                ind = inters[  # type: ignore[unreachable]
-                    (inters.line1 == i[0]) & (inters.line2 == i[1])
-                ].index.to_numpy()
-                exclude_inds.extend(ind)
-                ind = inters[
-                    (inters.line2 == i[0]) & (inters.line1 == i[1])
-                ].index.to_numpy()
-                exclude_inds.extend(ind)
-            # if single line number, get all intersections of that line
-            elif len(i) == 1:
-                ind = inters[
-                    (inters.line1 == i[0]) | (inters.line2 == i[0])
-                ].index.to_numpy()
-                exclude_inds.extend(ind)
+        for line in lines_to_drop:
+            ind = inters[
+                (inters.line1 == line) | (inters.line2 == line)
+            ].index.to_numpy()
+            exclude_inds.extend(ind)
+        for line1, line2 in line_pairs_to_drop:
+            ind = inters[
+                (inters.line1 == line1) & (inters.line2 == line2)
+            ].index.to_numpy()
+            exclude_inds.extend(ind)
+            ind = inters[
+                (inters.line2 == line1) & (inters.line1 == line2)
+            ].index.to_numpy()
+            exclude_inds.extend(ind)
         inters = inters.drop(index=exclude_inds).copy()
         logger.info(
             "manually omitted %s intersections points",

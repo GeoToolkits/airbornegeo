@@ -160,7 +160,7 @@ def test_create_intersection_table_exclude_ints_removes_specified_pairs():
     assert "B" not in pair_excluded[["line1", "line2"]].to_numpy()
 
     line_excluded = create_intersection_table(
-        data, line_column="line", method="network", exclude_ints=[["A"]]
+        data, line_column="line", method="network", exclude_ints=["A"]
     )
     assert len(line_excluded) == 0
 
