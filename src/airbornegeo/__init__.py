@@ -106,8 +106,6 @@ from .plotting import (  # noqa: E402
     add_scalebar,
     inspect_lines,
     plot_profiles,
-    # plot_flightlines,
-    # plot_flightlines_grids,
     plotly_points,
     plotly_profiles,
 )
@@ -137,4 +135,5 @@ from .utils import (  # noqa: E402
     normalize_values,
     rmse,
     sample_grid,
+    sample_grid_nearest,
 )

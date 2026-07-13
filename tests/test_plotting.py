@@ -5,7 +5,6 @@ mpl.use("Agg")
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import pygmt
 import pytest
 
 import airbornegeo.plotting as plotting_mod
@@ -13,8 +12,6 @@ from airbornegeo.plotting import (
     LevellingConvergenceMonitor,
     align_yaxis,
     inspect_lines,
-    plot_flightlines,
-    plot_flightlines_grids,
     plot_levelling_convergence,
     plot_profiles,
     plotly_points,
@@ -203,41 +200,6 @@ def _flightline_df():
             "track": [90.0] * 20,
         }
     )
-
-
-def test_plot_flightlines_runs_without_error():
-    """plot_flightlines() should run without error given a PyGMT figure and valid flightline data."""
-    df = _flightline_df()
-    fig = pygmt.Figure()
-    fig.basemap(region=[0, 100, 0, 100], projection="X10c", frame=True)
-    plot_flightlines(fig, df)
-
-
-def test_plot_flightlines_missing_coord_columns_raises():
-    """Missing easting/northing columns should raise an AssertionError."""
-    df = pd.DataFrame({"x": [1.0], "y": [2.0], "line": [1]})
-    fig = pygmt.Figure()
-    fig.basemap(region=[0, 10, 0, 10], projection="X5c", frame=True)
-    with pytest.raises(AssertionError, match="Project"):
-        plot_flightlines(fig, df)
-
-
-@pytest.mark.parametrize("direction", ["EW", "NS"])
-def test_plot_flightlines_grids_runs_without_error(direction):
-    """plot_flightlines_grids() should run without error for both supported direction strings."""
-    df = _flightline_df()
-    fig = pygmt.Figure()
-    fig.basemap(region=[0, 100, 0, 100], projection="X10c", frame=True)
-    plot_flightlines_grids(fig, df, direction=direction)
-
-
-def test_plot_flightlines_grids_invalid_direction_raises():
-    """An invalid direction string should raise a ValueError."""
-    df = _flightline_df()
-    fig = pygmt.Figure()
-    fig.basemap(region=[0, 100, 0, 100], projection="X10c", frame=True)
-    with pytest.raises(ValueError, match="invalid direction string"):
-        plot_flightlines_grids(fig, df, direction="bogus")
 
 
 def test_plotly_points_easting_northing_autodetect(monkeypatch):
