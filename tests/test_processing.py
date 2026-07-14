@@ -259,10 +259,7 @@ def test_detect_outliers_no_outliers_logs_info(caplog):
 def test_detect_outliers_with_outliers_creates_figure(caplog):
     """A column with an IQR outlier should create a boxplot figure and log no 'no outliers' message."""
     data = pd.DataFrame({"has_outliers": [1, 2, 3, 4, 1000]})
-    with (
-        caplog.at_level(logging.INFO, logger="airbornegeo"),
-        pytest.warns(PendingDeprecationWarning, match="vert"),
-    ):
+    with caplog.at_level(logging.INFO, logger="airbornegeo"):
         result = detect_outliers(data)  # pylint: disable=assignment-from-no-return
     assert result is None
     assert len(plt.get_fignums()) == 1
@@ -288,10 +285,7 @@ def test_detect_outliers_mixed_dataframe(caplog):
             "label": ["a", "b", "c", "d", "e"],
         }
     )
-    with (
-        caplog.at_level(logging.INFO, logger="airbornegeo"),
-        pytest.warns(PendingDeprecationWarning, match="vert"),
-    ):
+    with caplog.at_level(logging.INFO, logger="airbornegeo"):
         detect_outliers(data)
     assert "No outliers detected in column: no_outliers" in caplog.text
     assert "has_outliers" not in caplog.text
@@ -302,10 +296,7 @@ def test_detect_outliers_mixed_dataframe(caplog):
 def test_detect_outliers_nan_containing_column_still_detects_outlier(caplog):
     """NaN values should be ignored by the IQR calculation, but a real outlier should still be detected."""
     data = pd.DataFrame({"col": [1.0, 2.0, np.nan, 4.0, 100.0]})
-    with (
-        caplog.at_level(logging.INFO, logger="airbornegeo"),
-        pytest.warns(PendingDeprecationWarning, match="vert"),
-    ):
+    with caplog.at_level(logging.INFO, logger="airbornegeo"):
         detect_outliers(data)
     assert "No outliers detected" not in caplog.text
     assert len(plt.get_fignums()) == 1

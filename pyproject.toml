@@ -95,6 +95,9 @@ filterwarnings = [
   # https://github.com/fatiando/harmonica/blob/main/harmonica/filters/_fft.py
   "ignore:dropping variables using `drop` is deprecated; use drop_vars\\.:FutureWarning",
   "ignore:Default ifft's behaviour \\(lag=None\\) changed!.*:FutureWarning",
+  # seaborn's boxplot passes `vert` to matplotlib, deprecated in mpl 3.11
+  # (warning class changed from PendingDeprecationWarning to MatplotlibDeprecationWarning)
+  "ignore:vert. bool was deprecated:Warning",
 ]
 log_cli_level = "INFO"
 testpaths = [
