@@ -88,6 +88,9 @@ from .filtering import (  # noqa: E402
 from .grid_levelling import (  # noqa: E402
     level_to_grid,
 )
+from .grid_sample import (  # noqa: E402
+    sample_grid,
+)
 from .interpolating import (  # noqa: E402
     interpolate_missing,
     interpolate_missing_pointwise,
@@ -106,8 +109,6 @@ from .plotting import (  # noqa: E402
     add_scalebar,
     inspect_lines,
     plot_profiles,
-    # plot_flightlines,
-    # plot_flightlines_grids,
     plotly_points,
     plotly_profiles,
 )
@@ -136,5 +137,4 @@ from .utils import (  # noqa: E402
     median_line_spacing,
     normalize_values,
     rmse,
-    sample_grid,
 )

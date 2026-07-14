@@ -3,7 +3,6 @@ import logging
 import numpy as np
 import pandas as pd
 import pytest
-import xarray as xr
 
 from airbornegeo.utils import (
     DuplicateFilter,
@@ -14,7 +13,6 @@ from airbornegeo.utils import (
     median_line_spacing,
     normalize_values,
     rmse,
-    sample_grid,
 )
 
 
@@ -123,47 +121,6 @@ def test_get_min_max_custom_robust_percentiles():
     )
     assert v_min == pytest.approx(9.9)
     assert v_max == pytest.approx(89.1)
-
-
-def _linear_ramp_grid():
-    easting = np.linspace(0, 100, 21)
-    northing = np.linspace(0, 100, 21)
-    e, n = np.meshgrid(easting, northing)
-    return xr.DataArray(
-        e + n,
-        coords={"northing": northing, "easting": easting},
-        dims=("northing", "easting"),
-        name="z",
-    )
-
-
-def test_sample_grid_basic():
-    """Sampling a linear-ramp grid at known points should return the exact grid values, index preserved."""
-    grid = _linear_ramp_grid()
-    data = pd.DataFrame(
-        {"easting": [0.0, 50.0, 100.0], "northing": [0.0, 50.0, 100.0]}, index=[5, 6, 7]
-    )
-    result = sample_grid(data, grid, coord_names=("easting", "northing"))
-    assert result.tolist() == pytest.approx([0.0, 100.0, 200.0])
-    assert list(result.index) == [5, 6, 7]
-
-
-def test_sample_grid_missing_coord_column_raises():
-    """Missing coordinate columns should raise AssertionError naming them."""
-    grid = _linear_ramp_grid()
-    data = pd.DataFrame({"x": [1.0], "y": [2.0]})
-    with pytest.raises(
-        AssertionError, match=r"\('easting', 'northing'\) must be in the dataframe"
-    ):
-        sample_grid(data, grid, coord_names=("easting", "northing"))
-
-
-def test_sample_grid_custom_coord_names():
-    """Custom coord_names should be used to look up coordinate columns instead of the defaults."""
-    grid = _linear_ramp_grid()
-    data = pd.DataFrame({"lon": [10.0], "lat": [20.0]})
-    result = sample_grid(data, grid, coord_names=("lon", "lat"))
-    assert result.tolist() == pytest.approx([30.0])
 
 
 def test_median_line_spacing_two_parallel_lines():

@@ -606,7 +606,10 @@ def along_track_distance(
             line = gpd.GeoSeries(LineString(data.geometry.tolist()))
 
             # find minimum rotated rectangle around line
-            rect = line.iloc[0].minimum_rotated_rectangle
+            # newer GEOS builds emit a spurious "invalid value" RuntimeWarning from
+            # oriented_envelope even when the result is valid
+            with np.errstate(invalid="ignore"):
+                rect = line.iloc[0].minimum_rotated_rectangle
 
             # get angle of rotation
             angle = azimuth(rect)
@@ -642,7 +645,10 @@ def along_track_distance(
             line = gpd.GeoSeries(LineString(segment_data.geometry.tolist()))
 
             # find minimum rotated rectangle around line
-            rect = line.iloc[0].minimum_rotated_rectangle
+            # newer GEOS builds emit a spurious "invalid value" RuntimeWarning from
+            # oriented_envelope even when the result is valid
+            with np.errstate(invalid="ignore"):
+                rect = line.iloc[0].minimum_rotated_rectangle
 
             # get angle of rotation
             angle = azimuth(rect)

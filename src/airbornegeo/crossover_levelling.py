@@ -1,3 +1,5 @@
+import typing
+
 import matplotlib.pyplot as plt  # pylint: disable=too-many-lines
 import numpy as np
 import pandas as pd
@@ -19,7 +21,7 @@ def crossover_network_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter_type: str | None = None,
+    filter_kwargs: dict[str, typing.Any] | None = None,
     lines_to_level: list[float] | None = None,
     intersection_weight_col: str | None = None,
     crossover_error_interp_method: str = "linear",
@@ -67,16 +69,20 @@ def crossover_network_levelling(
         Column containing the distance along each line / segment.
     degree : int | None, optional
         Polynomial degree used to fit a trend to the misties along each line.
-    filter_type : str | None, optional
-        Alternative to `degree`; low-pass filter type applied to the misties along
-        each line.
+    filter_kwargs : dict | None, optional
+        Alternative to `degree`: keyword arguments forwarded to
+        `airbornegeo.filter_line` to low-pass filter the misties along each line
+        (besides `data_column` and `filter_by_column`, which are set for you). Must
+        include `filter_width`; anything else you don't provide falls back to
+        `filter_line`'s own defaults (e.g. `filter_shape="gaussian"`,
+        `engine="scipy"`).
     lines_to_level : list[float] | None
         All lines in the network to be levelled together. By default is all lines.
     intersection_weight_col : str | None, optional
         Column in `inters` with per-intersection weights.
     crossover_error_interp_method : str, optional
         Method used to fill gaps between misties along a line before filtering (only
-        used when `filter_type` is given), by default "linear".
+        used when `filter_kwargs` is given), by default "linear".
     relaxation_factor : float, optional
         Fraction of each line's fitted mistie trend to remove per iteration, by
         default 0.5 (i.e. split the mistie evenly between the two lines at each
@@ -132,7 +138,7 @@ def crossover_network_levelling(
                 data,
                 inters,
                 degree=degree,
-                filter_type=filter_type,
+                filter_kwargs=filter_kwargs,
                 data_col=data_col,
                 levelled_col=levelled_col,
                 line_column=line_column,
@@ -246,7 +252,7 @@ def _crossover_network_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter_type: str | None = None,
+    filter_kwargs: dict[str, typing.Any] | None = None,
     lines_to_level: list[float] | None = None,
     intersection_weight_col: str | None = None,
     crossover_error_interp_method: str = "linear",
@@ -264,11 +270,11 @@ def _crossover_network_levelling(
     if lines_to_level is None:
         lines_to_level = data[line_column].unique()
 
-    if (filter_type is not None) and (degree is not None):
-        msg = "only provide either `filter_type` or `degree`, not both"
+    if (filter_kwargs is not None) and (degree is not None):
+        msg = "only provide either `filter_kwargs` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter_type is None) and (degree is None):
-        msg = "must provide either `filter_type` or `degree`"
+    if (filter_kwargs is None) and (degree is None):
+        msg = "must provide either `filter_kwargs` or `degree`"
         raise UserWarning(msg)
 
     assert line_column in data.columns, (
@@ -336,7 +342,7 @@ def _crossover_network_levelling(
                 else:
                     raise ValueError from e
 
-        if filter_type is not None:
+        if filter_kwargs is not None:
             # add signed crossover errors to line dataframe at each intersection row
             for ind, row in line_df[line_df.is_intersection].iterrows():
                 match = line_ints[
@@ -381,11 +387,11 @@ def _crossover_network_levelling(
 
                 line_df["levelling_correction"] = airbornegeo.filter_line(
                     line_df,
-                    filter_type=filter_type,
                     data_column=crossover_error_col,
                     filter_by_column=distance_column,
                     groupby_column=None,
                     progressbar=False,
+                    **filter_kwargs,
                 )
 
         # damp the correction so both lines at each crossover move only part-way
@@ -557,7 +563,7 @@ def crossover_pair_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter_type: str | None = None,
+    filter_kwargs: dict[str, typing.Any] | None = None,
     intersection_weight_col: str | None = None,
     crossover_error_interp_method: str = "linear",
     raise_error_if_unchanged: bool = True,
@@ -602,7 +608,7 @@ def crossover_pair_levelling(
                 inters,
                 lines_to_level=lines_to_level,
                 degree=degree,
-                filter_type=filter_type,
+                filter_kwargs=filter_kwargs,
                 data_col=data_col,
                 levelled_col=levelled_col,
                 line_column=line_column,
@@ -684,7 +690,7 @@ def _crossover_pair_levelling(
     line_column: str,
     distance_column: str,
     degree: int | None = None,
-    filter_type: str | None = None,
+    filter_kwargs: dict[str, typing.Any] | None = None,
     intersection_weight_col: str | None = None,
     crossover_error_interp_method: str = "linear",
     raise_error_if_unchanged: bool = False,
@@ -696,11 +702,11 @@ def _crossover_pair_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if (filter_type is not None) and (degree is not None):
-        msg = "only provide either `filter_type` or `degree`, not both"
+    if (filter_kwargs is not None) and (degree is not None):
+        msg = "only provide either `filter_kwargs` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter_type is None) and (degree is None):
-        msg = "must provide either `filter_type` or `degree`"
+    if (filter_kwargs is None) and (degree is None):
+        msg = "must provide either `filter_kwargs` or `degree`"
         raise UserWarning(msg)
 
     # drop lines without intersections
@@ -794,7 +800,7 @@ def _crossover_pair_levelling(
                 else:
                     raise ValueError from e
 
-        if filter_type is not None:
+        if filter_kwargs is not None:
             # add crossover errors to line dataframe from intersections dataframe
             for ind, row in line_df[line_df.is_intersection].iterrows():
                 # search intersections for mistie values
@@ -844,11 +850,11 @@ def _crossover_pair_levelling(
                 # calculate levelling correction by low pass filtering the misfits values
                 line_df["levelling_correction"] = airbornegeo.filter_line(
                     line_df,
-                    filter_type=filter_type,
                     data_column=crossover_error_col,
                     filter_by_column=distance_column,
                     groupby_column=None,  # already giving a single group
                     progressbar=False,
+                    **filter_kwargs,
                 )
 
         # if levelling tie lines, negate the correction
@@ -905,7 +911,7 @@ def alternating_iterative_line_levelling(
     distance_column: str,
     lines_to_level: list[str] | None = None,
     degree: int | None = None,
-    filter_type: str | None = None,
+    filter_kwargs: dict[str, typing.Any] | None = None,
     intersection_weight_col: str | None = None,
     crossover_error_interp_method: str = "linear",
     max_iterations: int = 5,
@@ -919,11 +925,11 @@ def alternating_iterative_line_levelling(
     data = data.copy()
     inters = inters.copy()
 
-    if (filter_type is not None) and (degree is not None):
-        msg = "only provide either `filter_type` or `degree`, not both"
+    if (filter_kwargs is not None) and (degree is not None):
+        msg = "only provide either `filter_kwargs` or `degree`, not both"
         raise UserWarning(msg)
-    if (filter_type is None) and (degree is None):
-        msg = "must provide either `filter_type` or `degree`"
+    if (filter_kwargs is None) and (degree is None):
+        msg = "must provide either `filter_kwargs` or `degree`"
         raise UserWarning(msg)
 
     # check columns are present
@@ -963,7 +969,7 @@ def alternating_iterative_line_levelling(
             inters,
             lines_to_level=lines1_to_level,
             degree=degree,
-            filter_type=filter_type,
+            filter_kwargs=filter_kwargs,
             data_col=data_col,
             line_column=line_column,
             levelled_col=levelled_col,
@@ -978,7 +984,7 @@ def alternating_iterative_line_levelling(
             inters,
             lines_to_level=lines2_to_level,
             degree=degree,
-            filter_type=filter_type,
+            filter_kwargs=filter_kwargs,
             data_col=levelled_col,
             line_column=line_column,
             levelled_col=levelled_col,

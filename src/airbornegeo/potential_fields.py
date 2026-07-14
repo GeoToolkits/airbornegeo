@@ -195,7 +195,7 @@ def igrf(
         datetime = segment[datetime_column].iloc[0]
 
         # initialize a IGRF class with the date
-        igrf_model = hm.IGRF14(
+        igrf_model = hm.IGRF14(  # pylint: disable=no-member
             datetime,
             ellipsoid=ellipsoid,
             min_degree=min_degree,

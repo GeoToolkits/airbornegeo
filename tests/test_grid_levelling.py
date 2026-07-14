@@ -32,10 +32,10 @@ def test_level_to_grid_2d_trend_removes_constant_offset():
 
 
 def test_level_to_grid_degree_and_filter_both_raises_valueerror():
-    """Providing both degree and filter_type should raise ValueError."""
+    """Providing both degree and filter_kwargs should raise ValueError."""
     data = _survey_with_2d_trend()
     with pytest.raises(
-        ValueError, match="only provide filter_type or degree, not both"
+        ValueError, match="only provide filter_kwargs or degree, not both"
     ):
         level_to_grid(
             data,
@@ -43,7 +43,7 @@ def test_level_to_grid_degree_and_filter_both_raises_valueerror():
             grid_column="grid",
             fit_by_column=("easting", "northing"),
             degree=1,
-            filter_type="g1000",
+            filter_kwargs={"filter_width": 1000},
         )
 
 
@@ -58,7 +58,7 @@ def test_level_to_grid_2d_filter_raises_not_implemented():
             data_column="data",
             grid_column="grid",
             fit_by_column=("easting", "northing"),
-            filter_type="g1000",
+            filter_kwargs={"filter_width": 1000},
         )
 
 
@@ -170,7 +170,7 @@ def test_level_to_grid_groupby_filter_correction():
         data_column="data",
         grid_column="grid",
         fit_by_column="distance_along_line",
-        filter_type="g500",
+        filter_kwargs={"filter_width": 500},
         groupby_column="line",
     )
     assert result.shape == (200,)
