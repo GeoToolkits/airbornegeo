@@ -32,7 +32,7 @@ This is because a few dependencies rely on C packages, which can only be install
 Create a new virtual environment:
 
 ```
-conda create --name airbornegeo --yes --force pygmt geopandas --channel conda-forge
+conda create --name airbornegeo --yes --force geopandas --channel conda-forge
 ```
 
 activate the environment and use `pip` to install `airbornegeo`:
