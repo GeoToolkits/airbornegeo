@@ -1,15 +1,24 @@
+import itertools
 import typing
 import warnings
 
 import harmonica as hm
 import numpy as np
 import pandas as pd
-import pygmt
 import verde as vd
 import xarray as xr
 import xrft
+from numpy.typing import NDArray
+from scipy import fft, ndimage
 
 from airbornegeo.utils import _iter_groups
+
+try:
+    import pygmt
+
+    _HAS_PYGMT = True
+except ImportError:
+    _HAS_PYGMT = False
 
 try:
     import rioxarray  # noqa: F401 # pylint: disable=unused-import
@@ -119,16 +128,45 @@ def pad1d(
     return padded
 
 
+_GMT_FILTER_SHAPE_CODES = {
+    "gaussian": "g",
+    "boxcar": "b",
+    "cosine": "c",
+    "median": "m",
+}
+
+
+def _build_gmt_filter_type(
+    filter_shape: str, filter_width: float, filter_type: str, robust: bool
+) -> str:
+    """
+    Build a GMT filter1d filter_type string (e.g. "g1000+h") from filter_shape,
+    filter_width, filter_type, and robust. GMT's convention: low-pass needs no suffix,
+    high-pass appends "+h", and a robust filter uses an uppercase filter code.
+    """
+    code = _GMT_FILTER_SHAPE_CODES[filter_shape]
+    if robust:
+        code = code.upper()
+    suffix = "+h" if filter_type == "highpass" else ""
+    return f"{code}{filter_width}{suffix}"
+
+
 def filter_line(
     data: pd.DataFrame,
     *,
-    filter_type: str,
+    filter_width: float,
     data_column: str,
     filter_by_column: str,
+    filter_type: str = "lowpass",
+    filter_shape: str = "gaussian",
+    engine: str = "scipy",
     groupby_column: str | None = None,
     progressbar: bool = True,
     pad_width_percentage: float = 10,
     pad_mode: str = "reflect",
+    max_gap: float | None = None,
+    robust: bool = False,
+    robust_threshold: float = 2.5,
     **kwargs: typing.Any,
 ) -> pd.Series:
     """
@@ -136,26 +174,51 @@ def filter_line(
     The filter_by_column would typically be either distance along track for a spatial
     filter, or a time column, for a temporal filter. The dataframe can be grouped by the
     groupby_column before applying the filter. This column could contain flight names,
-    or lines names. The type of filter is supplied by filter_type, which uses the GMT
-    string format for filters. For example, if filter_by_column is "distance_along_line"
-    in meters, and filter_type is "g1000+l", then this would give a 1000 m low pass
-    gaussian filter. If filter_by_column is "time" in seconds, then the filter width
-    would be 1000 seconds. Ends of lines are automatically padded to avoid edge effects.
+    or lines names. filter_width is the filter width in the same units as
+    filter_by_column (e.g. if filter_by_column is "distance_along_line" in meters, a
+    filter_width of 1000 gives a 1000 m filter; if filter_by_column is a time column in
+    seconds, filter_width is in seconds). Ends of lines are automatically padded to
+    avoid edge effects.
+
+    Two engines are available, selected with the engine parameter:
+
+    - "scipy" (the default): applies the filter directly in Python via scipy, with no
+      external dependencies. It additionally splits each line at gaps in
+      filter_by_column larger than max_gap and filters the segments separately, so
+      anomalies are not smeared across genuine breaks in the data (see max_gap). This
+      engine is usually substantially faster than "gmt", especially when filtering
+      many lines/segments individually with groupby_column, since GMT's filter1d has
+      a large fixed per-call overhead.
+    - "gmt": applies the filter with GMT's filter1d, via the optional pygmt package
+      (raises an ImportError with installation instructions if pygmt is not
+      installed). This is a mature, independently-validated reference implementation;
+      use it if you need results that exactly reproduce GMT's own processing.
+
+    Both engines aim to give equivalent (though not always numerically identical)
+    results for the same filter_shape/filter_width/filter_type/robust combination.
 
     Parameters
     ----------
     data : pd.DataFrame
         Dataframe containing the data points to filter.
-    filter_type : str
-        A string with format "<type><width>+h" where type is GMT filter type, width is
-        the filter width in same units as filter_by_column, and optional +h switches
-        from low-pass to high-pass filter; e.g. "g10+h" is a 10m high-pass Gaussian
-        filter.
+    filter_width : float
+        The filter width, in the same units as filter_by_column. For "gaussian", this
+        is the full width (6 standard deviations); for the others, the full window
+        width.
     data_column : str
         The data to filter.
     filter_by_column : str, optional
         The independent variable to filter against, typically either a time or distance
         along track values.
+    filter_type : str, optional
+        Either "lowpass" or "highpass", by default "lowpass".
+    filter_shape : str, optional
+        One of "gaussian", "boxcar", "cosine", or "median", by default "gaussian". See
+        the "scipy" engine's implementation for what each of these represents; "gmt"
+        reproduces the equivalent pygmt.filter1d filter type ("g", "b", "c", "m"
+        respectively).
+    engine : str, optional
+        Either "scipy" or "gmt", by default "scipy".
     groupby_column : str | None, optional
         Column name to group by before filtering, by default None.
     progressbar : bool, optional
@@ -165,6 +228,22 @@ def filter_line(
         range of values provided by filter_by_column, by default 10.
     pad_mode : str, optional
         The mode to use for padding, by default is "reflect".
+    max_gap : float | None, optional
+        Only used by engine "scipy": split lines where consecutive filter_by_column
+        values differ by more than this (in the units of filter_by_column) and filter
+        each segment separately. By default (None) gaps larger than 10 times the median
+        spacing are split; use numpy.inf to disable splitting.
+    robust : bool, optional
+        Use a robust variant of the filter that resists outliers, by default False.
+        For engine "scipy", this despikes the data before filtering (replacing samples
+        far from the local median with that median) and is not supported for
+        filter_shape "median", which is already robust by construction. For engine
+        "gmt", this uses GMT's own uppercase (robust) filter codes.
+    robust_threshold : float, optional
+        Only used by engine "scipy" when robust is True: samples deviating from the
+        local median by more than robust_threshold times the local (MAD-based) robust
+        standard deviation are replaced by that median before filtering, by default
+        2.5 (matching GMT's default for its own robust filters).
     kwargs : Any, optional
         Keyword arguments to pass to np.pad, such as stat_length and
         constant_values.
@@ -174,7 +253,76 @@ def filter_line(
     pd.Series
         The filtered data values
     """
+    if filter_type not in ("lowpass", "highpass"):
+        msg = f"filter_type must be 'lowpass' or 'highpass', got '{filter_type}'"
+        raise ValueError(msg)
+    if filter_shape not in ("gaussian", "boxcar", "cosine", "median"):
+        msg = (
+            "filter_shape must be 'gaussian', 'boxcar', 'cosine', or 'median', got "
+            f"'{filter_shape}'"
+        )
+        raise ValueError(msg)
+    if engine not in ("scipy", "gmt"):
+        msg = f"engine must be 'scipy' or 'gmt', got '{engine}'"
+        raise ValueError(msg)
+    if engine == "scipy" and robust and filter_shape == "median":
+        msg = (
+            "robust=True has no effect for filter_shape='median', which is already "
+            "robust by construction; use robust=False"
+        )
+        raise ValueError(msg)
+
     data = data.copy()
+
+    if engine == "scipy":
+        if groupby_column is None:
+            filtered_values = _filter_values_scipy(
+                data[data_column].to_numpy(),
+                data[filter_by_column].to_numpy(),
+                filter_width=filter_width,
+                filter_type=filter_type,
+                filter_shape=filter_shape,
+                pad_width_percentage=pad_width_percentage,
+                pad_mode=pad_mode,
+                max_gap=max_gap,
+                robust=robust,
+                robust_threshold=robust_threshold,
+                **kwargs,
+            )
+            return pd.Series(filtered_values, index=data.index, name=data_column)
+
+        for segment_name, segment_data in _iter_groups(
+            data, groupby_column, progressbar
+        ):
+            data.loc[data[groupby_column] == segment_name, data_column] = (
+                _filter_values_scipy(
+                    segment_data[data_column].to_numpy(),
+                    segment_data[filter_by_column].to_numpy(),
+                    filter_width=filter_width,
+                    filter_type=filter_type,
+                    filter_shape=filter_shape,
+                    pad_width_percentage=pad_width_percentage,
+                    pad_mode=pad_mode,
+                    max_gap=max_gap,
+                    robust=robust,
+                    robust_threshold=robust_threshold,
+                    **kwargs,
+                )
+            )
+        return data[data_column]
+
+    # engine == "gmt"
+    if not _HAS_PYGMT:
+        msg = (
+            "engine='gmt' requires the optional dependency 'pygmt'. Install it with "
+            "`pip install pygmt` or `mamba install pygmt`, or use engine='scipy' "
+            "instead (the default)."
+        )
+        raise ImportError(msg)
+
+    gmt_filter_type = _build_gmt_filter_type(
+        filter_shape, filter_width, filter_type, robust
+    )
 
     if groupby_column is None:
         # pad the data with pad_mode, and the filter_by_column by extrapolation
@@ -192,7 +340,7 @@ def filter_line(
             padded[[filter_by_column, data_column]],
             end=True,
             time_col=0,
-            filter_type=filter_type,
+            filter_type=gmt_filter_type,
         )
 
         filtered = filtered.rename(columns={0: filter_by_column, 1: data_column})
@@ -221,7 +369,7 @@ def filter_line(
             padded[[filter_by_column, data_column]],
             end=True,
             time_col=0,
-            filter_type=filter_type,
+            filter_type=gmt_filter_type,
         )
         filtered.columns = [filter_by_column, data_column]
 
@@ -236,6 +384,173 @@ def filter_line(
         ]
 
     return data[data_column]
+
+
+def _despike(values: NDArray, window: int, threshold: float) -> NDArray:
+    """
+    Replace samples more than threshold robust standard deviations (estimated from the
+    median absolute deviation, MAD) from the local median with that median. This is
+    the same outlier rule GMT's robust filters use, applied as a despiking
+    pre-processing step rather than per-window during the (linear) FFT filter itself.
+    """
+    window = min(window, len(values))
+    if window % 2 == 0:
+        window += 1
+    if window < 3:
+        return values
+
+    local_median = ndimage.median_filter(values, size=window, mode="reflect")
+    deviation = np.abs(values - local_median)
+    mad = ndimage.median_filter(deviation, size=window, mode="reflect")
+    outliers = deviation > threshold * 1.4826 * mad
+
+    despiked = values.copy()
+    despiked[outliers] = local_median[outliers]
+    return despiked
+
+
+def _fft_filter_segment(
+    values: NDArray,
+    coords: NDArray,
+    filter_width: float,
+    pad_width_percentage: float,
+    pad_mode: str,
+    robust: bool,
+    robust_threshold: float,
+    filter_shape: str,
+    **kwargs: typing.Any,
+) -> NDArray:
+    """
+    Low-pass filter of a single gap-free segment. Returns the low-pass filtered values
+    at the original (possibly irregular) coords.
+    """
+    # too few points to estimate anything below the segment scale; the best available
+    # low-pass is the data itself
+    if len(values) < 4:
+        return values.copy()
+
+    # resample onto a regular grid at the median spacing, since the FFT (and the
+    # median window filter) require evenly spaced data
+    spacing = np.median(np.diff(coords))
+    if spacing <= 0:
+        msg = "coords must be strictly increasing within a segment"
+        raise ValueError(msg)
+    n_grid = round(float((coords[-1] - coords[0]) / spacing)) + 1
+    grid = np.linspace(coords[0], coords[-1], n_grid)
+    grid_values = np.interp(grid, coords, values)
+
+    # despike before filtering: replace outliers with the local median so they can't
+    # smear into the smooth result, using the same window as the filter width
+    if robust:
+        window = round(filter_width / spacing)
+        grid_values = _despike(grid_values, window=window, threshold=robust_threshold)
+
+    # pad to reduce edge effects
+    n_pad = round(n_grid * pad_width_percentage / 100)
+    if pad_mode in ("reflect", "symmetric", "wrap"):
+        n_pad = min(n_pad, n_grid - 1)
+    if n_pad > 0:
+        grid_values = np.pad(grid_values, n_pad, mode=pad_mode, **kwargs)
+
+    if filter_shape == "median":
+        # median is a non-linear filter and can't be expressed as a spectral transfer
+        # function, so apply it directly as a sliding window instead
+        window = max(3, round(filter_width / spacing))
+        if window % 2 == 0:
+            window += 1
+        window = min(window, len(grid_values))
+        low = ndimage.median_filter(grid_values, size=window, mode="reflect")
+    else:
+        # multiply the spectrum by each shape's (exact, analytic) transfer function,
+        # using GMT's convention that the filter width is the full convolution width
+        # (6 standard deviations for the gaussian)
+        freqs = fft.rfftfreq(len(grid_values), d=spacing)
+        width_freq = filter_width * freqs
+        if filter_shape == "gaussian":
+            sigma = filter_width / 6
+            transfer = np.exp(-2 * np.pi**2 * sigma**2 * freqs**2)
+        elif filter_shape == "boxcar":
+            # the Fourier transform of a normalized boxcar of width w is sinc(w f)
+            transfer = np.sinc(width_freq)
+        else:  # cosine
+            # the Fourier transform of a normalized raised-cosine (Hann) window
+            transfer = (
+                np.sinc(width_freq)
+                + 0.5 * np.sinc(width_freq - 1)
+                + 0.5 * np.sinc(width_freq + 1)
+            )
+        low = fft.irfft(fft.rfft(grid_values) * transfer, len(grid_values))
+
+    # un-pad and sample the smooth curve back at the original coords
+    if n_pad > 0:
+        low = low[n_pad:-n_pad]
+    return np.interp(coords, grid, low)
+
+
+def _filter_values_scipy(
+    values: NDArray,
+    coords: NDArray,
+    *,
+    filter_width: float,
+    filter_type: str,
+    filter_shape: str,
+    pad_width_percentage: float,
+    pad_mode: str,
+    max_gap: float | None,
+    robust: bool,
+    robust_threshold: float,
+    **kwargs: typing.Any,
+) -> NDArray:
+    """
+    Low-pass or high-pass filter 1D data in the frequency domain with scipy.fft (or,
+    for filter_shape "median", a direct sliding-window filter). The data does not need
+    to be evenly sampled; it is resampled onto a regular grid at the median spacing of
+    coords, padded to reduce edge effects, filtered, and interpolated back onto the
+    original coords. If coords contains gaps larger than max_gap, the data is split at
+    the gaps and each segment is filtered separately, so anomalies are not smeared
+    across the gaps. The high-pass filtered data is the data minus the low-pass
+    filtered data. This is filter_line's engine="scipy" implementation; validation of
+    filter_type/filter_shape/robust is expected to already have happened in the
+    caller.
+    """
+    values = np.asarray(values, dtype=float)
+    coords = np.asarray(coords, dtype=float)
+
+    if values.shape != coords.shape:
+        msg = "values and coords must have the same length"
+        raise ValueError(msg)
+
+    steps = np.diff(coords)
+    if np.any(steps < 0):
+        msg = "filter_by_column must be sorted in ascending order to use engine='scipy'"
+        raise ValueError(msg)
+
+    # find gaps larger than max_gap and filter each segment separately
+    if len(values) > 1:
+        if max_gap is None:
+            max_gap = 10 * np.median(steps)
+        segment_starts = np.flatnonzero(steps > max_gap) + 1
+    else:
+        segment_starts = np.array([], dtype=int)
+    bounds = [0, *segment_starts.tolist(), len(values)]
+
+    low = np.empty_like(values)
+    for start, stop in itertools.pairwise(bounds):
+        low[start:stop] = _fft_filter_segment(
+            values[start:stop],
+            coords[start:stop],
+            filter_width,
+            pad_width_percentage,
+            pad_mode,
+            robust,
+            robust_threshold,
+            filter_shape,
+            **kwargs,
+        )
+
+    if filter_type == "highpass":
+        return values - low
+    return low
 
 
 def _nearest_grid_fill(
@@ -301,8 +616,6 @@ def _nearest_grid_fill(
                 dims=(original_dims[1], original_dims[0]),
             )[original_name]
         )
-    # elif method == "pygmt":
-    #     filled = pygmt.grdfill(grid, mode="n", verbose="q").rename(original_name)
     else:
         msg = "method must be 'rioxarray', or 'verde'"
         raise ValueError(msg)

@@ -1,3 +1,5 @@
+import typing
+
 import pandas as pd
 import seaborn as sns
 import verde as vd
@@ -14,7 +16,7 @@ def level_to_grid(
     grid_column: str,
     fit_by_column: str | tuple[str],
     degree: int | None = None,
-    filter_type: str | None = None,
+    filter_kwargs: dict[str, typing.Any] | None = None,
     groupby_column: str | None = None,
 ) -> pd.Series:
     """
@@ -48,10 +50,13 @@ def level_to_grid(
         Column name to group by, by default None
     degree : int or None, optional
         the degree order to fit to the misfit values.
-    filter_type : int or None, optional
-        the filter to use for the misfit values to get the levelling correction. This
-        should be a pyGMT filter string, such as 'g10000' for a 10 km gaussian low pass
-        filter, assuming the units of filter_by_column of meters.
+    filter_kwargs : dict | None, optional
+        Alternative to `degree`: keyword arguments forwarded to
+        `airbornegeo.filter_line` to low-pass filter the misfit values (besides
+        `data_column` and `filter_by_column`, which are set for you). Must include
+        `filter_width`; anything else you don't provide falls back to
+        `filter_line`'s own defaults (e.g. `filter_shape="gaussian"`,
+        `engine="scipy"`).
 
     Returns
     -------
@@ -64,8 +69,8 @@ def level_to_grid(
 
     data["tmp_misfit"] = data[data_column] - data[grid_column]
 
-    if (degree is not None) & (filter_type is not None):
-        msg = "only provide filter_type or degree, not both"
+    if (degree is not None) & (filter_kwargs is not None):
+        msg = "only provide filter_kwargs or degree, not both"
         raise ValueError(msg)
 
     if groupby_column is None:
@@ -81,7 +86,7 @@ def level_to_grid(
             correction = vdtrend.predict(
                 coordinates=((data[fit_by_column[0]], data[fit_by_column[1]]))
             )
-        elif filter_type is not None:
+        elif filter_kwargs is not None:
             msg = "for 2D, only trend fitting supported, not filtering"
             raise NotImplementedError(msg)
         return data[data_column] - correction  # pylint: disable=possibly-used-before-assignment
@@ -102,13 +107,13 @@ def level_to_grid(
                 cols_to_predict=[fit_by_column, "correction"],
                 degree=degree,
             ).correction
-        elif filter_type is not None:
+        elif filter_kwargs is not None:
             # calculate levelling correction by low pass filtering the misfits values
             correction = airbornegeo.filter_line(
                 segment_data,
-                filter_type=filter_type,
                 data_column="tmp_misfit",
                 filter_by_column=fit_by_column,
+                **filter_kwargs,
             )
         # add correction values to the main dataframe
         data.loc[data.line == _segment_name, "levelling_correction"] = correction

@@ -10,7 +10,14 @@ import pytest
 import xarray as xr
 
 import airbornegeo.filtering as filtering_module
-from airbornegeo.filtering import _nearest_grid_fill, filter_grid, filter_line, pad1d
+from airbornegeo.filtering import (
+    _build_gmt_filter_type,
+    _despike,
+    _nearest_grid_fill,
+    filter_grid,
+    filter_line,
+    pad1d,
+)
 
 
 def test_pad1d_basic_reflect():
@@ -121,6 +128,73 @@ def test_pad1d_unsorted_independent_column_raises_valueerror():
         pad1d(data, data_column="val", independent_column="dist", width_percentage=10)
 
 
+# ---------------------------------------------------------------------------
+# filter_line: validation
+# ---------------------------------------------------------------------------
+
+
+def test_filter_line_invalid_filter_type_raises_valueerror():
+    """An unrecognized filter_type should raise ValueError."""
+    data = pd.DataFrame({"dist": np.linspace(0, 100, 20), "val": np.zeros(20)})
+    with pytest.raises(ValueError, match="filter_type must be 'lowpass' or 'highpass'"):
+        filter_line(
+            data,
+            filter_width=10,
+            filter_type="bandpass",
+            data_column="val",
+            filter_by_column="dist",
+            progressbar=False,
+        )
+
+
+def test_filter_line_invalid_filter_shape_raises_valueerror():
+    """An unrecognized filter_shape should raise ValueError."""
+    data = pd.DataFrame({"dist": np.linspace(0, 100, 20), "val": np.zeros(20)})
+    with pytest.raises(ValueError, match="filter_shape must be"):
+        filter_line(
+            data,
+            filter_width=10,
+            filter_shape="triangle",
+            data_column="val",
+            filter_by_column="dist",
+            progressbar=False,
+        )
+
+
+def test_filter_line_invalid_engine_raises_valueerror():
+    """An unrecognized engine should raise ValueError."""
+    data = pd.DataFrame({"dist": np.linspace(0, 100, 20), "val": np.zeros(20)})
+    with pytest.raises(ValueError, match="engine must be 'scipy' or 'gmt'"):
+        filter_line(
+            data,
+            filter_width=10,
+            engine="matlab",
+            data_column="val",
+            filter_by_column="dist",
+            progressbar=False,
+        )
+
+
+def test_filter_line_robust_median_raises_valueerror_for_scipy_engine():
+    """robust=True with filter_shape='median' should raise ValueError for engine='scipy', since median is already robust."""
+    data = pd.DataFrame({"dist": np.linspace(0, 100, 20), "val": np.zeros(20)})
+    with pytest.raises(ValueError, match="already robust by construction"):
+        filter_line(
+            data,
+            filter_width=10,
+            filter_shape="median",
+            robust=True,
+            data_column="val",
+            filter_by_column="dist",
+            progressbar=False,
+        )
+
+
+# ---------------------------------------------------------------------------
+# filter_line: engine="scipy" (the default)
+# ---------------------------------------------------------------------------
+
+
 def test_filter_line_lowpass_removes_short_wavelength_noise():
     """A lowpass filter should remove short-wavelength noise while preserving the long-wavelength signal."""
     x = np.linspace(0, 3000, 300)
@@ -130,7 +204,7 @@ def test_filter_line_lowpass_removes_short_wavelength_noise():
 
     result = filter_line(
         data,
-        filter_type="g200",
+        filter_width=200,
         data_column="val",
         filter_by_column="dist",
         progressbar=False,
@@ -150,7 +224,8 @@ def test_filter_line_highpass_isolates_high_frequency():
 
     result = filter_line(
         data,
-        filter_type="g100+h",
+        filter_width=100,
+        filter_type="highpass",
         data_column="val",
         filter_by_column="dist",
         progressbar=False,
@@ -158,6 +233,32 @@ def test_filter_line_highpass_isolates_high_frequency():
 
     residual = (result.to_numpy() - high)[15:-15]
     assert np.max(np.abs(residual)) < 0.05
+
+
+def test_filter_line_highpass_complements_lowpass():
+    """The highpass filtered data should be exactly the data minus the lowpass filtered data."""
+    rng = np.random.default_rng(1)
+    x = np.linspace(0, 1000, 200)
+    values = np.sin(2 * np.pi * x / 1000) + 0.2 * rng.normal(size=200)
+    data = pd.DataFrame({"dist": x, "val": values})
+
+    low = filter_line(
+        data,
+        filter_width=100,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+    high = filter_line(
+        data,
+        filter_width=100,
+        filter_type="highpass",
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+
+    assert (low + high).to_numpy() == pytest.approx(values)
 
 
 @pytest.mark.parametrize("progressbar", [True, False])
@@ -180,7 +281,7 @@ def test_filter_line_groupby_preserves_row_alignment_interleaved(progressbar):
 
     result = filter_line(
         data,
-        filter_type="g200",
+        filter_width=200,
         data_column="val",
         filter_by_column="dist",
         groupby_column="line",
@@ -210,7 +311,7 @@ def test_filter_line_groupby_labels_sort_differently_than_appearance():
 
     result = filter_line(
         data,
-        filter_type="g200",
+        filter_width=200,
         data_column="val",
         filter_by_column="dist",
         groupby_column="line",
@@ -230,7 +331,7 @@ def test_filter_line_pad_kwargs_pass_through():
     data = pd.DataFrame({"dist": x, "val": np.sin(2 * np.pi * x / 1000)})
     result = filter_line(
         data,
-        filter_type="g100",
+        filter_width=100,
         data_column="val",
         filter_by_column="dist",
         pad_mode="constant",
@@ -241,17 +342,428 @@ def test_filter_line_pad_kwargs_pass_through():
     assert result.index.equals(data.index)
 
 
-def test_filter_line_invalid_filter_type_raises_gmt_error():
-    """An invalid filter_type string should surface as a GMT CLib error from pygmt."""
-    data = pd.DataFrame({"dist": np.linspace(0, 100, 20), "val": np.zeros(20)})
-    with pytest.raises(pygmt.exceptions.GMTCLibError):
+def test_filter_line_irregular_sampling():
+    """Irregularly spaced coords should be handled by resampling onto a regular grid internally."""
+    rng = np.random.default_rng(2)
+    x = np.sort(rng.uniform(0, 3000, 400))
+    signal = np.sin(2 * np.pi * x / 3000)
+    noise = 0.3 * np.sin(2 * np.pi * x / 50)
+    data = pd.DataFrame({"dist": x, "val": signal + noise})
+
+    # disable gap splitting: random spacing has occasional gaps > 10x median
+    result = filter_line(
+        data,
+        filter_width=200,
+        max_gap=np.inf,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    ).to_numpy()
+
+    # threshold is looser than the evenly-sampled test since irregular sampling
+    # aliases some of the short-wavelength noise (signal + noise amplitude is 1.3)
+    inside = (x > 200) & (x < 2800)
+    assert np.max(np.abs((result - signal)[inside])) < 0.15
+
+
+def test_filter_line_splits_at_large_gaps():
+    """Segments separated by a large gap should be filtered independently, not smeared together."""
+    x1 = np.arange(100, dtype=float)
+    x2 = x1 + 10_000
+    x = np.concatenate([x1, x2])
+    values = np.concatenate([np.zeros(100), np.full(100, 10.0)])
+    data = pd.DataFrame({"dist": x, "val": values})
+
+    split = filter_line(
+        data,
+        filter_width=30,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+    assert split.to_numpy() == pytest.approx(values)
+
+    # without splitting, the filter smears the step across the gap
+    smeared = filter_line(
+        data,
+        filter_width=30,
+        max_gap=np.inf,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+    assert not np.allclose(smeared.to_numpy(), values)
+
+
+def test_filter_line_short_segment_passes_through():
+    """Segments too short to filter should be returned unchanged by the lowpass filter."""
+    x = np.array([0.0, 1.0, 2.0, 500.0, 501.0, 502.0, 503.0, 504.0])
+    values = np.arange(8, dtype=float)
+    data = pd.DataFrame({"dist": x, "val": values})
+    result = filter_line(
+        data,
+        filter_width=2,
+        max_gap=10,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+    assert result.to_numpy()[:3] == pytest.approx(values[:3])
+
+
+def test_filter_line_unsorted_filter_by_column_raises_valueerror():
+    """An unsorted filter_by_column should raise ValueError for engine='scipy'."""
+    data = pd.DataFrame({"dist": [0.0, 2.0, 1.0], "val": [0.0, 0.0, 0.0]})
+    with pytest.raises(ValueError, match="must be sorted in ascending order"):
         filter_line(
             data,
-            filter_type="bogus_filter",
+            filter_width=1,
             data_column="val",
             filter_by_column="dist",
             progressbar=False,
         )
+
+
+@pytest.mark.parametrize("filter_shape", ["gaussian", "boxcar", "cosine", "median"])
+def test_filter_line_all_scipy_shapes_run_and_are_finite(filter_shape):
+    """Every filter_shape should run without error under engine='scipy' and return finite values."""
+    rng = np.random.default_rng(1)
+    x = np.linspace(0, 3000, 300)
+    values = np.sin(2 * np.pi * x / 3000) + 0.3 * rng.normal(size=300)
+    data = pd.DataFrame({"dist": x, "val": values})
+
+    result = filter_line(
+        data,
+        filter_width=500,
+        filter_shape=filter_shape,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+    assert np.all(np.isfinite(result.to_numpy()))
+
+
+# ---------------------------------------------------------------------------
+# filter_line: robust (despiking) with engine="scipy"
+# ---------------------------------------------------------------------------
+
+
+def test_filter_line_robust_ignores_outliers():
+    """robust=True should keep large spikes from smearing into the lowpass result."""
+    rng = np.random.default_rng(3)
+    x = np.linspace(0, 3000, 300)
+    signal = np.sin(2 * np.pi * x / 3000)
+    noise = 0.05 * rng.normal(size=300)
+    values = signal + noise
+    spike_idx = rng.choice(300, size=6, replace=False)
+    values[spike_idx] += rng.choice([-1, 1], 6) * 5.0
+    data = pd.DataFrame({"dist": x, "val": values})
+
+    not_robust = filter_line(
+        data,
+        filter_width=200,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    ).to_numpy()
+    robust = filter_line(
+        data,
+        filter_width=200,
+        robust=True,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    ).to_numpy()
+
+    inside = slice(20, -20)
+    not_robust_error = np.max(np.abs((not_robust - signal)[inside]))
+    robust_error = np.max(np.abs((robust - signal)[inside]))
+    assert robust_error < not_robust_error
+    assert robust_error < 0.1
+
+
+def test_filter_line_robust_matches_non_robust_without_outliers():
+    """With no outliers present, the robust and non-robust results should be close."""
+    rng = np.random.default_rng(4)
+    x = np.linspace(0, 3000, 300)
+    signal = np.sin(2 * np.pi * x / 3000)
+    values = signal + 0.05 * rng.normal(size=300)
+    data = pd.DataFrame({"dist": x, "val": values})
+
+    not_robust = filter_line(
+        data,
+        filter_width=200,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    ).to_numpy()
+    robust = filter_line(
+        data,
+        filter_width=200,
+        robust=True,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    ).to_numpy()
+
+    # a handful of points can still be flagged as false positives by chance, but the
+    # despiked result should stay close to the non-robust one
+    assert robust == pytest.approx(not_robust, abs=0.05)
+
+
+def test_despike_higher_threshold_flags_fewer_outliers():
+    """A higher robust_threshold should flag fewer points as outliers."""
+    rng = np.random.default_rng(5)
+    values = rng.normal(0, 1, 300)
+    spike_idx = rng.choice(300, size=6, replace=False)
+    values[spike_idx] += rng.choice([-1, 1], 6) * 20.0
+
+    strict = _despike(values, window=21, threshold=1.0)
+    lenient = _despike(values, window=21, threshold=50.0)
+
+    n_changed_strict = np.sum(strict != values)
+    n_changed_lenient = np.sum(lenient != values)
+    assert (
+        n_changed_lenient <= len(spike_idx) + 1
+    )  # only the genuine spikes (+/- 1 false positive)
+    assert n_changed_strict > n_changed_lenient
+
+
+# ---------------------------------------------------------------------------
+# _build_gmt_filter_type
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("filter_shape", "filter_width", "filter_type", "robust", "expected"),
+    [
+        ("gaussian", 1000, "lowpass", False, "g1000"),
+        ("gaussian", 1000, "highpass", False, "g1000+h"),
+        ("gaussian", 1000, "lowpass", True, "G1000"),
+        ("gaussian", 1000, "highpass", True, "G1000+h"),
+        ("boxcar", 500.0, "lowpass", False, "b500.0"),
+        ("cosine", 250, "highpass", True, "C250+h"),
+        ("median", 100, "lowpass", True, "M100"),
+    ],
+)
+def test_build_gmt_filter_type(
+    filter_shape, filter_width, filter_type, robust, expected
+):
+    """_build_gmt_filter_type should construct the right GMT filter1d string for each combination."""
+    assert (
+        _build_gmt_filter_type(filter_shape, filter_width, filter_type, robust)
+        == expected
+    )
+
+
+# ---------------------------------------------------------------------------
+# filter_line: engine="gmt"
+# ---------------------------------------------------------------------------
+
+
+def test_filter_line_gmt_engine_lowpass_removes_short_wavelength_noise():
+    """engine='gmt' should filter equivalently to the scipy default."""
+    x = np.linspace(0, 3000, 300)
+    signal = np.sin(2 * np.pi * x / 3000)
+    noise = 0.3 * np.sin(2 * np.pi * x / 50)
+    data = pd.DataFrame({"dist": x, "val": signal + noise})
+
+    result = filter_line(
+        data,
+        filter_width=200,
+        engine="gmt",
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+
+    residual = (result.to_numpy() - signal)[15:-15]
+    assert np.max(np.abs(residual)) < 0.05
+
+
+@pytest.mark.parametrize("filter_shape", ["gaussian", "boxcar", "cosine"])
+@pytest.mark.parametrize("filter_type", ["lowpass", "highpass"])
+def test_filter_line_gmt_and_scipy_engines_agree(filter_shape, filter_type):
+    """For the shared convolution filter_shapes, engine='gmt' and engine='scipy' should closely agree."""
+    rng = np.random.default_rng(0)
+    x = np.linspace(0, 3000, 300)
+    values = np.sin(2 * np.pi * x / 3000) + 0.5 * rng.normal(size=300)
+    data = pd.DataFrame({"dist": x, "val": values})
+
+    gmt = filter_line(
+        data,
+        filter_width=500,
+        filter_shape=filter_shape,
+        filter_type=filter_type,
+        engine="gmt",
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+    scipy_result = filter_line(
+        data,
+        filter_width=500,
+        filter_shape=filter_shape,
+        filter_type=filter_type,
+        engine="scipy",
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+
+    assert np.max(np.abs(gmt.to_numpy() - scipy_result.to_numpy())[15:-15]) < 0.05
+
+
+def test_filter_line_gmt_and_scipy_engines_agree_median():
+    """For filter_shape='median', engine='gmt' and engine='scipy' should reasonably agree (both are sliding-window median filters, though not pixel-identical)."""
+    rng = np.random.default_rng(0)
+    x = np.linspace(0, 3000, 300)
+    values = np.sin(2 * np.pi * x / 3000) + 0.5 * rng.normal(size=300)
+    data = pd.DataFrame({"dist": x, "val": values})
+
+    gmt = filter_line(
+        data,
+        filter_width=500,
+        filter_shape="median",
+        engine="gmt",
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+    scipy_result = filter_line(
+        data,
+        filter_width=500,
+        filter_shape="median",
+        engine="scipy",
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+
+    assert np.max(np.abs(gmt.to_numpy() - scipy_result.to_numpy())[15:-15]) < 0.2
+
+
+def test_filter_line_gmt_engine_groupby_preserves_row_alignment():
+    """Grouped filtering with engine='gmt' should return results realigned to the original row order."""
+    n = 150
+    dist = np.linspace(0, 3000, n)
+    sig_b = np.sin(2 * np.pi * dist / 3000)
+    sig_a = np.cos(2 * np.pi * dist / 3000)
+    data = pd.DataFrame(
+        {
+            "line": ["B"] * n + ["A"] * n,
+            "dist": np.concatenate([dist, dist]),
+            "val": np.concatenate([sig_b, sig_a]),
+        }
+    )
+
+    result = filter_line(
+        data,
+        filter_width=200,
+        engine="gmt",
+        data_column="val",
+        filter_by_column="dist",
+        groupby_column="line",
+        progressbar=False,
+    )
+
+    assert result.index.equals(data.index)
+    b_residual = (result.to_numpy()[:n] - sig_b)[15:-15]
+    a_residual = (result.to_numpy()[n:] - sig_a)[15:-15]
+    assert np.max(np.abs(b_residual)) < 0.05
+    assert np.max(np.abs(a_residual)) < 0.05
+
+
+def test_filter_line_gmt_engine_robust_uses_uppercase_code():
+    """engine='gmt' with robust=True should despike outliers, similar to the scipy engine's robust option."""
+    rng = np.random.default_rng(6)
+    x = np.linspace(0, 3000, 300)
+    signal = np.sin(2 * np.pi * x / 3000)
+    values = signal + 0.05 * rng.normal(size=300)
+    spike_idx = rng.choice(300, size=6, replace=False)
+    values[spike_idx] += rng.choice([-1, 1], 6) * 5.0
+    data = pd.DataFrame({"dist": x, "val": values})
+
+    not_robust = filter_line(
+        data,
+        filter_width=200,
+        engine="gmt",
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+    robust = filter_line(
+        data,
+        filter_width=200,
+        engine="gmt",
+        robust=True,
+        data_column="val",
+        filter_by_column="dist",
+        progressbar=False,
+    )
+
+    inside = slice(20, -20)
+    assert np.max(np.abs((robust.to_numpy() - signal)[inside])) < np.max(
+        np.abs((not_robust.to_numpy() - signal)[inside])
+    )
+
+
+def test_filter_line_gmt_engine_invalid_filter_width_raises_gmt_error():
+    """A filter_width GMT itself rejects (e.g. non-positive) should surface as a GMT CLib error."""
+    data = pd.DataFrame({"dist": np.linspace(0, 100, 20), "val": np.zeros(20)})
+    with pytest.raises(pygmt.exceptions.GMTCLibError):
+        filter_line(
+            data,
+            filter_width=-10,
+            engine="gmt",
+            data_column="val",
+            filter_by_column="dist",
+            progressbar=False,
+        )
+
+
+def test_filter_line_gmt_engine_missing_pygmt_raises_importerror(monkeypatch):
+    """When pygmt isn't installed, engine='gmt' should raise ImportError with installation instructions."""
+    monkeypatch.setattr("airbornegeo.filtering._HAS_PYGMT", False)
+
+    data = pd.DataFrame({"dist": np.linspace(0, 100, 20), "val": np.zeros(20)})
+    with pytest.raises(
+        ImportError,
+        match=re.escape(
+            "engine='gmt' requires the optional dependency 'pygmt'. Install it with "
+            "`pip install pygmt` or `mamba install pygmt`, or use engine='scipy' "
+            "instead (the default)."
+        ),
+    ):
+        filter_line(
+            data,
+            filter_width=200,
+            engine="gmt",
+            data_column="val",
+            filter_by_column="dist",
+            progressbar=False,
+        )
+
+
+def test_module_sets_has_pygmt_false_when_import_fails(monkeypatch):
+    """If importing pygmt fails, the module should set _HAS_PYGMT=False instead of raising."""
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "pygmt":
+            msg = "simulated missing pygmt"
+            raise ImportError(msg)
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    monkeypatch.delitem(sys.modules, "pygmt", raising=False)
+
+    try:
+        importlib.reload(filtering_module)
+        assert filtering_module._HAS_PYGMT is False
+    finally:
+        monkeypatch.setattr(builtins, "__import__", real_import)
+        importlib.reload(filtering_module)
 
 
 def _linear_ramp_grid_with_nan_patch():

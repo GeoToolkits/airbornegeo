@@ -459,11 +459,11 @@ def test_crossover_pair_levelling_subsets_lines_to_level():
     assert not np.allclose(f1.value_leveled.to_numpy(), f1.value.to_numpy())
 
 
-def test__crossover_pair_levelling_degree_and_filter_type_raises_userwarning():
-    """Providing both degree and filter_type should raise UserWarning naming both options."""
+def test__crossover_pair_levelling_degree_and_filter_kwargs_raises_userwarning():
+    """Providing both degree and filter_kwargs should raise UserWarning naming both options."""
     filled, inters_valid = _leveling_ready(BIAS, method="groups")
     with pytest.raises(
-        UserWarning, match="only provide either `filter_type` or `degree`, not both"
+        UserWarning, match="only provide either `filter_kwargs` or `degree`, not both"
     ):
         _crossover_pair_levelling(
             filled,
@@ -474,11 +474,11 @@ def test__crossover_pair_levelling_degree_and_filter_type_raises_userwarning():
             line_column="line",
             distance_column="dist_along_line",
             degree=1,
-            filter_type="g300",
+            filter_kwargs={"filter_width": 300},
         )
 
 
-def test_crossover_pair_levelling_degree_and_filter_type_public_wrapper_swallows_warning():
+def test_crossover_pair_levelling_degree_and_filter_kwargs_public_wrapper_swallows_warning():
     """The public wrapper catches the UserWarning internally and returns after zero successful iterations, leaving data unmodified aside from the missing levelled_col."""
     filled, inters_valid = _leveling_ready(BIAS, method="groups")
     data, inters = crossover_pair_levelling(
@@ -490,7 +490,7 @@ def test_crossover_pair_levelling_degree_and_filter_type_public_wrapper_swallows
         line_column="line",
         distance_column="dist_along_line",
         degree=1,
-        filter_type="g300",
+        filter_kwargs={"filter_width": 300},
         max_iterations=1,
         plot_convergence=False,
         progressbar=False,
@@ -500,11 +500,11 @@ def test_crossover_pair_levelling_degree_and_filter_type_public_wrapper_swallows
     assert list(inters.columns) == list(inters_valid.columns)
 
 
-def test__crossover_pair_levelling_no_degree_no_filter_type_raises_userwarning():
-    """Providing neither degree nor filter_type should raise UserWarning."""
+def test__crossover_pair_levelling_no_degree_no_filter_kwargs_raises_userwarning():
+    """Providing neither degree nor filter_kwargs should raise UserWarning."""
     filled, inters_valid = _leveling_ready(BIAS, method="groups")
     with pytest.raises(
-        UserWarning, match="must provide either `filter_type` or `degree`"
+        UserWarning, match="must provide either `filter_kwargs` or `degree`"
     ):
         _crossover_pair_levelling(
             filled,
@@ -552,7 +552,7 @@ def test_crossover_pair_levelling_mixed_line_types_propagates_through_public_wra
         )
 
 
-def test_crossover_pair_levelling_filter_type_runs_without_nans():
+def test_crossover_pair_levelling_filter_kwargs_runs_without_nans():
     """A GMT low-pass filter string should run and produce a levelled_col with no NaNs on the levelled lines."""
     filled, inters_valid = _leveling_ready(BIAS, method="groups")
     data, _inters = crossover_pair_levelling(
@@ -563,7 +563,7 @@ def test_crossover_pair_levelling_filter_type_runs_without_nans():
         levelled_col="value_leveled",
         line_column="line",
         distance_column="dist_along_line",
-        filter_type="g300",
+        filter_kwargs={"filter_width": 300},
         max_iterations=1,
         plot_convergence=False,
         progressbar=False,
@@ -748,12 +748,12 @@ def _mismatched_pair_fixture():
     return data, inters
 
 
-def test_crossover_pair_levelling_filter_type_no_valid_misties_zeroes_correction(
+def test_crossover_pair_levelling_filter_kwargs_no_valid_misties_zeroes_correction(
     caplog,
 ):
     """When the matched mistie value for a line's only intersection is NaN (e.g. the
     underlying data value at that crossing is missing), n_valid_misties ends up 0 and the
-    filter_type branch logs a warning and zero-fills the levelling correction rather than
+    filter_kwargs branch logs a warning and zero-fills the levelling correction rather than
     interpolating/filtering."""
     data, inters = _mismatched_pair_fixture()
     result, _inters = _crossover_pair_levelling(
@@ -764,7 +764,7 @@ def test_crossover_pair_levelling_filter_type_no_valid_misties_zeroes_correction
         levelled_col="value_leveled",
         line_column="line",
         distance_column="dist_along_line",
-        filter_type="g300",
+        filter_kwargs={"filter_width": 300},
         raise_error_if_unchanged=False,
     )
     f1 = result[result.line == "F1"]
@@ -997,8 +997,8 @@ def test_lines_to_level_subset_only_levels_named_lines():
         )
 
 
-def test_network_levelling_filter_type_runs_without_nans():
-    """Using filter_type instead of degree should run without error and produce no NaNs in the levelled column."""
+def test_network_levelling_filter_kwargs_runs_without_nans():
+    """Using filter_kwargs instead of degree should run without error and produce no NaNs in the levelled column."""
     filled, inters = _leveling_ready(BIAS, method="network")
     data, _inters = crossover_network_levelling(
         filled,
@@ -1007,7 +1007,7 @@ def test_network_levelling_filter_type_runs_without_nans():
         levelled_col="value_leveled",
         line_column="line",
         distance_column="dist_along_line",
-        filter_type="g300",
+        filter_kwargs={"filter_width": 300},
         relaxation_factor=0.5,
         max_iterations=1,
         plot_convergence=False,
@@ -1017,8 +1017,8 @@ def test_network_levelling_filter_type_runs_without_nans():
     assert not data["value_leveled"].isna().any()
 
 
-def test_private_network_levelling_raises_when_both_degree_and_filter_type_given():
-    """Passing both degree and filter_type should raise UserWarning from the private single-iteration helper."""
+def test_private_network_levelling_raises_when_both_degree_and_filter_kwargs_given():
+    """Passing both degree and filter_kwargs should raise UserWarning from the private single-iteration helper."""
     filled, inters = _leveling_ready(BIAS, method="network")
     with pytest.raises(UserWarning, match="only provide either"):
         _crossover_network_levelling(
@@ -1029,12 +1029,12 @@ def test_private_network_levelling_raises_when_both_degree_and_filter_type_given
             line_column="line",
             distance_column="dist_along_line",
             degree=1,
-            filter_type="g300",
+            filter_kwargs={"filter_width": 300},
         )
 
 
-def test_private_network_levelling_raises_when_neither_degree_nor_filter_type_given():
-    """Passing neither degree nor filter_type should raise UserWarning from the private single-iteration helper."""
+def test_private_network_levelling_raises_when_neither_degree_nor_filter_kwargs_given():
+    """Passing neither degree nor filter_kwargs should raise UserWarning from the private single-iteration helper."""
     filled, inters = _leveling_ready(BIAS, method="network")
     with pytest.raises(UserWarning, match="must provide either"):
         _crossover_network_levelling(
@@ -1174,7 +1174,7 @@ def _mismatched_network_fixture():
     easting, northing) so it computes a valid crossover_error_0 for both pairs, but the
     hand-set dist_along_line1/2 in `inters` for F1/T1 deliberately don't match the
     distance_column value on F1's is_intersection row in `data`, so the np.isclose
-    distance-match inside the filter_type branch fails to find any match. The extra
+    distance-match inside the filter_kwargs branch fails to find any match. The extra
     F2/T2 crossing (left out of lines_to_level, so passed through unchanged) keeps at
     least one non-NaN mistie in the mistie table, avoiding an all-NaN RMSE warning."""
     data = pd.DataFrame(
@@ -1201,7 +1201,7 @@ def _mismatched_network_fixture():
     return data, inters
 
 
-def test_crossover_network_levelling_filter_type_no_match_continues():
+def test_crossover_network_levelling_filter_kwargs_no_match_continues():
     """When one of a line's intersection rows has a distance_column value that doesn't
     np.isclose-match the dist_along_line1 stored in inters, the match lookup for that row
     returns empty and the loop 'continue's (skipping the mistie assignment for that row)
@@ -1220,7 +1220,7 @@ def test_crossover_network_levelling_filter_type_no_match_continues():
         levelled_col="value_leveled",
         line_column="line",
         distance_column="dist_along_line",
-        filter_type="g300",
+        filter_kwargs={"filter_width": 300},
         lines_to_level=["F1"],
         raise_error_if_unchanged=False,
     )
@@ -1228,7 +1228,7 @@ def test_crossover_network_levelling_filter_type_no_match_continues():
     assert not f1.value_leveled.isna().any()
 
 
-def test_crossover_network_levelling_filter_type_matched_nan_mistie_zeroes_correction(
+def test_crossover_network_levelling_filter_kwargs_matched_nan_mistie_zeroes_correction(
     caplog,
 ):
     """When a data row's distance value correctly matches its intersection's
@@ -1251,7 +1251,7 @@ def test_crossover_network_levelling_filter_type_matched_nan_mistie_zeroes_corre
         levelled_col="value_leveled",
         line_column="line",
         distance_column="dist_along_line",
-        filter_type="g300",
+        filter_kwargs={"filter_width": 300},
         lines_to_level=["F1"],
         raise_error_if_unchanged=False,
     )
@@ -1349,11 +1349,11 @@ def test_alternating_iterative_line_levelling_missing_line_type_raises():
         )
 
 
-def test_alternating_iterative_line_levelling_degree_and_filter_type_raises():
-    """Providing both degree and filter_type should raise UserWarning before any iteration runs."""
+def test_alternating_iterative_line_levelling_degree_and_filter_kwargs_raises():
+    """Providing both degree and filter_kwargs should raise UserWarning before any iteration runs."""
     filled, inters_valid = _leveling_ready(BIAS, method="groups")
     with pytest.raises(
-        UserWarning, match="only provide either `filter_type` or `degree`, not both"
+        UserWarning, match="only provide either `filter_kwargs` or `degree`, not both"
     ):
         alternating_iterative_line_levelling(
             filled,
@@ -1363,18 +1363,18 @@ def test_alternating_iterative_line_levelling_degree_and_filter_type_raises():
             line_column="line",
             distance_column="dist_along_line",
             degree=1,
-            filter_type="g300",
+            filter_kwargs={"filter_width": 300},
             max_iterations=1,
             plot_convergence=False,
             progressbar=False,
         )
 
 
-def test_alternating_iterative_line_levelling_no_degree_no_filter_type_raises():
-    """Providing neither degree nor filter_type should raise UserWarning before any iteration runs."""
+def test_alternating_iterative_line_levelling_no_degree_no_filter_kwargs_raises():
+    """Providing neither degree nor filter_kwargs should raise UserWarning before any iteration runs."""
     filled, inters_valid = _leveling_ready(BIAS, method="groups")
     with pytest.raises(
-        UserWarning, match="must provide either `filter_type` or `degree`"
+        UserWarning, match="must provide either `filter_kwargs` or `degree`"
     ):
         alternating_iterative_line_levelling(
             filled,
