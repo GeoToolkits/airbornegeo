@@ -222,8 +222,8 @@ def test_create_intersection_table_block_size_drops_near_duplicates(monkeypatch)
         {
             "line1": ["A", "A", "A"],
             "line2": ["B", "B", "B"],
-            "line1_dist": [1.0, 2.0, 1.0],
-            "line2_dist": [1.0, 2.0, 1.0],
+            "line1_data_dist": [1.0, 2.0, 1.0],
+            "line2_data_dist": [1.0, 2.0, 1.0],
             "is_buffered": [False, False, False],
             "geometry": [Point(0, 0), Point(0.5, 0), Point(100, 100)],
         },

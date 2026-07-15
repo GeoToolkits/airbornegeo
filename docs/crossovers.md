@@ -25,4 +25,5 @@ These crossovers are only in 2D space (map view) since flight heights can differ
 crossovers_04_interpolating_values
 crossovers_05_crossover_errors
 crossovers_06_update_crossovers_with_equivalent_sources
+crossovers_07_deduplicating_intersections
 ```

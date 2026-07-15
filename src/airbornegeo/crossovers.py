@@ -185,8 +185,10 @@ def get_line_intersections(
         Columns:
             line1
             line2
-            line1_dist
-            line2_dist
+            line1_data_dist
+            line2_data_dist
+            line1_along_dist
+            line2_along_dist
             is_buffered
             is_proximity
             geometry
@@ -393,8 +395,18 @@ def get_line_intersections(
                 {
                     "line1": line1_name,
                     "line2": line2_name,
-                    "line1_dist": _nearest_data_dist(point_coords1[line1_name], point),
-                    "line2_dist": _nearest_data_dist(point_coords2[line2_name], point),
+                    "line1_data_dist": _nearest_data_dist(
+                        point_coords1[line1_name], point
+                    ),
+                    "line2_data_dist": _nearest_data_dist(
+                        point_coords2[line2_name], point
+                    ),
+                    "line1_along_dist": original_lines1[line1_name].line_locate_point(
+                        point
+                    ),
+                    "line2_along_dist": original_lines2[line2_name].line_locate_point(
+                        point
+                    ),
                     "is_buffered": is_buffered,
                     "is_proximity": is_proximity,
                     "geometry": point,
@@ -448,6 +460,7 @@ def create_intersection_table(
     buffer_dist: float | None = None,
     proximity_dist: float | None = None,
     block_size: float | None = None,
+    min_spacing: float | None = None,
     grid_size: float = 1,
     progressbar: bool = True,
 ) -> gpd.GeoDataFrame:
@@ -518,6 +531,13 @@ def create_intersection_table(
         For a spatial block of this width, intersection within with the same pairs of
         lines (duplicates) will be dropped, except the intersection with the lowest
         min_dist. This is useful for when lines cross very often.
+    min_spacing : float, optional
+        Like `block_size`, but measured in 1D distance along the lines instead of in
+        a 2D spatial window: an intersection is dropped if a better one of the same
+        line pair is within `min_spacing` along *both* lines. Unlike `block_size`,
+        this retains spatially-close crossings which are far apart along one of the
+        lines (e.g. a hairpin re-crossing). If both `block_size` and `min_spacing`
+        are given, an intersection must clear both tests to be kept, by default None
     grid_size : float, optional
         The resolution to snap the intersection coordinates to.  by default 1
     progressbar : bool, optional
@@ -586,8 +606,8 @@ def create_intersection_table(
             columns=[
                 "line1",
                 "line2",
-                "line1_dist",
-                "line2_dist",
+                "line1_data_dist",
+                "line2_data_dist",
                 "is_buffered",
                 "is_proximity",
                 "geometry",
@@ -602,12 +622,27 @@ def create_intersection_table(
 
     # get the largest of the two distance to each lines' nearest data point to the
     # theoretical intersection
-    inters["max_dist"] = inters[["line1_dist", "line2_dist"]].max(axis=1)
+    inters["max_dist"] = inters[["line1_data_dist", "line2_data_dist"]].max(axis=1)
 
-    # remove duplicate intersections within a block
-    if block_size is not None:
+    # remove duplicate intersections, either within a 2D spatial block
+    # (block_size), within a 1D window of distance along both lines
+    # (min_spacing), or both
+    if block_size is not None or min_spacing is not None:
+
+        def _is_duplicate(row: pd.Series, kept: pd.Series) -> bool:
+            if (
+                block_size is not None
+                and row.geometry.distance(kept.geometry) < block_size
+            ):
+                return True
+            return (
+                min_spacing is not None
+                and abs(row.line1_along_dist - kept.line1_along_dist) < min_spacing
+                and abs(row.line2_along_dist - kept.line2_along_dist) < min_spacing
+            )
+
         a = len(inters)
-        kept = []
+        kept_inds = []
         # process each line pair independently
         for (_, _), group in inters.groupby(["line1", "line2"], sort=False):
             # process true intersections before proximity-based ones, then lowest
@@ -620,21 +655,18 @@ def create_intersection_table(
             group_sorted = group.sort_values(sort_cols)
             selected = []
             for idx, row in group_sorted.iterrows():
-                point = row.geometry
-                # keep if it is not within block_size of an already-kept intersection
-                if all(
-                    point.distance(group_sorted.loc[i].geometry) >= block_size
-                    for i in selected
-                ):
+                # keep if it is not a duplicate of an already-kept intersection
+                if not any(_is_duplicate(row, group_sorted.loc[i]) for i in selected):
                     selected.append(idx)
-            kept.extend(selected)
-        inters = inters.loc[kept].sort_index()
+            kept_inds.extend(selected)
+        inters = inters.loc[kept_inds].sort_index()
         b = len(inters)
         if a != b:
             logger.debug(
-                "Dropped %s duplicate intersections within %.1f m blocks",
+                "Dropped %s duplicate intersections (block_size=%s, min_spacing=%s)",
                 a - b,
                 block_size,
+                min_spacing,
             )
 
     # deduplicate on line names and coordinates
@@ -705,7 +737,9 @@ def create_intersection_table(
             prior_len - len(inters),
         )
 
-    return inters.drop(columns=["line1_dist", "line2_dist"]).reset_index(drop=True)
+    return inters.drop(columns=["line1_data_dist", "line2_data_dist"]).reset_index(
+        drop=True
+    )
 
 
 def inspect_intersections(
