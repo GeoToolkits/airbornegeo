@@ -362,7 +362,8 @@ def inspect_lines(
 def plotly_points(
     df: pd.DataFrame,
     *,
-    color_col: str,
+    color_col: str | None = None,
+    color: str = "blue",
     hover_cols: list[str] | None = None,
     size: int = 4,
     edge_width: int | None = None,
@@ -374,67 +375,113 @@ def plotly_points(
     absolute: bool = False,
     theme: str | None = None,
     title: str | None = None,
-) -> None:
+    fig: go.Figure | None = None,
+) -> go.Figure:
     """
     Create a scatterplot of spatial data using columns 'easting' and 'northing'.
+
+    If `color_col` is None, points are plotted with the constant color `color`.
+    Pass an existing figure via `fig` to add the points on top of it.
     """
     _check_coord_columns(df)
-    data = df[df[color_col].notna()].copy()
-    assert len(data) > 0, "supplied column of data has no non nan values!"
 
-    # either
-    if cmap_lims is None and color_col is not None:
-        vmin, vmax = airbornegeo.get_min_max(
-            data[color_col],
-            robust=robust,
-            absolute=absolute,
+    if color_col is None:
+        data = df.copy()
+        new_fig = px.scatter(
+            data,
+            x="easting",
+            y="northing",
+            hover_data=hover_cols,
+            template=theme,
+            render_mode="webgl",
         )
-        cmap_lims = (vmin, vmax)
+        new_fig.update_traces(marker={"color": color})
     else:
-        vmin, vmax = cmap_lims
+        data = df[df[color_col].notna()].copy()
+        assert len(data) > 0, "supplied column of data has no non nan values!"
 
-    if cmap is None:
-        if (cmap_lims[0] < 0) and (cmap_lims[1] > 0):  # pylint: disable=R1716
-            cmap = "balance"
-            cmap_middle = 0
+        if cmap_lims is None:
+            vmin, vmax = airbornegeo.get_min_max(
+                data[color_col],
+                robust=robust,
+                absolute=absolute,
+            )
+            cmap_lims = (vmin, vmax)
         else:
-            cmap = None
+            vmin, vmax = cmap_lims
+
+        if cmap is None:
+            if (cmap_lims[0] < 0) and (cmap_lims[1] > 0):  # pylint: disable=R1716
+                cmap = "balance"
+                cmap_middle = 0
+            else:
+                cmap = None
+                cmap_middle = None
+        else:
             cmap_middle = None
-    else:
-        cmap_middle = None
 
-    if cmap_middle == 0:
-        max_abs = vd.maxabs((vmin, vmax))
-        cmap_lims = (-max_abs, max_abs)
+        if cmap_middle == 0:
+            max_abs = vd.maxabs((vmin, vmax))
+            cmap_lims = (-max_abs, max_abs)
 
-    fig = px.scatter(
-        data,
-        x="easting",
-        y="northing",
-        color=data[color_col],
-        color_continuous_scale=cmap,
-        color_continuous_midpoint=cmap_middle,
-        range_color=cmap_lims,
-        hover_data=hover_cols,
-        template=theme,
+        new_fig = px.scatter(
+            data,
+            x="easting",
+            y="northing",
+            color=data[color_col],
+            color_continuous_scale=cmap,
+            color_continuous_midpoint=cmap_middle,
+            range_color=cmap_lims,
+            hover_data=hover_cols,
+            template=theme,
+            render_mode="webgl",
+        )
+
+    new_fig.update_traces(
+        marker={"size": size, "line": {"color": edge_color, "width": edge_width}}
     )
-    fig.update_yaxes(
+
+    if fig is not None:
+        if color_col is not None:
+            # px stores the colorscale/limits in layout.coloraxis, which is lost
+            # when copying only the traces; move them onto the markers so they
+            # don't fall back to the existing figure's coloraxis
+            n_colorbars = 0
+            if fig.layout.coloraxis.colorscale is not None:
+                n_colorbars += 1
+            for trace in fig.data:
+                marker = getattr(trace, "marker", None)
+                if marker is not None and getattr(marker, "showscale", False):
+                    n_colorbars += 1
+            new_fig.update_traces(
+                marker={
+                    "coloraxis": None,
+                    "colorscale": new_fig.layout.coloraxis.colorscale,
+                    "cmin": cmap_lims[0],
+                    "cmax": cmap_lims[1],
+                    "showscale": True,
+                    "colorbar": {
+                        "title": color_col,
+                        "x": 1.02 + 0.15 * n_colorbars,
+                    },
+                }
+            )
+        fig.add_traces(new_fig.data)
+        return fig
+
+    new_fig.update_yaxes(
         scaleanchor="x",
         scaleratio=1,
     )
 
-    fig.update_layout(
+    new_fig.update_layout(
         title_text=title,
         autosize=False,
         width=800,
         height=800,
     )
 
-    fig.update_traces(
-        marker={"size": size, "line": {"color": edge_color, "width": edge_width}}
-    )
-
-    fig.show()
+    return new_fig
 
 
 def plotly_profiles(
