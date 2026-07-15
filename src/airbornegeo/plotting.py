@@ -24,7 +24,7 @@ def add_scalebar(ax, scale_length, position="bottom left"):
     if position == "bottom left":
         x_start = ax.get_xlim()[0] + (0.1 * x_width)
     elif position == "bottom right":
-        x_start = ax.get_xlim()[1] - (0.1 * x_width)
+        x_start = ax.get_xlim()[1] - (0.1 * x_width) - scale_length
     else:
         msg = "invalid string for position"
         raise ValueError(msg)
