@@ -42,8 +42,8 @@ def test_block_reduce_string_reduce_by_two_data_columns():
     result = block_reduce(
         data, np.mean, spacing=200, reduce_by="dist", progressbar=False
     )
-    assert list(result.columns) == ["dist", "tmp", "value", "value2"]
-    assert (result["tmp"] == 0.0).all()
+    assert list(result.columns) == ["dist", "value", "value2"]
+    assert "tmp" not in result.columns
     assert result["dist"].iloc[0] == pytest.approx(71.964053, abs=1e-5)
     assert result["value"].iloc[0] == pytest.approx(3.302175, abs=1e-5)
     assert result["value2"].iloc[0] == pytest.approx(2.092373, abs=1e-5)
@@ -150,7 +150,7 @@ def test_block_reduce_numeric_groupby_column_dtype_overwrite_bug():
         groupby_column="line",
         progressbar=False,
     )
-    assert list(result.columns) == ["dist", "tmp", "line", "value"]
+    assert list(result.columns) == ["dist", "line", "value"]
     assert result["line"].tolist() == [1, 2]
     assert result["line"].dtype == np.int64
     assert result["value"].tolist() == pytest.approx([1.5, 3.5])
@@ -210,7 +210,7 @@ def test_block_reduce_excludes_non_numeric_columns():
         data, np.mean, spacing=200, reduce_by="dist", progressbar=False
     )
     assert "label" not in result.columns
-    assert list(result.columns) == ["dist", "tmp", "value"]
+    assert list(result.columns) == ["dist", "value"]
 
 
 def test_block_reduce_center_coordinates_kwarg_changes_coordinates():
