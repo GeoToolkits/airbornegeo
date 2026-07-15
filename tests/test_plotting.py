@@ -202,13 +202,8 @@ def _flightline_df():
     )
 
 
-def test_plotly_points_easting_northing_autodetect(monkeypatch):
+def test_plotly_points_easting_northing_autodetect():
     """With no explicit coord_names, plotly_points() should autodetect the easting/northing columns for the x data."""
-    captured = []
-    monkeypatch.setattr(
-        go.Figure, "show", lambda self, *_a, **_k: captured.append(self)
-    )
-
     data = pd.DataFrame(
         {
             "easting": [0.0, 1.0, 2.0],
@@ -216,9 +211,9 @@ def test_plotly_points_easting_northing_autodetect(monkeypatch):
             "val": [1.0, 2.0, 3.0],
         }
     )
-    plotly_points(data, color_col="val")
-    assert len(captured) == 1
-    assert list(captured[0].data[0].x) == pytest.approx([0.0, 1.0, 2.0])
+    fig = plotly_points(data, color_col="val")
+    assert isinstance(fig, go.Figure)
+    assert list(fig.data[0].x) == pytest.approx([0.0, 1.0, 2.0])
 
 
 def test_plotly_points_all_nan_color_column_raises(monkeypatch):
