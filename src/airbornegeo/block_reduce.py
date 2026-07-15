@@ -56,9 +56,14 @@ def block_reduce(
     if isinstance(reduce_by, str):
         reduce_by = (reduce_by,)
 
+    dummy_coord = None
     if len(reduce_by) == 1:
-        reduce_by = (reduce_by[0], "tmp")  # add dummy column for second coordinate
-        data["tmp"] = 0.0
+        dummy_coord = "tmp"
+        reduce_by = (
+            reduce_by[0],
+            dummy_coord,
+        )  # add dummy column for second coordinate
+        data[dummy_coord] = 0.0
 
     assert all(col in data.columns for col in reduce_by), (
         f"{reduce_by} must be in the dataframe"
@@ -85,7 +90,7 @@ def block_reduce(
             data=input_data,
         )
 
-        out = {c: coordinates[i] for i, c in enumerate(reduce_by)}
+        out = {c: coordinates[i] for i, c in enumerate(reduce_by) if c != dummy_coord}
 
         if len(input_data_names) == 1:
             out[input_data_names[0]] = blocked_data
