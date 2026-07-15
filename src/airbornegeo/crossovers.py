@@ -124,6 +124,7 @@ def get_line_intersections(
     line_column: str,
     grid_size: float = 1,
     buffer_dist: float | None = None,
+    proximity_dist: float | None = None,
     progressbar: bool = True,
 ) -> gpd.GeoDataFrame:
     """
@@ -167,6 +168,14 @@ def get_line_intersections(
     buffer_dist : float | None, optional
         Distance to extend the ends of each line before calculating
         intersections.
+    proximity_dist : float | None, optional
+        If set, line pairs which come within this distance of each other are also
+        considered to cross, even if they never actually intersect (e.g. roughly
+        parallel lines which converge). For every data vertex of one line which is
+        within ``proximity_dist`` of the other line, a crossover point is created at
+        the midpoint between that vertex and the nearest point on the other line.
+        This can create many crossovers where lines run close together; reduce them
+        with the ``block_size`` argument of :func:`create_intersection_table`.
     progressbar : bool, optional
         Show a progress bar while calculating intersections, by default True.
 
@@ -178,6 +187,8 @@ def get_line_intersections(
             line2
             line1_dist
             line2_dist
+            is_buffered
+            is_proximity
             geometry
     """
 
@@ -230,17 +241,26 @@ def get_line_intersections(
                 lambda g: extend_line(g, buffer_dist)
             )
 
-    # dictionaries of original points for nearest-point distance calculation
-    point_groups1 = {  # noqa: C416 # pylint: disable=unnecessary-comprehension
-        name: df for name, df in lines1_gdf.groupby(line_column)
+    # dictionaries of original point coordinates for nearest-point distance
+    # calculation, as numpy arrays for speed
+    point_coords1 = {
+        name: shapely.get_coordinates(df.geometry)
+        for name, df in lines1_gdf.groupby(line_column)
     }
 
     if network:
-        point_groups2 = point_groups1
+        point_coords2 = point_coords1
     else:
-        point_groups2 = {  # noqa: C416 # pylint: disable=unnecessary-comprehension
-            name: df for name, df in lines2_gdf.groupby(line_column)
+        point_coords2 = {
+            name: shapely.get_coordinates(df.geometry)
+            for name, df in lines2_gdf.groupby(line_column)
         }
+
+    def _nearest_data_dist(coords: np.ndarray, point: Point) -> float:
+        """distance from point to the nearest data point of a line"""
+        return np.sqrt(
+            np.min((coords[:, 0] - point.x) ** 2 + (coords[:, 1] - point.y) ** 2)
+        )
 
     # create iterator over line pairs
     if network:
@@ -268,6 +288,23 @@ def get_line_intersections(
         )
     )
 
+    # precompute per-line data reused for every pair in the proximity search:
+    # prepared geometries (faster repeated distance predicates), bounding boxes
+    # (cheap pair rejection) and vertex point arrays
+    if proximity_dist is not None:
+        for g in itertools.chain(original_lines1.values(), original_lines2.values()):
+            shapely.prepare(g)
+        bounds1 = {name: g.bounds for name, g in original_lines1.items()}
+        bounds2 = {name: g.bounds for name, g in original_lines2.items()}
+        vertex_points1 = {
+            name: shapely.points(shapely.get_coordinates(g))
+            for name, g in original_lines1.items()
+        }
+        vertex_points2 = {
+            name: shapely.points(shapely.get_coordinates(g))
+            for name, g in original_lines2.items()
+        }
+
     # calculate intersections
     intersections = []
     for line1, line2 in (
@@ -280,21 +317,60 @@ def get_line_intersections(
             line2.geometry,
             grid_size=grid_size,
         )
-        if inter.geom_type == "Point":
-            points = [inter]
-        elif inter.geom_type == "MultiPoint":
-            points = list(inter.geoms)
-        else:
-            if inter.is_empty:
+        # unpack the intersection into individual points: keep Points directly and
+        # reduce each non-point component (e.g. tiny LineString overlaps from
+        # near-tangent, low-angle crossings snapped by grid_size) to one
+        # representative point each, so separate crossing regions aren't collapsed
+        # into a single point
+        points = []
+        for geom in getattr(inter, "geoms", [inter]):
+            if geom.is_empty:
                 continue
-            points = [inter.representative_point()]
+            if geom.geom_type == "Point":
+                points.append(geom)
+            elif geom.geom_type == "MultiPoint":
+                points.extend(geom.geoms)
+            else:
+                points.append(geom.representative_point())
 
         coords = shapely.get_coordinates(points)
 
-        if len(coords) == 0:
+        # find near-approach crossovers between lines within proximity_dist of
+        # each other, at the midpoints between each line's data vertices and the
+        # nearest point on the other line
+        proximity_coords = []
+        if proximity_dist is not None:
+            b1 = bounds1[line1_name]
+            b2 = bounds2[line2_name]
+            # cheap bounding-box rejection before the exact distance test
+            boxes_close = (
+                b1[0] - proximity_dist <= b2[2]
+                and b2[0] - proximity_dist <= b1[2]
+                and b1[1] - proximity_dist <= b2[3]
+                and b2[1] - proximity_dist <= b1[3]
+            )
+            geom1 = original_lines1[line1_name]
+            geom2 = original_lines2[line2_name]
+            if boxes_close and shapely.dwithin(geom1, geom2, proximity_dist):
+                for verts, other in (
+                    (vertex_points1[line1_name], geom2),
+                    (vertex_points2[line2_name], geom1),
+                ):
+                    close = verts[shapely.dwithin(other, verts, proximity_dist)]
+                    if len(close) > 0:
+                        # midpoints between each close vertex and the nearest
+                        # point on the other line
+                        segments = shapely.shortest_line(other, close)
+                        ends = shapely.get_coordinates(segments).reshape(-1, 2, 2)
+                        proximity_coords.extend(ends.mean(axis=1))
+
+        if len(coords) == 0 and len(proximity_coords) == 0:
             continue
 
-        for coord in coords:
+        candidates = [(coord, False) for coord in coords] + [
+            (coord, True) for coord in proximity_coords
+        ]
+        for coord, is_proximity in candidates:
             point = Point(coord)
             # point = shapely.set_precision(
             #     Point(coord),
@@ -303,7 +379,7 @@ def get_line_intersections(
             # Determine whether the intersection is only possible because of buffering
             is_buffered = False
 
-            if buffer_dist is not None:
+            if buffer_dist is not None and not is_proximity:
                 # is_buffered = (
                 #     not original_lines1[line1_name].intersects(point)
                 #     or not original_lines2[line2_name].intersects(point)
@@ -317,13 +393,10 @@ def get_line_intersections(
                 {
                     "line1": line1_name,
                     "line2": line2_name,
-                    "line1_dist": (
-                        point_groups1[line1_name].geometry.distance(point).min()
-                    ),
-                    "line2_dist": (
-                        point_groups2[line2_name].geometry.distance(point).min()
-                    ),
+                    "line1_dist": _nearest_data_dist(point_coords1[line1_name], point),
+                    "line2_dist": _nearest_data_dist(point_coords2[line2_name], point),
                     "is_buffered": is_buffered,
+                    "is_proximity": is_proximity,
                     "geometry": point,
                 }
             )
@@ -373,6 +446,7 @@ def create_intersection_table(
     exclude_ints: list[typing.Any | tuple[typing.Any, typing.Any]] | None = None,
     cutoff_dist: float | None = None,
     buffer_dist: float | None = None,
+    proximity_dist: float | None = None,
     block_size: float | None = None,
     grid_size: float = 1,
     progressbar: bool = True,
@@ -430,6 +504,16 @@ def create_intersection_table(
     buffer_dist : float, optional
         The distance to extend the line representation of the data points, useful for
         creating intersection which are just beyond the end of a line, by default None
+    proximity_dist : float, optional
+        If set, line pairs which come within this distance of each other are also
+        considered to cross, even if they never actually intersect (e.g. roughly
+        parallel lines which converge to within `proximity_dist` but extending the
+        line ends with `buffer_dist` still creates no crossing). For every data
+        vertex of one line within `proximity_dist` of the other line, a crossover is
+        created at the midpoint between that vertex and the nearest point on the
+        other line. This can create many crossovers where lines run close together;
+        reduce them with `block_size`. These crossovers are flagged in the
+        `is_proximity` column, by default None
     block_size : float, optional
         For a spatial block of this width, intersection within with the same pairs of
         lines (duplicates) will be dropped, except the intersection with the lowest
@@ -475,6 +559,7 @@ def create_intersection_table(
                 line_column=line_column,
                 grid_size=grid_size,
                 buffer_dist=buffer_dist,
+                proximity_dist=proximity_dist,
                 progressbar=progressbar,
             )
         elif method == "network":
@@ -485,6 +570,7 @@ def create_intersection_table(
                 line_column=line_column,
                 grid_size=grid_size,
                 buffer_dist=buffer_dist,
+                proximity_dist=proximity_dist,
                 progressbar=progressbar,
             )
         else:
@@ -503,6 +589,7 @@ def create_intersection_table(
                 "line1_dist",
                 "line2_dist",
                 "is_buffered",
+                "is_proximity",
                 "geometry",
             ],
             geometry="geometry",
@@ -523,8 +610,14 @@ def create_intersection_table(
         kept = []
         # process each line pair independently
         for (_, _), group in inters.groupby(["line1", "line2"], sort=False):
-            # process lowest max_dist first
-            group_sorted = group.sort_values("max_dist")
+            # process true intersections before proximity-based ones, then lowest
+            # max_dist first
+            sort_cols = (
+                ["is_proximity", "max_dist"]
+                if "is_proximity" in group.columns
+                else ["max_dist"]
+            )
+            group_sorted = group.sort_values(sort_cols)
             selected = []
             for idx, row in group_sorted.iterrows():
                 point = row.geometry
