@@ -4,6 +4,7 @@ import typing
 import numpy as np
 import pandas as pd
 import scipy.spatial
+import shapely
 import verde as vd
 from numpy.typing import NDArray
 from tqdm.autonotebook import tqdm
@@ -143,6 +144,47 @@ def get_min_max(
 
     assert v_min <= v_max, "min value should be less than or equal to max value"  # pylint: disable=possibly-used-before-assignment
     return (v_min, v_max)
+
+
+def largest_line_dimensions(
+    data: pd.DataFrame,
+    line_column: str,
+) -> pd.Series:
+    """
+    Largest dimension of each line, taken as the longest side of its minimum
+    rotated (oriented) bounding box. Robust to curved/circular lines, where
+    distance-along-line overstates and end-to-end distance understates the
+    line's spatial extent.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        The dataframe containing columns 'easting', 'northing', and the column given by
+        line_column. Rows with NaN coordinates are ignored.
+    line_column : str
+        name of the column containing the line number/name
+
+    Returns
+    -------
+    pd.Series
+        largest dimension of each line, indexed by line
+    """
+    _check_coord_columns(data)
+    assert line_column in data.columns, f"['{line_column}'] must be in the dataframe"
+
+    data = data.dropna(subset=["easting", "northing"])
+
+    dims = {}
+    for line, df in data.groupby(line_column):
+        points = shapely.MultiPoint(np.column_stack((df["easting"], df["northing"])))
+        rect = shapely.oriented_envelope(points)
+        if isinstance(rect, shapely.Polygon):
+            coords = np.asarray(rect.exterior.coords)
+            sides = np.hypot(*np.diff(coords, axis=0).T)
+            dims[line] = sides.max()
+        else:  # degenerate: perfectly straight line or single point
+            dims[line] = rect.length
+    return pd.Series(dims, name="largest_dimension").rename_axis(line_column)
 
 
 def median_line_spacing(

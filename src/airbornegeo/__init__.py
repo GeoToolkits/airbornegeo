@@ -134,6 +134,7 @@ from .trend import (  # noqa: E402
 )
 from .utils import (  # noqa: E402
     get_min_max,
+    largest_line_dimensions,
     median_line_spacing,
     normalize_values,
     rmse,

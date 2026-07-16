@@ -10,6 +10,7 @@ from airbornegeo.utils import (
     _check_coord_columns,
     _iter_groups,
     get_min_max,
+    largest_line_dimensions,
     median_line_spacing,
     normalize_values,
     rmse,
@@ -150,6 +151,70 @@ def test_median_line_spacing_missing_line_column_raises():
         AssertionError, match=r"\['not_a_col'\] must be in the dataframe"
     ):
         median_line_spacing(data, line_column="not_a_col")
+
+
+def test_largest_line_dimensions_straight_and_l_shaped_lines():
+    """A straight line's dimension is its length; an L-shaped line's is its long leg."""
+    n = 11
+    straight = pd.DataFrame(
+        {"easting": np.linspace(0, 1000, n), "northing": np.zeros(n), "line": "A"}
+    )
+    l_shaped = pd.DataFrame(
+        {
+            "easting": np.concatenate([np.linspace(0, 500, n), np.full(n, 500.0)]),
+            "northing": np.concatenate([np.zeros(n), np.linspace(0, 200, n)]),
+            "line": "B",
+        }
+    )
+    data = pd.concat([straight, l_shaped], ignore_index=True)
+    dims = largest_line_dimensions(data, line_column="line")
+    assert dims["A"] == pytest.approx(1000.0)
+    assert dims["B"] == pytest.approx(500.0)
+
+
+def test_largest_line_dimensions_circular_line():
+    """A circular line's largest dimension should be ~its diameter, not its perimeter."""
+    theta = np.linspace(0, 2 * np.pi, 100, endpoint=False)
+    data = pd.DataFrame(
+        {
+            "easting": 500 * np.cos(theta),
+            "northing": 500 * np.sin(theta),
+            "line": "A",
+        }
+    )
+    dims = largest_line_dimensions(data, line_column="line")
+    assert dims["A"] == pytest.approx(1000.0, rel=0.01)
+
+
+def test_largest_line_dimensions_ignores_nan_coordinates():
+    """Rows with NaN coordinates should not affect the result."""
+    data = pd.DataFrame(
+        {
+            "easting": [0.0, 50.0, 100.0, np.nan],
+            "northing": [0.0, 0.0, 0.0, 1e6],
+            "line": ["A"] * 4,
+        }
+    )
+    dims = largest_line_dimensions(data, line_column="line")
+    assert dims["A"] == pytest.approx(100.0)
+
+
+def test_largest_line_dimensions_single_point_line():
+    """A line with a single point should have a dimension of 0."""
+    data = pd.DataFrame({"easting": [1.0], "northing": [2.0], "line": ["A"]})
+    dims = largest_line_dimensions(data, line_column="line")
+    assert dims["A"] == 0.0
+
+
+def test_largest_line_dimensions_missing_columns_raises():
+    """Missing coordinate or line columns should raise AssertionError."""
+    with pytest.raises(AssertionError, match="Projected coordinates columns"):
+        largest_line_dimensions(pd.DataFrame({"x": [1.0], "line": ["A"]}), "line")
+    data = pd.DataFrame({"easting": [0.0], "northing": [0.0]})
+    with pytest.raises(
+        AssertionError, match=r"\['not_a_col'\] must be in the dataframe"
+    ):
+        largest_line_dimensions(data, line_column="not_a_col")
 
 
 def test_check_coord_columns_passes_when_present():
