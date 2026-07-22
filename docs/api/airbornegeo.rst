@@ -107,10 +107,7 @@ Functions related specifically to working with potential-fields data
 
     eq_sources_1d
     upward_continue_by_line
-    eotvos_correction_approx
-    eotvos_correction_glicken
-    eotvos_correction_harlan
-    eotvos_correction_full
+    eotvos_correction
     vertical_acceleration
     igrf
 

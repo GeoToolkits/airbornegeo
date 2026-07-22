@@ -73,10 +73,7 @@ from .crossovers import (  # noqa: E402
     update_intersections_with_eq_sources,
 )
 from .eotvos import (  # noqa: E402
-    eotvos_correction_approx,
-    eotvos_correction_full,
-    eotvos_correction_glicken,
-    eotvos_correction_harlan,
+    eotvos_correction,
 )
 from .eq_source_levelling import (  # noqa: E402
     equivalent_source_levelling,
