@@ -4,7 +4,7 @@ import scooby
 
 from ._version import version as __version__
 
-__all__ = ["__version__"]
+__all__ = ["Survey", "__version__"]
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +127,9 @@ from .reproject import (  # noqa: E402
 from .resample import (  # noqa: E402
     resample,
     resample_as,
+)
+from .survey import (  # noqa: E402
+    Survey,
 )
 from .trend import (  # noqa: E402
     trend,
