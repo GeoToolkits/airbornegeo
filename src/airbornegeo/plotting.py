@@ -1,3 +1,4 @@
+import math
 import typing
 
 import matplotlib as mpl
@@ -10,11 +11,128 @@ import plotly.graph_objects as go
 import seaborn as sns
 import verde as vd
 from IPython.display import clear_output, display
+from numpy.typing import NDArray
 
 import airbornegeo
 from airbornegeo.utils import _check_coord_columns
 
 sns.set_theme()
+
+
+_NICE_NUMBERS = (1, 2, 2.5, 5, 10)
+
+
+def nice_scalebar_width(
+    map_width: float,
+    target_fraction: float = 0.1,
+) -> float:
+    """
+    Round a fraction of the map width to a human-friendly scalebar length.
+
+    Returns the value of the form 1, 2, 2.5, 5 or 10 times a power of ten which
+    is closest (in log space) to ``map_width * target_fraction``, so the bar
+    stays near the requested fraction of the map rather than always rounding up.
+
+    Parameters
+    ----------
+    map_width : float
+        Width of the map, in the same units as the coordinates (e.g. metres).
+        Must be positive.
+    target_fraction : float, optional
+        Fraction of the map width the scalebar should span, by default 0.1.
+        Must be greater than 0 and no greater than 1.
+
+    Returns
+    -------
+    float
+        A nicely rounded scalebar length, in the units of `map_width`.
+
+    Examples
+    --------
+    >>> nice_scalebar_width(1e6)
+    100000.0
+    >>> nice_scalebar_width(6e6)
+    500000.0
+    """
+    if map_width <= 0:
+        msg = f"map_width must be positive, got {map_width}"
+        raise ValueError(msg)
+    if not 0 < target_fraction <= 1:
+        msg = f"target_fraction must be in (0, 1], got {target_fraction}"
+        raise ValueError(msg)
+
+    target = map_width * target_fraction
+    exponent = math.floor(math.log10(target))
+    fraction = target / 10**exponent
+
+    # pick the nice number nearest the target, measured in log space so that
+    # e.g. 3 is treated as closer to 2.5 than to 5
+    nice = min(_NICE_NUMBERS, key=lambda n: abs(math.log10(n / fraction)))
+    return float(nice * 10**exponent)
+
+
+def choose_colormap(
+    data: NDArray | pd.Series,
+    robust: bool = True,
+) -> tuple[str, float, float]:
+    """
+    Choose an appropriate colormap and color limits for a set of values.
+
+    If 0 lies strictly between the 25th and 75th percentiles of the data,
+    return a diverging colormap ('RdBu') centered on zero with symmetric
+    (robust) limits. Otherwise, return a sequential colormap ('viridis')
+    spanning the (robust) data range. NaNs are ignored.
+
+    Parameters
+    ----------
+    data : NDArray | pd.Series
+        The values to be plotted. Must contain at least one finite value.
+    robust : bool, optional
+        Use percentiles (98 for the diverging case, 2 and 98 for the sequential
+        case) instead of the full data range, so outliers don't dominate the
+        color scale, by default True.
+
+    Returns
+    -------
+    tuple[str, float, float]
+        The colormap name, and the lower and upper color limits.
+
+    Examples
+    --------
+    >>> choose_colormap([-1.0, 0.0, 1.0], robust=False)
+    ('RdBu', -1.0, 1.0)
+    >>> choose_colormap([10.0, 15.0, 20.0], robust=False)
+    ('viridis', 10.0, 20.0)
+    """
+    values = np.asarray(data, dtype=float).ravel()
+    values = values[np.isfinite(values)]
+
+    if values.size == 0:
+        msg = "cannot choose color limits: data has no finite (non-NaN) values"
+        raise ValueError(msg)
+
+    q25, q75 = np.percentile(values, [25, 75])
+
+    # only diverge when the data genuinely straddles zero, so that e.g. data
+    # clipped at zero doesn't waste half of a diverging colormap
+    if q25 < 0 < q75:
+        maxabs = float(vd.maxabs(values, percentile=98 if robust else 100))
+        cmap, vmin, vmax = "RdBu", -maxabs, maxabs
+    else:
+        min_percentile, max_percentile = (2, 98) if robust else (0, 100)
+        vmin, vmax = vd.minmax(
+            values,
+            min_percentile=min_percentile,
+            max_percentile=max_percentile,
+        )
+        cmap, vmin, vmax = "viridis", float(vmin), float(vmax)
+
+    if vmin == vmax:
+        # constant data would collapse the color scale, so pad the limits
+        pad = abs(vmin) * 0.05 or 0.5
+        vmin, vmax = vmin - pad, vmax + pad
+
+    return cmap, vmin, vmax
 
 
 def add_scalebar(ax, scale_length, position="bottom left"):

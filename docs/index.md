@@ -30,6 +30,12 @@ citing
 
 ```{toctree}
 :hidden:
+:caption: 🧭 The Survey object
+survey_object
+```
+
+```{toctree}
+:hidden:
 :caption: ⛏️ Generic processing
 processing.md
 ```

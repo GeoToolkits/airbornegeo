@@ -1,9 +1,14 @@
+import typing  # pylint: disable=too-many-lines
+
 import boule
 import numpy as np
+import pandas as pd
 from numpy.typing import NDArray
 
+from airbornegeo.utils import _apply_grouped
 
-def eotvos_correction_glicken(
+
+def _eotvos_correction_glicken(
     latitude: NDArray,
     track: NDArray,
     ground_speed: NDArray,
@@ -39,7 +44,7 @@ def eotvos_correction_glicken(
     )
 
 
-def eotvos_correction_harlan(
+def _eotvos_correction_harlan(
     latitude: NDArray,
     longitude: NDArray,
     time: NDArray,
@@ -146,7 +151,7 @@ def eotvos_correction_harlan(
     return 1e5 * (term_northing + term_easting + term_coriolis)
 
 
-def eotvos_correction_full(
+def _eotvos_correction_full(
     latitude: NDArray,
     longitude: NDArray,
     time: NDArray,
@@ -338,7 +343,7 @@ def eotvos_correction_full(
     return 1e5 * eotvos_corr
 
 
-def eotvos_correction_approx(
+def _eotvos_correction_approx(
     latitude: NDArray,
     longitude: NDArray,
     time: NDArray,
@@ -491,6 +496,142 @@ def eotvos_correction_approx(
 
     # eotvos correction in mGal
     return 1e5 * eotvos_corr
+
+
+# the column-name parameters each method needs, in the order its implementation
+# takes them
+_EOTVOS_METHOD_COLUMNS: dict[str, tuple[str, ...]] = {
+    "glicken": ("latitude_column", "track_column", "ground_speed_column"),
+    "harlan": (
+        "latitude_column",
+        "longitude_column",
+        "time_column",
+        "height_column",
+    ),
+    "full": ("latitude_column", "longitude_column", "time_column", "height_column"),
+    "approx": ("latitude_column", "longitude_column", "time_column", "height_column"),
+}
+
+_EOTVOS_METHODS: dict[str, typing.Callable[..., NDArray]] = {
+    "glicken": _eotvos_correction_glicken,
+    "harlan": _eotvos_correction_harlan,
+    "full": _eotvos_correction_full,
+    "approx": _eotvos_correction_approx,
+}
+
+
+def _available_eotvos_methods(
+    data: pd.DataFrame,
+    supplied: dict[str, str | None],
+) -> list[str]:
+    """Methods whose column parameters are all supplied and present in `data`."""
+    return [
+        method
+        for method, parameters in _EOTVOS_METHOD_COLUMNS.items()
+        if all(
+            supplied[parameter] is not None and supplied[parameter] in data.columns
+            for parameter in parameters
+        )
+    ]
+
+
+def eotvos_correction(
+    data: pd.DataFrame,
+    *,
+    method: str = "full",
+    latitude_column: str | None = None,
+    longitude_column: str | None = None,
+    time_column: str | None = None,
+    height_column: str | None = None,
+    track_column: str | None = None,
+    ground_speed_column: str | None = None,
+    groupby_column: str | None = None,
+    progressbar: bool = True,
+    **kwargs: typing.Any,
+) -> NDArray:
+    """
+    Compute the Eötvös correction with one of several methods.
+
+    Methods 'harlan', 'full' and 'approx' take time derivatives of the
+    trajectory, so pass `groupby_column` (usually the line column) to compute
+    them line by line — computing them across a whole survey at once gives
+    spurious values at the joins between lines.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the columns needed by the chosen `method`.
+    method : str, optional
+        One of 'full' (Harlan 1968 full formulation), 'harlan' (Harlan 1968
+        simplified), 'approx' (approximated full formulation) or 'glicken'
+        (Glicken 1962 simplified equation), by default 'full'.
+    latitude_column, longitude_column : str | None, optional
+        Names of the geodetic latitude/longitude columns in decimal degrees.
+    time_column : str | None, optional
+        Name of the column containing time in seconds.
+    height_column : str | None, optional
+        Name of the column containing the flight height in meters.
+    track_column : str | None, optional
+        Name of the column containing the aircraft track in decimal degrees
+        from geographic north, only used by method 'glicken'.
+    ground_speed_column : str | None, optional
+        Name of the column containing ground speed in meters per second, only
+        used by method 'glicken'.
+    groupby_column : str | None, optional
+        Column name to group by before calculation, by default None.
+    progressbar : bool, optional
+        Show a progress bar for each group, by default True.
+    kwargs : typing.Any
+        Additional keyword arguments passed to the chosen method's
+        implementation, e.g. `ground_speed=False` for method 'harlan'.
+
+    Returns
+    -------
+    NDArray
+        Eötvös correction in mGal, with one value per row of `data`.
+    """
+    if method not in _EOTVOS_METHODS:
+        msg = f"method must be one of {sorted(_EOTVOS_METHODS)}, not {method!r}"
+        raise ValueError(msg)
+
+    supplied = {
+        "latitude_column": latitude_column,
+        "longitude_column": longitude_column,
+        "time_column": time_column,
+        "height_column": height_column,
+        "track_column": track_column,
+        "ground_speed_column": ground_speed_column,
+    }
+    missing = [
+        parameter
+        for parameter in _EOTVOS_METHOD_COLUMNS[method]
+        if supplied[parameter] is None or supplied[parameter] not in data.columns
+    ]
+    if missing:
+        available = _available_eotvos_methods(data, supplied)
+        msg = (
+            f"method '{method}' needs {missing}, which were not given or name "
+            f"columns not in the dataframe. Methods usable with the columns "
+            f"given: {available or 'none'}"
+        )
+        raise ValueError(msg)
+
+    if groupby_column is not None and groupby_column not in data.columns:
+        msg = f"groupby_column '{groupby_column}' not found in the dataframe"
+        raise ValueError(msg)
+
+    implementation = _EOTVOS_METHODS[method]
+    columns = [supplied[p] for p in _EOTVOS_METHOD_COLUMNS[method]]
+
+    return _apply_grouped(  # type: ignore[no-any-return]
+        data,
+        groupby_column=groupby_column,
+        progressbar=progressbar,
+        func=lambda group: implementation(
+            *(group[column].to_numpy() for column in columns),
+            **kwargs,
+        ),
+    )
 
 
 # def central_difference(data_in, n=1, order=2, dt=0.1):

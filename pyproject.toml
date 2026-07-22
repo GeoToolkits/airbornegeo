@@ -98,6 +98,10 @@ filterwarnings = [
   # seaborn's boxplot passes `vert` to matplotlib, deprecated in mpl 3.11
   # (warning class changed from PendingDeprecationWarning to MatplotlibDeprecationWarning)
   "ignore:vert. bool was deprecated:Warning",
+  # newer GEOS builds (seen on macOS CI) emit spurious "invalid value"/"divide by
+  # zero" RuntimeWarnings from oriented_envelope even when the result is valid
+  "ignore:invalid value encountered in oriented_envelope:RuntimeWarning",
+  "ignore:divide by zero encountered in oriented_envelope:RuntimeWarning",
 ]
 log_cli_level = "INFO"
 testpaths = [

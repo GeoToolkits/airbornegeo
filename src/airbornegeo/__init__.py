@@ -4,7 +4,7 @@ import scooby
 
 from ._version import version as __version__
 
-__all__ = ["__version__"]
+__all__ = ["Survey", "__version__"]
 
 logger = logging.getLogger(__name__)
 
@@ -73,10 +73,7 @@ from .crossovers import (  # noqa: E402
     update_intersections_with_eq_sources,
 )
 from .eotvos import (  # noqa: E402
-    eotvos_correction_approx,
-    eotvos_correction_full,
-    eotvos_correction_glicken,
-    eotvos_correction_harlan,
+    eotvos_correction,
 )
 from .eq_source_levelling import (  # noqa: E402
     equivalent_source_levelling,
@@ -107,7 +104,9 @@ from .nav import (  # noqa: E402
 )
 from .plotting import (  # noqa: E402
     add_scalebar,
+    choose_colormap,
     inspect_lines,
+    nice_scalebar_width,
     plot_profiles,
     plotly_points,
     plotly_profiles,
@@ -128,6 +127,9 @@ from .reproject import (  # noqa: E402
 from .resample import (  # noqa: E402
     resample,
     resample_as,
+)
+from .survey import (  # noqa: E402
+    Survey,
 )
 from .trend import (  # noqa: E402
     trend,
