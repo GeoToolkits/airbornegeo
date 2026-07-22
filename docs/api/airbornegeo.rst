@@ -122,6 +122,9 @@ Plotting functions
     plotly_profiles
     plot_profiles
     inspect_lines
+    add_scalebar
+    nice_scalebar_width
+    choose_colormap
 
 
 Utilities

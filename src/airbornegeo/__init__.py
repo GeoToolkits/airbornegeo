@@ -104,7 +104,9 @@ from .nav import (  # noqa: E402
 )
 from .plotting import (  # noqa: E402
     add_scalebar,
+    choose_colormap,
     inspect_lines,
+    nice_scalebar_width,
     plot_profiles,
     plotly_points,
     plotly_profiles,

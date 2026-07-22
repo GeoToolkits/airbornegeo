@@ -11,7 +11,9 @@ import airbornegeo.plotting as plotting_mod
 from airbornegeo.plotting import (
     LevellingConvergenceMonitor,
     align_yaxis,
+    choose_colormap,
     inspect_lines,
+    nice_scalebar_width,
     plot_levelling_convergence,
     plot_profiles,
     plotly_points,
@@ -270,3 +272,109 @@ def test_inspect_lines_accepts_list_of_plot_variables(monkeypatch):
     )
     inspect_lines(df, plot_variable=["a", "b"], interp_on="distance_along_line")
     assert len(shown[0].data) == 2
+
+
+# ---------------------------------------------------------------------------
+# nice_scalebar_width
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("map_width", "expected"),
+    [
+        (1e6, 1e5),
+        (1e5, 1e4),
+        (2.5e6, 2.5e5),
+        (6e6, 5e5),  # nearest, not rounded up to 1e6
+        (3e5, 2.5e4),
+        (1.0, 0.1),
+    ],
+)
+def test_nice_scalebar_width_picks_nearest_nice_number(map_width, expected):
+    """The returned width should be the nice number closest to the target fraction."""
+    assert nice_scalebar_width(map_width) == pytest.approx(expected)
+
+
+def test_nice_scalebar_width_respects_target_fraction():
+    """A larger target fraction should give a proportionally larger bar."""
+    assert nice_scalebar_width(1e6, target_fraction=0.5) == pytest.approx(5e5)
+
+
+def test_nice_scalebar_width_stays_near_target_fraction():
+    """The bar should never be more than ~1.6x or less than ~0.6x the target."""
+    for map_width in np.logspace(0, 7, 200):
+        target = map_width * 0.1
+        assert 0.6 < nice_scalebar_width(map_width) / target < 1.6
+
+
+@pytest.mark.parametrize("map_width", [0, -1e5])
+def test_nice_scalebar_width_rejects_non_positive_width(map_width):
+    """Zero or negative map widths should raise a helpful error, not a log10 error."""
+    with pytest.raises(ValueError, match="map_width must be positive"):
+        nice_scalebar_width(map_width)
+
+
+@pytest.mark.parametrize("fraction", [0, -0.1, 1.5])
+def test_nice_scalebar_width_rejects_invalid_fraction(fraction):
+    """target_fraction outside (0, 1] should raise."""
+    with pytest.raises(ValueError, match="target_fraction"):
+        nice_scalebar_width(1e6, target_fraction=fraction)
+
+
+# ---------------------------------------------------------------------------
+# choose_colormap
+# ---------------------------------------------------------------------------
+
+
+def test_choose_colormap_diverging_for_data_straddling_zero():
+    """Data with 0 inside the interquartile range should get a centered diverging map."""
+    rng = np.random.default_rng(0)
+    cmap, vmin, vmax = choose_colormap(rng.normal(0, 1, 1000))
+    assert cmap == "RdBu"
+    assert vmin == pytest.approx(-vmax)
+
+
+def test_choose_colormap_sequential_for_one_sided_data():
+    """Data entirely above zero should get a sequential map spanning its range."""
+    cmap, vmin, vmax = choose_colormap(np.linspace(10, 20, 100), robust=False)
+    assert cmap == "viridis"
+    assert (vmin, vmax) == pytest.approx((10.0, 20.0))
+
+
+def test_choose_colormap_not_diverging_for_zero_clipped_data():
+    """Non-negative data with many exact zeros should not waste half a diverging map."""
+    data = np.r_[np.zeros(600), np.arange(1.0, 401.0)]
+    cmap, vmin, _vmax = choose_colormap(data)
+    assert cmap == "viridis"
+    assert vmin >= 0
+
+
+def test_choose_colormap_ignores_nans():
+    """Appending NaNs should not change the chosen colormap or limits."""
+    rng = np.random.default_rng(0)
+    values = rng.normal(0, 1, 999)
+    cmap, vmin, vmax = choose_colormap(values)
+    nan_cmap, nan_vmin, nan_vmax = choose_colormap(np.r_[values, np.nan])
+    assert nan_cmap == cmap
+    assert (nan_vmin, nan_vmax) == pytest.approx((vmin, vmax))
+
+
+@pytest.mark.parametrize("data", [np.full(10, np.nan), np.array([])])
+def test_choose_colormap_rejects_data_without_finite_values(data):
+    """All-NaN or empty data should raise rather than return NaN limits."""
+    with pytest.raises(ValueError, match="no finite"):
+        choose_colormap(data)
+
+
+@pytest.mark.parametrize("constant", [5.0, 0.0, -3.0])
+def test_choose_colormap_pads_constant_data(constant):
+    """Constant data must not produce vmin == vmax, which collapses the color scale."""
+    _cmap, vmin, vmax = choose_colormap(np.full(10, constant))
+    assert vmin < vmax
+
+
+def test_choose_colormap_accepts_series_and_ints():
+    """Pandas Series and integer arrays should work like float arrays."""
+    cmap, vmin, vmax = choose_colormap(pd.Series([-5, 0, 5, 10]))
+    assert cmap == "RdBu"
+    assert vmin == pytest.approx(-vmax)
