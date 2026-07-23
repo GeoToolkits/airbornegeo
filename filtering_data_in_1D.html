@@ -1,0 +1,1364 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Filtering data in 1D &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=fcfc4f34"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'filtering_data_in_1D';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="potential_field_processing.html" />
+    <link rel="prev" title="Along track distance" href="along_track_distance.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g40564363a" />
+    <meta name="docbuild:last-update" content="Jul 23, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🧭 The Survey object</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="survey_object.html">The Survey object</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="reproject_data.html">Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_sampling_frequency.html">Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="split_survey_into_lines.html">Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="along_track_distance.html">Along track distance</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="vertical_acceleration_correction.html">Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eotvos_correction.html">Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal_gravity_correction.html">Normal gravity correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IGRF_correction.html">IGRF Correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛌ Crossovers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="crossovers.html">Crossovers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_01_basics.html">Find crossover points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_02_grouped_intersections.html">Find survey intersections between groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_03_network_intersections.html">Find all survey intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_04_interpolating_values.html">Interpolating values at crossovers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_05_crossover_errors.html">Cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_06_update_crossovers_with_equivalent_sources.html">Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_07_deduplicating_intersections.html">Deduplicating intersections: <code class="docutils literal notranslate"><span class="pre">block_size</span></code> vs <code class="docutils literal notranslate"><span class="pre">min_spacing</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="levelling.html">Levelling</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="levelling_01_to_a_grid.html">Levelling to a grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_02_crossover_levelling_simple.html">Simple cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_03_crossover_levelling_alternating.html">Alternating cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_04_crossover_levelling_network.html">PolarGAP aeromagnetic levelling</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="levelling_05_crossover_levelling_trend_vs_wavelength.html">Cross-over levelling: trend vs wavelength based</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_06_crossover_levelling_dependence_on_line_length.html">Cross-over levelling dependence on line length</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="levelling_07_equivalent_source_levelling.html">Levelling with equivalent sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_08_assessing_levelling_results.html">Assessing levelling results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.Survey.html">airbornegeo.Survey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.directional_velocity.html">airbornegeo.directional_velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.resample.html">airbornegeo.resample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.resample_as.html">airbornegeo.resample_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing.html">airbornegeo.interpolate_missing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing_pointwise.html">airbornegeo.interpolate_missing_pointwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing_pointwise_with_windows.html">airbornegeo.interpolate_missing_pointwise_with_windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.optimal_spline_damping.html">airbornegeo.optimal_spline_damping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.trend.html">airbornegeo.trend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.median_line_spacing.html">airbornegeo.median_line_spacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.largest_line_dimensions.html">airbornegeo.largest_line_dimensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.add_values_to_intersections.html">airbornegeo.add_values_to_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_intersection_weights.html">airbornegeo.calculate_intersection_weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.crossover_pair_levelling.html">airbornegeo.crossover_pair_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.crossover_network_levelling.html">airbornegeo.crossover_network_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eotvos_correction.html">airbornegeo.eotvos_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.igrf.html">airbornegeo.igrf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_profiles.html">airbornegeo.plot_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.add_scalebar.html">airbornegeo.add_scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.nice_scalebar_width.html">airbornegeo.nice_scalebar_width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.choose_colormap.html">airbornegeo.choose_colormap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.get_min_max.html">airbornegeo.get_min_max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.rmse.html">airbornegeo.rmse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.normalize_values.html">airbornegeo.normalize_values</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/airbornegeo/airbornegeo/main?urlpath=lab/tree/docs/filtering_data_in_1D.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/filtering_data_in_1D.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Ffiltering_data_in_1D.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/filtering_data_in_1D.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Filtering data in 1D</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Filter-a-line">Filter a line</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Spatial-filtering">Spatial filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Temporal-filtering">Temporal filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Filtering-with-equivalent-sources">Filtering with equivalent sources</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Compare-filtering-methods">Compare filtering methods</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Filter-all-lines-in-a-survey">Filter all lines in a survey</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Spatial filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Temporal filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Equivalent-source-filtering">Equivalent source filtering</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Filtering-data-in-1D">
+<h1>Filtering data in 1D<a class="headerlink" href="#Filtering-data-in-1D" title="Link to this heading">#</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %load_ext autoreload</span>
+<span class="c1"># %autoreload 2</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">cmocean</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">verde</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">airbornegeo</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/AGAP_gravity_survey_processed.csv&quot;</span><span class="p">)</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span>
+    <span class="p">[</span>
+        <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;height&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">]</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="s2">&quot;unixtime&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>grav_disturbance</th>
+      <th>distance_along_line</th>
+      <th>height</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.000024e+06</td>
+      <td>226237.330771</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>1186.4</td>
+      <td>0.000000</td>
+      <td>4156.1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.000083e+06</td>
+      <td>226246.631269</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>342.1</td>
+      <td>59.842447</td>
+      <td>4156.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.000142e+06</td>
+      <td>226255.809132</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>-1965.9</td>
+      <td>119.693401</td>
+      <td>4156.1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.000201e+06</td>
+      <td>226264.969079</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>820.0</td>
+      <td>179.545645</td>
+      <td>4156.4</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.000260e+06</td>
+      <td>226274.156809</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+      <td>3198.0</td>
+      <td>239.285174</td>
+      <td>4156.6</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># extract a single line from the survey</span>
+<span class="n">line_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">4</span><span class="p">]</span>
+
+<span class="c1"># Create a survey for the single-line demo</span>
+<span class="n">line_survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">line_df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">distance_column</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Filter-a-line">
+<h2>Filter a line<a class="headerlink" href="#Filter-a-line" title="Link to this heading">#</a></h2>
+<section id="Spatial-filtering">
+<h3>Spatial filtering<a class="headerlink" href="#Spatial-filtering" title="Link to this heading">#</a></h3>
+<p>We can perform 1D filtering based on the distance along the flight line.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">line_survey</span><span class="o">.</span><span class="n">filter_line</span><span class="p">(</span>
+    <span class="n">filter_width</span><span class="o">=</span><span class="mi">19_000</span><span class="p">,</span>  <span class="c1"># 19 km low pass gaussian filter</span>
+    <span class="n">filter_type</span><span class="o">=</span><span class="s2">&quot;lowpass&quot;</span><span class="p">,</span>
+    <span class="n">filter_shape</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">filter_by_column</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="n">result_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filtered_spatial&quot;</span><span class="p">,</span>
+    <span class="n">pad_width_percentage</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4db18d3d4adc44678c3d34c2191828e2", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div class="ag-survey"><style>.ag-survey{font-family:var(--jp-code-font-family,monospace);font-size:0.9em;line-height:1.4;max-width:60em;}.ag-survey .ag-header{font-weight:bold;padding:4px 0;border-bottom:1px solid rgba(128,128,128,0.4);margin-bottom:4px;}.ag-survey .ag-shape{font-weight:normal;opacity:0.65;}.ag-survey details{padding:1px 0 1px 12px;border-left:2px solid rgba(128,128,128,0.25);margin:3px 0;}.ag-survey summary{cursor:pointer;font-weight:bold;list-style-position:outside;margin-left:-6px;}.ag-survey .ag-note{font-weight:normal;font-style:italic;opacity:0.6;margin-left:8px;}.ag-survey table{border-collapse:collapse;margin:2px 0;}.ag-survey td{padding:1px 12px 1px 0;border:none;text-align:left;vertical-align:top;}.ag-survey td:first-child{opacity:0.7;}.ag-survey .ag-data{overflow-x:auto;}</style><div class="ag-header">airbornegeo.Survey <span class="ag-shape">3,762 rows &times; 8 columns</span></div><details open><summary>Column attributes</summary><table><tr><td>line</td><td><code>line</code></td></tr><tr><td>line_type</td><td><span class="ag-note">not set</span></td></tr><tr><td>distance</td><td><code>distance_along_line</code></td></tr><tr><td>time</td><td><span class="ag-note">not set</span></td></tr><tr><td>height</td><td><span class="ag-note">not set</span></td></tr><tr><td>latitude</td><td><span class="ag-note">not set</span></td></tr><tr><td>longitude</td><td><span class="ag-note">not set</span></td></tr></table></details><details open><summary>CRS &amp; metadata<span class="ag-note">0 metadata entries</span></summary><table><tr><td>crs</td><td>None</td></tr></table></details><details><summary>Statistics<span class="ag-note">0/8 computed &mdash; access an attribute or call .describe()</span></summary><table><tr><td>region</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_counts</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>total_length</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>mean_line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_spacings</td><td><span class="ag-note">not computed</span></td></tr></table></details><details><summary>Intersections<span class="ag-note">None</span></summary><p class="ag-note">None &mdash; call <code>create_intersection_table()</code></p></details><details><summary>Data<span class="ag-note">first 5 rows</span></summary><div class="ag-data"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>grav_disturbance</th>
+      <th>distance_along_line</th>
+      <th>height</th>
+      <th>grav_disturbance_filtered_spatial</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>8591</th>
+      <td>1.316050e+06</td>
+      <td>392090.546753</td>
+      <td>4</td>
+      <td>1.230570e+09</td>
+      <td>1971.6</td>
+      <td>0.000000</td>
+      <td>3574.5</td>
+      <td>-17.269885</td>
+    </tr>
+    <tr>
+      <th>8592</th>
+      <td>1.315990e+06</td>
+      <td>392078.637888</td>
+      <td>4</td>
+      <td>1.230570e+09</td>
+      <td>1878.6</td>
+      <td>61.614338</td>
+      <td>3574.3</td>
+      <td>-17.272291</td>
+    </tr>
+    <tr>
+      <th>8593</th>
+      <td>1.315929e+06</td>
+      <td>392066.728534</td>
+      <td>4</td>
+      <td>1.230570e+09</td>
+      <td>-602.0</td>
+      <td>123.228587</td>
+      <td>3574.0</td>
+      <td>-17.279394</td>
+    </tr>
+    <tr>
+      <th>8594</th>
+      <td>1.315869e+06</td>
+      <td>392054.833235</td>
+      <td>4</td>
+      <td>1.230570e+09</td>
+      <td>-2875.9</td>
+      <td>184.956734</td>
+      <td>3573.7</td>
+      <td>-17.291215</td>
+    </tr>
+    <tr>
+      <th>8595</th>
+      <td>1.315808e+06</td>
+      <td>392042.937442</td>
+      <td>4</td>
+      <td>1.230570e+09</td>
+      <td>39.0</td>
+      <td>246.684793</td>
+      <td>3573.5</td>
+      <td>-17.307745</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></details></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">maxabs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">line_df</span><span class="o">.</span><span class="n">grav_disturbance</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;b.&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">maxabs</span><span class="p">,</span> <span class="n">maxabs</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filtered_spatial&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;r.&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">maxabs</span><span class="p">,</span> <span class="n">maxabs</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;mGal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">KeyError</span>                                  Traceback (most recent call last)
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/airbornegeo/.pixi/envs/default/lib/python3.14/site-packages/pandas/core/indexes/base.py:3641</span>, in <span class="ansi-cyan-fg">Index.get_loc</span><span class="ansi-blue-fg">(self, key)</span>
+<span class="ansi-green-fg">   3640</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">3641</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-black-fg ansi-yellow-bg">self</span><span class="ansi-black-fg ansi-yellow-bg">.</span><span class="ansi-black-fg ansi-yellow-bg">_engine</span><span class="ansi-black-fg ansi-yellow-bg">.</span><span class="ansi-black-fg ansi-yellow-bg">get_loc</span><span class="ansi-black-fg ansi-yellow-bg">(</span><span class="ansi-black-fg ansi-yellow-bg">casted_key</span><span class="ansi-black-fg ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">   3642</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">KeyError</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> err:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">pandas/_libs/index.pyx:168</span>, in <span class="ansi-cyan-fg">pandas._libs.index.IndexEngine.get_loc</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">168</span> <span class="ansi-yellow-fg">&#39;Could not get source, probably due dynamically evaluated source code.&#39;</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">pandas/_libs/index.pyx:197</span>, in <span class="ansi-cyan-fg">pandas._libs.index.IndexEngine.get_loc</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">197</span> <span class="ansi-yellow-fg">&#39;Could not get source, probably due dynamically evaluated source code.&#39;</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">pandas/_libs/hashtable_class_helper.pxi:7668</span>, in <span class="ansi-cyan-fg">pandas._libs.hashtable.PyObjectHashTable.get_item</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">7668</span> <span class="ansi-yellow-fg">&#39;Could not get source, probably due dynamically evaluated source code.&#39;</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">pandas/_libs/hashtable_class_helper.pxi:7676</span>, in <span class="ansi-cyan-fg">pandas._libs.hashtable.PyObjectHashTable.get_item</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">7676</span> <span class="ansi-yellow-fg">&#39;Could not get source, probably due dynamically evaluated source code.&#39;</span>
+
+<span class="ansi-red-fg">KeyError</span>: &#39;grav_disturbance_filtered_spatial&#39;
+
+The above exception was the direct cause of the following exception:
+
+<span class="ansi-red-fg">KeyError</span>                                  Traceback (most recent call last)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[5]</span><span class="ansi-green-fg">, line 9</span>
+<span class="ansi-green-fg">      5</span>     style=<span class="ansi-yellow-fg">&#34;b.&#34;</span>,
+<span class="ansi-green-fg">      6</span>     ms=<span class="ansi-green-fg">0.6</span>,
+<span class="ansi-green-fg">      7</span>     ylim=(-maxabs, maxabs),
+<span class="ansi-green-fg">      8</span> )
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">9</span> ax = line_df.plot.line(
+<span class="ansi-green-fg">     10</span>     <span class="ansi-yellow-fg">&#34;distance_along_line&#34;</span>,
+<span class="ansi-green-fg">     11</span>     <span class="ansi-yellow-fg">&#34;grav_disturbance_filtered_spatial&#34;</span>,
+<span class="ansi-green-fg">     12</span>     style=<span class="ansi-yellow-fg">&#34;r.&#34;</span>,
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/airbornegeo/.pixi/envs/default/lib/python3.14/site-packages/pandas/plotting/_core.py:1295</span>, in <span class="ansi-cyan-fg">PlotAccessor.line</span><span class="ansi-blue-fg">(self, x, y, color, **kwargs)</span>
+<span class="ansi-green-fg">   1293</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> color <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">   1294</span>     kwargs[<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">color</span><span class="ansi-yellow-fg">&#34;</span>] = color
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1295</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-black-fg ansi-yellow-bg">self</span><span class="ansi-black-fg ansi-yellow-bg">(</span><span class="ansi-black-fg ansi-yellow-bg">kind</span><span class="ansi-black-fg ansi-yellow-bg">=</span><span class="ansi-black-fg ansi-yellow-bg">&#34;</span><span class="ansi-black-fg ansi-yellow-bg">line</span><span class="ansi-black-fg ansi-yellow-bg">&#34;</span><span class="ansi-black-fg ansi-yellow-bg">,</span><span class="ansi-black-fg ansi-yellow-bg"> </span><span class="ansi-black-fg ansi-yellow-bg">x</span><span class="ansi-black-fg ansi-yellow-bg">=</span><span class="ansi-black-fg ansi-yellow-bg">x</span><span class="ansi-black-fg ansi-yellow-bg">,</span><span class="ansi-black-fg ansi-yellow-bg"> </span><span class="ansi-black-fg ansi-yellow-bg">y</span><span class="ansi-black-fg ansi-yellow-bg">=</span><span class="ansi-black-fg ansi-yellow-bg">y</span><span class="ansi-black-fg ansi-yellow-bg">,</span><span class="ansi-black-fg ansi-yellow-bg"> </span><span class="ansi-black-fg ansi-yellow-bg">*</span><span class="ansi-black-fg ansi-yellow-bg">*</span><span class="ansi-black-fg ansi-yellow-bg">kwargs</span><span class="ansi-black-fg ansi-yellow-bg">)</span>
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/airbornegeo/.pixi/envs/default/lib/python3.14/site-packages/pandas/plotting/_core.py:1169</span>, in <span class="ansi-cyan-fg">PlotAccessor.__call__</span><span class="ansi-blue-fg">(self, *args, **kwargs)</span>
+<span class="ansi-green-fg">   1166</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> (<span class="ansi-bold" style="color: rgb(215,95,95)">IndexError</span>, <span class="ansi-bold" style="color: rgb(215,95,95)">KeyError</span>, <span class="ansi-bold" style="color: rgb(215,95,95)">TypeError</span>):
+<span class="ansi-green-fg">   1167</span>             <span class="ansi-bold" style="color: rgb(0,135,0)">pass</span>
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">1169</span> data = <span class="ansi-black-fg ansi-yellow-bg">data</span><span class="ansi-black-fg ansi-yellow-bg">[</span><span class="ansi-black-fg ansi-yellow-bg">y</span><span class="ansi-black-fg ansi-yellow-bg">]</span>
+<span class="ansi-green-fg">   1171</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">isinstance</span>(data, ABCSeries):
+<span class="ansi-green-fg">   1172</span>     label_name = label_kw <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> y
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/airbornegeo/.pixi/envs/default/lib/python3.14/site-packages/pandas/core/frame.py:4378</span>, in <span class="ansi-cyan-fg">DataFrame.__getitem__</span><span class="ansi-blue-fg">(self, key)</span>
+<span class="ansi-green-fg">   4374</span>
+<span class="ansi-green-fg">   4375</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> is_single_key:
+<span class="ansi-green-fg">   4376</span>             <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> self.columns.nlevels &gt; <span class="ansi-green-fg">1</span>:
+<span class="ansi-green-fg">   4377</span>                 <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> self._getitem_multilevel(key)
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">4378</span>             indexer = self.columns.get_loc(key)
+<span class="ansi-green-fg">   4379</span>             <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> is_integer(indexer):
+<span class="ansi-green-fg">   4380</span>                 indexer = [indexer]
+<span class="ansi-green-fg">   4381</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/airbornegeo/.pixi/envs/default/lib/python3.14/site-packages/pandas/core/indexes/base.py:3648</span>, in <span class="ansi-cyan-fg">Index.get_loc</span><span class="ansi-blue-fg">(self, key)</span>
+<span class="ansi-green-fg">   3643</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">isinstance</span>(casted_key, <span style="color: rgb(0,135,0)">slice</span>) <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> (
+<span class="ansi-green-fg">   3644</span>         <span style="color: rgb(0,135,0)">isinstance</span>(casted_key, abc.Iterable)
+<span class="ansi-green-fg">   3645</span>         <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> <span style="color: rgb(0,135,0)">any</span>(<span style="color: rgb(0,135,0)">isinstance</span>(x, <span style="color: rgb(0,135,0)">slice</span>) <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> x <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> casted_key)
+<span class="ansi-green-fg">   3646</span>     ):
+<span class="ansi-green-fg">   3647</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> InvalidIndexError(key) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">err</span>
+<span class="ansi-green-fg">-&gt; </span><span class="ansi-green-fg">3648</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">KeyError</span>(key) <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">err</span>
+<span class="ansi-green-fg">   3649</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">TypeError</span>:
+<span class="ansi-green-fg">   3650</span>     <span style="color: rgb(95,135,135)"># If we have a listlike key, _check_indexing_error will raise</span>
+<span class="ansi-green-fg">   3651</span>     <span style="color: rgb(95,135,135)">#  InvalidIndexError. Otherwise we fall through and re-raise</span>
+<span class="ansi-green-fg">   3652</span>     <span style="color: rgb(95,135,135)">#  the TypeError.</span>
+<span class="ansi-green-fg">   3653</span>     <span style="color: rgb(0,135,0)">self</span>._check_indexing_error(key)
+
+<span class="ansi-red-fg">KeyError</span>: &#39;grav_disturbance_filtered_spatial&#39;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/filtering_data_in_1D_7_1.png" src="_images/filtering_data_in_1D_7_1.png" />
+</div>
+</div>
+</section>
+<section id="Temporal-filtering">
+<h3>Temporal filtering<a class="headerlink" href="#Temporal-filtering" title="Link to this heading">#</a></h3>
+<p>We can also perform 1D filtering based on the time.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">line_df</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;unixtime&quot;</span><span class="p">)</span>
+
+<span class="n">line_survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">line_df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">distance_column</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">line_survey</span><span class="o">.</span><span class="n">filter_line</span><span class="p">(</span>
+    <span class="n">filter_width</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>  <span class="c1"># 400 sec low pass gaussian filter</span>
+    <span class="n">filter_type</span><span class="o">=</span><span class="s2">&quot;lowpass&quot;</span><span class="p">,</span>
+    <span class="n">filter_shape</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">filter_by_column</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">result_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filtered_temporal&quot;</span><span class="p">,</span>
+    <span class="n">pad_width_percentage</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;b.&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">maxabs</span><span class="p">,</span> <span class="n">maxabs</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filtered_temporal&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;r.&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">maxabs</span><span class="p">,</span> <span class="n">maxabs</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;mGal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;mGal&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/filtering_data_in_1D_10_1.png" src="_images/filtering_data_in_1D_10_1.png" />
+</div>
+</div>
+</section>
+<section id="Filtering-with-equivalent-sources">
+<h3>Filtering with equivalent sources<a class="headerlink" href="#Filtering-with-equivalent-sources" title="Link to this heading">#</a></h3>
+<p>If our data is gravity or magnetic anomalies, an alternative method is to fit an equivalent source model to the unfiltered data, and either either block-reduction, damping, source-depth, or predicting at a high elevation (upward continuation) to smooth the data.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eqs</span> <span class="o">=</span> <span class="n">line_survey</span><span class="o">.</span><span class="n">eq_sources_1d</span><span class="p">(</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">depth</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">damping</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span>
+    <span class="n">block_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">line_df</span><span class="p">[</span><span class="s2">&quot;grav_disturbance_filtered_eqs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eqs</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+    <span class="p">(</span>
+        <span class="n">line_df</span><span class="o">.</span><span class="n">distance_along_line</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">line_df</span><span class="o">.</span><span class="n">distance_along_line</span><span class="p">),</span>
+        <span class="n">line_df</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="c1"># np.full_like(line_df.height, 10e3) # use this if you want to upward continue the data</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Compare-filtering-methods">
+<h3>Compare filtering methods<a class="headerlink" href="#Compare-filtering-methods" title="Link to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ylim</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span>
+    <span class="n">line_df</span><span class="p">[</span>
+        <span class="p">[</span>
+            <span class="s2">&quot;grav_disturbance_filtered_spatial&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;grav_disturbance_filtered_temporal&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;grav_disturbance_filtered_eqs&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filtered_spatial&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;b.&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filtered_temporal&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;r.&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">line_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filtered_eqs&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;g.&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">markerscale</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;mGal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;mGal&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/filtering_data_in_1D_14_1.png" src="_images/filtering_data_in_1D_14_1.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Filter-all-lines-in-a-survey">
+<h2>Filter all lines in a survey<a class="headerlink" href="#Filter-all-lines-in-a-survey" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h3>Spatial filtering<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the unfiltered gravity disturbance data</span>
+<span class="n">maxabs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">line_df</span><span class="o">.</span><span class="n">grav_disturbance</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">maxabs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">maxabs</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/filtering_data_in_1D_17_0.png" src="_images/filtering_data_in_1D_17_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create survey for full dataset</span>
+<span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">distance_column</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">filter_line</span><span class="p">(</span>
+    <span class="n">filter_width</span><span class="o">=</span><span class="mi">19_000</span><span class="p">,</span>  <span class="c1"># 19 km low pass gaussian filter</span>
+    <span class="n">filter_type</span><span class="o">=</span><span class="s2">&quot;lowpass&quot;</span><span class="p">,</span>
+    <span class="n">filter_shape</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">filter_by_column</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="n">result_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filtered_spatial&quot;</span><span class="p">,</span>
+    <span class="n">pad_width_percentage</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the filtered gravity disturbance data</span>
+<span class="n">maxabs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">line_df</span><span class="o">.</span><span class="n">grav_disturbance_filtered_spatial</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filtered_spatial&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">maxabs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">maxabs</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/filtering_data_in_1D_20_0.png" src="_images/filtering_data_in_1D_20_0.png" />
+</div>
+</div>
+</section>
+<section id="id2">
+<h3>Temporal filtering<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">filter_line</span><span class="p">(</span>
+    <span class="n">filter_width</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>  <span class="c1"># 500 sec low pass gaussian filter</span>
+    <span class="n">filter_type</span><span class="o">=</span><span class="s2">&quot;lowpass&quot;</span><span class="p">,</span>
+    <span class="n">filter_shape</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">filter_by_column</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">result_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filtered_temporal&quot;</span><span class="p">,</span>
+    <span class="n">pad_width_percentage</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the filtered gravity disturbance data</span>
+<span class="n">maxabs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">line_df</span><span class="o">.</span><span class="n">grav_disturbance_filtered_temporal</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filtered_temporal&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">maxabs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">maxabs</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/filtering_data_in_1D_23_0.png" src="_images/filtering_data_in_1D_23_0.png" />
+</div>
+</div>
+</section>
+<section id="Equivalent-source-filtering">
+<h3>Equivalent source filtering<a class="headerlink" href="#Equivalent-source-filtering" title="Link to this heading">#</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eqs</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">eq_sources_1d</span><span class="p">(</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">depth</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">damping</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span>
+    <span class="c1"># damping=1e5,</span>
+    <span class="c1"># damping=1e6,</span>
+    <span class="n">block_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pbar</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;line&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">segment_name</span><span class="p">,</span> <span class="n">segment_data</span> <span class="ow">in</span> <span class="n">pbar</span><span class="p">:</span>
+    <span class="n">line_eqs</span> <span class="o">=</span> <span class="n">eqs</span><span class="p">[</span><span class="n">segment_name</span><span class="p">]</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="n">segment_name</span><span class="p">,</span> <span class="s2">&quot;grav_disturbance_filtered_eqs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">line_eqs</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">segment_data</span><span class="o">.</span><span class="n">distance_along_line</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">segment_data</span><span class="o">.</span><span class="n">distance_along_line</span><span class="p">),</span>
+                <span class="n">segment_data</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot the filtered gravity disturbance data</span>
+<span class="n">maxabs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">line_df</span><span class="o">.</span><span class="n">grav_disturbance_filtered_eqs</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filtered_eqs&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">maxabs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">maxabs</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/filtering_data_in_1D_27_0.png" src="_images/filtering_data_in_1D_27_0.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="along_track_distance.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Along track distance</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="potential_field_processing.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">&lt;no title&gt;</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Filter-a-line">Filter a line</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Spatial-filtering">Spatial filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Temporal-filtering">Temporal filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Filtering-with-equivalent-sources">Filtering with equivalent sources</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Compare-filtering-methods">Compare filtering methods</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Filter-all-lines-in-a-survey">Filter all lines in a survey</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Spatial filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Temporal filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Equivalent-source-filtering">Equivalent source filtering</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 23, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

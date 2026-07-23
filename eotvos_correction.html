@@ -1,0 +1,1301 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Eotvos correction &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=fcfc4f34"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'eotvos_correction';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Normal gravity correction" href="normal_gravity_correction.html" />
+    <link rel="prev" title="Vertical acceleration correction" href="vertical_acceleration_correction.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g40564363a" />
+    <meta name="docbuild:last-update" content="Jul 23, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🧭 The Survey object</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="survey_object.html">The Survey object</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="reproject_data.html">Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_sampling_frequency.html">Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="split_survey_into_lines.html">Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="along_track_distance.html">Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filtering_data_in_1D.html">Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="vertical_acceleration_correction.html">Vertical acceleration correction</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal_gravity_correction.html">Normal gravity correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IGRF_correction.html">IGRF Correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛌ Crossovers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="crossovers.html">Crossovers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_01_basics.html">Find crossover points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_02_grouped_intersections.html">Find survey intersections between groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_03_network_intersections.html">Find all survey intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_04_interpolating_values.html">Interpolating values at crossovers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_05_crossover_errors.html">Cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_06_update_crossovers_with_equivalent_sources.html">Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_07_deduplicating_intersections.html">Deduplicating intersections: <code class="docutils literal notranslate"><span class="pre">block_size</span></code> vs <code class="docutils literal notranslate"><span class="pre">min_spacing</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="levelling.html">Levelling</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="levelling_01_to_a_grid.html">Levelling to a grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_02_crossover_levelling_simple.html">Simple cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_03_crossover_levelling_alternating.html">Alternating cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_04_crossover_levelling_network.html">PolarGAP aeromagnetic levelling</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="levelling_05_crossover_levelling_trend_vs_wavelength.html">Cross-over levelling: trend vs wavelength based</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_06_crossover_levelling_dependence_on_line_length.html">Cross-over levelling dependence on line length</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="levelling_07_equivalent_source_levelling.html">Levelling with equivalent sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_08_assessing_levelling_results.html">Assessing levelling results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.Survey.html">airbornegeo.Survey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.directional_velocity.html">airbornegeo.directional_velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.resample.html">airbornegeo.resample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.resample_as.html">airbornegeo.resample_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing.html">airbornegeo.interpolate_missing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing_pointwise.html">airbornegeo.interpolate_missing_pointwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing_pointwise_with_windows.html">airbornegeo.interpolate_missing_pointwise_with_windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.optimal_spline_damping.html">airbornegeo.optimal_spline_damping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.trend.html">airbornegeo.trend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.median_line_spacing.html">airbornegeo.median_line_spacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.largest_line_dimensions.html">airbornegeo.largest_line_dimensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.add_values_to_intersections.html">airbornegeo.add_values_to_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_intersection_weights.html">airbornegeo.calculate_intersection_weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.crossover_pair_levelling.html">airbornegeo.crossover_pair_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.crossover_network_levelling.html">airbornegeo.crossover_network_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eotvos_correction.html">airbornegeo.eotvos_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.igrf.html">airbornegeo.igrf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_profiles.html">airbornegeo.plot_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.add_scalebar.html">airbornegeo.add_scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.nice_scalebar_width.html">airbornegeo.nice_scalebar_width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.choose_colormap.html">airbornegeo.choose_colormap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.get_min_max.html">airbornegeo.get_min_max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.rmse.html">airbornegeo.rmse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.normalize_values.html">airbornegeo.normalize_values</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/airbornegeo/airbornegeo/main?urlpath=lab/tree/docs/eotvos_correction.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/eotvos_correction.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Feotvos_correction.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/eotvos_correction.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Eotvos correction</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Eotvos-correction-following-Glicken-1962">Eotvos correction following Glicken 1962</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Eotvos-correction-following-Harlan-1968">Eotvos correction following Harlan 1968</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Equation-15:">Equation 15:</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Eotvos-correction">
+<h1>Eotvos correction<a class="headerlink" href="#Eotvos-correction" title="Link to this heading">#</a></h1>
+<p>The Eotvos correction is a necessary correction to apply for any gravity surveys conducted on a moving platform, such as a ship or airplane. The correction accounts for the relative motion between the vehicle and the Earth’s surface, which generates an additional centrifugal force known as the Eotvos effect. We offer several methods of computing the correction, which we show here, generally from simpliest to most complex.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %load_ext autoreload</span>
+<span class="c1"># %autoreload 2</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.io</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">verde</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">airbornegeo</span>
+
+<span class="n">pio</span><span class="o">.</span><span class="n">renderers</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;notebook&quot;</span>
+</pre></div>
+</div>
+</div>
+<section id="Load-data">
+<h2>Load data<a class="headerlink" href="#Load-data" title="Link to this heading">#</a></h2>
+<p>This is a subset of the BAS AGAP survey over Antarctica’s Gamburtsev Subglacial Mountains. The file is downloaded and subset in the notebook <code class="docutils literal notranslate"><span class="pre">AGAP_gravity_survey</span></code>. It has a pre-computed Eotvos correction, which we will compare our computed values to.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/AGAP_gravity_survey.csv&quot;</span><span class="p">)</span>
+<span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">time_column</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">latitude_column</span><span class="o">=</span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+    <span class="n">longitude_column</span><span class="o">=</span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">along_track_distance</span><span class="p">()</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get only the raw columns</span>
+<span class="c1"># we will perform the corrections ourselves and compare to their values</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span>
+    <span class="p">[</span>
+        <span class="s2">&quot;EotvosCor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Height_WGS1984&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">]</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>EotvosCor</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Height_WGS1984</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>unixtime</th>
+      <th>line</th>
+      <th>distance_along_line</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>68.15</td>
+      <td>77.252450</td>
+      <td>-80.583923</td>
+      <td>4156.1</td>
+      <td>1.000024e+06</td>
+      <td>226237.330771</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>68.37</td>
+      <td>77.252672</td>
+      <td>-80.583377</td>
+      <td>4156.0</td>
+      <td>1.000083e+06</td>
+      <td>226246.631269</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>59.842447</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>68.37</td>
+      <td>77.252901</td>
+      <td>-80.582831</td>
+      <td>4156.1</td>
+      <td>1.000142e+06</td>
+      <td>226255.809132</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>119.693401</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>68.16</td>
+      <td>77.253131</td>
+      <td>-80.582285</td>
+      <td>4156.4</td>
+      <td>1.000201e+06</td>
+      <td>226264.969079</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>179.545645</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>68.12</td>
+      <td>77.253358</td>
+      <td>-80.581740</td>
+      <td>4156.6</td>
+      <td>1.000260e+06</td>
+      <td>226274.156809</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>239.285174</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Eotvos-correction-following-Glicken-1962">
+<h2>Eotvos correction following Glicken 1962<a class="headerlink" href="#Eotvos-correction-following-Glicken-1962" title="Link to this heading">#</a></h2>
+<p>The most simple method of calculating the Eotvos correction is the <a class="reference external" href="https://doi.org/10.1190/1.1439057">Glicken 1962</a> formula, which depends on only the latitudes, the track angle, and the ground speed. This approximation ignores the effects of aircraft altitude, and the flattening of the ellipsoid. It does this by assuming heights are neglible compared to the radius of the Earth, and the change in Earth radius with latitude (flatenning) is also negligible, so the mean radius of the Earth is
+used. This results in a simple formula of</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>E = 7.503 V \cos\phi \sin\tau + 0.00415V^2
+</pre></div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(V\)</span> is the ground speed of the aircraft, <span class="math notranslate nohighlight">\(\phi\)</span> is the geodetic latitude, and <span class="math notranslate nohighlight">\(\tau\)</span> is the track angle.</p>
+<p>The track angle is similar to the aircraft’s heading. The heading is the angle the nose of the plane points, which due to wind, can differ from the angle the path of the plane makes. This is in degrees clockwise from geographic (true) north.</p>
+<p>By setting <code class="docutils literal notranslate"><span class="pre">ellipsoid=True</span></code> in the below function, we calculate the track using the WGS84 ellipsoid, instead of using a simplified spheric model of the Earth. It is more accurate, but a bit slower to compute.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">track</span><span class="p">(</span><span class="n">ellipsoid</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;track&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/eotvos_correction_9_0.png" src="_images/eotvos_correction_9_0.png" />
+</div>
+</div>
+<p>The Glicken formulation also requiresthe ground speed of the aircraft. The below function <code class="docutils literal notranslate"><span class="pre">ground_speed</span></code> calculates the relative distance between successive rows in the dataframe. This assumes the dataframe is sorted by line, and then by time. From the relative distance, it then calculate the ground speed of the aircraft.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">ground_speed</span><span class="p">()</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;ground_speed&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/eotvos_correction_12_0.png" src="_images/eotvos_correction_12_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;eotvos_correction_glicken&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">eotvos_correction</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;glicken&quot;</span><span class="p">,</span>
+    <span class="n">latitude_column</span><span class="o">=</span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+    <span class="n">track_column</span><span class="o">=</span><span class="s2">&quot;track&quot;</span><span class="p">,</span>
+    <span class="n">ground_speed_column</span><span class="o">=</span><span class="s2">&quot;ground_speed&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>EotvosCor</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Height_WGS1984</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>unixtime</th>
+      <th>line</th>
+      <th>distance_along_line</th>
+      <th>track</th>
+      <th>ground_speed</th>
+      <th>eotvos_correction_glicken</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>68.15</td>
+      <td>77.252450</td>
+      <td>-80.583923</td>
+      <td>4156.1</td>
+      <td>1.000024e+06</td>
+      <td>226237.330771</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>0.000000</td>
+      <td>3.805916</td>
+      <td>59.842447</td>
+      <td>65.686957</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>68.37</td>
+      <td>77.252672</td>
+      <td>-80.583377</td>
+      <td>4156.0</td>
+      <td>1.000083e+06</td>
+      <td>226246.631269</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>59.842447</td>
+      <td>3.925778</td>
+      <td>59.846701</td>
+      <td>65.994238</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>68.37</td>
+      <td>77.252901</td>
+      <td>-80.582831</td>
+      <td>4156.1</td>
+      <td>1.000142e+06</td>
+      <td>226255.809132</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>119.693401</td>
+      <td>3.943093</td>
+      <td>59.851599</td>
+      <td>66.047865</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>68.16</td>
+      <td>77.253131</td>
+      <td>-80.582285</td>
+      <td>4156.4</td>
+      <td>1.000201e+06</td>
+      <td>226264.969079</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>179.545645</td>
+      <td>3.899163</td>
+      <td>59.795886</td>
+      <td>65.825500</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>68.12</td>
+      <td>77.253358</td>
+      <td>-80.581740</td>
+      <td>4156.6</td>
+      <td>1.000260e+06</td>
+      <td>226274.156809</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>239.285174</td>
+      <td>3.933634</td>
+      <td>59.740782</td>
+      <td>65.799305</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;eotvos_correction_glicken&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/eotvos_correction_14_0.png" src="_images/eotvos_correction_14_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">ylim</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">EotvosCor</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EotvosCor&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Published values&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eotvos_correction_glicken&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Calculated values&quot;</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Eotvos correction (mGal)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;Eotvos correction (mGal)&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/eotvos_correction_15_1.png" src="_images/eotvos_correction_15_1.png" />
+</div>
+</div>
+</section>
+<section id="Eotvos-correction-following-Harlan-1968">
+<h2>Eotvos correction following Harlan 1968<a class="headerlink" href="#Eotvos-correction-following-Harlan-1968" title="Link to this heading">#</a></h2>
+<p>Another common method to compute the correction is from <a class="reference external" href="https://doi.org/10.1029/JB073i014p04675">Harlan 1968</a>. The paper offers several equations, but first we will follow equation 15.</p>
+<section id="Equation-15:">
+<h3>Equation 15:<a class="headerlink" href="#Equation-15:" title="Link to this heading">#</a></h3>
+<p>This formulation requires the aircraft latitude, longtide, time (to calculate time derivatives) and height.</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>E = \frac{V_N^2}{a} [ 1 + \frac{h}{a} + f (2-3\sin^{2}\phi) ] + \frac{V_E^2}{a} [ 1 + \frac{h}{a} - f \sin^{2}\phi) ] + 2 V_E \omega \cos \phi (1 + \frac{h}{a})
+</pre></div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(V_N\)</span>, <span class="math notranslate nohighlight">\(V_E\)</span>, <span class="math notranslate nohighlight">\(h\)</span>, and <span class="math notranslate nohighlight">\(\phi\)</span>, $ are the aircraft’s eastward and northward velocities, height, and geodetic latitude, and <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(f\)</span>, and <span class="math notranslate nohighlight">\(\omega\)</span> are the ellipsoid’s semimajor axis, flattening, and rotation rate.</p>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>V_N = r&#39; \dot{\phi_{c}} sec(D)
+</pre></div>
+</div>
+<div class="highlight-math notranslate"><div class="highlight"><pre><span></span>V_E = r&#39; \dot{l} cos(\phi_{c})
+</pre></div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(r'\)</span> is the ellipsoid’s geocentric radius at the latitude of the aircraft, <span class="math notranslate nohighlight">\(l\)</span> is the aircraft’s longitude, <span class="math notranslate nohighlight">\(\phi_{c}\)</span> is the geocentric radius of the aircraft, <span class="math notranslate nohighlight">\(\dot{\phi_{c}}\)</span> is the first time derivative of the geocentric radius of the aircraft, and <span class="math notranslate nohighlight">\(D\)</span> is the deviation between the aircraft’s geodetic latitude and geocentric latitude.</p>
+<p>Compared to the Glicken formulation, it is more exact since it accounts for aircraft height as well as the flattening of the ellipsoid. However it still makes a few assumptions which simplify the calculations. These include a simplification for the deviation between geocentric and geodetic latitudes, and thus the time derivatives of this deviation, as well as a simplification of the geocentric radius, and thus the time derivatives of the geocentric radius.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;eotvos_correction_harlan&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">eotvos_correction</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;harlan&quot;</span><span class="p">,</span>
+    <span class="n">latitude_column</span><span class="o">=</span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+    <span class="n">longitude_column</span><span class="o">=</span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+    <span class="n">time_column</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">height_column</span><span class="o">=</span><span class="s2">&quot;Height_WGS1984&quot;</span><span class="p">,</span>
+    <span class="n">groupby_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>EotvosCor</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Height_WGS1984</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>unixtime</th>
+      <th>line</th>
+      <th>distance_along_line</th>
+      <th>track</th>
+      <th>ground_speed</th>
+      <th>eotvos_correction_glicken</th>
+      <th>eotvos_correction_harlan</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>68.15</td>
+      <td>77.252450</td>
+      <td>-80.583923</td>
+      <td>4156.1</td>
+      <td>1.000024e+06</td>
+      <td>226237.330771</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>0.000000</td>
+      <td>3.805916</td>
+      <td>59.842447</td>
+      <td>65.686957</td>
+      <td>68.079899</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>68.37</td>
+      <td>77.252672</td>
+      <td>-80.583377</td>
+      <td>4156.0</td>
+      <td>1.000083e+06</td>
+      <td>226246.631269</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>59.842447</td>
+      <td>3.925778</td>
+      <td>59.846701</td>
+      <td>65.994238</td>
+      <td>68.241925</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>68.37</td>
+      <td>77.252901</td>
+      <td>-80.582831</td>
+      <td>4156.1</td>
+      <td>1.000142e+06</td>
+      <td>226255.809132</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>119.693401</td>
+      <td>3.943093</td>
+      <td>59.851599</td>
+      <td>66.047865</td>
+      <td>68.427131</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>68.16</td>
+      <td>77.253131</td>
+      <td>-80.582285</td>
+      <td>4156.4</td>
+      <td>1.000201e+06</td>
+      <td>226264.969079</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>179.545645</td>
+      <td>3.899163</td>
+      <td>59.795886</td>
+      <td>65.825500</td>
+      <td>68.275851</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>68.12</td>
+      <td>77.253358</td>
+      <td>-80.581740</td>
+      <td>4156.6</td>
+      <td>1.000260e+06</td>
+      <td>226274.156809</td>
+      <td>1.229507e+09</td>
+      <td>1</td>
+      <td>239.285174</td>
+      <td>3.933634</td>
+      <td>59.740782</td>
+      <td>65.799305</td>
+      <td>68.147679</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;eotvos_correction_harlan&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/eotvos_correction_18_0.png" src="_images/eotvos_correction_18_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">ylim</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">EotvosCor</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EotvosCor&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Published values&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eotvos_correction_harlan&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Line </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">unique</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Calculated values&quot;</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Eotvos correction (mGal)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;Eotvos correction (mGal)&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/eotvos_correction_19_1.png" src="_images/eotvos_correction_19_1.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="vertical_acceleration_correction.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Vertical acceleration correction</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="normal_gravity_correction.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Normal gravity correction</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Eotvos-correction-following-Glicken-1962">Eotvos correction following Glicken 1962</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Eotvos-correction-following-Harlan-1968">Eotvos correction following Harlan 1968</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Equation-15:">Equation 15:</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 23, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,880 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>airbornegeo.Survey &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=fcfc4f34"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generated/airbornegeo.Survey';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="airbornegeo.along_track_distance" href="airbornegeo.along_track_distance.html" />
+    <link rel="prev" title="API Reference" href="../airbornegeo.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g40564363a" />
+    <meta name="docbuild:last-update" content="Jul 23, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🧭 The Survey object</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../survey_object.html">The Survey object</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../reproject_data.html">Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../change_sampling_frequency.html">Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../split_survey_into_lines.html">Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../along_track_distance.html">Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filtering_data_in_1D.html">Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../vertical_acceleration_correction.html">Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../eotvos_correction.html">Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../normal_gravity_correction.html">Normal gravity correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../IGRF_correction.html">IGRF Correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛌ Crossovers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../crossovers.html">Crossovers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../crossovers_01_basics.html">Find crossover points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../crossovers_02_grouped_intersections.html">Find survey intersections between groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../crossovers_03_network_intersections.html">Find all survey intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../crossovers_04_interpolating_values.html">Interpolating values at crossovers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../crossovers_05_crossover_errors.html">Cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../crossovers_06_update_crossovers_with_equivalent_sources.html">Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../crossovers_07_deduplicating_intersections.html">Deduplicating intersections: <code class="docutils literal notranslate"><span class="pre">block_size</span></code> vs <code class="docutils literal notranslate"><span class="pre">min_spacing</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../levelling.html">Levelling</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../levelling_01_to_a_grid.html">Levelling to a grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../levelling_02_crossover_levelling_simple.html">Simple cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../levelling_03_crossover_levelling_alternating.html">Alternating cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../levelling_04_crossover_levelling_network.html">PolarGAP aeromagnetic levelling</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../levelling_05_crossover_levelling_trend_vs_wavelength.html">Cross-over levelling: trend vs wavelength based</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../levelling_06_crossover_levelling_dependence_on_line_length.html">Cross-over levelling dependence on line length</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../levelling_07_equivalent_source_levelling.html">Levelling with equivalent sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../levelling_08_assessing_levelling_results.html">Assessing levelling results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../airbornegeo.html">API Reference</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">airbornegeo.Survey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.directional_velocity.html">airbornegeo.directional_velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.resample.html">airbornegeo.resample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.resample_as.html">airbornegeo.resample_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.interpolate_missing.html">airbornegeo.interpolate_missing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.interpolate_missing_pointwise.html">airbornegeo.interpolate_missing_pointwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.interpolate_missing_pointwise_with_windows.html">airbornegeo.interpolate_missing_pointwise_with_windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.optimal_spline_damping.html">airbornegeo.optimal_spline_damping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.trend.html">airbornegeo.trend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.median_line_spacing.html">airbornegeo.median_line_spacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.largest_line_dimensions.html">airbornegeo.largest_line_dimensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.add_values_to_intersections.html">airbornegeo.add_values_to_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.calculate_intersection_weights.html">airbornegeo.calculate_intersection_weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.crossover_pair_levelling.html">airbornegeo.crossover_pair_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.crossover_network_levelling.html">airbornegeo.crossover_network_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.eotvos_correction.html">airbornegeo.eotvos_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.igrf.html">airbornegeo.igrf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plot_profiles.html">airbornegeo.plot_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.add_scalebar.html">airbornegeo.add_scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.nice_scalebar_width.html">airbornegeo.nice_scalebar_width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.choose_colormap.html">airbornegeo.choose_colormap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.get_min_max.html">airbornegeo.get_min_max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.rmse.html">airbornegeo.rmse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="airbornegeo.normalize_values.html">airbornegeo.normalize_values</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/api/generated/airbornegeo.Survey.rst" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Fapi/generated/airbornegeo.Survey.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/api/generated/airbornegeo.Survey.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>airbornegeo.Survey</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#airbornegeo.Survey"><code class="docutils literal notranslate"><span class="pre">Survey</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#airbornegeo.Survey.__init__"><code class="docutils literal notranslate"><span class="pre">Survey.__init__</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="airbornegeo-survey">
+<h1>airbornegeo.Survey<a class="headerlink" href="#airbornegeo-survey" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="airbornegeo.Survey">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Survey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_type_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">easting_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'easting'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">northing_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'northing'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/airbornegeo/survey.html#Survey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#airbornegeo.Survey" title="Link to this definition">#</a></dt>
+<dd><p>Container for an airborne survey dataframe with its structural column
+names, coordinate reference system, metadata, intersection table, and
+lazily computed summary statistics.</p>
+<p>Methods which add or alter a few columns operate in place on
+<code class="docutils literal notranslate"><span class="pre">survey.data</span></code> and return the survey itself, so calls can be chained,
+e.g. <code class="docutils literal notranslate"><span class="pre">survey.along_track_distance().filter_line(...)</span></code>. Methods which
+replace the whole dataframe (<a class="reference internal" href="airbornegeo.block_reduce.html#airbornegeo.block_reduce" title="airbornegeo.block_reduce"><code class="xref py py-meth docutils literal notranslate"><span class="pre">block_reduce</span></code></a>, <a class="reference internal" href="airbornegeo.resample.html#airbornegeo.resample" title="airbornegeo.resample"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resample</span></code></a>,
+<a class="reference internal" href="airbornegeo.resample_as.html#airbornegeo.resample_as" title="airbornegeo.resample_as"><code class="xref py py-meth docutils literal notranslate"><span class="pre">resample_as</span></code></a>) instead return a new <a class="reference internal" href="#airbornegeo.Survey" title="airbornegeo.Survey"><code class="xref py py-class docutils literal notranslate"><span class="pre">Survey</span></code></a>, leaving the
+original untouched.</p>
+<p>Summary statistics (<code class="xref py py-attr docutils literal notranslate"><span class="pre">region</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">line_counts</span></code>,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">line_lengths</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">total_length</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">median_line_lengths</span></code>,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">line_azimuths</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">mean_line_azimuths</span></code>,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">median_line_spacings</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">line_point_spacings</span></code>,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">median_point_spacings</span></code>) are computed on first access and cached.
+The cache is cleared automatically when methods replace or restructure the
+dataframe, but not when <code class="docutils literal notranslate"><span class="pre">survey.data</span></code> is mutated directly from outside —
+call <code class="xref py py-meth docutils literal notranslate"><span class="pre">invalidate_cache</span></code> after such external edits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">GeoDataFrame</span></code></span>) – <p>the survey dataframe. Must contain projected coordinate columns; if
+they are not named ‘easting’/’northing’, give their names with
+easting_column/northing_column and they will be renamed on ingest
+(the rest of the package requires those literal names).</p>
+<p>Apart from the coordinates, no column names are assumed. Name the
+columns a workflow needs when building the Survey; methods which need
+an unset binding raise a ValueError naming the missing one.</p>
+</p></li>
+<li><p><strong>line_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – name of the column containing line names/numbers, by default None</p></li>
+<li><p><strong>line_type_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – name of the column containing line type codes (0 = flight line,
+1 = tie line, 2 = excluded), by default None</p></li>
+<li><p><strong>distance_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – name of the column containing distance along line, by default None</p></li>
+<li><p><strong>time_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – name of the column containing time values, by default None</p></li>
+<li><p><strong>height_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – name of the column containing flight heights, by default None</p></li>
+<li><p><strong>latitude_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – names of the geodetic latitude/longitude columns, by default None</p></li>
+<li><p><strong>longitude_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – names of the geodetic latitude/longitude columns, by default None</p></li>
+<li><p><strong>easting_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – names of the projected coordinate columns in the supplied dataframe,
+renamed to ‘easting’/’northing’ on ingest, by default already
+‘easting’/’northing’</p></li>
+<li><p><strong>northing_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – names of the projected coordinate columns in the supplied dataframe,
+renamed to ‘easting’/’northing’ on ingest, by default already
+‘easting’/’northing’</p></li>
+<li><p><strong>crs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – coordinate reference system, anything accepted by
+<code class="docutils literal notranslate"><span class="pre">pyproj.CRS.from_user_input</span></code>. Taken from the GeoDataFrame if not
+given, by default None</p></li>
+<li><p><strong>metadata</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – free-form survey metadata (name, year, instrument, units, …),
+by default None</p></li>
+<li><p><strong>copy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – copy the dataframe on ingest so in-place methods never alter the
+caller’s frame. Set to False to avoid the copy for very large
+surveys, at the cost of methods mutating the supplied frame,
+by default True</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="airbornegeo.Survey.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_type_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">easting_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'easting'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">northing_column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'northing'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/airbornegeo/survey.html#Survey.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#airbornegeo.Survey.__init__" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">GeoDataFrame</span></code></span>)</p></li>
+<li><p><strong>line_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>line_type_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>distance_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>time_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>height_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>latitude_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>longitude_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>easting_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>)</p></li>
+<li><p><strong>northing_column</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>)</p></li>
+<li><p><strong>crs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>metadata</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>)</p></li>
+<li><p><strong>copy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#airbornegeo.Survey.__init__" title="airbornegeo.Survey.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(data, *[, line_column, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_intersections</span></code>(**kwargs)</p></td>
+<td><p>Insert the intersection points as rows into the survey dataframe and add their along-line distances to the intersection table.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_values_to_intersections</span></code>(columns)</p></td>
+<td><p>Add each line's values of the given columns to the intersection table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">along_track_distance</span></code>(**kwargs)</p></td>
+<td><p>Compute distance along each line, written to the survey's distance column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">alternating_iterative_line_levelling</span></code>(*, data_col)</p></td>
+<td><p>Alternately level flight lines (line type 0) and tie lines (line type 1) using crossover errors, written to <code class="docutils literal notranslate"><span class="pre">levelled_col</span></code> (default <code class="docutils literal notranslate"><span class="pre">'&lt;data_col&gt;_levelled'</span></code>); updates the survey dataframe and the intersection table in place.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">block_reduce</span></code>(reduction, *, spacing[, reduce_by])</p></td>
+<td><p>Return a new Survey with block-reduced data; this survey is unchanged and its intersection table is not carried over.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_crossover_errors</span></code>(*, data_col, **kwargs)</p></td>
+<td><p>Calculate crossover errors of <code class="docutils literal notranslate"><span class="pre">data_col</span></code>, added to the intersection table as a <code class="docutils literal notranslate"><span class="pre">crossover_error_N</span></code> column.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_intersection_table</span></code>(*, method, **kwargs)</p></td>
+<td><p>Create the intersection table of the survey's lines, stored as <code class="docutils literal notranslate"><span class="pre">survey.intersections</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">crossover_network_levelling</span></code>(*, data_col[, ...])</p></td>
+<td><p>Network-level all lines using crossover errors, written to <code class="docutils literal notranslate"><span class="pre">levelled_col</span></code> (default <code class="docutils literal notranslate"><span class="pre">'&lt;data_col&gt;_levelled'</span></code>); updates the survey dataframe and the intersection table in place.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">crossover_pair_levelling</span></code>(*, data_col, ...[, ...])</p></td>
+<td><p>Level the given lines to the rest of the survey using crossover errors, written to <code class="docutils literal notranslate"><span class="pre">levelled_col</span></code> (default <code class="docutils literal notranslate"><span class="pre">'&lt;data_col&gt;_levelled'</span></code>); updates the survey dataframe and the intersection table in place.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">describe</span></code>()</p></td>
+<td><p>Compute all summary statistics and return them as a formatted string.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">directional_velocity</span></code>(*[, coordinate_column, ...])</p></td>
+<td><p>Compute velocity along one coordinate direction, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code> (default <code class="docutils literal notranslate"><span class="pre">'&lt;coordinate_column&gt;_velocity'</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eotvos_correction</span></code>(*[, method, ...])</p></td>
+<td><p>Compute the Eötvös correction, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eq_sources_1d</span></code>(*, data_column, damping, **kwargs)</p></td>
+<td><p>Fit equivalent sources along each line and return them (a dict keyed by line name), for use with <a class="reference internal" href="airbornegeo.upward_continue_by_line.html#airbornegeo.upward_continue_by_line" title="airbornegeo.upward_continue_by_line"><code class="xref py py-meth docutils literal notranslate"><span class="pre">upward_continue_by_line</span></code></a> or <a class="reference internal" href="airbornegeo.update_intersections_with_eq_sources.html#airbornegeo.update_intersections_with_eq_sources" title="airbornegeo.update_intersections_with_eq_sources"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update_intersections_with_eq_sources</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">equivalent_source_levelling</span></code>(*, data_column, ...)</p></td>
+<td><p>Level lines with iteratively fitted equivalent sources, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code> (default <code class="docutils literal notranslate"><span class="pre">'&lt;data_column&gt;_levelled'</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_line</span></code>(*, data_column, filter_width[, ...])</p></td>
+<td><p>Filter a data column along each line, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code> (default <code class="docutils literal notranslate"><span class="pre">'&lt;data_column&gt;_filtered'</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_csv</span></code>(path, **kwargs)</p></td>
+<td><p>Reload a survey saved with <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_csv</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_parquet</span></code>(path, **kwargs)</p></td>
+<td><p>Reload a survey saved with <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_parquet</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ground_speed</span></code>(*[, result_column])</p></td>
+<td><p>Compute ground speed along each line, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">igrf</span></code>(*, datetime_column[, result_columns])</p></td>
+<td><p>Compute the IGRF intensity, inclination and declination, written to the three <code class="docutils literal notranslate"><span class="pre">result_columns</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inspect_intersections</span></code>(*, plot_variable[, x])</p></td>
+<td><p>Step through a plotly profile of each line with intersections in turn, plotted against <code class="docutils literal notranslate"><span class="pre">x</span></code> (default the survey's distance column).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inspect_lines</span></code>(*, plot_variable[, interp_on])</p></td>
+<td><p>Step through a plotly profile of each line in turn, plotted against <code class="docutils literal notranslate"><span class="pre">interp_on</span></code> (default the survey's distance column).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate_intersections</span></code>(*, to_interp[, ...])</p></td>
+<td><p>Interpolate <code class="docutils literal notranslate"><span class="pre">to_interp</span></code> onto the intersection rows along <code class="docutils literal notranslate"><span class="pre">interp_on</span></code> (default the survey's distance column), updating both the survey dataframe and the intersection table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate_missing</span></code>(*, to_interp[, interp_on])</p></td>
+<td><p>Fill NaN values of <code class="docutils literal notranslate"><span class="pre">to_interp</span></code> by interpolating along <code class="docutils literal notranslate"><span class="pre">interp_on</span></code> (default the survey's distance column) for each line.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate_missing_pointwise</span></code>(*, to_interp)</p></td>
+<td><p>Fill NaN values of <code class="docutils literal notranslate"><span class="pre">to_interp</span></code> one point at a time by interpolating along <code class="docutils literal notranslate"><span class="pre">interp_on</span></code> (default the survey's distance column) for each line.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolate_missing_pointwise_with_windows</span></code>(*, ...)</p></td>
+<td><p>Fill NaN values of <code class="docutils literal notranslate"><span class="pre">to_interp</span></code> one point at a time using a moving window along <code class="docutils literal notranslate"><span class="pre">interp_on</span></code> (default the survey's distance column) for each line.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">invalidate_cache</span></code>()</p></td>
+<td><p>Drop all cached statistics so they recompute on next access.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">level_to_grid</span></code>(*, data_column, grid_column[, ...])</p></td>
+<td><p>Level a data column to values sampled from a grid, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code> (default <code class="docutils literal notranslate"><span class="pre">'&lt;data_column&gt;_levelled'</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">lines_without_intersections</span></code>()</p></td>
+<td><p>Return the lines which have no intersections in the intersection table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code>(*[, ax, color_by, categorical, ...])</p></td>
+<td><p>Plot the survey points in map view, optionally colored by a column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_line_and_crosses</span></code>(*, y[, x])</p></td>
+<td><p>Plot one line's profiles against <code class="docutils literal notranslate"><span class="pre">x</span></code> (default the survey's distance column), marking its intersections.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profiles</span></code>(*, y[, x])</p></td>
+<td><p>Plot data profiles with matplotlib, against <code class="docutils literal notranslate"><span class="pre">x</span></code> (default the survey's distance column).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotly_points</span></code>(**kwargs)</p></td>
+<td><p>Interactive map-view scatter of the survey points.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotly_profiles</span></code>(*, y[, x])</p></td>
+<td><p>Plot data profiles with plotly, against <code class="docutils literal notranslate"><span class="pre">x</span></code> (default the survey's distance column).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">relative_distance</span></code>(*[, result_column])</p></td>
+<td><p>Compute the distance between consecutive points of each line, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reproject</span></code>(output_crs, *[, input_crs])</p></td>
+<td><p>Reproject the survey's easting/northing columns into <code class="docutils literal notranslate"><span class="pre">output_crs</span></code> and set it as the survey's crs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample</span></code>(*, spacing, maxdist[, resample_by])</p></td>
+<td><p>Return a new Survey resampled onto a regular spacing of <code class="docutils literal notranslate"><span class="pre">resample_by</span></code> (default the survey's distance column); this survey is unchanged and its intersection table is not carried over.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_as</span></code>(*, resample_values[, resample_by])</p></td>
+<td><p>Return a new Survey resampled onto the supplied values of <code class="docutils literal notranslate"><span class="pre">resample_by</span></code> (default the survey's distance column); this survey is unchanged and its intersection table is not carried over.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_grid</span></code>(grid, *, result_column[, ...])</p></td>
+<td><p>Sample a grid at the survey's coordinates, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_into_segments</span></code>(threshold, *[, ...])</p></td>
+<td><p>Split the survey into segments where <code class="docutils literal notranslate"><span class="pre">column_name</span></code> (default the survey's time column) jumps by more than <code class="docutils literal notranslate"><span class="pre">threshold</span></code>, writing the segment names to <code class="docutils literal notranslate"><span class="pre">result_column</span></code> (default the survey's line column).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_csv</span></code>(path, **kwargs)</p></td>
+<td><p>Save this survey to CSV: <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;.csv</span></code> (the data, a plain CSV file readable without airbornegeo), <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;_intersections.csv</span></code> (only written if <code class="xref py py-attr docutils literal notranslate"><span class="pre">intersections</span></code> is set, with its geometry column as WKT text), and <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;.json</span></code> (a sidecar with the CRS, metadata, and column bindings needed to reconstruct the <code class="docutils literal notranslate"><span class="pre">Survey</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_parquet</span></code>(path, **kwargs)</p></td>
+<td><p>Save this survey to Parquet: <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;.parquet</span></code> (the data, a plain Parquet file readable without airbornegeo), <a href="#id1"><span class="problematic" id="id2">``</span></a>&lt;path&gt;_intersections.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">track</span></code>(*[, result_column])</p></td>
+<td><p>Compute the travel azimuth (track) along each line, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">unique_line_id</span></code>()</p></td>
+<td><p>Replace the line column's values with unique sequential integer ids.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_intersections_with_eq_sources</span></code>(*, ...)</p></td>
+<td><p>Replace the interpolated values at the intersection rows with values predicted by fitted equivalent sources, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code> (default overwriting <code class="docutils literal notranslate"><span class="pre">data_column</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">upward_continue_by_line</span></code>(...[, result_column])</p></td>
+<td><p>Upward continue each line to a constant height using fitted equivalent sources, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vertical_acceleration</span></code>(*[, result_column])</p></td>
+<td><p>Compute vertical acceleration along each line, written to <code class="docutils literal notranslate"><span class="pre">result_column</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Attributes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>The survey dataframe.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">distance_column</span></code></p></td>
+<td><p>Name of the distance-along-line column.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">height_column</span></code></p></td>
+<td><p>Name of the flight height column.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_azimuths</span></code></p></td>
+<td><p>Compass azimuth (degrees clockwise from north, axial 0-180 range) of each line's minimum rotated bounding box long axis, indexed by line.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_column</span></code></p></td>
+<td><p>Name of the line name/number column.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_counts</span></code></p></td>
+<td><p>Number of lines, in total and per line type.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_lengths</span></code></p></td>
+<td><p>Largest bounding dimension of each line, indexed by line.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_point_spacings</span></code></p></td>
+<td><p>Median along-line distance between successive data points of each line, indexed by line.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_type_column</span></code></p></td>
+<td><p>Name of the line type code column (0 = flight, 1 = tie, 2 = excluded).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_line_azimuths</span></code></p></td>
+<td><p>Mean compass azimuth per line type, computed as an axial circular mean so lines straddling the 0/180 wraparound average correctly.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">median_line_lengths</span></code></p></td>
+<td><p>Median line length per line type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">median_line_spacings</span></code></p></td>
+<td><p>Median line spacing per line type (line types with fewer than 2 lines are skipped).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">median_point_spacings</span></code></p></td>
+<td><p>Median along-line data point spacing per line type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">region</span></code></p></td>
+<td><p>Bounding region (west, east, south, north) of the survey.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_column</span></code></p></td>
+<td><p>Name of the time column.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_length</span></code></p></td>
+<td><p>Total survey length; the sum of all line lengths.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../airbornegeo.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="airbornegeo.along_track_distance.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">airbornegeo.along_track_distance</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#airbornegeo.Survey"><code class="docutils literal notranslate"><span class="pre">Survey</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#airbornegeo.Survey.__init__"><code class="docutils literal notranslate"><span class="pre">Survey.__init__</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 23, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,1863 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Process the AGAP airborne gravity data &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=fcfc4f34"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'processing_AGAP_gravity';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g40564363a" />
+    <meta name="docbuild:last-update" content="Jul 23, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🧭 The Survey object</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="survey_object.html">The Survey object</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="reproject_data.html">Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_sampling_frequency.html">Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="split_survey_into_lines.html">Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="along_track_distance.html">Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filtering_data_in_1D.html">Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="vertical_acceleration_correction.html">Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eotvos_correction.html">Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal_gravity_correction.html">Normal gravity correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IGRF_correction.html">IGRF Correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛌ Crossovers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="crossovers.html">Crossovers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_01_basics.html">Find crossover points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_02_grouped_intersections.html">Find survey intersections between groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_03_network_intersections.html">Find all survey intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_04_interpolating_values.html">Interpolating values at crossovers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_05_crossover_errors.html">Cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_06_update_crossovers_with_equivalent_sources.html">Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_07_deduplicating_intersections.html">Deduplicating intersections: <code class="docutils literal notranslate"><span class="pre">block_size</span></code> vs <code class="docutils literal notranslate"><span class="pre">min_spacing</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="levelling.html">Levelling</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="levelling_01_to_a_grid.html">Levelling to a grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_02_crossover_levelling_simple.html">Simple cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_03_crossover_levelling_alternating.html">Alternating cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_04_crossover_levelling_network.html">PolarGAP aeromagnetic levelling</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="levelling_05_crossover_levelling_trend_vs_wavelength.html">Cross-over levelling: trend vs wavelength based</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_06_crossover_levelling_dependence_on_line_length.html">Cross-over levelling dependence on line length</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="levelling_07_equivalent_source_levelling.html">Levelling with equivalent sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_08_assessing_levelling_results.html">Assessing levelling results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.Survey.html">airbornegeo.Survey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.directional_velocity.html">airbornegeo.directional_velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.resample.html">airbornegeo.resample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.resample_as.html">airbornegeo.resample_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing.html">airbornegeo.interpolate_missing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing_pointwise.html">airbornegeo.interpolate_missing_pointwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing_pointwise_with_windows.html">airbornegeo.interpolate_missing_pointwise_with_windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.optimal_spline_damping.html">airbornegeo.optimal_spline_damping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.trend.html">airbornegeo.trend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.median_line_spacing.html">airbornegeo.median_line_spacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.largest_line_dimensions.html">airbornegeo.largest_line_dimensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.add_values_to_intersections.html">airbornegeo.add_values_to_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_intersection_weights.html">airbornegeo.calculate_intersection_weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.crossover_pair_levelling.html">airbornegeo.crossover_pair_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.crossover_network_levelling.html">airbornegeo.crossover_network_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eotvos_correction.html">airbornegeo.eotvos_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.igrf.html">airbornegeo.igrf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_profiles.html">airbornegeo.plot_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.add_scalebar.html">airbornegeo.add_scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.nice_scalebar_width.html">airbornegeo.nice_scalebar_width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.choose_colormap.html">airbornegeo.choose_colormap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.get_min_max.html">airbornegeo.get_min_max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.rmse.html">airbornegeo.rmse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.normalize_values.html">airbornegeo.normalize_values</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/airbornegeo/airbornegeo/main?urlpath=lab/tree/docs/processing_AGAP_gravity.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/processing_AGAP_gravity.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Fprocessing_AGAP_gravity.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/processing_AGAP_gravity.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Process the AGAP airborne gravity data</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Distance-along-line">Distance along line</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Relative-gravity">Relative gravity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Absolute-gravity">Absolute gravity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Vertical-acceleration-corrections">Vertical acceleration corrections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Horizontal-acceleration-corrections">Horizontal acceleration corrections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Eotvos-correction">Eotvos correction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Observed-gravity">Observed gravity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Normal-gravity-corrections">Normal gravity corrections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Gravity-Distrubance">Gravity Distrubance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Filtering">Filtering</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Save-the-results">Save the results</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Process-the-AGAP-airborne-gravity-data">
+<h1>Process the AGAP airborne gravity data<a class="headerlink" href="#Process-the-AGAP-airborne-gravity-data" title="Link to this heading">#</a></h1>
+<p>We try to recreate the BAS processing steps, as outlined here: <a class="reference external" href="https://data.bas.ac.uk/full-record.php?id=GB/NERC/BAS/PDC/01310">https://data.bas.ac.uk/full-record.php?id=GB/NERC/BAS/PDC/01310</a></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %load_ext autoreload</span>
+<span class="c1"># %autoreload 2</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">boule</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cmocean</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">verde</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">airbornegeo</span>
+</pre></div>
+</div>
+</div>
+<section id="Load-data">
+<h2>Load data<a class="headerlink" href="#Load-data" title="Link to this heading">#</a></h2>
+<p>This is a subset of the BAS AGAP survey over Antarctica’s Gamburtsev Subglacial Mountains. The file is download and subset in the notebook <code class="docutils literal notranslate"><span class="pre">AGAP_survey</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/AGAP_gravity_survey.csv&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Index([&#39;Lon&#39;, &#39;Lat&#39;, &#39;Height_WGS1984&#39;, &#39;Date&#39;, &#39;Time&#39;, &#39;ST&#39;, &#39;CC&#39;, &#39;RB&#39;,
+       &#39;XACC&#39;, &#39;LACC&#39;, &#39;Still&#39;, &#39;Base&#39;, &#39;ST_real&#39;, &#39;Beam_vel&#39;, &#39;rec_grav&#39;,
+       &#39;Abs_grav&#39;, &#39;VaccCor&#39;, &#39;EotvosCor&#39;, &#39;LatCor&#39;, &#39;FaCor&#39;, &#39;HaccCor&#39;,
+       &#39;Free_air&#39;, &#39;FAA_filt&#39;, &#39;FAA_clip&#39;, &#39;Level_cor&#39;, &#39;FAA_level&#39;,
+       &#39;Fa_4600m&#39;, &#39;easting&#39;, &#39;northing&#39;, &#39;line_name&#39;, &#39;line&#39;, &#39;unixtime&#39;],
+      dtype=&#39;str&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Height_WGS1984</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>ST</th>
+      <th>CC</th>
+      <th>RB</th>
+      <th>XACC</th>
+      <th>LACC</th>
+      <th>...</th>
+      <th>FAA_filt</th>
+      <th>FAA_clip</th>
+      <th>Level_cor</th>
+      <th>FAA_level</th>
+      <th>Fa_4600m</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>line_name</th>
+      <th>line</th>
+      <th>unixtime</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>77.252450</td>
+      <td>-80.583923</td>
+      <td>4156.1</td>
+      <td>2008-12-17</td>
+      <td>0 days 09:42:48</td>
+      <td>11934.47</td>
+      <td>2.61</td>
+      <td>-659.0</td>
+      <td>-49.0</td>
+      <td>273.0</td>
+      <td>...</td>
+      <td>49.38</td>
+      <td>49.38</td>
+      <td>7.03</td>
+      <td>42.4</td>
+      <td>40.8</td>
+      <td>1.000024e+06</td>
+      <td>226237.330771</td>
+      <td>11_DA500</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>77.252672</td>
+      <td>-80.583377</td>
+      <td>4156.0</td>
+      <td>2008-12-17</td>
+      <td>0 days 09:42:49</td>
+      <td>11934.47</td>
+      <td>2.72</td>
+      <td>-368.6</td>
+      <td>-321.0</td>
+      <td>230.0</td>
+      <td>...</td>
+      <td>49.45</td>
+      <td>49.45</td>
+      <td>7.04</td>
+      <td>42.4</td>
+      <td>40.8</td>
+      <td>1.000083e+06</td>
+      <td>226246.631269</td>
+      <td>11_DA500</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>77.252901</td>
+      <td>-80.582831</td>
+      <td>4156.1</td>
+      <td>2008-12-17</td>
+      <td>0 days 09:42:50</td>
+      <td>11888.95</td>
+      <td>-2.08</td>
+      <td>703.1</td>
+      <td>433.0</td>
+      <td>146.0</td>
+      <td>...</td>
+      <td>49.52</td>
+      <td>49.52</td>
+      <td>7.04</td>
+      <td>42.5</td>
+      <td>40.9</td>
+      <td>1.000142e+06</td>
+      <td>226255.809132</td>
+      <td>11_DA500</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>77.253131</td>
+      <td>-80.582285</td>
+      <td>4156.4</td>
+      <td>2008-12-17</td>
+      <td>0 days 09:42:51</td>
+      <td>11888.95</td>
+      <td>0.50</td>
+      <td>625.1</td>
+      <td>566.0</td>
+      <td>223.0</td>
+      <td>...</td>
+      <td>49.58</td>
+      <td>49.58</td>
+      <td>7.03</td>
+      <td>42.5</td>
+      <td>40.9</td>
+      <td>1.000201e+06</td>
+      <td>226264.969079</td>
+      <td>11_DA500</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>77.253358</td>
+      <td>-80.581740</td>
+      <td>4156.6</td>
+      <td>2008-12-17</td>
+      <td>0 days 09:42:52</td>
+      <td>11888.95</td>
+      <td>-1.73</td>
+      <td>575.1</td>
+      <td>108.0</td>
+      <td>205.0</td>
+      <td>...</td>
+      <td>49.65</td>
+      <td>49.65</td>
+      <td>7.04</td>
+      <td>42.6</td>
+      <td>41.0</td>
+      <td>1.000260e+06</td>
+      <td>226274.156809</td>
+      <td>11_DA500</td>
+      <td>1</td>
+      <td>1.229507e+09</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 32 columns</p>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">time_column</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">height_column</span><span class="o">=</span><span class="s2">&quot;Height_WGS1984&quot;</span><span class="p">,</span>
+    <span class="n">latitude_column</span><span class="o">=</span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span>
+    <span class="n">longitude_column</span><span class="o">=</span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span>
+    <span class="n">distance_column</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">survey</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Distance-along-line">
+<h2>Distance along line<a class="headerlink" href="#Distance-along-line" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">along_track_distance</span><span class="p">()</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[[</span><span class="s2">&quot;easting&quot;</span><span class="p">,</span> <span class="s2">&quot;northing&quot;</span><span class="p">,</span> <span class="s2">&quot;distance_along_line&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Relative-gravity">
+<h2>Relative gravity<a class="headerlink" href="#Relative-gravity" title="Link to this heading">#</a></h2>
+<div class="math notranslate nohighlight">
+\[g_{rel} = s (t +(b k)+c)\]</div>
+<p>where <span class="math notranslate nohighlight">\(g_{rel}\)</span> is the relative gravity, <span class="math notranslate nohighlight">\(t\)</span> is the true spring tension, <span class="math notranslate nohighlight">\(b\)</span> is the beam velocity, <span class="math notranslate nohighlight">\(k\)</span> is 30, <span class="math notranslate nohighlight">\(c\)</span> is the cross-coupling, and <span class="math notranslate nohighlight">\(s\)</span> is the meter scale value, which is 0.9966.</p>
+<p>The beam velocity (<span class="math notranslate nohighlight">\(b\)</span>) is from a centered finite difference approximation of the raw beam position (<span class="math notranslate nohighlight">\(RB\)</span>).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_relative&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.9966</span> <span class="o">*</span> <span class="p">(</span>
+    <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ST_real&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Beam_vel&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">30</span><span class="p">)</span> <span class="o">+</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;CC&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span>
+    <span class="p">[</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span> <span class="s2">&quot;RB&quot;</span><span class="p">,</span> <span class="s2">&quot;Beam_vel&quot;</span><span class="p">,</span> <span class="s2">&quot;CC&quot;</span><span class="p">,</span> <span class="s2">&quot;ST&quot;</span><span class="p">,</span> <span class="s2">&quot;ST_real&quot;</span><span class="p">,</span> <span class="s2">&quot;grav_relative&quot;</span><span class="p">]</span>
+<span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">max_abs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grav_relative</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_relative&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">max_abs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">max_abs</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for now just use there values</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;grav_relative&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_relative&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">rec_grav</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Absolute-gravity">
+<h2>Absolute gravity<a class="headerlink" href="#Absolute-gravity" title="Link to this heading">#</a></h2>
+<p>Still readings are in mGal and were calculating assuming a 2nd order best fit to the approximately linear drift of the meter observed at the tie down points. For each line, there are 2-5 unique still values. For the whole survey, the base station readings are all equal to 981970.73 mGal.</p>
+<p>Absolute gravity is then calculated as:</p>
+<div class="math notranslate nohighlight">
+\[g_{abs} = g_{rel} - g_{still} + g_{base}\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_absolute&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_relative&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Still&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;Base&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[[</span><span class="s2">&quot;grav_relative&quot;</span><span class="p">,</span> <span class="s2">&quot;Base&quot;</span><span class="p">,</span> <span class="s2">&quot;Still&quot;</span><span class="p">,</span> <span class="s2">&quot;grav_absolute&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grav_absolute</span><span class="p">,</span> <span class="n">min_percentile</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_absolute&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for now just use their values</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;grav_absolute&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_absolute&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">Abs_grav</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Vertical-acceleration-corrections">
+<h2>Vertical acceleration corrections<a class="headerlink" href="#Vertical-acceleration-corrections" title="Link to this heading">#</a></h2>
+<p>The vertical acceleration is calculated as the 2nd derivative of flight altitude w.r.t. time with a 3 point mean filter applied after differencing to reduce short wavelength noise.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">vertical_acceleration</span><span class="p">(</span>
+    <span class="n">smoothing_window</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">result_column</span><span class="o">=</span><span class="s2">&quot;vertical_acceleration&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Convert from m/s2 to mGal (already done by the method via result multiplier)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">ylim</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">VaccCor</span><span class="p">)</span>  <span class="c1"># , min_percentile=5, max_percentile=95)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vertical_acceleration&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;VaccCor&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rx&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="c1"># ax=ax,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">VaccCor</span> <span class="o">-</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">vertical_acceleration</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Vertical acceleration difference with published values, RMSE:</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">airbornegeo</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for now just use the BAS values</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;vertical_acceleration&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;vertical_acceleration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">VaccCor</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Horizontal-acceleration-corrections">
+<h2>Horizontal acceleration corrections<a class="headerlink" href="#Horizontal-acceleration-corrections" title="Link to this heading">#</a></h2>
+<p>For this survey the approximation of Swain 1996 was used, assuming a damping of 0.707 and a platform period of 4 minutes.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># data_df[&#39;horizontal_acceleration&#39;] = (</span>
+<span class="c1">#     data_df.XACC**2 +</span>
+<span class="c1">#     data_df.LACC**2 -</span>
+<span class="c1">#     (np.diff(airbornegeo.eastward_velocity(</span>
+<span class="c1">#         data_df.Lat.values, data_df.Lon.values, data_df.unixtime.values</span>
+<span class="c1">#     ), prepend=np.nan) / data_df.unixtime.diff() )**2 -</span>
+<span class="c1">#     (np.diff(airbornegeo.northward_velocity(</span>
+<span class="c1">#         data_df.Lat.values, data_df.Lon.values, data_df.unixtime.values</span>
+<span class="c1">#     ), prepend=np.nan) / data_df.unixtime.diff() )**2</span>
+<span class="c1"># ) / 2*data_df.grav_relative</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for now just use the BAS values</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;horizontal_acceleration&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;horizontal_acceleration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">HaccCor</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Eotvos-correction">
+<h2>Eotvos correction<a class="headerlink" href="#Eotvos-correction" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">ground_speed</span><span class="p">()</span>
+
+<span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">ground_speed</span><span class="p">,</span> <span class="n">min_percentile</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;ground_speed&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">track</span><span class="p">(</span><span class="n">ellipsoid</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># this is faster</span>
+
+<span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">track</span><span class="p">,</span> <span class="n">min_percentile</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;track&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">eotvos_correction</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;glicken&quot;</span><span class="p">)</span>
+<span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">eotvos_correction</span><span class="p">,</span> <span class="n">min_percentile</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;eotvos_correction&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">eotvos_correction</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;glicken&quot;</span><span class="p">)</span>
+<span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">eotvos_correction</span><span class="p">,</span> <span class="n">min_percentile</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;eotvos_correction&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">ylim</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">EotvosCor</span><span class="p">)</span>  <span class="c1"># , min_percentile=5, max_percentile=95)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;eotvos_correction&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EotvosCor&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rx&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">EotvosCor</span> <span class="o">-</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">eotvos_correction</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Eötvös correction difference with published values, RMSE:</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">airbornegeo</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for now just use the BAS values</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;eotvos_correction&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;eotvos_correction&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">EotvosCor</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Observed-gravity">
+<h2>Observed gravity<a class="headerlink" href="#Observed-gravity" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_observed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_absolute&quot;</span><span class="p">]</span>
+    <span class="o">-</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;vertical_acceleration&quot;</span><span class="p">]</span>
+    <span class="o">+</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;eotvos_correction&quot;</span><span class="p">]</span>
+    <span class="o">-</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;horizontal_acceleration&quot;</span><span class="p">])</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grav_observed</span><span class="p">,</span> <span class="n">min_percentile</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_observed&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">ylim</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">grav_observed</span><span class="p">)</span>  <span class="c1"># , min_percentile=5, max_percentile=95)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_observed&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Normal-gravity-corrections">
+<h2>Normal gravity corrections<a class="headerlink" href="#Normal-gravity-corrections" title="Link to this heading">#</a></h2>
+<p>BAS used a separate latitude correction and free-air correction. We will instead combine them with a Normal gravity correction.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># combine the published Latitude and Free air corrections into a Normal gravity column</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;NormalGrav&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">LatCor</span> <span class="o">-</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">FaCor</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate normal gravity using the WGS84 ellipsoid</span>
+<span class="n">ellipsoid</span> <span class="o">=</span> <span class="n">bl</span><span class="o">.</span><span class="n">WGS84</span>
+
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_normal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ellipsoid</span><span class="o">.</span><span class="n">normal_gravity</span><span class="p">(</span>
+    <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Lat</span><span class="p">,</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Height_WGS1984</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_normal&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_normal&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;NormalGrav&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rx&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">NormalGrav</span> <span class="o">-</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grav_normal</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Normal gravity difference with published values, RMSE:</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">airbornegeo</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for now just use the BAS values</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;grav_normal&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_normal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">NormalGrav</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Gravity-Distrubance">
+<h2>Gravity Distrubance<a class="headerlink" href="#Gravity-Distrubance" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The disturbance is the observed minus normal gravity (calculated at the</span>
+<span class="c1"># observation point)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav_observed</span> <span class="o">-</span> <span class="n">data_df</span><span class="o">.</span><span class="n">grav_normal</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Free_air</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">cpt_lims</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Free_air</span> <span class="o">-</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grav_disturbance</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Gravity disturbance (FAA) difference with published values, RMSE:</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">airbornegeo</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">ylim</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">grav_disturbance</span><span class="p">)</span>  <span class="c1"># , min_percentile=5, max_percentile=95)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Free_air&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rx&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for now just use the BAS values</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">Free_air</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Filtering">
+<h2>Filtering<a class="headerlink" href="#Filtering" title="Link to this heading">#</a></h2>
+<p>Filtered free air anomaly (FAA_filt) used 9 km 1/2 wavelength space domain kernel filter (Holt et al., 2006).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">filter_line</span><span class="p">(</span>
+    <span class="n">filter_width</span><span class="o">=</span><span class="mi">26_000</span><span class="p">,</span>
+    <span class="n">filter_type</span><span class="o">=</span><span class="s2">&quot;lowpass&quot;</span><span class="p">,</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+    <span class="n">result_column</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">pad_width_percentage</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">FAA_filt</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">cpt_lims</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;FAA_filt&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">cpt_lims</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">FAA_filt</span> <span class="o">-</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">grav_disturbance_filt</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;filtered FAA difference with published values, RMSE:</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">airbornegeo</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cpt_lims</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dif</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">95</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[::</span><span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;dif&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">cpt_lims</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">cpt_lims</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">ylim</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">minmax</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">FAA_filt</span><span class="p">)</span>  <span class="c1"># , min_percentile=5, max_percentile=95)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;bp&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;FAA_filt&quot;</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">&quot;rx&quot;</span><span class="p">,</span>
+    <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># for now just use the BAS values</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">FAA_filt</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Save-the-results">
+<h2>Save the results<a class="headerlink" href="#Save-the-results" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># save to csv for further levelling notebook</span>
+<span class="c1"># eventually will use our version, but for checking the levelling is working correctly,</span>
+<span class="c1"># we will just use their version</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;Level_cor&quot;</span><span class="p">:</span> <span class="s2">&quot;level_correction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;FAA_level&quot;</span><span class="p">:</span> <span class="s2">&quot;grav_disturbance_filt_level&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Height_WGS1984&quot;</span><span class="p">:</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Lon&quot;</span><span class="p">:</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Lat&quot;</span><span class="p">:</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
+    <span class="p">[</span>
+        <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;height&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_observed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_disturbance&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_disturbance_filt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;level_correction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grav_disturbance_filt_level&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">]</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data/AGAP_gravity_survey_processed.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># block reduce by line to speed up the notebooks</span>
+<span class="n">df_blocked</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">block_reduce</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">reduce_by</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="n">groupby_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">df_blocked</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a3f3deb485a84c16a850e4db3579014a", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>distance_along_line</th>
+      <th>tmp</th>
+      <th>line</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>longitude</th>
+      <th>latitude</th>
+      <th>height</th>
+      <th>unixtime</th>
+      <th>grav_observed</th>
+      <th>grav_disturbance</th>
+      <th>grav_disturbance_filt</th>
+      <th>level_correction</th>
+      <th>grav_disturbance_filt_level</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>89.767924</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1.000112e+06</td>
+      <td>226251.220201</td>
+      <td>77.252786</td>
+      <td>-80.583104</td>
+      <td>4156.10</td>
+      <td>1.229507e+09</td>
+      <td>982375.8575</td>
+      <td>581.05</td>
+      <td>49.485</td>
+      <td>7.035</td>
+      <td>42.45</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>299.027209</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1.000319e+06</td>
+      <td>226283.309168</td>
+      <td>77.253587</td>
+      <td>-80.581195</td>
+      <td>4156.90</td>
+      <td>1.229507e+09</td>
+      <td>981105.9000</td>
+      <td>-716.70</td>
+      <td>49.710</td>
+      <td>7.030</td>
+      <td>42.70</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>507.126130</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1.000525e+06</td>
+      <td>226314.585668</td>
+      <td>77.254418</td>
+      <td>-80.579297</td>
+      <td>4159.60</td>
+      <td>1.229507e+09</td>
+      <td>981213.4300</td>
+      <td>-584.35</td>
+      <td>49.920</td>
+      <td>7.035</td>
+      <td>42.90</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>713.391042</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1.000729e+06</td>
+      <td>226345.184353</td>
+      <td>77.255265</td>
+      <td>-80.577416</td>
+      <td>4163.30</td>
+      <td>1.229507e+09</td>
+      <td>980694.7050</td>
+      <td>-1092.30</td>
+      <td>50.110</td>
+      <td>7.030</td>
+      <td>43.10</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>888.955840</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1.000903e+06</td>
+      <td>226371.179740</td>
+      <td>77.255988</td>
+      <td>-80.575815</td>
+      <td>4165.00</td>
+      <td>1.229507e+09</td>
+      <td>982786.7400</td>
+      <td>1011.00</td>
+      <td>50.270</td>
+      <td>7.030</td>
+      <td>43.20</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>107007</th>
+      <td>78243.550033</td>
+      <td>0.0</td>
+      <td>100</td>
+      <td>1.587849e+06</td>
+      <td>497160.759515</td>
+      <td>72.614485</td>
+      <td>-74.773032</td>
+      <td>2116.45</td>
+      <td>1.230382e+09</td>
+      <td>982357.5600</td>
+      <td>182.25</td>
+      <td>-17.505</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>107008</th>
+      <td>78427.756923</td>
+      <td>0.0</td>
+      <td>100</td>
+      <td>1.587882e+06</td>
+      <td>496979.685445</td>
+      <td>72.620783</td>
+      <td>-74.773230</td>
+      <td>2116.70</td>
+      <td>1.230382e+09</td>
+      <td>982478.8800</td>
+      <td>292.30</td>
+      <td>-17.370</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>107009</th>
+      <td>78612.860388</td>
+      <td>0.0</td>
+      <td>100</td>
+      <td>1.587914e+06</td>
+      <td>496797.241880</td>
+      <td>72.627100</td>
+      <td>-74.773453</td>
+      <td>2115.55</td>
+      <td>1.230382e+09</td>
+      <td>981880.3200</td>
+      <td>-337.90</td>
+      <td>-17.205</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>107010</th>
+      <td>78826.103942</td>
+      <td>0.0</td>
+      <td>100</td>
+      <td>1.587950e+06</td>
+      <td>496587.151406</td>
+      <td>72.634381</td>
+      <td>-74.773705</td>
+      <td>2113.20</td>
+      <td>1.230382e+09</td>
+      <td>982215.1500</td>
+      <td>-12.55</td>
+      <td>-16.990</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>107011</th>
+      <td>79041.150831</td>
+      <td>0.0</td>
+      <td>100</td>
+      <td>1.587987e+06</td>
+      <td>496375.310967</td>
+      <td>72.641724</td>
+      <td>-74.773957</td>
+      <td>2110.90</td>
+      <td>1.230382e+09</td>
+      <td>983405.7125</td>
+      <td>1175.90</td>
+      <td>-16.725</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>107012 rows × 14 columns</p>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># block reduce by line to speed up the notebooks</span>
+<span class="n">df_blocked</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">block_reduce</span><span class="p">(</span>
+    <span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">reduce_by</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="n">groupby_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">df_blocked</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {"05195d594575471b8e27de8491edf5fd": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "07c90ff91480452a9ecff6a511282ba8": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "11337386cc7b4e4b9c48420bfe6b4a57": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "120dbd4bc79a4c64907394594a9888a7": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "1300b9c75af946d6a3dd3ede287de8bb": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "1572cde2761b4f53ad371dac178bab24": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "1dc7b0ec0ba04f87a95f18b43e50fb8a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "1e1d7821c0e14d97a90dedf218467cfa": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "1f466dc1d52f476aa4cf7f42c3d9da8a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_11337386cc7b4e4b9c48420bfe6b4a57", "placeholder": "\u200b", "style": "IPY_MODEL_1e1d7821c0e14d97a90dedf218467cfa", "tabbable": null, "tooltip": null, "value": "\u2007100/100\u2007[00:00&lt;00:00,\u200711975.86it/s]"}}, "22666ee311d148409825156644fa556f": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "28e8eaea1f9b439ea0a8ed6f4aa8b3ea": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "29ba4a0fc7b249fc8ecb7a2e75610e83": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "2a6c18d10b954e96969b4ddfce431ff9": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_fb21586476b04d749ac4a575a7b40ae7", "IPY_MODEL_ded76fa6ea7e43d9a3dce0fe5b491ddb", "IPY_MODEL_a35b1262ee24418f9ae89f3a4e619cbb"], "layout": "IPY_MODEL_be2ca9bbfb584a5f8c2a19613a255aa1", "tabbable": null, "tooltip": null}}, "33f6d3da9d8744b58a4a27eeed4e6460": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "3e39c51f5c1a480a9ccff462a50e98d6": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "3fbb45879d9a4ec3bd9734c1d208d2d7": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "4a7942c43e234696a675437c3078a480": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "4b7ae4f4104f4f76b83d2f1f35ffdf24": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "4c3eae4528fc4105a6b1e3a1ec0a607c": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "4e7a92e9ed1c4b0eaf64c010dbe43bf4": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_33f6d3da9d8744b58a4a27eeed4e6460", "placeholder": "\u200b", "style": "IPY_MODEL_b5d8b48585c34ecda0c5a3fc04522912", "tabbable": null, "tooltip": null, "value": "Block-reducing\u2007segments:\u2007100%"}}, "568bc5f304ac4bb9ac891e69c881d802": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_b89646942de942479104639ab0388359", "max": 100, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_b42b97d53b894f4aacb77892d823170c", "tabbable": null, "tooltip": null, "value": 100}}, "5c0342acb35f450e882b17be42bafbe1": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "5cbdfa54548e43609eb13184946c78e2": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_8f15e97dbce84a65a1e16d1e6dd1b906", "IPY_MODEL_bcadb4eea26f42a0bd1c23449a7700ab", "IPY_MODEL_c9878ff32a9045409394b4cbbb93fbcd"], "layout": "IPY_MODEL_22666ee311d148409825156644fa556f", "tabbable": null, "tooltip": null}}, "62dae022ca0849de867a172a0a3516bb": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "6474290a7a584ff78df258b8facafc5f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_edb8722d3616483e81ab7049f341ea8d", "max": 100, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_67b2fc5325b54d76a7a73f652c60bf27", "tabbable": null, "tooltip": null, "value": 100}}, "67b2fc5325b54d76a7a73f652c60bf27": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "69d4ba9d7dad4049ab288491d7e0d049": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "6d1c540e536f4aeeb0fcf6a6b661aa3e": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_bf38b6869b5045ed8fa89387a3f6ec65", "placeholder": "\u200b", "style": "IPY_MODEL_3fbb45879d9a4ec3bd9734c1d208d2d7", "tabbable": null, "tooltip": null, "value": "Segments:\u2007100%"}}, "726b836edffe474ba479a011806c921d": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_4c3eae4528fc4105a6b1e3a1ec0a607c", "placeholder": "\u200b", "style": "IPY_MODEL_f222298dd7824ce5b0cfe7144e4aada3", "tabbable": null, "tooltip": null, "value": "Segments:\u2007100%"}}, "77fc4ffe15bb48909e5d15d09256016d": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_ab2cc583f92c476f840db1b7ca4c51ca", "placeholder": "\u200b", "style": "IPY_MODEL_5c0342acb35f450e882b17be42bafbe1", "tabbable": null, "tooltip": null, "value": "Segments:\u2007100%"}}, "782a999733e74efb96ed3ff25ba64919": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "82a70c2e8d174aa48f1d2f6f7e90c6b3": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "866eb89d4ab244eebf96d29aceebd638": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_a440091e6a1343c8b0c788bbf90684db", "placeholder": "\u200b", "style": "IPY_MODEL_a6075be7e88b449786c93031a1ccb9fe", "tabbable": null, "tooltip": null, "value": "\u2007100/100\u2007[00:00&lt;00:00,\u200710272.60it/s]"}}, "89e09be4163e42bbb1e408243f300545": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "8f15e97dbce84a65a1e16d1e6dd1b906": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_1300b9c75af946d6a3dd3ede287de8bb", "placeholder": "\u200b", "style": "IPY_MODEL_07c90ff91480452a9ecff6a511282ba8", "tabbable": null, "tooltip": null, "value": "Segments:\u2007100%"}}, "94328ff237cb43ec99a4991ac61ea263": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_bcc2d512df0140559267335bf0fd4ffc", "placeholder": "\u200b", "style": "IPY_MODEL_1dc7b0ec0ba04f87a95f18b43e50fb8a", "tabbable": null, "tooltip": null, "value": "\u2007100/100\u2007[00:00&lt;00:00,\u200712367.11it/s]"}}, "9894b34cf78f47acac96699aa85aae35": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "a1079dddbfa44c0693016e690ad1b976": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "a35b1262ee24418f9ae89f3a4e619cbb": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_69d4ba9d7dad4049ab288491d7e0d049", "placeholder": "\u200b", "style": "IPY_MODEL_05195d594575471b8e27de8491edf5fd", "tabbable": null, "tooltip": null, "value": "\u2007100/100\u2007[00:00&lt;00:00,\u20078604.94it/s]"}}, "a3bab67bfbeb4ae2a7315421624f205f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_4e7a92e9ed1c4b0eaf64c010dbe43bf4", "IPY_MODEL_ef288115bee5478f96184bac196b610f", "IPY_MODEL_cc66c679858c45e2914e7e96b43fe708"], "layout": "IPY_MODEL_a1079dddbfa44c0693016e690ad1b976", "tabbable": null, "tooltip": null}}, "a440091e6a1343c8b0c788bbf90684db": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "a6075be7e88b449786c93031a1ccb9fe": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "ab2cc583f92c476f840db1b7ca4c51ca": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "ab4c2b89f7034d2c9110b65a8106c799": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_62dae022ca0849de867a172a0a3516bb", "placeholder": "\u200b", "style": "IPY_MODEL_f18f0e42e7364cd59d30856c671152b2", "tabbable": null, "tooltip": null, "value": "Segments:\u2007100%"}}, "b42b97d53b894f4aacb77892d823170c": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "b5d8b48585c34ecda0c5a3fc04522912": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "b72cf86666a240fa8c54c0d2fe76faec": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_6d1c540e536f4aeeb0fcf6a6b661aa3e", "IPY_MODEL_6474290a7a584ff78df258b8facafc5f", "IPY_MODEL_94328ff237cb43ec99a4991ac61ea263"], "layout": "IPY_MODEL_c64a997309904278a96c35e8cc78c63a", "tabbable": null, "tooltip": null}}, "b7b4ee9b75774c6e8998ab8a1179d500": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "b7fb2e66e18347a6bf6667f069f74e94": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "b876e4fb1e4248aaa2ce7c47ac852409": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_120dbd4bc79a4c64907394594a9888a7", "max": 100, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_cb3f5fb205c04d2aad318ed9b1a4ec20", "tabbable": null, "tooltip": null, "value": 100}}, "b89646942de942479104639ab0388359": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "bcadb4eea26f42a0bd1c23449a7700ab": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_9894b34cf78f47acac96699aa85aae35", "max": 100, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_1572cde2761b4f53ad371dac178bab24", "tabbable": null, "tooltip": null, "value": 100}}, "bcc2d512df0140559267335bf0fd4ffc": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "be2ca9bbfb584a5f8c2a19613a255aa1": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "bf38b6869b5045ed8fa89387a3f6ec65": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "c1db4ba9ac6b41faa48163eb084c4692": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "c64a997309904278a96c35e8cc78c63a": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "c91ef1cfb3c54814abf346003fe0f15b": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "c9878ff32a9045409394b4cbbb93fbcd": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_b7b4ee9b75774c6e8998ab8a1179d500", "placeholder": "\u200b", "style": "IPY_MODEL_de90b54bbaf34c1ab3164c8e06650d92", "tabbable": null, "tooltip": null, "value": "\u2007100/100\u2007[00:00&lt;00:00,\u2007831.33it/s]"}}, "cb3f5fb205c04d2aad318ed9b1a4ec20": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "cc62436093fe4675a4a4c5734aa15bef": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_ab4c2b89f7034d2c9110b65a8106c799", "IPY_MODEL_568bc5f304ac4bb9ac891e69c881d802", "IPY_MODEL_1f466dc1d52f476aa4cf7f42c3d9da8a"], "layout": "IPY_MODEL_28e8eaea1f9b439ea0a8ed6f4aa8b3ea", "tabbable": null, "tooltip": null}}, "cc66c679858c45e2914e7e96b43fe708": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_ef749deece86495f800c33db2cf38065", "placeholder": "\u200b", "style": "IPY_MODEL_c91ef1cfb3c54814abf346003fe0f15b", "tabbable": null, "tooltip": null, "value": "\u2007100/100\u2007[00:33&lt;00:00,\u2007\u20074.12it/s]"}}, "d05e93c2c5c84e709984e09454f256bc": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "d280a6e9e077481e8a2c715414ca00ae": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "de90b54bbaf34c1ab3164c8e06650d92": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "ded76fa6ea7e43d9a3dce0fe5b491ddb": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_4b7ae4f4104f4f76b83d2f1f35ffdf24", "max": 100, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_29ba4a0fc7b249fc8ecb7a2e75610e83", "tabbable": null, "tooltip": null, "value": 100}}, "e37654b852e744798bf259e12195e8bf": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_726b836edffe474ba479a011806c921d", "IPY_MODEL_b876e4fb1e4248aaa2ce7c47ac852409", "IPY_MODEL_866eb89d4ab244eebf96d29aceebd638"], "layout": "IPY_MODEL_82a70c2e8d174aa48f1d2f6f7e90c6b3", "tabbable": null, "tooltip": null}}, "e9919bc6936245559f9b74dc70dbd24a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_f308f2c0a3524a77959c8734b5005643", "placeholder": "\u200b", "style": "IPY_MODEL_4a7942c43e234696a675437c3078a480", "tabbable": null, "tooltip": null, "value": "\u2007100/100\u2007[00:00&lt;00:00,\u200711843.63it/s]"}}, "ed005184e97544e1b2e6fdc0b23d05b3": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_782a999733e74efb96ed3ff25ba64919", "max": 100, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_3e39c51f5c1a480a9ccff462a50e98d6", "tabbable": null, "tooltip": null, "value": 100}}, "edb8722d3616483e81ab7049f341ea8d": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "ef288115bee5478f96184bac196b610f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_b7fb2e66e18347a6bf6667f069f74e94", "max": 100, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_c1db4ba9ac6b41faa48163eb084c4692", "tabbable": null, "tooltip": null, "value": 100}}, "ef749deece86495f800c33db2cf38065": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "ef968ebddfcf4138a3b5cc7672b67bb2": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_77fc4ffe15bb48909e5d15d09256016d", "IPY_MODEL_ed005184e97544e1b2e6fdc0b23d05b3", "IPY_MODEL_e9919bc6936245559f9b74dc70dbd24a"], "layout": "IPY_MODEL_89e09be4163e42bbb1e408243f300545", "tabbable": null, "tooltip": null}}, "f18f0e42e7364cd59d30856c671152b2": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "f222298dd7824ce5b0cfe7144e4aada3": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "f308f2c0a3524a77959c8734b5005643": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "fb21586476b04d749ac4a575a7b40ae7": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_d05e93c2c5c84e709984e09454f256bc", "placeholder": "\u200b", "style": "IPY_MODEL_d280a6e9e077481e8a2c715414ca00ae", "tabbable": null, "tooltip": null, "value": "Segments:\u2007100%"}}}, "version_major": 2, "version_minor": 0}
+</script></section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Distance-along-line">Distance along line</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Relative-gravity">Relative gravity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Absolute-gravity">Absolute gravity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Vertical-acceleration-corrections">Vertical acceleration corrections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Horizontal-acceleration-corrections">Horizontal acceleration corrections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Eotvos-correction">Eotvos correction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Observed-gravity">Observed gravity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Normal-gravity-corrections">Normal gravity corrections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Gravity-Distrubance">Gravity Distrubance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Filtering">Filtering</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Save-the-results">Save the results</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 23, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

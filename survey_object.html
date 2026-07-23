@@ -1,0 +1,2043 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The Survey object &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=fcfc4f34"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'survey_object';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="processing.html" />
+    <link rel="prev" title="Citing AirborneGeo" href="citing.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g40564363a" />
+    <meta name="docbuild:last-update" content="Jul 23, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🧭 The Survey object</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">The Survey object</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="reproject_data.html">Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_sampling_frequency.html">Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="split_survey_into_lines.html">Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="along_track_distance.html">Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filtering_data_in_1D.html">Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="vertical_acceleration_correction.html">Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eotvos_correction.html">Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal_gravity_correction.html">Normal gravity correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IGRF_correction.html">IGRF Correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛌ Crossovers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="crossovers.html">Crossovers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_01_basics.html">Find crossover points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_02_grouped_intersections.html">Find survey intersections between groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_03_network_intersections.html">Find all survey intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_04_interpolating_values.html">Interpolating values at crossovers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_05_crossover_errors.html">Cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_06_update_crossovers_with_equivalent_sources.html">Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crossovers_07_deduplicating_intersections.html">Deduplicating intersections: <code class="docutils literal notranslate"><span class="pre">block_size</span></code> vs <code class="docutils literal notranslate"><span class="pre">min_spacing</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="levelling.html">Levelling</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="levelling_01_to_a_grid.html">Levelling to a grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_02_crossover_levelling_simple.html">Simple cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_03_crossover_levelling_alternating.html">Alternating cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_04_crossover_levelling_network.html">PolarGAP aeromagnetic levelling</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="levelling_05_crossover_levelling_trend_vs_wavelength.html">Cross-over levelling: trend vs wavelength based</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_06_crossover_levelling_dependence_on_line_length.html">Cross-over levelling dependence on line length</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="levelling_07_equivalent_source_levelling.html">Levelling with equivalent sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levelling_08_assessing_levelling_results.html">Assessing levelling results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.Survey.html">airbornegeo.Survey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.directional_velocity.html">airbornegeo.directional_velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.resample.html">airbornegeo.resample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.resample_as.html">airbornegeo.resample_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing.html">airbornegeo.interpolate_missing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing_pointwise.html">airbornegeo.interpolate_missing_pointwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_missing_pointwise_with_windows.html">airbornegeo.interpolate_missing_pointwise_with_windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.optimal_spline_damping.html">airbornegeo.optimal_spline_damping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.trend.html">airbornegeo.trend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.median_line_spacing.html">airbornegeo.median_line_spacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.largest_line_dimensions.html">airbornegeo.largest_line_dimensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.add_values_to_intersections.html">airbornegeo.add_values_to_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.calculate_intersection_weights.html">airbornegeo.calculate_intersection_weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.crossover_pair_levelling.html">airbornegeo.crossover_pair_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.crossover_network_levelling.html">airbornegeo.crossover_network_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.eotvos_correction.html">airbornegeo.eotvos_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.igrf.html">airbornegeo.igrf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_profiles.html">airbornegeo.plot_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.add_scalebar.html">airbornegeo.add_scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.nice_scalebar_width.html">airbornegeo.nice_scalebar_width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.choose_colormap.html">airbornegeo.choose_colormap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.get_min_max.html">airbornegeo.get_min_max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.rmse.html">airbornegeo.rmse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/airbornegeo.normalize_values.html">airbornegeo.normalize_values</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/airbornegeo/airbornegeo/main?urlpath=lab/tree/docs/survey_object.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/survey_object.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Fsurvey_object.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/survey_object.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>The Survey object</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Create-a-Survey">Create a Survey</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Plotting">Plotting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Summary-statistics">Summary statistics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Chained-processing">Chained processing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Frame-replacing-methods-return-a-new-Survey">Frame-replacing methods return a new Survey</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Crossovers-and-levelling">Crossovers and levelling</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Saving-and-reloading-a-Survey">Saving and reloading a Survey</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="The-Survey-object">
+<h1>The Survey object<a class="headerlink" href="#The-Survey-object" title="Link to this heading">#</a></h1>
+<p>Most of <code class="docutils literal notranslate"><span class="pre">airbornegeo</span></code>’s functions take a dataframe plus the names of the columns they need (<code class="docutils literal notranslate"><span class="pre">line_column</span></code>, <code class="docutils literal notranslate"><span class="pre">distance_column</span></code>, <code class="docutils literal notranslate"><span class="pre">time_column</span></code>, …), which quickly gets repetitive. The <code class="docutils literal notranslate"><span class="pre">airbornegeo.Survey</span></code> class stores the dataframe together with those column names, a coordinate reference system, free-form metadata, and the survey’s intersection table, and exposes most package functions as methods which fill the column names in for you.</p>
+<p>Two kinds of methods:</p>
+<ul class="simple">
+<li><p>Methods which add or alter a few columns (e.g. <code class="docutils literal notranslate"><span class="pre">along_track_distance</span></code>, <code class="docutils literal notranslate"><span class="pre">filter_line</span></code>, the crossover pipeline) operate <strong>in place</strong> on <code class="docutils literal notranslate"><span class="pre">survey.data</span></code> and return the survey itself, so calls can be chained.</p></li>
+<li><p>Methods which replace the whole dataframe (<code class="docutils literal notranslate"><span class="pre">block_reduce</span></code>, <code class="docutils literal notranslate"><span class="pre">resample</span></code>, <code class="docutils literal notranslate"><span class="pre">resample_as</span></code>) return a <strong>new</strong> <code class="docutils literal notranslate"><span class="pre">Survey</span></code>, leaving the original untouched.</p></li>
+</ul>
+<p>Summary statistics (bounding region, line counts, line lengths, spacings, and orientations) are computed lazily the first time you access them and cached afterwards.</p>
+<p>The functional API is unchanged — every method simply wraps the function of the same name.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">airbornegeo</span>
+
+<span class="c1"># setup logging to get some additional info from the airbornegeo functions</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;airbornegeo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<section id="Load-data">
+<h2>Load data<a class="headerlink" href="#Load-data" title="Link to this heading">#</a></h2>
+<p>This is a subset of the BAS AGAP aeromagnetic survey over Antarctica’s Gamburtsev Subglacial Mountains, already processed and block-reduced (see the notebooks <code class="docutils literal notranslate"><span class="pre">AGAP_magnetic_survey</span></code> and <code class="docutils literal notranslate"><span class="pre">processing_AGAP_magnetics</span></code>). We mark the ~E-W survey lines with <code class="docutils literal notranslate"><span class="pre">line_type=0</span></code> and the ~N-S tie lines with <code class="docutils literal notranslate"><span class="pre">line_type=1</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/AGAP_magnetic_survey_processed_blocked.csv&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s2">&quot;easting&quot;</span><span class="p">,</span> <span class="s2">&quot;northing&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span> <span class="s2">&quot;mag&quot;</span><span class="p">]]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s2">&quot;mag&quot;</span><span class="p">)</span>
+
+<span class="c1"># for speed, limit the number of lines</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">133</span><span class="p">,</span> <span class="mi">142</span><span class="p">)]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">168</span><span class="p">,</span> <span class="mi">176</span><span class="p">)]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">unique</span><span class="p">()[::</span><span class="mi">2</span><span class="p">]))</span> <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">line</span> <span class="o">&gt;=</span> <span class="mi">143</span><span class="p">)]</span>
+
+<span class="c1"># define survey lines (0) vs tie lines (1)</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;line_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">line</span> <span class="o">&gt;=</span> <span class="mi">142</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>height</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>mag</th>
+      <th>line_type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>621152.853769</td>
+      <td>159064.167598</td>
+      <td>4112.55</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-34.245</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>621367.339673</td>
+      <td>159092.051982</td>
+      <td>4119.45</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-37.740</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>621580.287957</td>
+      <td>159122.206492</td>
+      <td>4124.15</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-40.975</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>621766.100699</td>
+      <td>159150.747140</td>
+      <td>4127.50</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-43.430</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>621924.954435</td>
+      <td>159176.326498</td>
+      <td>4131.00</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-45.300</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Create-a-Survey">
+<h2>Create a Survey<a class="headerlink" href="#Create-a-Survey" title="Link to this heading">#</a></h2>
+<p>We pass the dataframe once, along with the names of its structural columns, the coordinate reference system, and any metadata we want to keep with it. Only the projected coordinates default to a name (<code class="docutils literal notranslate"><span class="pre">easting</span></code>/<code class="docutils literal notranslate"><span class="pre">northing</span></code>, which the rest of the package requires); every other column must be named explicitly, since naming conventions vary too much between surveys to guess. Name them once here and every method will use them — a method needing a binding you did not set raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
+telling you which one.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">repr</span></code> shows the column bindings and which statistics have been computed so far — none yet, since they are lazy.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">line_type_column</span><span class="o">=</span><span class="s2">&quot;line_type&quot;</span><span class="p">,</span>
+    <span class="n">distance_column</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+    <span class="n">time_column</span><span class="o">=</span><span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">height_column</span><span class="o">=</span><span class="s2">&quot;height&quot;</span><span class="p">,</span>
+    <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:3031&quot;</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;survey&quot;</span><span class="p">:</span> <span class="s2">&quot;AGAP aeromagnetics&quot;</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;BAS&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">survey</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div class="ag-survey"><style>.ag-survey{font-family:var(--jp-code-font-family,monospace);font-size:0.9em;line-height:1.4;max-width:60em;}.ag-survey .ag-header{font-weight:bold;padding:4px 0;border-bottom:1px solid rgba(128,128,128,0.4);margin-bottom:4px;}.ag-survey .ag-shape{font-weight:normal;opacity:0.65;}.ag-survey details{padding:1px 0 1px 12px;border-left:2px solid rgba(128,128,128,0.25);margin:3px 0;}.ag-survey summary{cursor:pointer;font-weight:bold;list-style-position:outside;margin-left:-6px;}.ag-survey .ag-note{font-weight:normal;font-style:italic;opacity:0.6;margin-left:8px;}.ag-survey table{border-collapse:collapse;margin:2px 0;}.ag-survey td{padding:1px 12px 1px 0;border:none;text-align:left;vertical-align:top;}.ag-survey td:first-child{opacity:0.7;}.ag-survey .ag-data{overflow-x:auto;}</style><div class="ag-header">airbornegeo.Survey <span class="ag-shape">199,181 rows &times; 7 columns</span></div><details open><summary>Column attributes</summary><table><tr><td>line</td><td><code>line</code></td></tr><tr><td>line_type</td><td><code>line_type</code></td></tr><tr><td>distance</td><td><code>distance_along_line</code></td></tr><tr><td>time</td><td><code>unixtime</code></td></tr><tr><td>height</td><td><code>height</code></td></tr><tr><td>latitude</td><td><span class="ag-note">not set</span></td></tr><tr><td>longitude</td><td><span class="ag-note">not set</span></td></tr></table></details><details open><summary>CRS &amp; metadata<span class="ag-note">2 metadata entries</span></summary><table><tr><td>crs</td><td>EPSG:3031</td></tr><tr><td>survey</td><td>AGAP aeromagnetics</td></tr><tr><td>source</td><td>BAS</td></tr></table></details><details><summary>Statistics<span class="ag-note">0/8 computed &mdash; access an attribute or call .describe()</span></summary><table><tr><td>region</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_counts</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>total_length</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>mean_line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_spacings</td><td><span class="ag-note">not computed</span></td></tr></table></details><details><summary>Intersections<span class="ag-note">None</span></summary><p class="ag-note">None &mdash; call <code>create_intersection_table()</code></p></details><details><summary>Data<span class="ag-note">first 5 rows</span></summary><div class="ag-data"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>height</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>mag</th>
+      <th>line_type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>621152.853769</td>
+      <td>159064.167598</td>
+      <td>4112.55</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-34.245</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>621367.339673</td>
+      <td>159092.051982</td>
+      <td>4119.45</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-37.740</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>621580.287957</td>
+      <td>159122.206492</td>
+      <td>4124.15</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-40.975</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>621766.100699</td>
+      <td>159150.747140</td>
+      <td>4127.50</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-43.430</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>621924.954435</td>
+      <td>159176.326498</td>
+      <td>4131.00</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-45.300</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></details></div></div>
+</div>
+</section>
+<section id="Plotting">
+<h2>Plotting<a class="headerlink" href="#Plotting" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">plot()</span></code> method plots a simple overview map of the survey data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;line_type&quot;</span><span class="p">,</span>
+    <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">label_categories</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: title={&#39;center&#39;: &#39;Survey: AGAP aeromagnetics&#39;}, xlabel=&#39;easting&#39;, ylabel=&#39;northing&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/mdtanker/airbornegeo/.pixi/envs/docs/lib/python3.14/site-packages/IPython/core/events.py:100: UserWarning: Creating legend with loc=&#34;best&#34; can be slow with large amounts of data.
+  func(*args, **kwargs)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/survey_object_7_2.png" src="_images/survey_object_7_2.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;mag&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: title={&#39;center&#39;: &#39;Survey: AGAP aeromagnetics&#39;}, xlabel=&#39;easting&#39;, ylabel=&#39;northing&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/survey_object_8_1.png" src="_images/survey_object_8_1.png" />
+</div>
+</div>
+</section>
+<section id="Summary-statistics">
+<h2>Summary statistics<a class="headerlink" href="#Summary-statistics" title="Link to this heading">#</a></h2>
+<p>Each statistic is computed on first access and cached. Accessing them again is free, and the cache is cleared automatically whenever a method changes the survey’s geometry (e.g. re-splitting lines or block-reducing).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">region</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(405984.1809454474, 1636623.976977538, -632145.6203212709, 696582.6964278754)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">line_counts</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;total&#39;: 121, &#39;flight&#39;: 66, &#39;tie&#39;: 55}
+</pre></div></div>
+</div>
+<p>Line spacings are estimated per line type with <code class="docutils literal notranslate"><span class="pre">airbornegeo.median_line_spacing</span></code>, and line orientations are compass azimuths (degrees clockwise from north, in the axial 0–180° range) of each line’s minimum rotated bounding box.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">median_line_spacings</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;flight&#39;: 9729.398917801933, &#39;tie&#39;: 33189.404584862554}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">mean_line_azimuths</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;flight&#39;: 79.95350457799643, &#39;tie&#39;: 169.98710022379905}
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">describe()</span></code> computes everything at once and returns a formatted summary.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+airbornegeo.Survey (199,181 rows x 7 cols)
+  crs: EPSG:3031
+  metadata: {&#39;survey&#39;: &#39;AGAP aeromagnetics&#39;, &#39;source&#39;: &#39;BAS&#39;}
+  region (W, E, S, N): 405,984.2, 1,636,624.0, -632,145.6, 696,582.7
+  line counts: total: 121, flight: 66, tie: 55
+  total length: 39,902,272.0
+  median line lengths: flight: 314,764.2, tie: 254,021.9
+  mean line azimuths: flight: 80.0, tie: 170.0
+  median line spacings: flight: 9,729.4, tie: 33,189.4
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div class="ag-survey"><style>.ag-survey{font-family:var(--jp-code-font-family,monospace);font-size:0.9em;line-height:1.4;max-width:60em;}.ag-survey .ag-header{font-weight:bold;padding:4px 0;border-bottom:1px solid rgba(128,128,128,0.4);margin-bottom:4px;}.ag-survey .ag-shape{font-weight:normal;opacity:0.65;}.ag-survey details{padding:1px 0 1px 12px;border-left:2px solid rgba(128,128,128,0.25);margin:3px 0;}.ag-survey summary{cursor:pointer;font-weight:bold;list-style-position:outside;margin-left:-6px;}.ag-survey .ag-note{font-weight:normal;font-style:italic;opacity:0.6;margin-left:8px;}.ag-survey table{border-collapse:collapse;margin:2px 0;}.ag-survey td{padding:1px 12px 1px 0;border:none;text-align:left;vertical-align:top;}.ag-survey td:first-child{opacity:0.7;}.ag-survey .ag-data{overflow-x:auto;}</style><div class="ag-header">airbornegeo.Survey <span class="ag-shape">199,181 rows &times; 7 columns</span></div><details open><summary>Column attributes</summary><table><tr><td>line</td><td><code>line</code></td></tr><tr><td>line_type</td><td><code>line_type</code></td></tr><tr><td>distance</td><td><code>distance_along_line</code></td></tr><tr><td>time</td><td><code>unixtime</code></td></tr><tr><td>height</td><td><code>height</code></td></tr><tr><td>latitude</td><td><span class="ag-note">not set</span></td></tr><tr><td>longitude</td><td><span class="ag-note">not set</span></td></tr></table></details><details open><summary>CRS &amp; metadata<span class="ag-note">2 metadata entries</span></summary><table><tr><td>crs</td><td>EPSG:3031</td></tr><tr><td>survey</td><td>AGAP aeromagnetics</td></tr><tr><td>source</td><td>BAS</td></tr></table></details><details open><summary>Statistics<span class="ag-note">all computed</span></summary><table><tr><td>region</td><td>405,984.2, 1,636,624.0, -632,145.6, 696,582.7</td></tr><tr><td>line_counts</td><td>total: 121, flight: 66, tie: 55</td></tr><tr><td>line_lengths</td><td>121 lines | min 29,231.3 | median 285,371.2 | max 745,183.6</td></tr><tr><td>total_length</td><td>39,902,272.0</td></tr><tr><td>median_line_lengths</td><td>flight: 314,764.2, tie: 254,021.9</td></tr><tr><td>line_azimuths</td><td>121 lines | min 79.7 | median 80.1 | max 170.8</td></tr><tr><td>mean_line_azimuths</td><td>flight: 80.0, tie: 170.0</td></tr><tr><td>median_line_spacings</td><td>flight: 9,729.4, tie: 33,189.4</td></tr></table></details><details><summary>Intersections<span class="ag-note">None</span></summary><p class="ag-note">None &mdash; call <code>create_intersection_table()</code></p></details><details><summary>Data<span class="ag-note">first 5 rows</span></summary><div class="ag-data"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>height</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>mag</th>
+      <th>line_type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>621152.853769</td>
+      <td>159064.167598</td>
+      <td>4112.55</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-34.245</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>621367.339673</td>
+      <td>159092.051982</td>
+      <td>4119.45</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-37.740</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>621580.287957</td>
+      <td>159122.206492</td>
+      <td>4124.15</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-40.975</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>621766.100699</td>
+      <td>159150.747140</td>
+      <td>4127.50</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-43.430</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>621924.954435</td>
+      <td>159176.326498</td>
+      <td>4131.00</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-45.300</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></details></div></div>
+</div>
+</section>
+<section id="Chained-processing">
+<h2>Chained processing<a class="headerlink" href="#Chained-processing" title="Link to this heading">#</a></h2>
+<p>Methods which add columns mutate <code class="docutils literal notranslate"><span class="pre">survey.data</span></code> in place and return the survey, so processing steps chain naturally. Here we compute the distance along each line (written to the survey’s <code class="docutils literal notranslate"><span class="pre">distance_column</span></code>) and low-pass filter the magnetic data along each line (written to <code class="docutils literal notranslate"><span class="pre">mag_filtered</span></code> by default).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">along_track_distance</span><span class="p">()</span><span class="o">.</span><span class="n">filter_line</span><span class="p">(</span>
+    <span class="n">data_column</span><span class="o">=</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span>
+    <span class="n">filter_width</span><span class="o">=</span><span class="mf">5e3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">[[</span><span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span> <span class="s2">&quot;mag&quot;</span><span class="p">,</span> <span class="s2">&quot;mag_filtered&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4ea6f81d5ab64a3f9aba41b6257622f2", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b5a0f9be49b14d54a839c05bf38b916f", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>line</th>
+      <th>distance_along_line</th>
+      <th>mag</th>
+      <th>mag_filtered</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>0.000000</td>
+      <td>-34.245</td>
+      <td>-43.331276</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>216.290873</td>
+      <td>-37.740</td>
+      <td>-43.601245</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>431.363573</td>
+      <td>-40.975</td>
+      <td>-44.356346</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>619.355444</td>
+      <td>-43.430</td>
+      <td>-45.353443</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>780.255453</td>
+      <td>-45.300</td>
+      <td>-46.457980</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Frame-replacing-methods-return-a-new-Survey">
+<h2>Frame-replacing methods return a new Survey<a class="headerlink" href="#Frame-replacing-methods-return-a-new-Survey" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">block_reduce</span></code>, <code class="docutils literal notranslate"><span class="pre">resample</span></code> and <code class="docutils literal notranslate"><span class="pre">resample_as</span></code> produce an entirely new dataframe, so instead of overwriting the survey they return a new <code class="docutils literal notranslate"><span class="pre">Survey</span></code> carrying over the column bindings, CRS and metadata — the original survey is retained.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">blocked</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">block_reduce</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">1e3</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;original: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows, blocked: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">blocked</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
+<span class="n">blocked</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "c8c240dac6ed480e95c9f08951eec933", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+original: 199181 rows, blocked: 39914 rows
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div class="ag-survey"><style>.ag-survey{font-family:var(--jp-code-font-family,monospace);font-size:0.9em;line-height:1.4;max-width:60em;}.ag-survey .ag-header{font-weight:bold;padding:4px 0;border-bottom:1px solid rgba(128,128,128,0.4);margin-bottom:4px;}.ag-survey .ag-shape{font-weight:normal;opacity:0.65;}.ag-survey details{padding:1px 0 1px 12px;border-left:2px solid rgba(128,128,128,0.25);margin:3px 0;}.ag-survey summary{cursor:pointer;font-weight:bold;list-style-position:outside;margin-left:-6px;}.ag-survey .ag-note{font-weight:normal;font-style:italic;opacity:0.6;margin-left:8px;}.ag-survey table{border-collapse:collapse;margin:2px 0;}.ag-survey td{padding:1px 12px 1px 0;border:none;text-align:left;vertical-align:top;}.ag-survey td:first-child{opacity:0.7;}.ag-survey .ag-data{overflow-x:auto;}</style><div class="ag-header">airbornegeo.Survey <span class="ag-shape">39,914 rows &times; 9 columns</span></div><details open><summary>Column attributes</summary><table><tr><td>line</td><td><code>line</code></td></tr><tr><td>line_type</td><td><code>line_type</code></td></tr><tr><td>distance</td><td><code>distance_along_line</code></td></tr><tr><td>time</td><td><code>unixtime</code></td></tr><tr><td>height</td><td><code>height</code></td></tr><tr><td>latitude</td><td><span class="ag-note">not set</span></td></tr><tr><td>longitude</td><td><span class="ag-note">not set</span></td></tr></table></details><details open><summary>CRS &amp; metadata<span class="ag-note">2 metadata entries</span></summary><table><tr><td>crs</td><td>EPSG:3031</td></tr><tr><td>survey</td><td>AGAP aeromagnetics</td></tr><tr><td>source</td><td>BAS</td></tr></table></details><details><summary>Statistics<span class="ag-note">0/8 computed &mdash; access an attribute or call .describe()</span></summary><table><tr><td>region</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_counts</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>total_length</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>mean_line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_spacings</td><td><span class="ag-note">not computed</span></td></tr></table></details><details><summary>Intersections<span class="ag-note">None</span></summary><p class="ag-note">None &mdash; call <code>create_intersection_table()</code></p></details><details><summary>Data<span class="ag-note">first 5 rows</span></summary><div class="ag-data"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>distance_along_line</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>height</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>mag</th>
+      <th>line_type</th>
+      <th>mag_filtered</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>431.363573</td>
+      <td>621580.287957</td>
+      <td>159122.206492</td>
+      <td>4124.15</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-40.975</td>
+      <td>0.0</td>
+      <td>-44.356346</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1404.747786</td>
+      <td>622539.892288</td>
+      <td>159285.062530</td>
+      <td>4132.50</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-52.120</td>
+      <td>0.0</td>
+      <td>-51.829202</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2415.422455</td>
+      <td>623536.992161</td>
+      <td>159449.894800</td>
+      <td>4139.05</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-62.010</td>
+      <td>0.0</td>
+      <td>-60.887993</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3419.398294</td>
+      <td>624526.483998</td>
+      <td>159619.624326</td>
+      <td>4135.10</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-68.640</td>
+      <td>0.0</td>
+      <td>-67.645305</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4408.347291</td>
+      <td>625502.244274</td>
+      <td>159779.941260</td>
+      <td>4148.40</td>
+      <td>1</td>
+      <td>1.229501e+09</td>
+      <td>-72.140</td>
+      <td>0.0</td>
+      <td>-72.333324</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></details></div></div>
+</div>
+</section>
+<section id="Crossovers-and-levelling">
+<h2>Crossovers and levelling<a class="headerlink" href="#Crossovers-and-levelling" title="Link to this heading">#</a></h2>
+<p>The crossover pipeline stores the intersection table on the survey as <code class="docutils literal notranslate"><span class="pre">survey.intersections</span></code> and updates it, together with <code class="docutils literal notranslate"><span class="pre">survey.data</span></code>, as each chained step runs. Here we find the intersections between the survey lines and the tie lines (the <code class="docutils literal notranslate"><span class="pre">groups</span></code> method, using the <code class="docutils literal notranslate"><span class="pre">line_type</span></code> column), add them to the dataframe, interpolate the magnetic data onto them, and calculate the crossover errors.</p>
+<p>(The <code class="docutils literal notranslate"><span class="pre">network</span></code> method finds intersections between <em>all</em> line pairs instead; note that pairs of lines crossing more than once must be deduplicated before the rest of the pipeline — see the crossovers notebooks for details.)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">create_intersection_table</span><span class="p">(</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span>
+    <span class="n">buffer_dist</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+    <span class="n">cutoff_dist</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">intersections</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1cf9a6dd82564f04823bd64970ff5264", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:airbornegeo:found 669 intersections
+INFO:airbornegeo:removed 3 intersection point(s) with a max distance greater than 0 km
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>line1</th>
+      <th>line2</th>
+      <th>line1_along_dist</th>
+      <th>line2_along_dist</th>
+      <th>is_buffered</th>
+      <th>is_proximity</th>
+      <th>geometry</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>max_dist</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>143</td>
+      <td>545683.269511</td>
+      <td>137763.647746</td>
+      <td>False</td>
+      <td>False</td>
+      <td>POINT (1158153 254083)</td>
+      <td>1158153.0</td>
+      <td>254083.0</td>
+      <td>73.980331</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>144</td>
+      <td>578867.489410</td>
+      <td>131264.857865</td>
+      <td>False</td>
+      <td>False</td>
+      <td>POINT (1190820 259865)</td>
+      <td>1190820.0</td>
+      <td>259865.0</td>
+      <td>91.228123</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1</td>
+      <td>145</td>
+      <td>612096.925761</td>
+      <td>146939.686838</td>
+      <td>False</td>
+      <td>False</td>
+      <td>POINT (1223524 265689)</td>
+      <td>1223524.0</td>
+      <td>265689.0</td>
+      <td>77.978287</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1</td>
+      <td>146</td>
+      <td>645286.779258</td>
+      <td>135889.427157</td>
+      <td>False</td>
+      <td>False</td>
+      <td>POINT (1256193 271497)</td>
+      <td>1256193.0</td>
+      <td>271497.0</td>
+      <td>62.334186</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>147</td>
+      <td>678513.585282</td>
+      <td>154819.157039</td>
+      <td>False</td>
+      <td>False</td>
+      <td>POINT (1288902 277249)</td>
+      <td>1288902.0</td>
+      <td>277249.0</td>
+      <td>99.009111</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">add_intersections</span><span class="p">()</span><span class="o">.</span><span class="n">interpolate_intersections</span><span class="p">(</span>
+    <span class="n">to_interp</span><span class="o">=</span><span class="s2">&quot;mag&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">calculate_crossover_errors</span><span class="p">(</span><span class="n">data_col</span><span class="o">=</span><span class="s2">&quot;mag&quot;</span><span class="p">)</span>
+
+<span class="n">survey</span><span class="o">.</span><span class="n">intersections</span><span class="o">.</span><span class="n">crossover_error_0</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "37b03fe54ae743b2bb96450df1d94d61", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3da60f8780824112a4db332526a6017a", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "47635e2125814cd79f3e91176d4f1fe4", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+count    664.000000
+mean       7.640998
+std       43.030551
+min      -97.282149
+25%      -27.513072
+50%        5.989165
+75%       40.616310
+max      160.057662
+Name: crossover_error_0, dtype: float64
+</pre></div></div>
+</div>
+<p>Now we can level the survey using those crossover errors. The network levelling method updates both <code class="docutils literal notranslate"><span class="pre">survey.data</span></code> (adding the <code class="docutils literal notranslate"><span class="pre">mag_levelled</span></code> column) and <code class="docutils literal notranslate"><span class="pre">survey.intersections</span></code> (appending a new <code class="docutils literal notranslate"><span class="pre">crossover_error_N</span></code> column per iteration).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">crossover_network_levelling</span><span class="p">(</span>
+    <span class="n">data_col</span><span class="o">=</span><span class="s2">&quot;mag&quot;</span><span class="p">,</span>
+    <span class="n">levelled_col</span><span class="o">=</span><span class="s2">&quot;mag_levelled&quot;</span><span class="p">,</span>
+    <span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "46379e19f1d04d5ea2ca98c3b1c7a2f8", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:airbornegeo:
+Levelling terminated after 5 iterations with RMS of levelling correction of 6.79 because maximum number of iterations (5) reached.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/survey_object_26_2.png" src="_images/survey_object_26_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div class="ag-survey"><style>.ag-survey{font-family:var(--jp-code-font-family,monospace);font-size:0.9em;line-height:1.4;max-width:60em;}.ag-survey .ag-header{font-weight:bold;padding:4px 0;border-bottom:1px solid rgba(128,128,128,0.4);margin-bottom:4px;}.ag-survey .ag-shape{font-weight:normal;opacity:0.65;}.ag-survey details{padding:1px 0 1px 12px;border-left:2px solid rgba(128,128,128,0.25);margin:3px 0;}.ag-survey summary{cursor:pointer;font-weight:bold;list-style-position:outside;margin-left:-6px;}.ag-survey .ag-note{font-weight:normal;font-style:italic;opacity:0.6;margin-left:8px;}.ag-survey table{border-collapse:collapse;margin:2px 0;}.ag-survey td{padding:1px 12px 1px 0;border:none;text-align:left;vertical-align:top;}.ag-survey td:first-child{opacity:0.7;}.ag-survey .ag-data{overflow-x:auto;}</style><div class="ag-header">airbornegeo.Survey <span class="ag-shape">200,509 rows &times; 13 columns</span></div><details open><summary>Column attributes</summary><table><tr><td>line</td><td><code>line</code></td></tr><tr><td>line_type</td><td><code>line_type</code></td></tr><tr><td>distance</td><td><code>distance_along_line</code></td></tr><tr><td>time</td><td><code>unixtime</code></td></tr><tr><td>height</td><td><code>height</code></td></tr><tr><td>latitude</td><td><span class="ag-note">not set</span></td></tr><tr><td>longitude</td><td><span class="ag-note">not set</span></td></tr></table></details><details open><summary>CRS &amp; metadata<span class="ag-note">2 metadata entries</span></summary><table><tr><td>crs</td><td>EPSG:3031</td></tr><tr><td>survey</td><td>AGAP aeromagnetics</td></tr><tr><td>source</td><td>BAS</td></tr></table></details><details><summary>Statistics<span class="ag-note">0/8 computed &mdash; access an attribute or call .describe()</span></summary><table><tr><td>region</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_counts</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>total_length</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>mean_line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_spacings</td><td><span class="ag-note">not computed</span></td></tr></table></details><details><summary>Intersections<span class="ag-note">664 rows</span></summary><p>664 intersections with columns: <code>[&#x27;line1&#x27;, &#x27;line2&#x27;, &#x27;line1_along_dist&#x27;, &#x27;line2_along_dist&#x27;, &#x27;is_buffered&#x27;, &#x27;is_proximity&#x27;, &#x27;geometry&#x27;, &#x27;easting&#x27;, &#x27;northing&#x27;, &#x27;max_dist&#x27;, &#x27;dist_along_line1&#x27;, &#x27;dist_along_line2&#x27;, &#x27;line1_interpolation_type&#x27;, &#x27;line2_interpolation_type&#x27;, &#x27;crossover_error_0&#x27;, &#x27;crossover_error_1&#x27;, &#x27;crossover_error_2&#x27;, &#x27;crossover_error_3&#x27;, &#x27;crossover_error_4&#x27;, &#x27;crossover_error_5&#x27;]</code></p></details><details><summary>Data<span class="ag-note">first 5 rows</span></summary><div class="ag-data"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>height</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>mag</th>
+      <th>line_type</th>
+      <th>distance_along_line</th>
+      <th>mag_filtered</th>
+      <th>is_intersection</th>
+      <th>intersecting_line</th>
+      <th>mag_interpolation_type</th>
+      <th>mag_levelled</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>621152.853769</td>
+      <td>159064.167598</td>
+      <td>4112.55</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-34.245</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>-43.331276</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-25.597772</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>621367.339673</td>
+      <td>159092.051982</td>
+      <td>4119.45</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-37.740</td>
+      <td>0.0</td>
+      <td>216.290873</td>
+      <td>-43.601245</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-29.097845</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>621580.287957</td>
+      <td>159122.206492</td>
+      <td>4124.15</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-40.975</td>
+      <td>0.0</td>
+      <td>431.363573</td>
+      <td>-44.356346</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-32.337889</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>621766.100699</td>
+      <td>159150.747140</td>
+      <td>4127.50</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-43.430</td>
+      <td>0.0</td>
+      <td>619.355444</td>
+      <td>-45.353443</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-34.797299</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>621924.954435</td>
+      <td>159176.326498</td>
+      <td>4131.00</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-45.300</td>
+      <td>0.0</td>
+      <td>780.255453</td>
+      <td>-46.457980</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-36.671072</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></details></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">error_cols</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">survey</span><span class="o">.</span><span class="n">intersections</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;crossover_error_&quot;</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="n">rms_before</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">intersections</span><span class="p">[</span><span class="n">error_cols</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+<span class="n">rms_after</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="n">survey</span><span class="o">.</span><span class="n">intersections</span><span class="p">[</span><span class="n">error_cols</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;crossover error RMS: </span><span class="si">{</span><span class="n">rms_before</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">rms_after</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> nT&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+crossover error RMS: 43.67 -&gt; 13.42 nT
+</pre></div></div>
+</div>
+<p>The functional equivalent of this whole notebook would have passed <code class="docutils literal notranslate"><span class="pre">line_column</span></code>, <code class="docutils literal notranslate"><span class="pre">distance_column</span></code> and the intersection table around at every step — with the <code class="docutils literal notranslate"><span class="pre">Survey</span></code> object they are stored once and injected for you, while <code class="docutils literal notranslate"><span class="pre">airbornegeo</span></code>’s functions remain available for anything not wrapped as a method (e.g. the Eötvös corrections and plotting utilities).</p>
+</section>
+<section id="Saving-and-reloading-a-Survey">
+<h2>Saving and reloading a Survey<a class="headerlink" href="#Saving-and-reloading-a-Survey" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Survey</span></code> has two built-in ways to save and reload its full state — the data, the intersection table (if any), the CRS, the metadata, and the column-name bindings:</p>
+<ul class="simple">
+<li><p><strong>``to_parquet``/``from_parquet``</strong> (recommended): the data and intersections are saved as Parquet files, plus a small JSON sidecar for the CRS/metadata/bindings. Parquet preserves dtypes exactly and is fast and compact, so prefer it unless you need a plain-text format.</p></li>
+<li><p><strong>``to_csv``/``from_csv``</strong>: the same layout, but with CSV data files instead. Maximally portable and human-readable, at the cost of dtype fidelity (e.g. integer columns come back as floats) and file size.</p></li>
+</ul>
+<p>Either way, the main data file is a plain Parquet/CSV file with no <code class="docutils literal notranslate"><span class="pre">airbornegeo</span></code>-specific encoding — anyone can read <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;.parquet</span></code>/<code class="docutils literal notranslate"><span class="pre">&lt;path&gt;.csv</span></code> with bare <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, no <code class="docutils literal notranslate"><span class="pre">airbornegeo</span></code> import required.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># replace this with your real local path you want to use</span>
+<span class="n">example_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span> <span class="o">/</span> <span class="s2">&quot;agap_survey&quot;</span>
+
+<span class="c1"># save the survey to the set path</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">example_path</span><span class="p">)</span>
+
+<span class="c1"># show the 3 file which were created</span>
+<span class="nb">sorted</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">example_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;agap_survey.json&#39;,
+ &#39;agap_survey.parquet&#39;,
+ &#39;agap_survey_intersections.parquet&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reloaded</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="o">.</span><span class="n">from_parquet</span><span class="p">(</span><span class="n">example_path</span><span class="p">)</span>
+<span class="n">reloaded</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div class="ag-survey"><style>.ag-survey{font-family:var(--jp-code-font-family,monospace);font-size:0.9em;line-height:1.4;max-width:60em;}.ag-survey .ag-header{font-weight:bold;padding:4px 0;border-bottom:1px solid rgba(128,128,128,0.4);margin-bottom:4px;}.ag-survey .ag-shape{font-weight:normal;opacity:0.65;}.ag-survey details{padding:1px 0 1px 12px;border-left:2px solid rgba(128,128,128,0.25);margin:3px 0;}.ag-survey summary{cursor:pointer;font-weight:bold;list-style-position:outside;margin-left:-6px;}.ag-survey .ag-note{font-weight:normal;font-style:italic;opacity:0.6;margin-left:8px;}.ag-survey table{border-collapse:collapse;margin:2px 0;}.ag-survey td{padding:1px 12px 1px 0;border:none;text-align:left;vertical-align:top;}.ag-survey td:first-child{opacity:0.7;}.ag-survey .ag-data{overflow-x:auto;}</style><div class="ag-header">airbornegeo.Survey <span class="ag-shape">200,509 rows &times; 13 columns</span></div><details open><summary>Column attributes</summary><table><tr><td>line</td><td><code>line</code></td></tr><tr><td>line_type</td><td><code>line_type</code></td></tr><tr><td>distance</td><td><code>distance_along_line</code></td></tr><tr><td>time</td><td><code>unixtime</code></td></tr><tr><td>height</td><td><code>height</code></td></tr><tr><td>latitude</td><td><span class="ag-note">not set</span></td></tr><tr><td>longitude</td><td><span class="ag-note">not set</span></td></tr></table></details><details open><summary>CRS &amp; metadata<span class="ag-note">2 metadata entries</span></summary><table><tr><td>crs</td><td>EPSG:3031</td></tr><tr><td>survey</td><td>AGAP aeromagnetics</td></tr><tr><td>source</td><td>BAS</td></tr></table></details><details><summary>Statistics<span class="ag-note">0/8 computed &mdash; access an attribute or call .describe()</span></summary><table><tr><td>region</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_counts</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>total_length</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_lengths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>mean_line_azimuths</td><td><span class="ag-note">not computed</span></td></tr><tr><td>median_line_spacings</td><td><span class="ag-note">not computed</span></td></tr></table></details><details><summary>Intersections<span class="ag-note">664 rows</span></summary><p>664 intersections with columns: <code>[&#x27;line1&#x27;, &#x27;line2&#x27;, &#x27;line1_along_dist&#x27;, &#x27;line2_along_dist&#x27;, &#x27;is_buffered&#x27;, &#x27;is_proximity&#x27;, &#x27;geometry&#x27;, &#x27;easting&#x27;, &#x27;northing&#x27;, &#x27;max_dist&#x27;, &#x27;dist_along_line1&#x27;, &#x27;dist_along_line2&#x27;, &#x27;line1_interpolation_type&#x27;, &#x27;line2_interpolation_type&#x27;, &#x27;crossover_error_0&#x27;, &#x27;crossover_error_1&#x27;, &#x27;crossover_error_2&#x27;, &#x27;crossover_error_3&#x27;, &#x27;crossover_error_4&#x27;, &#x27;crossover_error_5&#x27;]</code></p></details><details><summary>Data<span class="ag-note">first 5 rows</span></summary><div class="ag-data"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>height</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>mag</th>
+      <th>line_type</th>
+      <th>distance_along_line</th>
+      <th>mag_filtered</th>
+      <th>is_intersection</th>
+      <th>intersecting_line</th>
+      <th>mag_interpolation_type</th>
+      <th>mag_levelled</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>621152.853769</td>
+      <td>159064.167598</td>
+      <td>4112.55</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-34.245</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>-43.331276</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-25.597772</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>621367.339673</td>
+      <td>159092.051982</td>
+      <td>4119.45</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-37.740</td>
+      <td>0.0</td>
+      <td>216.290873</td>
+      <td>-43.601245</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-29.097845</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>621580.287957</td>
+      <td>159122.206492</td>
+      <td>4124.15</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-40.975</td>
+      <td>0.0</td>
+      <td>431.363573</td>
+      <td>-44.356346</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-32.337889</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>621766.100699</td>
+      <td>159150.747140</td>
+      <td>4127.50</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-43.430</td>
+      <td>0.0</td>
+      <td>619.355444</td>
+      <td>-45.353443</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-34.797299</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>621924.954435</td>
+      <td>159176.326498</td>
+      <td>4131.00</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-45.300</td>
+      <td>0.0</td>
+      <td>780.255453</td>
+      <td>-46.457980</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-36.671072</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></details></div></div>
+</div>
+<p>The data file needs nothing but <code class="docutils literal notranslate"><span class="pre">pandas</span></code> to read — no <code class="docutils literal notranslate"><span class="pre">airbornegeo</span></code> import required:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">example_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.parquet&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>height</th>
+      <th>line</th>
+      <th>unixtime</th>
+      <th>mag</th>
+      <th>line_type</th>
+      <th>distance_along_line</th>
+      <th>mag_filtered</th>
+      <th>is_intersection</th>
+      <th>intersecting_line</th>
+      <th>mag_interpolation_type</th>
+      <th>mag_levelled</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>621152.853769</td>
+      <td>159064.167598</td>
+      <td>4112.55</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-34.245</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>-43.331276</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-25.597772</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>621367.339673</td>
+      <td>159092.051982</td>
+      <td>4119.45</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-37.740</td>
+      <td>0.0</td>
+      <td>216.290873</td>
+      <td>-43.601245</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-29.097845</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>621580.287957</td>
+      <td>159122.206492</td>
+      <td>4124.15</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-40.975</td>
+      <td>0.0</td>
+      <td>431.363573</td>
+      <td>-44.356346</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-32.337889</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>621766.100699</td>
+      <td>159150.747140</td>
+      <td>4127.50</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-43.430</td>
+      <td>0.0</td>
+      <td>619.355444</td>
+      <td>-45.353443</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-34.797299</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>621924.954435</td>
+      <td>159176.326498</td>
+      <td>4131.00</td>
+      <td>1</td>
+      <td>1.229500e+09</td>
+      <td>-45.300</td>
+      <td>0.0</td>
+      <td>780.255453</td>
+      <td>-46.457980</td>
+      <td>False</td>
+      <td>NaN</td>
+      <td>none</td>
+      <td>-36.671072</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<script type="application/vnd.jupyter.widget-state+json">
+{"state": {"008a458e7a3442d4a6879ec632916cba": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_dcabd775fd144d00b1e955596b20d0ba", "placeholder": "\u200b", "style": "IPY_MODEL_dd0ff3e660ad4f2697f6ee768b7024f1", "tabbable": null, "tooltip": null, "value": "\u2007666/666\u2007[00:00&lt;00:00,\u20079466.80it/s]"}}, "02278d2175de46fea660a76a014c5c4e": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "02fe68709a9e46408e1cc5b72ff52aef": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "06a638e572b44010bc5f9e64f3dca093": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_b36ff5f7f5754c259d29bd57166ddea0", "placeholder": "\u200b", "style": "IPY_MODEL_551a560a33d94d9f96ea5a4185d1c5b4", "tabbable": null, "tooltip": null, "value": "\u2007121/121\u2007[00:00&lt;00:00,\u200799.06it/s]"}}, "0f48fc5bdfd84f98b2cccbcd6ba9eb57": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "0fa9079b85ad41adbc103d4bd85ffe0b": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_31104b907f7b4385ae38ab6544a8173b", "max": 121, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_55a68770b3ff43b788a96caa3642861a", "tabbable": null, "tooltip": null, "value": 121}}, "1623d1bd09ea4d72a225498142d07307": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_4f7cd99a02a4491b809571bf77e80353", "placeholder": "\u200b", "style": "IPY_MODEL_4b8274b6a469485f834b56259ee17098", "tabbable": null, "tooltip": null, "value": "\u2007121/121\u2007[00:00&lt;00:00,\u2007936.08it/s]"}}, "19baeeabe0bf4363818062e965c5b85d": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_95fceb8f55b7440b9291435437049bb0", "max": 3630, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_2993a82e727e4e99a59ef009888dff60", "tabbable": null, "tooltip": null, "value": 3630}}, "1cf9a6dd82564f04823bd64970ff5264": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_975572656109407a9abca71d94e96a0d", "IPY_MODEL_19baeeabe0bf4363818062e965c5b85d", "IPY_MODEL_9add64f121a443cfa5c4a1bff4749067"], "layout": "IPY_MODEL_de49f867f14444f58acf5d8d15b920d7", "tabbable": null, "tooltip": null}}, "2228abe37036471f82c470fa015cfdbe": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "23706f77dccd4c00acdff7c369c19770": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "23c94c5aed264891884290ac75e0ccc0": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "266d9f2a4563465cb60d56a70cdf9380": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_80748520154442c6af2f35e20db1ef28", "placeholder": "\u200b", "style": "IPY_MODEL_c311654ddcea4026a936788e70ba61d8", "tabbable": null, "tooltip": null, "value": "Collecting\u2007intersections:\u2007100%"}}, "2993a82e727e4e99a59ef009888dff60": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "2dcf04394ba24ecba37e5ea43c2012d8": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "2e69d97257dc441bbd2bf84282ed1c7b": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_2ee568386d604ee1b65abfff4bbd02a1", "placeholder": "\u200b", "style": "IPY_MODEL_beb15085afd4473fbceb9e35b1846ae1", "tabbable": null, "tooltip": null, "value": "\u2007121/121\u2007[00:15&lt;00:00,\u200710.61it/s]"}}, "2ee568386d604ee1b65abfff4bbd02a1": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "2fe00b7db90842159b9bd41609d981f3": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_b20564e2140b4142bb08082a127f0541", "max": 121, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_ac27f4b893554fdaaf4acf0e699a4d1c", "tabbable": null, "tooltip": null, "value": 121}}, "31104b907f7b4385ae38ab6544a8173b": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "35b646daf4e04c748d50bdd40f96ce70": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_884b8f3b5b5540d9b0c415abd1e0c88a", "max": 666, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_bbeb116469f94402b496db4287dbe190", "tabbable": null, "tooltip": null, "value": 666}}, "35e69c15edc94f9f993c2b20349bd865": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "37b03fe54ae743b2bb96450df1d94d61": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_266d9f2a4563465cb60d56a70cdf9380", "IPY_MODEL_74b2950d0f824188a616547c367f82d9", "IPY_MODEL_008a458e7a3442d4a6879ec632916cba"], "layout": "IPY_MODEL_4006698e07aa485095d47ba4a9220289", "tabbable": null, "tooltip": null}}, "3a2a0e271da0412ca447c05cdb1df2e2": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "3da60f8780824112a4db332526a6017a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_a75a3eeaf433495886a2878687fe0713", "IPY_MODEL_35b646daf4e04c748d50bdd40f96ce70", "IPY_MODEL_89ba1f8c9f5c44f697749a0f1eacdaef"], "layout": "IPY_MODEL_2228abe37036471f82c470fa015cfdbe", "tabbable": null, "tooltip": null}}, "4006698e07aa485095d47ba4a9220289": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "46379e19f1d04d5ea2ca98c3b1c7a2f8": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_d7d43ffb06d84d77a44c4a461f91e4ca", "IPY_MODEL_dffd33a712454549b228e3f50c2431e9", "IPY_MODEL_da2398a33c5546ad8ed51a5889ba8693"], "layout": "IPY_MODEL_8b43ae259881471da736762d216f0c76", "tabbable": null, "tooltip": null}}, "47635e2125814cd79f3e91176d4f1fe4": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_e83d851d93954bab97be1d015e0f2247", "IPY_MODEL_2fe00b7db90842159b9bd41609d981f3", "IPY_MODEL_06a638e572b44010bc5f9e64f3dca093"], "layout": "IPY_MODEL_02278d2175de46fea660a76a014c5c4e", "tabbable": null, "tooltip": null}}, "4b8274b6a469485f834b56259ee17098": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "4da61c551fe149fea4c0ed3d5e6b775c": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_5adcdb28ffd14db6a2d4421a1ab922da", "max": 121, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_23c94c5aed264891884290ac75e0ccc0", "tabbable": null, "tooltip": null, "value": 121}}, "4ea6f81d5ab64a3f9aba41b6257622f2": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_f2d382013aa64e668d0ed98e332b8e42", "IPY_MODEL_bb893caee7544a119e9cb9b48d9628e8", "IPY_MODEL_fb7adcdb1739448f98451c4c17efcd80"], "layout": "IPY_MODEL_dc5ed97581994598a70966ece2523edf", "tabbable": null, "tooltip": null}}, "4f7cd99a02a4491b809571bf77e80353": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "551a560a33d94d9f96ea5a4185d1c5b4": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "55a68770b3ff43b788a96caa3642861a": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "59edb4eed5484edd9f47ae9745fd1fad": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "5adcdb28ffd14db6a2d4421a1ab922da": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "5c1c110e93624680b693a34d59718889": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "64ecced8fe3d45538a79c6d65b1f16c8": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "651201fcd90e46b6bef432ac7c06df21": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "687dcf5bc1624ea1beedd121e39e6b30": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_2dcf04394ba24ecba37e5ea43c2012d8", "placeholder": "\u200b", "style": "IPY_MODEL_b0f37d878bbe4c7fb7ac73086b95b16c", "tabbable": null, "tooltip": null, "value": "Segments:\u2007100%"}}, "706c898ab95c406daf3d9a3db2162956": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "7127cabfac8c463189f4292c4f08aa83": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "74b2950d0f824188a616547c367f82d9": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_7127cabfac8c463189f4292c4f08aa83", "max": 666, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_f307481f7b464ca59554e84f56183565", "tabbable": null, "tooltip": null, "value": 666}}, "7cdfcdfa0a6a4d6f84e2c9d08e64d420": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "80748520154442c6af2f35e20db1ef28": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "82a773a57f844a27acf1f9d2a902d9e6": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "839a63b388ee4fbd957fdb4cd02ec57c": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "8475e258c01748ca899cd6553f767cd2": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "8599d529df224da4857e87a0b3a582b2": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "87bb0b6cf4af4b3fae59cea1cf4a6df6": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "884b8f3b5b5540d9b0c415abd1e0c88a": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "88a0786bb0854404b4e61558c9a257a6": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "89ba1f8c9f5c44f697749a0f1eacdaef": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_88a0786bb0854404b4e61558c9a257a6", "placeholder": "\u200b", "style": "IPY_MODEL_c69412a93e8543e59d49e98860a7859f", "tabbable": null, "tooltip": null, "value": "\u2007666/666\u2007[00:00&lt;00:00,\u20079891.67it/s]"}}, "8b43ae259881471da736762d216f0c76": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "8cf19b4ba0004d35a54016b35db83a02": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "95fceb8f55b7440b9291435437049bb0": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "96406b34ad764a3594790e81ce4e078f": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "975572656109407a9abca71d94e96a0d": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_8cf19b4ba0004d35a54016b35db83a02", "placeholder": "\u200b", "style": "IPY_MODEL_8475e258c01748ca899cd6553f767cd2", "tabbable": null, "tooltip": null, "value": "Line\u2007pairs:\u2007100%"}}, "9a6bba7759d241bbb159105765a181c0": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "9add64f121a443cfa5c4a1bff4749067": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_8599d529df224da4857e87a0b3a582b2", "placeholder": "\u200b", "style": "IPY_MODEL_b8eed3d3dac841c597d98d8d9ae63d28", "tabbable": null, "tooltip": null, "value": "\u20073630/3630\u2007[00:00&lt;00:00,\u20074926.94it/s]"}}, "a75a3eeaf433495886a2878687fe0713": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_c812a569d25743509d26292c7d22f14c", "placeholder": "\u200b", "style": "IPY_MODEL_651201fcd90e46b6bef432ac7c06df21", "tabbable": null, "tooltip": null, "value": "Collecting\u2007intersections:\u2007100%"}}, "ac27f4b893554fdaaf4acf0e699a4d1c": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "b0f37d878bbe4c7fb7ac73086b95b16c": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "b20564e2140b4142bb08082a127f0541": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "b36ff5f7f5754c259d29bd57166ddea0": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "b5a0f9be49b14d54a839c05bf38b916f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_687dcf5bc1624ea1beedd121e39e6b30", "IPY_MODEL_4da61c551fe149fea4c0ed3d5e6b775c", "IPY_MODEL_1623d1bd09ea4d72a225498142d07307"], "layout": "IPY_MODEL_3a2a0e271da0412ca447c05cdb1df2e2", "tabbable": null, "tooltip": null}}, "b8eed3d3dac841c597d98d8d9ae63d28": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "bb893caee7544a119e9cb9b48d9628e8": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "success", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_7cdfcdfa0a6a4d6f84e2c9d08e64d420", "max": 121, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_5c1c110e93624680b693a34d59718889", "tabbable": null, "tooltip": null, "value": 121}}, "bbeb116469f94402b496db4287dbe190": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "beb15085afd4473fbceb9e35b1846ae1": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "c07ba338ddce4cbc8b0ce8f0e00323f6": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "c311654ddcea4026a936788e70ba61d8": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "c69412a93e8543e59d49e98860a7859f": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "c812a569d25743509d26292c7d22f14c": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "c8c240dac6ed480e95c9f08951eec933": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HBoxModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HBoxModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HBoxView", "box_style": "", "children": ["IPY_MODEL_e06b41195e044e0fac2117a2ebf627a6", "IPY_MODEL_0fa9079b85ad41adbc103d4bd85ffe0b", "IPY_MODEL_2e69d97257dc441bbd2bf84282ed1c7b"], "layout": "IPY_MODEL_87bb0b6cf4af4b3fae59cea1cf4a6df6", "tabbable": null, "tooltip": null}}, "d473da2db76e4127a3847c48f1f2d586": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "d7d43ffb06d84d77a44c4a461f91e4ca": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_c07ba338ddce4cbc8b0ce8f0e00323f6", "placeholder": "\u200b", "style": "IPY_MODEL_02fe68709a9e46408e1cc5b72ff52aef", "tabbable": null, "tooltip": null, "value": "Iterations\u2007ended\u2007due\u2007to\u2007[&#x27;max\u2007iterations&#x27;]:\u2007\u200780%"}}, "da2398a33c5546ad8ed51a5889ba8693": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_706c898ab95c406daf3d9a3db2162956", "placeholder": "\u200b", "style": "IPY_MODEL_23706f77dccd4c00acdff7c369c19770", "tabbable": null, "tooltip": null, "value": "\u20074/5\u2007[00:08&lt;00:01,\u2007\u20071.51s/it]"}}, "dc5ed97581994598a70966ece2523edf": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "dcabd775fd144d00b1e955596b20d0ba": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "dd0ff3e660ad4f2697f6ee768b7024f1": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "background": null, "description_width": "", "font_size": null, "text_color": null}}, "de49f867f14444f58acf5d8d15b920d7": {"model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "model_name": "LayoutModel", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "dffd33a712454549b228e3f50c2431e9": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "FloatProgressModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "ProgressView", "bar_style": "danger", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_9a6bba7759d241bbb159105765a181c0", "max": 5, "min": 0, "orientation": "horizontal", "style": "IPY_MODEL_f759c8530e7c4e27b6f58d0837a8fb57", "tabbable": null, "tooltip": null, "value": 4}}, "e06b41195e044e0fac2117a2ebf627a6": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_0f48fc5bdfd84f98b2cccbcd6ba9eb57", "placeholder": "\u200b", "style": "IPY_MODEL_64ecced8fe3d45538a79c6d65b1f16c8", "tabbable": null, "tooltip": null, "value": "Block-reducing\u2007segments:\u2007100%"}}, "e83d851d93954bab97be1d015e0f2247": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_35e69c15edc94f9f993c2b20349bd865", "placeholder": "\u200b", "style": "IPY_MODEL_59edb4eed5484edd9f47ae9745fd1fad", "tabbable": null, "tooltip": null, "value": "Interpolating\u2007segments:\u2007100%"}}, "f2d382013aa64e668d0ed98e332b8e42": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_839a63b388ee4fbd957fdb4cd02ec57c", "placeholder": "\u200b", "style": "IPY_MODEL_d473da2db76e4127a3847c48f1f2d586", "tabbable": null, "tooltip": null, "value": "Segments:\u2007100%"}}, "f307481f7b464ca59554e84f56183565": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "f759c8530e7c4e27b6f58d0837a8fb57": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "ProgressStyleModel", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "fb7adcdb1739448f98451c4c17efcd80": {"model_module": "@jupyter-widgets/controls", "model_module_version": "2.0.0", "model_name": "HTMLModel", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "2.0.0", "_model_name": "HTMLModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "2.0.0", "_view_name": "HTMLView", "description": "", "description_allow_html": false, "layout": "IPY_MODEL_96406b34ad764a3594790e81ce4e078f", "placeholder": "\u200b", "style": "IPY_MODEL_82a773a57f844a27acf1f9d2a902d9e6", "tabbable": null, "tooltip": null, "value": "\u2007121/121\u2007[00:00&lt;00:00,\u200713147.61it/s]"}}}, "version_major": 2, "version_minor": 0}
+</script></section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="citing.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Citing AirborneGeo</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="processing.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">&lt;no title&gt;</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Create-a-Survey">Create a Survey</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Plotting">Plotting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Summary-statistics">Summary statistics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Chained-processing">Chained processing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Frame-replacing-methods-return-a-new-Survey">Frame-replacing methods return a new Survey</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Crossovers-and-levelling">Crossovers and levelling</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Saving-and-reloading-a-Survey">Saving and reloading a Survey</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 23, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

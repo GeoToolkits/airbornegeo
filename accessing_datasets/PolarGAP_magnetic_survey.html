@@ -1,0 +1,3416 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Downloading the PolarGAP airborne magnetic survey to use in the notebooks &#8212; airbornegeo</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=fcfc4f34"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'accessing_datasets/PolarGAP_magnetic_survey';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.dev1+g40564363a" />
+    <meta name="docbuild:last-update" content="Jul 23, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">airbornegeo</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">ℹ️️ Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing.html">Citing AirborneGeo</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🧭 The Survey object</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../survey_object.html">The Survey object</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛏️ Generic processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../reproject_data.html">Reproject data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_sampling_frequency.html">Change samping frequency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../split_survey_into_lines.html">Split survey data into lines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../along_track_distance.html">Along track distance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../filtering_data_in_1D.html">Filtering data in 1D</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🍎🧲 Potential-fields processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../vertical_acceleration_correction.html">Vertical acceleration correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../eotvos_correction.html">Eotvos correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../normal_gravity_correction.html">Normal gravity correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../IGRF_correction.html">IGRF Correction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">⛌ Crossovers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../crossovers.html">Crossovers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../crossovers_01_basics.html">Find crossover points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crossovers_02_grouped_intersections.html">Find survey intersections between groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crossovers_03_network_intersections.html">Find all survey intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crossovers_04_interpolating_values.html">Interpolating values at crossovers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crossovers_05_crossover_errors.html">Cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crossovers_06_update_crossovers_with_equivalent_sources.html">Using equivalent sources for cross-over errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crossovers_07_deduplicating_intersections.html">Deduplicating intersections: <code class="docutils literal notranslate"><span class="pre">block_size</span></code> vs <code class="docutils literal notranslate"><span class="pre">min_spacing</span></code></a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📈 Levelling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../levelling.html">Levelling</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../levelling_01_to_a_grid.html">Levelling to a grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../levelling_02_crossover_levelling_simple.html">Simple cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../levelling_03_crossover_levelling_alternating.html">Alternating cross-over levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../levelling_04_crossover_levelling_network.html">PolarGAP aeromagnetic levelling</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../levelling_05_crossover_levelling_trend_vs_wavelength.html">Cross-over levelling: trend vs wavelength based</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../levelling_06_crossover_levelling_dependence_on_line_length.html">Cross-over levelling dependence on line length</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../levelling_07_equivalent_source_levelling.html">Levelling with equivalent sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../levelling_08_assessing_levelling_results.html">Assessing levelling results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">📖 API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/airbornegeo.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.Survey.html">airbornegeo.Survey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.along_track_distance.html">airbornegeo.along_track_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.relative_distance.html">airbornegeo.relative_distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.ground_speed.html">airbornegeo.ground_speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.directional_velocity.html">airbornegeo.directional_velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.track.html">airbornegeo.track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.reproject.html">airbornegeo.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.block_reduce.html">airbornegeo.block_reduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.filter_line.html">airbornegeo.filter_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.filter_grid.html">airbornegeo.filter_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.sample_grid.html">airbornegeo.sample_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.resample.html">airbornegeo.resample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.resample_as.html">airbornegeo.resample_as</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.interpolate_missing.html">airbornegeo.interpolate_missing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.interpolate_missing_pointwise.html">airbornegeo.interpolate_missing_pointwise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.interpolate_missing_pointwise_with_windows.html">airbornegeo.interpolate_missing_pointwise_with_windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.optimal_spline_damping.html">airbornegeo.optimal_spline_damping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.trend.html">airbornegeo.trend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.split_into_segments.html">airbornegeo.split_into_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.unique_line_id.html">airbornegeo.unique_line_id</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.median_line_spacing.html">airbornegeo.median_line_spacing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.largest_line_dimensions.html">airbornegeo.largest_line_dimensions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.create_intersection_table.html">airbornegeo.create_intersection_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.interpolate_intersections.html">airbornegeo.interpolate_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.add_values_to_intersections.html">airbornegeo.add_values_to_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.inspect_intersections.html">airbornegeo.inspect_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.lines_without_intersections.html">airbornegeo.lines_without_intersections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.calculate_crossover_errors.html">airbornegeo.calculate_crossover_errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.update_intersections_with_eq_sources.html">airbornegeo.update_intersections_with_eq_sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.calculate_intersection_weights.html">airbornegeo.calculate_intersection_weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.level_to_grid.html">airbornegeo.level_to_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.crossover_pair_levelling.html">airbornegeo.crossover_pair_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.crossover_network_levelling.html">airbornegeo.crossover_network_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.alternating_iterative_line_levelling.html">airbornegeo.alternating_iterative_line_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.equivalent_source_levelling.html">airbornegeo.equivalent_source_levelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.plot_levelling_convergence.html">airbornegeo.plot_levelling_convergence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.eq_sources_1d.html">airbornegeo.eq_sources_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.upward_continue_by_line.html">airbornegeo.upward_continue_by_line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.eotvos_correction.html">airbornegeo.eotvos_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.vertical_acceleration.html">airbornegeo.vertical_acceleration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.igrf.html">airbornegeo.igrf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.plotly_points.html">airbornegeo.plotly_points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.plotly_profiles.html">airbornegeo.plotly_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.plot_profiles.html">airbornegeo.plot_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.plot_line_and_crosses.html">airbornegeo.plot_line_and_crosses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.inspect_lines.html">airbornegeo.inspect_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.add_scalebar.html">airbornegeo.add_scalebar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.nice_scalebar_width.html">airbornegeo.nice_scalebar_width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.choose_colormap.html">airbornegeo.choose_colormap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.get_min_max.html">airbornegeo.get_min_max</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.rmse.html">airbornegeo.rmse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/airbornegeo.normalize_values.html">airbornegeo.normalize_values</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">🗂️ Other resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">How to contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/airbornegeo/airbornegeo">Source code on GitHub</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/airbornegeo/airbornegeo/main?urlpath=lab/tree/docs/accessing_datasets/PolarGAP_magnetic_survey.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch on Binder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img alt="Binder logo" src="../_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/edit/main/docs/accessing_datasets/PolarGAP_magnetic_survey.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/airbornegeo/airbornegeo/issues/new?title=Issue%20on%20page%20%2Faccessing_datasets/PolarGAP_magnetic_survey.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/accessing_datasets/PolarGAP_magnetic_survey.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Downloading the PolarGAP airborne magnetic survey to use in the notebooks</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reproject">Reproject</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Calculate-unixtime">Calculate unixtime</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Set-line-and-flight-ID's">Set line and flight ID’s</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Analyze-flights">Analyze flights</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Analyze-lines">Analyze lines</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Distance-along-flight">Distance along flight</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Distance-along-line">Distance along line</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Examine-magnetic-data">Examine magnetic data</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Downloading-the-PolarGAP-airborne-magnetic-survey-to-use-in-the-notebooks">
+<h1>Downloading the PolarGAP airborne magnetic survey to use in the notebooks<a class="headerlink" href="#Downloading-the-PolarGAP-airborne-magnetic-survey-to-use-in-the-notebooks" title="Link to this heading">#</a></h1>
+<p>Accessed from: <a class="reference external" href="https://ramadda.data.bas.ac.uk/repository/entry/show?entryid=4a6096e7-6350-416d-a2a1-6a24adaaf929">https://ramadda.data.bas.ac.uk/repository/entry/show?entryid=4a6096e7-6350-416d-a2a1-6a24adaaf929</a> Survey can be viewed here: <a class="reference external" href="https://bas.maps.arcgis.com/apps/instant/media/index.html">https://bas.maps.arcgis.com/apps/instant/media/index.html</a>?appid=c1a658ec78d54be18da570e955c278ca# Some more info here: <a class="reference external" href="https://antarctica.github.io/PDC_GeophysicsBook/data-portal/data_available.html#polargap-2015-16">https://antarctica.github.io/PDC_GeophysicsBook/data-portal/data_available.html#polargap-2015-16</a> Metadata here: <a class="reference external" href="https://data.bas.ac.uk/full-record.php?id=GB/NERC/BAS/PDC/01584">https://data.bas.ac.uk/full-record.php?id=GB/NERC/BAS/PDC/01584</a></p>
+<p>Survey notes:</p>
+<ul class="simple">
+<li><p>Used two remote field sites (FD83, Thiel Mountains), and US South Pole Station.</p></li>
+<li><p>38 survey flights, P1-P38</p></li>
+<li><p>145 hrs and 26000 km survey lines</p></li>
+<li><p>No compensation flight, so low-pass filtered the 10Hz data to 150 samples (~900m)</p></li>
+<li><p>magnetic heading corrections not been applied</p></li>
+<li><p>Processing notes: Data resolution: The radial design of the survey makes defining a specific resolution problematic. Line spacing at the survey edges was 90 km, reducing towards South Pole. The provided data is sampled at 1Hz, along track which equates to a ~60m along track sample spacing. The true usable resolution of this dataset is proportional to the depth to source, which averages to 2900 m across the survey.</p></li>
+</ul>
+<p>Lineage/Methodology: The raw aeromagnetic data was initially corrected for DC offsets due to aircraft procedures, such as pumping fuel from so called ‘tip tanks’. Most of these corrections were in turns, but logistical considerations meant such corrections on lines were unavoidable. Due to the unusual radial survey design normal compensation for aircraft dynamics was not possible. However, visual comparison between recorded fluxgate and total field data on the aircraft suggested most dynamic
+noise had a frequency of &lt;15 seconds (~900m). The tip corrected data was therefore filtered with a 15 second low pass filter to remove dynamic noise prior to decimation from 10Hz to 1Hz to enhance the efficiency of data processing. The total field magnetic data was corrected for the core field using the 2015 IGRF, implemented in the Geosoft software package.</p>
+<p>The base-station correction for diurnal variations was derived from multiple base-station observations. Base station data at the PolarGAP field camps (Thiel Mountains and FD83) was collected using total-field sensors, with additional fluxgate magnetometer data from the Polar Experiment Network for Geospace Upper atmosphere Investigations (PENGUIn) at South Pole and other remote field sites. All base station data was converted into total field values, and each station corrected to have a zero
+mean across the survey period. The theoretical base station value at the aircraft was calculated using an inverse distance weighting scheme to merge base station observations (Shenwary et al 2011). This incorporates the base station corrections from all available base stations weighted by their distance to the survey aircraft. This technique provided a smooth transition between different base stations, and ensures the most ‘local’ base station dominates the correction. As short wavelength
+diurnal variations observed at a base station are often not fully representative of those occurring at large distances from the base station, the base station corrections were filtered with either a 60 or 30 minute low-pass filter. The base station data is also provided for reference.</p>
+<p>After base station correction preliminary levelling of the 30 minute base station corrected magnetic data was carried out. This included minimising internal crossovers and discrepancies with other surveys in the region. In general the preferred levelling method removed a 0, or 1st order trend revealed by errors at a number of intersections. Where residual line to line discrepancies remained, more complex spline levelling was applied. Further improvement of the dataset by more detailed levelling
+may be possible.</p>
+<p>The aeromagnetic data set includes the following channels:</p>
+<ul class="simple">
+<li><p>Line: Sequential survey flight number from P03 to P39: decimals denote line breaks.</p></li>
+<li><p>Lon: Longitude DDD.DDDDDDDD</p></li>
+<li><p>Lat: Latitude DD.DDDDDDDD</p></li>
+<li><p>Elev: Elevation on the WGS1984 ellipsoid</p></li>
+<li><p>Date: Date YYYY/MM/DD</p></li>
+<li><p>Time: Time (UTC) HH:MM:SS.SS</p></li>
+<li><p>MagR: Raw total field magnetic data (nT)</p></li>
+<li><p>MagC: Pseudo-compensated total field magnetic data (nT)</p></li>
+<li><p>TCorr: Tip correction (nT)</p></li>
+<li><p>RefField: IGRF correction (nT)</p></li>
+<li><p>MagRTC: Mag after IGRF: compensation and tip correction (nT)</p></li>
+<li><p>Bcorr_60min: IDW base station correction with 60 minute mean filter (nT)</p></li>
+<li><p>Bcorr_30min: IDW base station correction with 30 minute mean filter (nT)</p></li>
+<li><p>MagB60RTC: Final mag after 60 min base station correction (nT)</p></li>
+<li><p>MagB30RTC: Final mag after 30 min base station correction (nT)</p></li>
+<li><p>MagL_B30RTC: Magnetic anomaly after preliminary levelling (nT)</p></li>
+</ul>
+<p>The magnetic base station data set includes the following channels:</p>
+<ul class="simple">
+<li><p>Line: PolarGAP flight number</p></li>
+<li><p>TimeUTC: Time UTC (HH:MM:SS.SS)</p></li>
+<li><p>UTCDate: Date (YYYY/MM/DD)</p></li>
+<li><p>Longitude_decimal_degrees: Survey aircraft longitude (DDD.DDDDDDDDD)</p></li>
+<li><p>Latitude_decimal_degrees: Survey aircraft Latitude (DD.DDDDDDDDD)</p></li>
+<li><p>x: Polar stereographic projected aircraft x position (true scale -71) (m)</p></li>
+<li><p>y: Polar stereographic projected aircraft y position (true scale -71) (m)</p></li>
+<li><p>power: Exponential power used in inverse distance weighting.</p></li>
+<li><p>r_TH: Range to Thiel Mountains base station (coordinates -527308.92: 85658.68)</p></li>
+<li><p>r_FD: Range to FD83 base station (coordinates 251981.30: 672276.42)</p></li>
+<li><p>r_PG3: Range to PENGUIn 3 magnetometer (coordinates 344511.27: 446882.90)</p></li>
+<li><p>r_PG4: Range to PENGUIn 4 magnetometer (coordinates 153738.09: 707916.92)</p></li>
+<li><p>r_SP: Range to South Pole</p></li>
+<li><p>Mag_base_Thiels_nT: Thiel Mountains base station: corrected to zero mean (nT). *=no obs</p></li>
+<li><p>Mag_TH_fill_30_nT: Thiel Mountains base station with 30 min filter.</p></li>
+<li><p>Mag_TH_fill_60:_nT Thiel Mountains base station with 60 min filter.</p></li>
+<li><p>Mag_base_FD83_nT: FD83 base station: corrected to zero mean (nT). *=no obs</p></li>
+<li><p>Mag_FD_fill_30_nT: FD83 base station with 30 min filter.</p></li>
+<li><p>Mag_FD_fill_60_nT: FD83 base station with 60 min filter.</p></li>
+<li><p>Mag_base_PG3_nT: Calculated total magnetic field for PENGUIn 3 magnetometer (nT)</p></li>
+<li><p>Mag_PG3_30min_nT: Total magnetic field for PENGUIn 3 magnetometer with 30 min filter.</p></li>
+<li><p>Mag_PG3_60min_nT: Total magnetic field for PENGUIn 3 magnetometer with 60 min filter.</p></li>
+<li><p>Mag_base_PG4_nT: Calculated total magnetic field for PENGUIn 4 magnetometer (nT)</p></li>
+<li><p>Mag_PG4_30min_nT: Total magnetic field for PENGUIn 4 magnetometer with 30 min filter.</p></li>
+<li><p>Mag_PG4_60min_nT: Total magnetic field for PENGUIn 4 magnetometer with 60 min filter.</p></li>
+<li><p>Mag_base_SP_nT: Calculated total magnetic field for South Pole Fluxgate magnetometer (nT)</p></li>
+<li><p>Mag_SP_30min_nT: Total magnetic field for South Pole magnetometer with 30 min filter.</p></li>
+<li><p>Mag_SP_60min_nT: Total magnetic field for South Pole magnetometer with 60 min filter.</p></li>
+<li><p>Mag_base_IDW_30min_nT: 30 min filtered IDW base station correction applied at aircraft (nT)</p></li>
+<li><p>Mag_base_IDW_60min_nT: 60 min filtered IDW base station correction applied at aircraft (nT)</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">cmocean</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">harmonica</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.io</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">verde</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">vd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">airbornegeo</span>
+
+<span class="n">pio</span><span class="o">.</span><span class="n">renderers</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;notebook&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div></div>
+</div>
+<section id="Load-data">
+<h2>Load data<a class="headerlink" href="#Load-data" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://ramadda.data.bas.ac.uk/repository/entry/get/PolarGAP_mag_ADMAP_ASCII_V2.csv?entryid=synth:4a6096e7-6350-416d-a2a1-6a24adaaf929:L1BvbGFyR0FQX21hZ19BRE1BUF9BU0NJSV9WMi5jc3Y=&quot;</span><span class="p">,</span>
+    <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;PolarGAP_mag_ADMAP_ASCII_V2.csv&quot;</span><span class="p">,</span>
+    <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pooch</span><span class="o">.</span><span class="n">os_cache</span><span class="p">(</span><span class="s1">&#39;airbornegeo&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">known_hash</span><span class="o">=</span><span class="s2">&quot;ffcc1db1e924ca23cb65d5e24b8d2d469c3e86949872f34488b9fb10b6aed8bb&quot;</span><span class="p">,</span>
+    <span class="n">progressbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">])</span>
+
+<span class="c1"># drop rows with nans in Lat / Lon / MagR</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span> <span class="s2">&quot;Lat&quot;</span><span class="p">,</span> <span class="s2">&quot;MagR&quot;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">)</span>
+<span class="n">data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Line</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Elev</th>
+      <th>date</th>
+      <th>Time_UTC</th>
+      <th>MagR</th>
+      <th>MagC</th>
+      <th>Tcorr</th>
+      <th>RefField</th>
+      <th>MagRTC</th>
+      <th>Bcorr_60min</th>
+      <th>Bcorr_30min</th>
+      <th>MagB60RTC</th>
+      <th>MagB30RTC</th>
+      <th>MagL_B30RTC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>776</th>
+      <td>P03.1</td>
+      <td>-44.480694</td>
+      <td>-80.441398</td>
+      <td>131.48</td>
+      <td>2015/12/15</td>
+      <td>17:48:04.00</td>
+      <td>47687.3792</td>
+      <td>47688.29</td>
+      <td>0.0</td>
+      <td>47798.3</td>
+      <td>-110.04</td>
+      <td>-1.33</td>
+      <td>NaN</td>
+      <td>-108.71</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>777</th>
+      <td>P03.1</td>
+      <td>-44.482024</td>
+      <td>-80.441687</td>
+      <td>132.03</td>
+      <td>2015/12/15</td>
+      <td>17:48:05.00</td>
+      <td>47689.7448</td>
+      <td>47688.64</td>
+      <td>0.0</td>
+      <td>47798.6</td>
+      <td>-109.99</td>
+      <td>-1.34</td>
+      <td>NaN</td>
+      <td>-108.65</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>778</th>
+      <td>P03.1</td>
+      <td>-44.483376</td>
+      <td>-80.441986</td>
+      <td>132.76</td>
+      <td>2015/12/15</td>
+      <td>17:48:06.00</td>
+      <td>47689.7208</td>
+      <td>47688.92</td>
+      <td>0.0</td>
+      <td>47798.9</td>
+      <td>-110.01</td>
+      <td>-1.35</td>
+      <td>NaN</td>
+      <td>-108.66</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>779</th>
+      <td>P03.1</td>
+      <td>-44.484744</td>
+      <td>-80.442292</td>
+      <td>133.96</td>
+      <td>2015/12/15</td>
+      <td>17:48:07.00</td>
+      <td>47690.7116</td>
+      <td>47689.12</td>
+      <td>0.0</td>
+      <td>47799.2</td>
+      <td>-110.11</td>
+      <td>-1.36</td>
+      <td>NaN</td>
+      <td>-108.75</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>780</th>
+      <td>P03.1</td>
+      <td>-44.486123</td>
+      <td>-80.442606</td>
+      <td>135.51</td>
+      <td>2015/12/15</td>
+      <td>17:48:08.00</td>
+      <td>47689.7556</td>
+      <td>47689.25</td>
+      <td>0.0</td>
+      <td>47799.5</td>
+      <td>-110.27</td>
+      <td>-1.37</td>
+      <td>NaN</td>
+      <td>-108.90</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>640411</th>
+      <td>P39</td>
+      <td>-79.011108</td>
+      <td>-84.990586</td>
+      <td>1593.23</td>
+      <td>2016/01/20</td>
+      <td>21:47:24.00</td>
+      <td>52678.9898</td>
+      <td>52679.05</td>
+      <td>0.0</td>
+      <td>52845.8</td>
+      <td>-166.76</td>
+      <td>-126.03</td>
+      <td>-126.03</td>
+      <td>-40.73</td>
+      <td>-40.73</td>
+      <td>80.95</td>
+    </tr>
+    <tr>
+      <th>640412</th>
+      <td>P39</td>
+      <td>-79.016923</td>
+      <td>-84.990828</td>
+      <td>1591.87</td>
+      <td>2016/01/20</td>
+      <td>21:47:25.00</td>
+      <td>52679.4624</td>
+      <td>52679.57</td>
+      <td>0.0</td>
+      <td>52846.3</td>
+      <td>-166.71</td>
+      <td>-125.93</td>
+      <td>-125.93</td>
+      <td>-40.78</td>
+      <td>-40.78</td>
+      <td>80.93</td>
+    </tr>
+    <tr>
+      <th>640413</th>
+      <td>P39</td>
+      <td>-79.022752</td>
+      <td>-84.991071</td>
+      <td>1590.41</td>
+      <td>2016/01/20</td>
+      <td>21:47:26.00</td>
+      <td>52680.1722</td>
+      <td>52680.08</td>
+      <td>0.0</td>
+      <td>52846.8</td>
+      <td>-166.68</td>
+      <td>-125.86</td>
+      <td>-125.86</td>
+      <td>-40.82</td>
+      <td>-40.82</td>
+      <td>80.92</td>
+    </tr>
+    <tr>
+      <th>640414</th>
+      <td>P39</td>
+      <td>-79.028594</td>
+      <td>-84.991315</td>
+      <td>1588.76</td>
+      <td>2016/01/20</td>
+      <td>21:47:27.00</td>
+      <td>52680.6980</td>
+      <td>52680.59</td>
+      <td>0.0</td>
+      <td>52847.2</td>
+      <td>-166.66</td>
+      <td>-125.81</td>
+      <td>-125.81</td>
+      <td>-40.85</td>
+      <td>-40.85</td>
+      <td>80.92</td>
+    </tr>
+    <tr>
+      <th>640415</th>
+      <td>P39</td>
+      <td>-79.034452</td>
+      <td>-84.991560</td>
+      <td>1586.98</td>
+      <td>2016/01/20</td>
+      <td>21:47:28.00</td>
+      <td>52680.9108</td>
+      <td>52681.09</td>
+      <td>0.0</td>
+      <td>52847.7</td>
+      <td>-166.65</td>
+      <td>-125.77</td>
+      <td>NaN</td>
+      <td>-40.88</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>560167 rows × 16 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Elev</th>
+      <th>MagR</th>
+      <th>MagC</th>
+      <th>Tcorr</th>
+      <th>RefField</th>
+      <th>MagRTC</th>
+      <th>Bcorr_60min</th>
+      <th>Bcorr_30min</th>
+      <th>MagB60RTC</th>
+      <th>MagB30RTC</th>
+      <th>MagL_B30RTC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>560167.000000</td>
+      <td>560167.000000</td>
+      <td>560167.000000</td>
+      <td>560167.000000</td>
+      <td>542803.000000</td>
+      <td>545338.000000</td>
+      <td>560167.000000</td>
+      <td>542803.000000</td>
+      <td>560166.000000</td>
+      <td>521655.000000</td>
+      <td>542802.000000</td>
+      <td>522265.000000</td>
+      <td>522263.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>-22.666029</td>
+      <td>-86.147723</td>
+      <td>2916.017281</td>
+      <td>53021.696145</td>
+      <td>53016.835123</td>
+      <td>-18.675374</td>
+      <td>53044.626554</td>
+      <td>-41.528796</td>
+      <td>-33.841691</td>
+      <td>-33.581347</td>
+      <td>-8.343020</td>
+      <td>-6.728692</td>
+      <td>-7.477536</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>75.189642</td>
+      <td>2.152358</td>
+      <td>457.949070</td>
+      <td>2120.134321</td>
+      <td>2123.642185</td>
+      <td>48.027996</td>
+      <td>2135.054349</td>
+      <td>106.356901</td>
+      <td>74.001941</td>
+      <td>75.415269</td>
+      <td>80.130212</td>
+      <td>80.304888</td>
+      <td>78.016381</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>-179.737553</td>
+      <td>-89.999904</td>
+      <td>131.480000</td>
+      <td>47687.379200</td>
+      <td>47688.290000</td>
+      <td>-187.000000</td>
+      <td>47798.300000</td>
+      <td>-497.980000</td>
+      <td>-316.420000</td>
+      <td>-347.920000</td>
+      <td>-344.880000</td>
+      <td>-358.840000</td>
+      <td>-358.840000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>-80.844587</td>
+      <td>-87.919588</td>
+      <td>2804.540000</td>
+      <td>51409.472000</td>
+      <td>51421.345000</td>
+      <td>0.000000</td>
+      <td>51430.450000</td>
+      <td>-98.440000</td>
+      <td>-62.840000</td>
+      <td>-62.480000</td>
+      <td>-61.650000</td>
+      <td>-60.180000</td>
+      <td>-59.230000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>-30.000391</td>
+      <td>-85.821818</td>
+      <td>2925.860000</td>
+      <td>53150.234200</td>
+      <td>53125.850000</td>
+      <td>0.000000</td>
+      <td>53159.000000</td>
+      <td>-40.600000</td>
+      <td>-9.600000</td>
+      <td>-9.720000</td>
+      <td>-23.220000</td>
+      <td>-21.590000</td>
+      <td>-22.400000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>20.482409</td>
+      <td>-84.601775</td>
+      <td>3210.600000</td>
+      <td>54625.244700</td>
+      <td>54618.950000</td>
+      <td>0.000000</td>
+      <td>54677.900000</td>
+      <td>22.050000</td>
+      <td>7.320000</td>
+      <td>7.600000</td>
+      <td>32.447500</td>
+      <td>33.820000</td>
+      <td>29.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>179.862364</td>
+      <td>-80.441398</td>
+      <td>4326.720000</td>
+      <td>58030.806400</td>
+      <td>58030.540000</td>
+      <td>0.000000</td>
+      <td>58037.100000</td>
+      <td>546.870000</td>
+      <td>241.190000</td>
+      <td>255.400000</td>
+      <td>538.020000</td>
+      <td>535.700000</td>
+      <td>545.790000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Reproject">
+<h2>Reproject<a class="headerlink" href="#Reproject" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># reproject to EPSG:3031 Polar Stereographic</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;easting&quot;</span><span class="p">],</span> <span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;northing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">Lon</span><span class="p">,</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">Lat</span><span class="p">,</span>
+    <span class="n">input_crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span>
+    <span class="n">output_crs</span><span class="o">=</span><span class="s2">&quot;EPSG:3031&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Line</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Elev</th>
+      <th>date</th>
+      <th>Time_UTC</th>
+      <th>MagR</th>
+      <th>MagC</th>
+      <th>Tcorr</th>
+      <th>RefField</th>
+      <th>MagRTC</th>
+      <th>Bcorr_60min</th>
+      <th>Bcorr_30min</th>
+      <th>MagB60RTC</th>
+      <th>MagB30RTC</th>
+      <th>MagL_B30RTC</th>
+      <th>easting</th>
+      <th>northing</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>776</th>
+      <td>P03.1</td>
+      <td>-44.480694</td>
+      <td>-80.441398</td>
+      <td>131.48</td>
+      <td>2015/12/15</td>
+      <td>17:48:04.00</td>
+      <td>47687.3792</td>
+      <td>47688.29</td>
+      <td>0.0</td>
+      <td>47798.3</td>
+      <td>-110.04</td>
+      <td>-1.33</td>
+      <td>NaN</td>
+      <td>-108.71</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729314.730339</td>
+      <td>742656.452995</td>
+    </tr>
+    <tr>
+      <th>777</th>
+      <td>P03.1</td>
+      <td>-44.482024</td>
+      <td>-80.441687</td>
+      <td>132.03</td>
+      <td>2015/12/15</td>
+      <td>17:48:05.00</td>
+      <td>47689.7448</td>
+      <td>47688.64</td>
+      <td>0.0</td>
+      <td>47798.6</td>
+      <td>-109.99</td>
+      <td>-1.34</td>
+      <td>NaN</td>
+      <td>-108.65</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729309.819815</td>
+      <td>742616.969634</td>
+    </tr>
+    <tr>
+      <th>778</th>
+      <td>P03.1</td>
+      <td>-44.483376</td>
+      <td>-80.441986</td>
+      <td>132.76</td>
+      <td>2015/12/15</td>
+      <td>17:48:06.00</td>
+      <td>47689.7208</td>
+      <td>47688.92</td>
+      <td>0.0</td>
+      <td>47798.9</td>
+      <td>-110.01</td>
+      <td>-1.35</td>
+      <td>NaN</td>
+      <td>-108.66</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729304.426553</td>
+      <td>742576.426492</td>
+    </tr>
+    <tr>
+      <th>779</th>
+      <td>P03.1</td>
+      <td>-44.484744</td>
+      <td>-80.442292</td>
+      <td>133.96</td>
+      <td>2015/12/15</td>
+      <td>17:48:07.00</td>
+      <td>47690.7116</td>
+      <td>47689.12</td>
+      <td>0.0</td>
+      <td>47799.2</td>
+      <td>-110.11</td>
+      <td>-1.36</td>
+      <td>NaN</td>
+      <td>-108.75</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729298.702629</td>
+      <td>742535.134113</td>
+    </tr>
+    <tr>
+      <th>780</th>
+      <td>P03.1</td>
+      <td>-44.486123</td>
+      <td>-80.442606</td>
+      <td>135.51</td>
+      <td>2015/12/15</td>
+      <td>17:48:08.00</td>
+      <td>47689.7556</td>
+      <td>47689.25</td>
+      <td>0.0</td>
+      <td>47799.5</td>
+      <td>-110.27</td>
+      <td>-1.37</td>
+      <td>NaN</td>
+      <td>-108.90</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729292.506529</td>
+      <td>742493.078148</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Calculate-unixtime">
+<h2>Calculate unixtime<a class="headerlink" href="#Calculate-unixtime" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># calculate the unixtime from the date and time columns</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">])</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;Time_UTC&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;Time_UTC&quot;</span><span class="p">])</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;unixtime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;Time_UTC&quot;</span><span class="p">]</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;unixtime&quot;</span><span class="p">])</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;unixtime&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;unixtime&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">timestamp</span><span class="p">())</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;unixtime&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Line</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Elev</th>
+      <th>date</th>
+      <th>Time_UTC</th>
+      <th>MagR</th>
+      <th>MagC</th>
+      <th>Tcorr</th>
+      <th>RefField</th>
+      <th>MagRTC</th>
+      <th>Bcorr_60min</th>
+      <th>Bcorr_30min</th>
+      <th>MagB60RTC</th>
+      <th>MagB30RTC</th>
+      <th>MagL_B30RTC</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>unixtime</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>P03.1</td>
+      <td>-44.480694</td>
+      <td>-80.441398</td>
+      <td>131.48</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:04</td>
+      <td>47687.3792</td>
+      <td>47688.29</td>
+      <td>0.0</td>
+      <td>47798.3</td>
+      <td>-110.04</td>
+      <td>-1.33</td>
+      <td>NaN</td>
+      <td>-108.71</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729314.730339</td>
+      <td>742656.452995</td>
+      <td>1.450202e+09</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>P03.1</td>
+      <td>-44.482024</td>
+      <td>-80.441687</td>
+      <td>132.03</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:05</td>
+      <td>47689.7448</td>
+      <td>47688.64</td>
+      <td>0.0</td>
+      <td>47798.6</td>
+      <td>-109.99</td>
+      <td>-1.34</td>
+      <td>NaN</td>
+      <td>-108.65</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729309.819815</td>
+      <td>742616.969634</td>
+      <td>1.450202e+09</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>P03.1</td>
+      <td>-44.483376</td>
+      <td>-80.441986</td>
+      <td>132.76</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:06</td>
+      <td>47689.7208</td>
+      <td>47688.92</td>
+      <td>0.0</td>
+      <td>47798.9</td>
+      <td>-110.01</td>
+      <td>-1.35</td>
+      <td>NaN</td>
+      <td>-108.66</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729304.426553</td>
+      <td>742576.426492</td>
+      <td>1.450202e+09</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>P03.1</td>
+      <td>-44.484744</td>
+      <td>-80.442292</td>
+      <td>133.96</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:07</td>
+      <td>47690.7116</td>
+      <td>47689.12</td>
+      <td>0.0</td>
+      <td>47799.2</td>
+      <td>-110.11</td>
+      <td>-1.36</td>
+      <td>NaN</td>
+      <td>-108.75</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729298.702629</td>
+      <td>742535.134113</td>
+      <td>1.450202e+09</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>P03.1</td>
+      <td>-44.486123</td>
+      <td>-80.442606</td>
+      <td>135.51</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:08</td>
+      <td>47689.7556</td>
+      <td>47689.25</td>
+      <td>0.0</td>
+      <td>47799.5</td>
+      <td>-110.27</td>
+      <td>-1.37</td>
+      <td>NaN</td>
+      <td>-108.90</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-729292.506529</td>
+      <td>742493.078148</td>
+      <td>1.450202e+09</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;DatetimeArray&gt;
+[&#39;2015-12-15 00:00:00&#39;, &#39;2015-12-16 00:00:00&#39;, &#39;2015-12-17 00:00:00&#39;,
+ &#39;2015-12-18 00:00:00&#39;, &#39;2015-12-19 00:00:00&#39;, &#39;2015-12-20 00:00:00&#39;,
+ &#39;2015-12-21 00:00:00&#39;, &#39;2015-12-25 00:00:00&#39;, &#39;2015-12-26 00:00:00&#39;,
+ &#39;2015-12-27 00:00:00&#39;, &#39;2015-12-28 00:00:00&#39;, &#39;2015-12-29 00:00:00&#39;,
+ &#39;2015-12-30 00:00:00&#39;, &#39;2015-12-31 00:00:00&#39;, &#39;2016-01-04 00:00:00&#39;,
+ &#39;2016-01-05 00:00:00&#39;, &#39;2016-01-06 00:00:00&#39;, &#39;2016-01-07 00:00:00&#39;,
+ &#39;2016-01-08 00:00:00&#39;, &#39;2016-01-09 00:00:00&#39;, &#39;2016-01-10 00:00:00&#39;,
+ &#39;2016-01-11 00:00:00&#39;, &#39;2016-01-12 00:00:00&#39;, &#39;2016-01-13 00:00:00&#39;,
+ &#39;2016-01-14 00:00:00&#39;, &#39;2016-01-16 00:00:00&#39;, &#39;2016-01-17 00:00:00&#39;,
+ &#39;2016-01-18 00:00:00&#39;, &#39;2016-01-20 00:00:00&#39;]
+Length: 29, dtype: datetime64[us]
+</pre></div></div>
+</div>
+</section>
+<section id="Set-line-and-flight-ID's">
+<h2>Set line and flight ID’s<a class="headerlink" href="#Set-line-and-flight-ID's" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">Line</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([&#39;P03.1&#39;, &#39;P04.1&#39;, &#39;P04.2&#39;, &#39;P04.3&#39;, &#39;P04.4&#39;, &#39;P04.5&#39;, &#39;P05.1&#39;,
+       &#39;P05.2&#39;, &#39;P05.3&#39;, &#39;P05.4&#39;, &#39;P05.5&#39;, &#39;P06.1&#39;, &#39;P06.2&#39;, &#39;P06.3&#39;,
+       &#39;P06.4&#39;, &#39;P06.5&#39;, &#39;P07.1&#39;, &#39;P07.2&#39;, &#39;P07.3&#39;, &#39;P07.4&#39;, &#39;P07.5&#39;,
+       &#39;P07.6&#39;, &#39;P07.7&#39;, &#39;P07.8&#39;, &#39;P07.9&#39;, &#39;P07.10&#39;, &#39;P07.11&#39;, &#39;P07.12&#39;,
+       &#39;P07.13&#39;, &#39;P07.14&#39;, &#39;P07.15&#39;, &#39;P07.16&#39;, &#39;P07.17&#39;, &#39;P08.1&#39;, &#39;P08.2&#39;,
+       &#39;P09.1&#39;, &#39;P09.2&#39;, &#39;P10.1&#39;, &#39;P10.2&#39;, &#39;P10.3&#39;, &#39;P10.4&#39;, &#39;P10.5&#39;,
+       &#39;P10.6&#39;, &#39;P10.7&#39;, &#39;P10.8&#39;, &#39;P10.9&#39;, &#39;P10.10&#39;, &#39;P10.11&#39;, &#39;P10.12&#39;,
+       &#39;P10.13&#39;, &#39;P11.1&#39;, &#39;P11.2&#39;, &#39;P11.3&#39;, &#39;P11.4&#39;, &#39;P11.5&#39;, &#39;P11.6&#39;,
+       &#39;P11.7&#39;, &#39;P11.8&#39;, &#39;P11.9&#39;, &#39;P11.10&#39;, &#39;P11.11&#39;, &#39;P11.12&#39;, &#39;P11.13&#39;,
+       &#39;P11.14&#39;, &#39;P12.1&#39;, &#39;P13.1&#39;, &#39;P13.2&#39;, &#39;P13.3&#39;, &#39;P14.1&#39;, &#39;P14.2&#39;,
+       &#39;P14.3&#39;, &#39;P15.1&#39;, &#39;P15.2&#39;, &#39;P16.1&#39;, &#39;P16.2&#39;, &#39;P17.1&#39;, &#39;P17.2&#39;,
+       &#39;P18.1&#39;, &#39;P18.2&#39;, &#39;P19.1&#39;, &#39;P19.2&#39;, &#39;P19.3&#39;, &#39;P20.1&#39;, &#39;P20.2&#39;,
+       &#39;P20.3&#39;, &#39;P20.4&#39;, &#39;P20.5&#39;, &#39;P20.6&#39;, &#39;P20.7&#39;, &#39;P21.1&#39;, &#39;P21.2&#39;,
+       &#39;P21.3&#39;, &#39;P22.1&#39;, &#39;P22.2&#39;, &#39;P23.1&#39;, &#39;P23.2&#39;, &#39;P24.1&#39;, &#39;P24.2&#39;,
+       &#39;P25.1&#39;, &#39;P25.2&#39;, &#39;P25.3&#39;, &#39;P26.1&#39;, &#39;P26.2&#39;, &#39;P26.3&#39;, &#39;P27.1&#39;,
+       &#39;P27.2&#39;, &#39;P27.3&#39;, &#39;P28.1&#39;, &#39;P28.2&#39;, &#39;P28.3&#39;, &#39;P29.1&#39;, &#39;P29.2&#39;,
+       &#39;P29.3&#39;, &#39;P30.1&#39;, &#39;P30.2&#39;, &#39;P30.3&#39;, &#39;P31.1&#39;, &#39;P31.2&#39;, &#39;P31.3&#39;,
+       &#39;P32.1&#39;, &#39;P32.2&#39;, &#39;P32.3&#39;, &#39;P32.4&#39;, &#39;P32.5&#39;, &#39;P32.6&#39;, &#39;P33.1&#39;,
+       &#39;P33.2&#39;, &#39;P33.3&#39;, &#39;P34.1&#39;, &#39;P34.2&#39;, &#39;P34.3&#39;, &#39;P35.1&#39;, &#39;P35.2&#39;,
+       &#39;P35.3&#39;, &#39;P36.1&#39;, &#39;P36.2&#39;, &#39;P36.3&#39;, &#39;P37.1&#39;, &#39;P37.2&#39;, &#39;P37.3&#39;,
+       &#39;P39&#39;], dtype=object)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># first integer of &#39;Line&#39; is the flight number</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;line&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">Line</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;flight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<span class="n">data_df</span><span class="p">[[</span><span class="s2">&quot;Line&quot;</span><span class="p">,</span> <span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="s2">&quot;flight&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Line</th>
+      <th>line</th>
+      <th>flight</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>P03.1</td>
+      <td>03.1</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>P03.1</td>
+      <td>03.1</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>P03.1</td>
+      <td>03.1</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>P03.1</td>
+      <td>03.1</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>P03.1</td>
+      <td>03.1</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>560162</th>
+      <td>P39</td>
+      <td>39</td>
+      <td>39.0</td>
+    </tr>
+    <tr>
+      <th>560163</th>
+      <td>P39</td>
+      <td>39</td>
+      <td>39.0</td>
+    </tr>
+    <tr>
+      <th>560164</th>
+      <td>P39</td>
+      <td>39</td>
+      <td>39.0</td>
+    </tr>
+    <tr>
+      <th>560165</th>
+      <td>P39</td>
+      <td>39</td>
+      <td>39.0</td>
+    </tr>
+    <tr>
+      <th>560166</th>
+      <td>P39</td>
+      <td>39</td>
+      <td>39.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>560167 rows × 3 columns</p>
+</div></div>
+</div>
+<section id="Analyze-flights">
+<h3>Analyze flights<a class="headerlink" href="#Analyze-flights" title="Link to this heading">#</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># convert flight labels to integers starting from 0</span>
+<span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;flight&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">unique_line_id</span><span class="p">()</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">flight</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;flight&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">coarsen</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;flight&quot;</span><span class="p">,</span> <span class="s2">&quot;unixtime&quot;</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;flight&quot;</span><span class="p">):</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">unixtime</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">unixtime</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;time_dif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">unixtime</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+    <span class="n">max_jump</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">time_dif</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="c1"># if max_jump&gt;10:</span>
+    <span class="c1"># print(df.sort_values([&#39;time_dif&#39;]))</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;flight&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="n">duration</span><span class="p">,</span> <span class="s2">&quot;max_jump&quot;</span><span class="p">:</span> <span class="n">max_jump</span><span class="p">})</span>
+<span class="n">flight_time_stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">flight_time_stats</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>flight</th>
+      <th>duration</th>
+      <th>max_jump</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>26</th>
+      <td>27</td>
+      <td>18378.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>18</td>
+      <td>18245.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>33</td>
+      <td>18195.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>32</td>
+      <td>18177.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>18150.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>24</td>
+      <td>17863.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>17</td>
+      <td>17677.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>26</td>
+      <td>17533.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>8</td>
+      <td>17325.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>12</td>
+      <td>17208.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>29</td>
+      <td>17185.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>25</td>
+      <td>17056.0</td>
+      <td>1.10</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>23</td>
+      <td>16996.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>16692.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>28</td>
+      <td>16581.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>16</td>
+      <td>16350.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>31</td>
+      <td>16256.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>30</td>
+      <td>16225.0</td>
+      <td>19.76</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>34</td>
+      <td>16153.0</td>
+      <td>1.09</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>10</td>
+      <td>16031.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>7</td>
+      <td>15794.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>15731.0</td>
+      <td>31.98</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>13</td>
+      <td>15705.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>15</td>
+      <td>15651.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>21</td>
+      <td>15567.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>14</td>
+      <td>15037.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>14869.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>22</td>
+      <td>13868.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>13434.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>9</td>
+      <td>12893.0</td>
+      <td>375.69</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>35</td>
+      <td>12724.0</td>
+      <td>3.00</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>6</td>
+      <td>12623.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>11</td>
+      <td>12259.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>20</td>
+      <td>11066.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>36</td>
+      <td>10223.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>19</td>
+      <td>9276.0</td>
+      <td>1.08</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">flight_time_stats</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;max_jump&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>flight</th>
+      <th>duration</th>
+      <th>max_jump</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>8</th>
+      <td>9</td>
+      <td>12893.0</td>
+      <td>375.69</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>15731.0</td>
+      <td>31.98</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>30</td>
+      <td>16225.0</td>
+      <td>19.76</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>35</td>
+      <td>12724.0</td>
+      <td>3.00</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>25</td>
+      <td>17056.0</td>
+      <td>1.10</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>34</td>
+      <td>16153.0</td>
+      <td>1.09</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>16692.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>18150.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>13434.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>14869.0</td>
+      <td>1.08</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot each flight</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data_df</span>
+
+<span class="n">grid</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">col</span><span class="o">=</span><span class="s2">&quot;flight&quot;</span><span class="p">,</span>
+    <span class="n">col_wrap</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">flight</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">norm</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">unixtime</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">unixtime</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+<span class="n">grid</span><span class="o">.</span><span class="n">map_dataframe</span><span class="p">(</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">,</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;unixtime&quot;</span><span class="p">,</span>
+    <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">,</span>
+    <span class="n">hue_norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sm</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+<span class="n">sm</span><span class="o">.</span><span class="n">set_array</span><span class="p">([])</span>
+<span class="n">cbar</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/accessing_datasets_PolarGAP_magnetic_survey_20_0.png" src="../_images/accessing_datasets_PolarGAP_magnetic_survey_20_0.png" />
+</div>
+</div>
+</section>
+<section id="Analyze-lines">
+<h3>Analyze lines<a class="headerlink" href="#Analyze-lines" title="Link to this heading">#</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># convert line labels to integers starting from 0</span>
+<span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span><span class="n">data_df</span><span class="p">,</span> <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">unique_line_id</span><span class="p">()</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;rainbow&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">coarsen</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="s2">&quot;unixtime&quot;</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;line&quot;</span><span class="p">):</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">unixtime</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">unixtime</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;time_dif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">unixtime</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span>
+    <span class="n">max_jump</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">time_dif</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="c1"># if max_jump&gt;10:</span>
+    <span class="c1"># print(df.sort_values([&#39;time_dif&#39;]))</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="n">duration</span><span class="p">,</span> <span class="s2">&quot;max_jump&quot;</span><span class="p">:</span> <span class="n">max_jump</span><span class="p">})</span>
+<span class="n">line_time_stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">line_time_stats</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>line</th>
+      <th>duration</th>
+      <th>max_jump</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>16692.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>64</th>
+      <td>65</td>
+      <td>16031.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>36</td>
+      <td>12541.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>97</th>
+      <td>98</td>
+      <td>11702.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>76</th>
+      <td>77</td>
+      <td>11159.0</td>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>120</th>
+      <td>121</td>
+      <td>312.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>53</th>
+      <td>54</td>
+      <td>283.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>29</td>
+      <td>275.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>18</td>
+      <td>273.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>23</td>
+      <td>245.0</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+<p>141 rows × 3 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">line_time_stats</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;max_jump&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>line</th>
+      <th>duration</th>
+      <th>max_jump</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>52</th>
+      <td>53</td>
+      <td>1117.31</td>
+      <td>80.35</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>12</td>
+      <td>4375.00</td>
+      <td>31.98</td>
+    </tr>
+    <tr>
+      <th>122</th>
+      <td>123</td>
+      <td>5428.00</td>
+      <td>19.76</td>
+    </tr>
+    <tr>
+      <th>137</th>
+      <td>138</td>
+      <td>6148.00</td>
+      <td>3.00</td>
+    </tr>
+    <tr>
+      <th>106</th>
+      <td>107</td>
+      <td>7300.00</td>
+      <td>1.10</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>127</th>
+      <td>128</td>
+      <td>6203.00</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>135</th>
+      <td>136</td>
+      <td>1034.00</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>134</th>
+      <td>135</td>
+      <td>6998.00</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>139</th>
+      <td>140</td>
+      <td>3988.00</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>140</th>
+      <td>141</td>
+      <td>10223.00</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+<p>141 rows × 3 columns</p>
+</div></div>
+</div>
+</section>
+</section>
+<section id="Distance-along-flight">
+<h2>Distance along flight<a class="headerlink" href="#Distance-along-flight" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;flight&quot;</span><span class="p">,</span>
+    <span class="n">distance_column</span><span class="o">=</span><span class="s2">&quot;distance_along_flight&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">along_track_distance</span><span class="p">()</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;distance_along_flight&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">coarsen</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Distance-along-line">
+<h2>Distance along line<a class="headerlink" href="#Distance-along-line" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">distance_column</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">survey</span><span class="o">.</span><span class="n">along_track_distance</span><span class="p">()</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+<span class="n">data_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">coarsen</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Examine-magnetic-data">
+<h2>Examine magnetic data<a class="headerlink" href="#Examine-magnetic-data" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Index([&#39;Line&#39;, &#39;Lon&#39;, &#39;Lat&#39;, &#39;Elev&#39;, &#39;date&#39;, &#39;Time_UTC&#39;, &#39;MagR&#39;, &#39;MagC&#39;,
+       &#39;Tcorr&#39;, &#39;RefField&#39;, &#39;MagRTC&#39;, &#39;Bcorr_60min&#39;, &#39;Bcorr_30min&#39;,
+       &#39;MagB60RTC&#39;, &#39;MagB30RTC&#39;, &#39;MagL_B30RTC&#39;, &#39;easting&#39;, &#39;northing&#39;,
+       &#39;unixtime&#39;, &#39;line&#39;, &#39;flight&#39;, &#39;geometry&#39;, &#39;distance_along_flight&#39;,
+       &#39;distance_along_line&#39;],
+      dtype=&#39;str&#39;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span>
+    <span class="p">[</span>
+        <span class="s2">&quot;MagR&quot;</span><span class="p">,</span>  <span class="c1"># Raw total field magnetic data (nT)</span>
+        <span class="s2">&quot;MagC&quot;</span><span class="p">,</span>  <span class="c1"># Pseudo-compensated total field magnetic data (nT)</span>
+        <span class="s2">&quot;Tcorr&quot;</span><span class="p">,</span>  <span class="c1"># Tip correction (nT)</span>
+        <span class="s2">&quot;RefField&quot;</span><span class="p">,</span>  <span class="c1"># IGRF correction (nT)</span>
+        <span class="s2">&quot;MagRTC&quot;</span><span class="p">,</span>  <span class="c1"># Mag after IGRF: compensation and tip correction (nT)</span>
+        <span class="s2">&quot;Bcorr_60min&quot;</span><span class="p">,</span>  <span class="c1"># IDW base station correction with 60 minute mean filter (nT)</span>
+        <span class="s2">&quot;Bcorr_30min&quot;</span><span class="p">,</span>  <span class="c1"># IDW base station correction with 30 minute mean filter (nT)</span>
+        <span class="s2">&quot;MagB60RTC&quot;</span><span class="p">,</span>  <span class="c1"># Final mag after 60 min base station correction (nT)</span>
+        <span class="s2">&quot;MagB30RTC&quot;</span><span class="p">,</span>  <span class="c1"># Final mag after 30 min base station correction (nT)</span>
+        <span class="s2">&quot;MagL_B30RTC&quot;</span><span class="p">,</span>  <span class="c1"># Magnetic anomaly after preliminary levelling (nT)</span>
+    <span class="p">]</span>
+<span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>MagR</th>
+      <th>MagC</th>
+      <th>Tcorr</th>
+      <th>RefField</th>
+      <th>MagRTC</th>
+      <th>Bcorr_60min</th>
+      <th>Bcorr_30min</th>
+      <th>MagB60RTC</th>
+      <th>MagB30RTC</th>
+      <th>MagL_B30RTC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>47687.3792</td>
+      <td>47688.29</td>
+      <td>0.0</td>
+      <td>47798.3</td>
+      <td>-110.04</td>
+      <td>-1.33</td>
+      <td>NaN</td>
+      <td>-108.71</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>47689.7448</td>
+      <td>47688.64</td>
+      <td>0.0</td>
+      <td>47798.6</td>
+      <td>-109.99</td>
+      <td>-1.34</td>
+      <td>NaN</td>
+      <td>-108.65</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>47689.7208</td>
+      <td>47688.92</td>
+      <td>0.0</td>
+      <td>47798.9</td>
+      <td>-110.01</td>
+      <td>-1.35</td>
+      <td>NaN</td>
+      <td>-108.66</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>47690.7116</td>
+      <td>47689.12</td>
+      <td>0.0</td>
+      <td>47799.2</td>
+      <td>-110.11</td>
+      <td>-1.36</td>
+      <td>NaN</td>
+      <td>-108.75</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>47689.7556</td>
+      <td>47689.25</td>
+      <td>0.0</td>
+      <td>47799.5</td>
+      <td>-110.27</td>
+      <td>-1.37</td>
+      <td>NaN</td>
+      <td>-108.90</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span>
+    <span class="p">[</span>
+        <span class="s2">&quot;MagR&quot;</span><span class="p">,</span>  <span class="c1"># Raw total field magnetic data (nT)</span>
+        <span class="s2">&quot;MagC&quot;</span><span class="p">,</span>  <span class="c1"># Pseudo-compensated total field magnetic data (nT)</span>
+        <span class="s2">&quot;Tcorr&quot;</span><span class="p">,</span>  <span class="c1"># Tip correction (nT)</span>
+        <span class="s2">&quot;RefField&quot;</span><span class="p">,</span>  <span class="c1"># IGRF correction (nT)</span>
+        <span class="s2">&quot;MagRTC&quot;</span><span class="p">,</span>  <span class="c1"># Mag after IGRF: compensation and tip correction (nT)</span>
+        <span class="s2">&quot;Bcorr_60min&quot;</span><span class="p">,</span>  <span class="c1"># IDW base station correction with 60 minute mean filter (nT)</span>
+        <span class="s2">&quot;Bcorr_30min&quot;</span><span class="p">,</span>  <span class="c1"># IDW base station correction with 30 minute mean filter (nT)</span>
+        <span class="s2">&quot;MagB60RTC&quot;</span><span class="p">,</span>  <span class="c1"># Final mag after 60 min base station correction (nT)</span>
+        <span class="s2">&quot;MagB30RTC&quot;</span><span class="p">,</span>  <span class="c1"># Final mag after 30 min base station correction (nT)</span>
+        <span class="s2">&quot;MagL_B30RTC&quot;</span><span class="p">,</span>  <span class="c1"># Magnetic anomaly after preliminary levelling (nT)</span>
+    <span class="p">]</span>
+<span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>MagR</th>
+      <th>MagC</th>
+      <th>Tcorr</th>
+      <th>RefField</th>
+      <th>MagRTC</th>
+      <th>Bcorr_60min</th>
+      <th>Bcorr_30min</th>
+      <th>MagB60RTC</th>
+      <th>MagB30RTC</th>
+      <th>MagL_B30RTC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>560167.000000</td>
+      <td>542803.000000</td>
+      <td>545338.000000</td>
+      <td>560167.000000</td>
+      <td>542803.000000</td>
+      <td>560166.000000</td>
+      <td>521655.000000</td>
+      <td>542802.000000</td>
+      <td>522265.000000</td>
+      <td>522263.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>53021.696145</td>
+      <td>53016.835123</td>
+      <td>-18.675374</td>
+      <td>53044.626554</td>
+      <td>-41.528796</td>
+      <td>-33.841691</td>
+      <td>-33.581347</td>
+      <td>-8.343020</td>
+      <td>-6.728692</td>
+      <td>-7.477536</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>2120.134321</td>
+      <td>2123.642185</td>
+      <td>48.027996</td>
+      <td>2135.054349</td>
+      <td>106.356901</td>
+      <td>74.001941</td>
+      <td>75.415269</td>
+      <td>80.130212</td>
+      <td>80.304888</td>
+      <td>78.016381</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>47687.379200</td>
+      <td>47688.290000</td>
+      <td>-187.000000</td>
+      <td>47798.300000</td>
+      <td>-497.980000</td>
+      <td>-316.420000</td>
+      <td>-347.920000</td>
+      <td>-344.880000</td>
+      <td>-358.840000</td>
+      <td>-358.840000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>51409.472000</td>
+      <td>51421.345000</td>
+      <td>0.000000</td>
+      <td>51430.450000</td>
+      <td>-98.440000</td>
+      <td>-62.840000</td>
+      <td>-62.480000</td>
+      <td>-61.650000</td>
+      <td>-60.180000</td>
+      <td>-59.230000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>53150.234200</td>
+      <td>53125.850000</td>
+      <td>0.000000</td>
+      <td>53159.000000</td>
+      <td>-40.600000</td>
+      <td>-9.600000</td>
+      <td>-9.720000</td>
+      <td>-23.220000</td>
+      <td>-21.590000</td>
+      <td>-22.400000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>54625.244700</td>
+      <td>54618.950000</td>
+      <td>0.000000</td>
+      <td>54677.900000</td>
+      <td>22.050000</td>
+      <td>7.320000</td>
+      <td>7.600000</td>
+      <td>32.447500</td>
+      <td>33.820000</td>
+      <td>29.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>58030.806400</td>
+      <td>58030.540000</td>
+      <td>0.000000</td>
+      <td>58037.100000</td>
+      <td>546.870000</td>
+      <td>241.190000</td>
+      <td>255.400000</td>
+      <td>538.020000</td>
+      <td>535.700000</td>
+      <td>545.790000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;MagB30RTC&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">coarsen</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">survey</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;MagL_B30RTC&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">coarsen</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="s2">&quot;published_levelling_correction&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">MagL_B30RTC</span> <span class="o">-</span> <span class="n">data_df</span><span class="o">.</span><span class="n">MagB30RTC</span>
+
+<span class="n">maxabs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">data_df</span><span class="o">.</span><span class="n">published_levelling_correction</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="n">data_df</span><span class="p">[::</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="s2">&quot;published_levelling_correction&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="n">cmocean</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span>
+    <span class="n">vmin</span><span class="o">=-</span><span class="n">maxabs</span><span class="p">,</span>
+    <span class="n">vmax</span><span class="o">=</span><span class="n">maxabs</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/accessing_datasets_PolarGAP_magnetic_survey_39_0.png" src="../_images/accessing_datasets_PolarGAP_magnetic_survey_39_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot each flight</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data_df</span>
+
+<span class="n">grid</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">col</span><span class="o">=</span><span class="s2">&quot;flight&quot;</span><span class="p">,</span>
+    <span class="n">col_wrap</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">flight</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">maxabs</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">maxabs</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">published_levelling_correction</span><span class="p">,</span> <span class="n">percentile</span><span class="o">=</span><span class="mi">99</span><span class="p">)</span>
+
+<span class="n">norm</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=-</span><span class="n">maxabs</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">maxabs</span><span class="p">)</span>
+
+<span class="n">grid</span><span class="o">.</span><span class="n">map_dataframe</span><span class="p">(</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">,</span>
+    <span class="s2">&quot;easting&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;northing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;published_levelling_correction&quot;</span><span class="p">,</span>
+    <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;RdBu&quot;</span><span class="p">,</span>
+    <span class="n">hue_norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sm</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;RdBu&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+<span class="n">sm</span><span class="o">.</span><span class="n">set_array</span><span class="p">([])</span>
+<span class="n">cbar</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/accessing_datasets_PolarGAP_magnetic_survey_40_0.png" src="../_images/accessing_datasets_PolarGAP_magnetic_survey_40_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_profiles</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">flight</span> <span class="o">==</span> <span class="mi">14</span><span class="p">],</span>
+    <span class="c1"># y=(&quot;MagL_B30RTC&quot;, &quot;MagB30RTC&quot;),</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;MagB30RTC&quot;</span><span class="p">,</span> <span class="s2">&quot;MagL_B30RTC&quot;</span><span class="p">),</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;distance_along_flight&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/accessing_datasets_PolarGAP_magnetic_survey_41_0.png" src="../_images/accessing_datasets_PolarGAP_magnetic_survey_41_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">flight</span> <span class="o">==</span> <span class="mi">14</span><span class="p">]</span><span class="o">.</span><span class="n">line</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([74, 75])
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_profiles</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">74</span><span class="p">],</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;MagB30RTC&quot;</span><span class="p">,</span> <span class="s2">&quot;MagL_B30RTC&quot;</span><span class="p">),</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/accessing_datasets_PolarGAP_magnetic_survey_43_0.png" src="../_images/accessing_datasets_PolarGAP_magnetic_survey_43_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">plot_profiles</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">[</span><span class="n">data_df</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">75</span><span class="p">],</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;MagB30RTC&quot;</span><span class="p">,</span> <span class="s2">&quot;MagL_B30RTC&quot;</span><span class="p">),</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;distance_along_line&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/accessing_datasets_PolarGAP_magnetic_survey_44_0.png" src="../_images/accessing_datasets_PolarGAP_magnetic_survey_44_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;../data/PolarGAP_magnetic_survey.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;../data/PolarGAP_magnetic_survey.csv&quot;</span><span class="p">)</span>
+<span class="n">data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Line</th>
+      <th>Lon</th>
+      <th>Lat</th>
+      <th>Elev</th>
+      <th>date</th>
+      <th>Time_UTC</th>
+      <th>MagR</th>
+      <th>MagC</th>
+      <th>Tcorr</th>
+      <th>RefField</th>
+      <th>...</th>
+      <th>MagL_B30RTC</th>
+      <th>easting</th>
+      <th>northing</th>
+      <th>unixtime</th>
+      <th>line</th>
+      <th>flight</th>
+      <th>geometry</th>
+      <th>distance_along_flight</th>
+      <th>distance_along_line</th>
+      <th>published_levelling_correction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>P03.1</td>
+      <td>-44.480694</td>
+      <td>-80.441398</td>
+      <td>131.48</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:04</td>
+      <td>47687.3792</td>
+      <td>47688.29</td>
+      <td>0.0</td>
+      <td>47798.3</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>-729314.730339</td>
+      <td>742656.452995</td>
+      <td>1.450202e+09</td>
+      <td>1</td>
+      <td>1</td>
+      <td>POINT (-729314.7303385646 742656.4529948358)</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>P03.1</td>
+      <td>-44.482024</td>
+      <td>-80.441687</td>
+      <td>132.03</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:05</td>
+      <td>47689.7448</td>
+      <td>47688.64</td>
+      <td>0.0</td>
+      <td>47798.6</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>-729309.819815</td>
+      <td>742616.969634</td>
+      <td>1.450202e+09</td>
+      <td>1</td>
+      <td>1</td>
+      <td>POINT (-729309.8198154062 742616.9696339326)</td>
+      <td>39.787549</td>
+      <td>39.787549</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>P03.1</td>
+      <td>-44.483376</td>
+      <td>-80.441986</td>
+      <td>132.76</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:06</td>
+      <td>47689.7208</td>
+      <td>47688.92</td>
+      <td>0.0</td>
+      <td>47798.9</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>-729304.426553</td>
+      <td>742576.426492</td>
+      <td>1.450202e+09</td>
+      <td>1</td>
+      <td>1</td>
+      <td>POINT (-729304.4265530404 742576.4264921739)</td>
+      <td>80.687837</td>
+      <td>80.687837</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>P03.1</td>
+      <td>-44.484744</td>
+      <td>-80.442292</td>
+      <td>133.96</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:07</td>
+      <td>47690.7116</td>
+      <td>47689.12</td>
+      <td>0.0</td>
+      <td>47799.2</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>-729298.702629</td>
+      <td>742535.134113</td>
+      <td>1.450202e+09</td>
+      <td>1</td>
+      <td>1</td>
+      <td>POINT (-729298.7026291394 742535.1341129589)</td>
+      <td>122.375052</td>
+      <td>122.375052</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>P03.1</td>
+      <td>-44.486123</td>
+      <td>-80.442606</td>
+      <td>135.51</td>
+      <td>2015-12-15</td>
+      <td>0 days 17:48:08</td>
+      <td>47689.7556</td>
+      <td>47689.25</td>
+      <td>0.0</td>
+      <td>47799.5</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>-729292.506529</td>
+      <td>742493.078148</td>
+      <td>1.450202e+09</td>
+      <td>1</td>
+      <td>1</td>
+      <td>POINT (-729292.5065285452 742493.0781482834)</td>
+      <td>164.885002</td>
+      <td>164.885002</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>560162</th>
+      <td>P39</td>
+      <td>-79.011108</td>
+      <td>-84.990586</td>
+      <td>1593.23</td>
+      <td>2016-01-20</td>
+      <td>0 days 21:47:24</td>
+      <td>52678.9898</td>
+      <td>52679.05</td>
+      <td>0.0</td>
+      <td>52845.8</td>
+      <td>...</td>
+      <td>80.95</td>
+      <td>-534631.996395</td>
+      <td>103814.370783</td>
+      <td>1.453326e+09</td>
+      <td>141</td>
+      <td>36</td>
+      <td>POINT (-534631.9963949411 103814.3707829598)</td>
+      <td>560911.994252</td>
+      <td>560911.994252</td>
+      <td>121.68</td>
+    </tr>
+    <tr>
+      <th>560163</th>
+      <td>P39</td>
+      <td>-79.016923</td>
+      <td>-84.990828</td>
+      <td>1591.87</td>
+      <td>2016-01-20</td>
+      <td>0 days 21:47:25</td>
+      <td>52679.4624</td>
+      <td>52679.57</td>
+      <td>0.0</td>
+      <td>52846.3</td>
+      <td>...</td>
+      <td>80.93</td>
+      <td>-534616.670182</td>
+      <td>103755.091283</td>
+      <td>1.453326e+09</td>
+      <td>141</td>
+      <td>36</td>
+      <td>POINT (-534616.6701818157 103755.09128288226)</td>
+      <td>560973.222937</td>
+      <td>560973.222937</td>
+      <td>121.71</td>
+    </tr>
+    <tr>
+      <th>560164</th>
+      <td>P39</td>
+      <td>-79.022752</td>
+      <td>-84.991071</td>
+      <td>1590.41</td>
+      <td>2016-01-20</td>
+      <td>0 days 21:47:26</td>
+      <td>52680.1722</td>
+      <td>52680.08</td>
+      <td>0.0</td>
+      <td>52846.8</td>
+      <td>...</td>
+      <td>80.92</td>
+      <td>-534601.255925</td>
+      <td>103695.664609</td>
+      <td>1.453326e+09</td>
+      <td>141</td>
+      <td>36</td>
+      <td>POINT (-534601.2559252244 103695.66460877389)</td>
+      <td>561034.616169</td>
+      <td>561034.616169</td>
+      <td>121.74</td>
+    </tr>
+    <tr>
+      <th>560165</th>
+      <td>P39</td>
+      <td>-79.028594</td>
+      <td>-84.991315</td>
+      <td>1588.76</td>
+      <td>2016-01-20</td>
+      <td>0 days 21:47:27</td>
+      <td>52680.6980</td>
+      <td>52680.59</td>
+      <td>0.0</td>
+      <td>52847.2</td>
+      <td>...</td>
+      <td>80.92</td>
+      <td>-534585.751767</td>
+      <td>103636.100136</td>
+      <td>1.453326e+09</td>
+      <td>141</td>
+      <td>36</td>
+      <td>POINT (-534585.7517672417 103636.10013555853)</td>
+      <td>561096.165380</td>
+      <td>561096.165380</td>
+      <td>121.77</td>
+    </tr>
+    <tr>
+      <th>560166</th>
+      <td>P39</td>
+      <td>-79.034452</td>
+      <td>-84.991560</td>
+      <td>1586.98</td>
+      <td>2016-01-20</td>
+      <td>0 days 21:47:28</td>
+      <td>52680.9108</td>
+      <td>52681.09</td>
+      <td>0.0</td>
+      <td>52847.7</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>-534570.163085</td>
+      <td>103576.369917</td>
+      <td>1.453326e+09</td>
+      <td>141</td>
+      <td>36</td>
+      <td>POINT (-534570.1630849909 103576.36991718244)</td>
+      <td>561157.896296</td>
+      <td>561157.896296</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>560167 rows × 25 columns</p>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># block reduce the line data</span>
+<span class="n">survey</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">Survey</span><span class="p">(</span>
+    <span class="n">data_df</span><span class="p">,</span>
+    <span class="n">line_column</span><span class="o">=</span><span class="s2">&quot;flight&quot;</span><span class="p">,</span>
+    <span class="n">distance_column</span><span class="o">=</span><span class="s2">&quot;distance_along_flight&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">survey</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">block_reduce</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+    <span class="c1"># reduce_by=(&#39;easting&#39;,&#39;northing&#39;),</span>
+    <span class="n">reduce_by</span><span class="o">=</span><span class="s2">&quot;distance_along_flight&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">survey</span><span class="o">.</span><span class="n">data</span>
+<span class="n">data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;../data/PolarGAP_magnetic_survey_blocked.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">break</span>  <span class="c1"># noqa: F701</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+  <span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[45]</span><span class="ansi-green-fg">, line 1</span>
+<span class="ansi-red-fg">    </span><span class="ansi-red-fg">break  # noqa: F701</span>
+    ^
+<span class="ansi-red-fg">SyntaxError</span><span class="ansi-red-fg">:</span> &#39;break&#39; outside loop
+
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;../data/PolarGAP_magnetic_survey_blocked.csv&quot;</span><span class="p">)</span>
+<span class="n">data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_df</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;easting&quot;</span><span class="p">,</span> <span class="s2">&quot;northing&quot;</span><span class="p">,</span> <span class="s2">&quot;Elev&quot;</span><span class="p">,</span> <span class="s2">&quot;MagB30RTC&quot;</span><span class="p">])</span>
+
+<span class="n">coords</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">easting</span><span class="p">,</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">northing</span><span class="p">,</span>
+    <span class="n">data_df</span><span class="o">.</span><span class="n">Elev</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">data_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eqs_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>  <span class="c1"># noqa: C408</span>
+    <span class="n">damping</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">depth</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">block_size</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># eqs_unlevelled = hm.EquivalentSourcesGB(</span>
+<span class="c1">#     window_size=600e3,</span>
+<span class="c1">#     random_state=42,</span>
+<span class="c1">#     **eqs_kwargs,</span>
+<span class="c1"># )</span>
+
+<span class="n">eqs_unlevelled</span> <span class="o">=</span> <span class="n">hm</span><span class="o">.</span><span class="n">EquivalentSources</span><span class="p">(</span><span class="o">**</span><span class="n">eqs_kwargs</span><span class="p">)</span>
+
+<span class="c1"># bytes = eqs_unlevelled.estimate_required_memory(coords)</span>
+<span class="c1"># print(f&quot;{bytes / 1e9} GB ram required&quot;)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eqs_unlevelled</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">data_df</span><span class="o">.</span><span class="n">MagB30RTC</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define grid coordinates</span>
+<span class="n">grid_coords</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">grid_coordinates</span><span class="p">(</span>
+    <span class="n">region</span><span class="o">=</span><span class="n">vd</span><span class="o">.</span><span class="n">pad_region</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">get_region</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span> <span class="mf">10e3</span><span class="p">),</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="n">extra_coords</span><span class="o">=</span><span class="n">data_df</span><span class="o">.</span><span class="n">Elev</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>  <span class="c1"># upward continue</span>
+    <span class="n">adjust</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">grid_unlevelled</span> <span class="o">=</span> <span class="n">eqs_unlevelled</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid_coords</span><span class="p">)</span>
+
+<span class="c1"># grid_unlevelled = vd.distance_mask(</span>
+<span class="c1">#     (coords[0], coords[1]), maxdist=10e3, grid=grid_unlevelled</span>
+<span class="c1"># )</span>
+<span class="n">grid_unlevelled</span> <span class="o">=</span> <span class="n">grid_unlevelled</span><span class="o">.</span><span class="n">reset_coords</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s2">&quot;upward&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">scalars</span>
+
+<span class="n">grid_unlevelled</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hg_unlevelled</span> <span class="o">=</span> <span class="n">airbornegeo</span><span class="o">.</span><span class="n">filter_grid</span><span class="p">(</span>
+    <span class="n">grid_unlevelled</span><span class="p">,</span> <span class="n">filter_type</span><span class="o">=</span><span class="s2">&quot;horizontal_gradient&quot;</span>
+<span class="p">)</span>
+<span class="n">hg_unlevelled</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Load-data">Load data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Reproject">Reproject</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Calculate-unixtime">Calculate unixtime</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Set-line-and-flight-ID's">Set line and flight ID’s</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Analyze-flights">Analyze flights</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Analyze-lines">Analyze lines</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Distance-along-flight">Distance along flight</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Distance-along-line">Distance along line</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Examine-magnetic-data">Examine magnetic data</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Matt Tankersley
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Jul 23, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
