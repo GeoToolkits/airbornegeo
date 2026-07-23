@@ -122,7 +122,8 @@ class Survey:
     Summary statistics (:attr:`region`, :attr:`line_counts`,
     :attr:`line_lengths`, :attr:`total_length`, :attr:`median_line_lengths`,
     :attr:`line_azimuths`, :attr:`mean_line_azimuths`,
-    :attr:`median_line_spacings`) are computed on first access and cached.
+    :attr:`median_line_spacings`, :attr:`line_point_spacings`,
+    :attr:`median_point_spacings`) are computed on first access and cached.
     The cache is cleared automatically when methods replace or restructure the
     dataframe, but not when ``survey.data`` is mutated directly from outside —
     call :meth:`invalidate_cache` after such external edits.
@@ -674,6 +675,30 @@ class Survey:
             )
         return spacings
 
+    @functools.cached_property
+    def line_point_spacings(self) -> pd.Series:
+        """
+        Median along-line distance between successive data points of each
+        line, indexed by line. See :func:`airbornegeo.relative_distance`.
+        """
+        self._require(self.line_column)
+        distances = relative_distance(
+            self._data,
+            groupby_column=self.line_column,
+            progressbar=False,
+        )
+        return (
+            pd.Series(distances, index=self._data.index)
+            .groupby(self._data[self.line_column])
+            .median()
+            .rename("point_spacing")
+        )
+
+    @functools.cached_property
+    def median_point_spacings(self) -> dict[str, float]:
+        """Median along-line data point spacing per line type."""
+        return self._per_type(self.line_point_spacings)
+
     ####################
     # repr and summary
     ####################
@@ -724,6 +749,7 @@ class Survey:
             f"  median line lengths: {_fmt(self.median_line_lengths)}",
             f"  mean line azimuths: {_fmt(self.mean_line_azimuths)}",
             f"  median line spacings: {_fmt(self.median_line_spacings)}",
+            f"  median point spacings: {_fmt(self.median_point_spacings)}",
         ]
         return "\n".join(lines)
 

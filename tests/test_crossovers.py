@@ -426,6 +426,133 @@ def test_interpolate_intersections_window_width_uses_windowed_interpolation():
     assert not intersection_rows.value.isna().any()
 
 
+def test_interpolate_intersections_called_again_for_another_column_keeps_earlier_column():
+    """Regression test: calling interpolate_intersections a second time for a different
+    to_interp column used to wipe out the first column's interpolated values at the
+    intersection rows, because add_intersections rebuilds those rows from scratch. Both
+    columns should have real values at the intersection rows after both calls."""
+    data = _crossing_lines_gdf()
+    data["dist_along_line"] = data.groupby("line")["easting"].transform(
+        lambda s: s - s.min()
+    ) + data.groupby("line")["northing"].transform(lambda s: s - s.min())
+    data["value"] = data["easting"] + data["northing"]
+    data["height"] = data["easting"] - data["northing"]
+
+    inters = create_intersection_table(data, line_column="line", method="network")
+
+    filled_1, inters_1 = interpolate_intersections(
+        data,
+        inters,
+        line_column="line",
+        to_interp="value",
+        interp_on="dist_along_line",
+        method="linear",
+    )
+    filled_2, _inters_2 = interpolate_intersections(
+        filled_1,
+        inters_1,
+        line_column="line",
+        to_interp="height",
+        interp_on="dist_along_line",
+        method="linear",
+    )
+
+    intersection_rows = filled_2[filled_2.is_intersection]
+    assert len(intersection_rows) == 2
+    assert not intersection_rows.value.isna().any()
+    assert not intersection_rows.height.isna().any()
+
+
+def test_interpolate_intersections_loop_matches_isolated_calls_and_survives_later_failure(
+    monkeypatch,
+):
+    """Chaining interpolate_intersections over several columns, one call per column (as
+    in Survey's loop-based usage), should give each column the exact same interpolated
+    value as calling interpolate_intersections for that column alone, straight from the
+    original data. This should hold even when a later column in the loop fails to
+    interpolate at an intersection an earlier column already succeeded at (e.g. not
+    enough surrounding points, or the nearest points are too far from the crossing): the
+    intersection and the earlier column's value must survive, only the failed column's
+    value should be missing."""
+    data = _crossing_lines_gdf()
+    data["dist_along_line"] = data.groupby("line")["easting"].transform(
+        lambda s: s - s.min()
+    ) + data.groupby("line")["northing"].transform(lambda s: s - s.min())
+    data["col_a"] = data["easting"] + data["northing"]
+    data["col_b"] = data["easting"] - data["northing"]
+    data["col_c"] = data["easting"] * 0.5 - data["northing"]
+
+    inters = create_intersection_table(data, line_column="line", method="network")
+
+    real_interpolate = cx_module.airbornegeo.interpolating.interpolate_missing_pointwise
+
+    def fake_interpolate(df, *, to_interp, **kwargs):
+        """Behave normally for every column except 'col_c', which always fails to
+        interpolate at intersections (simulating too little/too-far surrounding data)."""
+        result = real_interpolate(df, to_interp=to_interp, **kwargs)
+        if to_interp == "col_c":
+            result = result.copy()
+            result.loc[result.is_intersection, "col_c"] = np.nan
+            result.loc[result.is_intersection, "col_c_interpolation_type"] = "none"
+        return result
+
+    monkeypatch.setattr(
+        cx_module.airbornegeo.interpolating,
+        "interpolate_missing_pointwise",
+        fake_interpolate,
+    )
+
+    # isolated reference: interpolate col_a and col_b independently from the original
+    # (un-chained) data, exactly as if each were the only column ever processed
+    filled_a_only, _ = interpolate_intersections(
+        data,
+        inters,
+        line_column="line",
+        to_interp="col_a",
+        interp_on="dist_along_line",
+        method="linear",
+    )
+    filled_b_only, _ = interpolate_intersections(
+        data,
+        inters,
+        line_column="line",
+        to_interp="col_b",
+        interp_on="dist_along_line",
+        method="linear",
+    )
+
+    # looped/chained: feed each call's output into the next, as Survey.interpolate_intersections does
+    filled, current_inters = data, inters
+    for col in ["col_a", "col_b", "col_c"]:
+        filled, current_inters = interpolate_intersections(
+            filled,
+            current_inters,
+            line_column="line",
+            to_interp=col,
+            interp_on="dist_along_line",
+            method="linear",
+        )
+
+    sort_cols = ["line", "intersecting_line"]
+    looped_rows = filled[filled.is_intersection].sort_values(sort_cols)
+    a_only_rows = filled_a_only[filled_a_only.is_intersection].sort_values(sort_cols)
+    b_only_rows = filled_b_only[filled_b_only.is_intersection].sort_values(sort_cols)
+
+    assert looped_rows["col_a"].to_numpy() == pytest.approx(
+        a_only_rows["col_a"].to_numpy()
+    )
+    assert looped_rows["col_b"].to_numpy() == pytest.approx(
+        b_only_rows["col_b"].to_numpy()
+    )
+
+    # col_c failed at the only intersection, but col_a/col_b succeeded there earlier in
+    # the loop: the intersection must still be present, with their values intact, and
+    # only col_c missing.
+    assert len(looped_rows) == 2
+    assert looped_rows["col_c"].isna().all()
+    assert len(current_inters) == 1
+
+
 def test_interpolate_intersections_drops_rows_with_failed_interpolation(monkeypatch):
     """If a value can't be interpolated at an intersection (interpolation_type stays
     'none'), the intersection should be excluded from the returned intersections table

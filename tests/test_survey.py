@@ -320,6 +320,19 @@ def test_median_line_spacings_without_line_type_column():
     assert Survey(data, line_column="line").median_line_spacings["all"] > 0
 
 
+def test_line_point_spacings():
+    # each line has points every 10 m
+    spacings = _survey().line_point_spacings
+    assert spacings.to_numpy() == pytest.approx([10.0] * 3)
+
+
+def test_median_point_spacings():
+    assert _survey().median_point_spacings == {
+        "flight": pytest.approx(10.0),
+        "tie": pytest.approx(10.0),
+    }
+
+
 # ---------------------------------------------------------------------------
 # cache invalidation
 # ---------------------------------------------------------------------------
