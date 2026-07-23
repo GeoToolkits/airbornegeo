@@ -862,6 +862,24 @@ def interpolate_intersections(
     cols = [line_column, to_interp, interp_on]
     assert all(col in df.columns for col in cols), f"{cols} must be in the dataframe"
 
+    # add_intersections() rebuilds intersection rows from scratch below, so anything
+    # interpolated onto them by an earlier call (e.g. a different to_interp column) would
+    # otherwise be lost. Save those columns here, keyed on the (line, intersecting_line,
+    # easting, northing) that uniquely identifies each intersection row, and restore them
+    # once the new rows exist. Also remember which intersections already carry real data
+    # from an earlier call, so this call failing to interpolate `to_interp` there doesn't
+    # drop an intersection a previous column already succeeded at.
+    key_cols = [line_column, "intersecting_line", "easting", "northing"]
+    old_intersection_data = None
+    previously_valid_keys: set[tuple] = set()
+    if "is_intersection" in df.columns and df["is_intersection"].any():
+        old_intersection_data = df.loc[df.is_intersection].set_index(key_cols)
+        reserved_cols = {*key_cols, "is_intersection", interp_on}
+        data_cols = [c for c in old_intersection_data.columns if c not in reserved_cols]
+        if data_cols:
+            has_data = old_intersection_data[data_cols].notna().any(axis=1)
+            previously_valid_keys = set(old_intersection_data.index[has_data])
+
     # remove NaNs from target variable
     df = df.dropna(subset=to_interp, how="any")
 
@@ -927,13 +945,33 @@ def interpolate_intersections(
         intersection_rows[interp_col].reindex(keys2).to_numpy()
     )
 
-    # remove invalid intersections
+    # remove invalid intersections, unless a previous call already populated them with
+    # real data for a different to_interp column (see previously_valid_keys above)
     valid_mask = (
         inters.line1_interpolation_type.notna()
         & inters.line2_interpolation_type.notna()
         & (inters.line1_interpolation_type != "none")
         & (inters.line2_interpolation_type != "none")
     )
+    if previously_valid_keys:
+        line_pair_keys1 = list(
+            zip(
+                inters.line1, inters.line2, inters.easting, inters.northing, strict=True
+            )
+        )
+        line_pair_keys2 = list(
+            zip(
+                inters.line2, inters.line1, inters.easting, inters.northing, strict=True
+            )
+        )
+        previously_valid = pd.Series(
+            [
+                k1 in previously_valid_keys or k2 in previously_valid_keys
+                for k1, k2 in zip(line_pair_keys1, line_pair_keys2, strict=True)
+            ],
+            index=inters.index,
+        )
+        valid_mask = valid_mask | previously_valid
     inters_valid = inters.loc[valid_mask].copy()
 
     # remove invalid rows from filled_lines
@@ -969,6 +1007,21 @@ def interpolate_intersections(
     assert len(inters_valid) * 2 == len(filled_lines[filled_lines.is_intersection]), (
         "Number of intersection rows in the dataframe should be twice the number of rows in intersection table"
     )
+
+    # restore columns interpolated by earlier calls (see save above) onto the rebuilt
+    # intersection rows, without overwriting anything this call just computed.
+    if old_intersection_data is not None:
+        carry_cols = [
+            col for col in old_intersection_data.columns if col in filled_lines.columns
+        ]
+        if carry_cols:
+            mask = filled_lines.is_intersection
+            keys = pd.MultiIndex.from_frame(filled_lines.loc[mask, key_cols])
+            carried = old_intersection_data[carry_cols].reindex(keys)
+            carried.index = filled_lines.loc[mask].index
+            filled_lines.loc[mask, carry_cols] = filled_lines.loc[
+                mask, carry_cols
+            ].combine_first(carried)
 
     return filled_lines, inters_valid
 
