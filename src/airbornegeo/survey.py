@@ -1283,18 +1283,25 @@ class Survey:
     # navigation / trajectory methods (in place, chainable)
     ####################
 
-    def along_track_distance(self, **kwargs: typing.Any) -> typing.Self:
+    def along_track_distance(
+        self,
+        column_name: str | None = None,
+        **kwargs: typing.Any,
+    ) -> typing.Self:
         """
-        Compute distance along each line, written to the survey's distance
-        column. See :func:`airbornegeo.along_track_distance` for all
+        Compute distance along each line, written to ``column_name`` (default
+        the survey's distance column), which then becomes the survey's
+        distance column. See :func:`airbornegeo.along_track_distance` for all
         parameters.
         """
         self._require(self.line_column)
-        self._data[self.distance_column] = along_track_distance(
+        column_name = column_name or self.distance_column
+        self._data[column_name] = along_track_distance(
             self._data,
             groupby_column=self.line_column,
             **kwargs,
         )
+        self.distance_column = column_name
         return self
 
     def relative_distance(
