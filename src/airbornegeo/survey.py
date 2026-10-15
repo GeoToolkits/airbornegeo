@@ -2055,6 +2055,168 @@ class Survey:
         )
         return self
 
+    def plot_intersections(
+        self,
+        column: str,
+        *,
+        lines: float | list[float] | None = None,
+        ax: mpl.axes.Axes | None = None,
+        color_by: str | None = None,
+        cmap: str | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        robust: bool = True,
+        point_color: str = "k",
+        point_size: float = 0.0001,
+        s: float = 10,
+        title: str | None = None,
+        colorbar_label: str | None = None,
+        scalebar: bool = True,
+        scalebar_length: float | None = None,
+        **kwargs: typing.Any,
+    ) -> mpl.axes.Axes:
+        """
+        Plot a map of crossover errors at the survey's intersections, with
+        the underlying survey points drawn beneath them.
+
+        Parameters
+        ----------
+        column : str
+            Column of ``survey.intersections`` to plot, e.g. a
+            ``crossover_error_N`` column from :meth:`calculate_crossover_errors`.
+        lines : float | list[float] | None, optional
+            Restrict to intersections involving this line (or lines) and to
+            those lines' survey points, zooming the map to their extent. If
+            not given, all intersections and survey points are plotted.
+        ax : mpl.axes.Axes | None, optional
+            Axes to plot into. A new figure and axes are created if not
+            given.
+        color_by : str | None, optional
+            Survey data column to color the underlying survey points by. If
+            None, points are drawn as small dots of `point_color`.
+        cmap : str | None, optional
+            Colormap for the crossover errors, by default the diverging
+            'RdBu' colormap, centered on zero.
+        vmin, vmax : float | None, optional
+            Color limits for the crossover errors. If not given, symmetric
+            limits are chosen with :func:`verde.maxabs`.
+        robust : bool, optional
+            Use a 98th percentile instead of the full data range when
+            choosing color limits for the crossover errors and for
+            `color_by`, by default True.
+        point_color : str, optional
+            Color of the survey points, if `color_by` is not given, by
+            default "k".
+        point_size : float, optional
+            Marker size of the survey points, if `color_by` is not given, by
+            default 0.0001.
+        s : float, optional
+            Marker size of the intersection points, by default 10.
+        title : str | None, optional
+            Plot title, by default "Crossover errors: <column>".
+        colorbar_label : str | None, optional
+            Label for the crossover error colorbar, by default `column`.
+        scalebar : bool, optional
+            Add a scalebar, by default True.
+        scalebar_length : float | None, optional
+            Length of the scalebar in the coordinates' units. If not given,
+            a nicely rounded fraction of the map width is used.
+        kwargs : typing.Any
+            Additional keyword arguments passed to the intersections'
+            scatter call.
+
+        Returns
+        -------
+        mpl.axes.Axes
+            The axes the map was plotted into.
+        """
+        intersections = self._require_intersections()
+        if column not in intersections.columns:
+            msg = f"column {column!r} not found in survey.intersections"
+            raise ValueError(msg)
+        if color_by is not None:
+            self._require(color_by)
+
+        data = self._data
+        if lines is not None:
+            self._require(self.line_column)
+            lines_list = (
+                list(lines) if isinstance(lines, list | tuple | np.ndarray) else [lines]
+            )
+            data = data[data[self.line_column].isin(lines_list)]
+            intersections = intersections[
+                intersections.line1.isin(lines_list)
+                | intersections.line2.isin(lines_list)
+            ]
+
+        # sort by absolute crossover error, so small points plot below large ones
+        intersections = intersections.sort_values(column, key=lambda col: col.abs())
+
+        if ax is None:
+            _fig, ax = plt.subplots(figsize=(6, 6))
+
+        if color_by is None:
+            ax.scatter(
+                data.easting,
+                data.northing,
+                color=point_color,
+                s=point_size,
+                marker=".",
+            )
+        else:
+            values = data[color_by]
+            point_cmap, point_vmin, point_vmax = choose_colormap(values, robust=robust)
+            points = ax.scatter(
+                data.easting,
+                data.northing,
+                c=values,
+                s=point_size,
+                lw=0,
+                cmap=point_cmap,
+                vmin=point_vmin,
+                vmax=point_vmax,
+            )
+            colorbar = ax.figure.colorbar(points, ax=ax)
+            colorbar.set_label(color_by)
+
+        if vmin is None or vmax is None:
+            maxabs = float(
+                vd.maxabs(intersections[column], percentile=98 if robust else 100)
+            )
+            vmin = -maxabs if vmin is None else vmin
+            vmax = maxabs if vmax is None else vmax
+
+        inters_points = ax.scatter(
+            intersections.easting,
+            intersections.northing,
+            c=intersections[column],
+            s=s,
+            marker="o",
+            linewidth=0.5,
+            edgecolor="k",
+            cmap=cmap or "RdBu",
+            vmin=vmin,
+            vmax=vmax,
+            **kwargs,
+        )
+        inters_colorbar = ax.figure.colorbar(inters_points, ax=ax)
+        inters_colorbar.set_label(
+            colorbar_label if colorbar_label is not None else column
+        )
+
+        ax.set_xlabel("easting")
+        ax.set_ylabel("northing")
+        ax.set_aspect("equal")
+        ax.set_title(title if title is not None else f"Crossover errors: {column}")
+
+        if scalebar:
+            if scalebar_length is None:
+                x_width = abs(ax.get_xlim()[1] - ax.get_xlim()[0])
+                scalebar_length = nice_scalebar_width(x_width)
+            add_scalebar(ax, scalebar_length)
+
+        return ax
+
     ####################
     # crossover levelling methods (in place, chainable)
     ####################
