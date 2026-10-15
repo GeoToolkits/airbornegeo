@@ -1307,6 +1307,10 @@ def plot_line_and_crosses(
     # if ylims is not None:
     #     line_df = line_df[line_df[x].between(*ylims)]
 
+    # nothing to mark if intersections haven't been added to the data
+    if "is_intersection" not in line_df.columns:
+        plot_inters = False
+
     # list of which dataset to plot intersections for
     if plot_inters is True:
         inters_to_plot: list[bool] = []
