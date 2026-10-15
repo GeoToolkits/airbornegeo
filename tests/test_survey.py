@@ -323,7 +323,8 @@ def test_mean_line_azimuths_wraparound():
 
 def test_median_line_spacings():
     spacings = _survey().median_line_spacings
-    assert spacings["flight"] == pytest.approx(100.0)
+    # spacings are computed on every 2nd point, so are only approximate
+    assert spacings["flight"] == pytest.approx(100.0, rel=0.01)
     # only one tie line, so no tie spacing can be computed
     assert "tie" not in spacings
 
@@ -337,6 +338,16 @@ def test_line_point_spacings():
     # each line has points every 10 m
     spacings = _survey().line_point_spacings
     assert spacings.to_numpy() == pytest.approx([10.0] * 3)
+
+
+def test_median_sampling_rates():
+    # each line has points every 1 s
+    survey = _survey()
+    assert survey.line_sampling_rates.to_numpy() == pytest.approx([1.0] * 3)
+    assert survey.median_sampling_rates == {
+        "flight": pytest.approx(1.0),
+        "tie": pytest.approx(1.0),
+    }
 
 
 def test_median_point_spacings():

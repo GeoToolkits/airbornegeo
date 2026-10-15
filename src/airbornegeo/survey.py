@@ -29,6 +29,7 @@ import verde as vd
 import xarray as xr
 from numpy.typing import NDArray
 
+from airbornegeo import logger
 from airbornegeo.block_reduce import block_reduce
 from airbornegeo.crossover_levelling import (
     alternating_iterative_line_levelling,
@@ -128,7 +129,8 @@ class Survey:
     :attr:`line_lengths`, :attr:`total_length`, :attr:`median_line_lengths`,
     :attr:`line_azimuths`, :attr:`mean_line_azimuths`,
     :attr:`median_line_spacings`, :attr:`line_point_spacings`,
-    :attr:`median_point_spacings`) are computed on first access and cached.
+    :attr:`median_point_spacings`, :attr:`line_sampling_rates`,
+    :attr:`median_sampling_rates`) are computed on first access and cached.
     The cache is cleared automatically when methods replace or restructure the
     dataframe, but not when ``survey.data`` is mutated directly from outside —
     call :meth:`invalidate_cache` after such external edits.
@@ -219,6 +221,25 @@ class Survey:
         self.crs: pyproj.CRS | None = (
             None if crs is None else pyproj.CRS.from_user_input(crs)
         )
+
+        cols = [
+            line_column,
+            line_type_column,
+            distance_column,
+            time_column,
+            height_column,
+            latitude_column,
+            longitude_column,
+        ]
+        cols = [c for c in cols if c != None]  # noqa: E711
+        # warn rather than raise, since some bound columns (e.g. distance) are
+        # only created later by survey methods; methods needing a missing
+        # column raise when called
+        missing = [col for col in cols if col not in data.columns]
+        if missing:
+            logger.warning(
+                "Supplied column name(s) %s not present in dataframe", missing
+            )
 
         self._line_column = line_column
         self._line_type_column = line_type_column
@@ -656,23 +677,20 @@ class Survey:
     def median_line_spacings(self) -> dict[str, float]:
         """
         Median line spacing per line type (line types with fewer than 2 lines
-        are skipped). See :func:`airbornegeo.median_line_spacing`.
+        are skipped). To speed up computation, the dataframe is coarsened by a factor
+        of 2. See :func:`airbornegeo.median_line_spacing`.
         """
         self._require(self.line_column)
-        if (
-            self._line_type_column is None
-            or self._line_type_column not in self._data.columns
-        ):
-            if self._data[self.line_column].nunique() < 2:
+
+        df = self._data[::2]
+
+        if self._line_type_column is None or self._line_type_column not in df.columns:
+            if df[self.line_column].nunique() < 2:
                 return {}
-            return {
-                "all": float(
-                    median_line_spacing(self._data, line_column=self.line_column)
-                )
-            }
+            return {"all": float(median_line_spacing(df, line_column=self.line_column))}
         spacings = {}
         for code, name in _TYPE_NAMES.items():
-            subset = self._data[self._data[self.line_type_column] == code]
+            subset = df[df[self.line_type_column] == code]
             if subset[self.line_column].nunique() < 2:
                 continue
             spacings[name] = float(
@@ -703,6 +721,26 @@ class Survey:
     def median_point_spacings(self) -> dict[str, float]:
         """Median along-line data point spacing per line type."""
         return self._per_type(self.line_point_spacings)
+
+    @functools.cached_property
+    def line_sampling_rates(self) -> pd.Series:
+        """
+        Sampling rate (Hz) of each line, from the median time step between
+        successive data points, indexed by line. Assumes the time column is in
+        seconds.
+        """
+        self._require(self.line_column, self.time_column)
+        time_steps = self._data.groupby(self.line_column)[self.time_column].diff()
+        return (
+            (1 / time_steps.groupby(self._data[self.line_column]).median())
+            .replace(np.inf, np.nan)
+            .rename("sampling_rate")
+        )
+
+    @functools.cached_property
+    def median_sampling_rates(self) -> dict[str, float]:
+        """Median sampling rate (Hz) per line type."""
+        return self._per_type(self.line_sampling_rates)
 
     ####################
     # repr and summary
@@ -735,11 +773,26 @@ class Survey:
         Compute all summary statistics and return them as a formatted string.
         """
 
-        def _fmt(values: dict[str, float]) -> str:
+        def _sig(value: float, unit: str) -> str:
+            # 3 significant figures, switching metres to km above 1000 m
+            if unit == "m" and abs(value) >= 1000:
+                value, unit = value / 1000, "km"
+            return f"{float(f'{value:.3g}'):,g} {unit}"
+
+        def _fmt(values: dict[str, float], unit: str) -> str:
             return (
-                ", ".join(f"{key}: {value:,.1f}" for key, value in values.items())
+                ", ".join(
+                    f"{key}: {_sig(value, unit)}" for key, value in values.items()
+                )
                 or "n/a"
             )
+
+        # sampling rate needs a time column, which not every survey has
+        sampling_rates = (
+            _fmt(self.median_sampling_rates, "Hz")
+            if self._time_column is not None
+            else "n/a (no time_column)"
+        )
 
         lines = [
             f"airbornegeo.Survey ({len(self._data):,} rows x "
@@ -747,14 +800,16 @@ class Survey:
             f"  crs: {self.crs.to_string() if self.crs else None}",
             f"  metadata: {self.metadata or 'none'}",
             "  region (W, E, S, N): "
-            + ", ".join(f"{value:,.1f}" for value in self.region),
+            + ", ".join(f"{value:,.1f}" for value in self.region)
+            + " m",
             "  line counts: "
             + ", ".join(f"{key}: {value}" for key, value in self.line_counts.items()),
-            f"  total length: {self.total_length:,.1f}",
-            f"  median line lengths: {_fmt(self.median_line_lengths)}",
-            f"  mean line azimuths: {_fmt(self.mean_line_azimuths)}",
-            f"  median line spacings: {_fmt(self.median_line_spacings)}",
-            f"  median point spacings: {_fmt(self.median_point_spacings)}",
+            f"  total length: {_sig(self.total_length, 'm')}",
+            f"  median line lengths: {_fmt(self.median_line_lengths, 'm')}",
+            f"  mean line azimuths: {_fmt(self.mean_line_azimuths, 'deg')}",
+            f"  median line spacings: {_fmt(self.median_line_spacings, 'm')}",
+            f"  median point spacings: {_fmt(self.median_point_spacings, 'm')}",
+            f"  median sampling rates: {sampling_rates}",
         ]
         return "\n".join(lines)
 
