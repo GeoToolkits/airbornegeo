@@ -184,11 +184,12 @@ def test_plot_profiles_zero_axis_raises():
         plot_profiles(data, y="a", x="x", y_axes=[0])
 
 
-def test_plot_profiles_more_than_two_axes_raises_not_implemented():
-    """More than two unique y_axes values should raise NotImplementedError."""
-    data = pd.DataFrame({"x": [0.0], "a": [1.0], "b": [2.0], "c": [3.0]})
-    with pytest.raises(NotImplementedError, match="Only 2 unique y axes"):
-        plot_profiles(data, y=["a", "b", "c"], x="x", y_axes=[1, 2, 3])
+def test_plot_profiles_more_than_four_axes_raises_not_implemented():
+    """More than four unique y_axes values should raise NotImplementedError."""
+    cols = ["a", "b", "c", "d", "e"]
+    data = pd.DataFrame({"x": [0.0], **{c: [1.0] for c in cols}})
+    with pytest.raises(NotImplementedError, match="Only 4 unique y axes"):
+        plot_profiles(data, y=cols, x="x", y_axes=[1, 2, 3, 4, 5])
 
 
 def _flightline_df():
