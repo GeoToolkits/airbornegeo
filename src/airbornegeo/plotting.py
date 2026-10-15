@@ -396,6 +396,10 @@ def plot_levelling_convergence(
         ax1.set_ylim(min(rms_values), max(rms_values))
 
     finite_delta_rms_values = np.array(delta_rms_values)[np.isfinite(delta_rms_values)]
+    if finite_delta_rms_values.size == 0:
+        # a run that converged on its first iteration has no change to show:
+        # leave the axis on autoscale rather than reduce over an empty array
+        return
     delta_rms_range = np.nanmax(finite_delta_rms_values) - np.nanmin(
         finite_delta_rms_values
     )
