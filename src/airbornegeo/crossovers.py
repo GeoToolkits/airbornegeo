@@ -711,7 +711,7 @@ def create_intersection_table(
         logger.info(
             "removed %s intersection point(s) with a max distance greater than %s km",
             prior_len - len(inters),
-            int(cutoff_dist / 1000),
+            round(cutoff_dist / 1000, 2),
         )
 
     if exclude_ints is not None:
@@ -1272,7 +1272,7 @@ def plot_line_and_crosses(
     line_column: str,
     x: str,
     line: float | None = None,
-    plot_inters: bool | list[bool] = False,
+    plot_inters: bool | list[bool] = True,
     use_intersection_y: bool = True,
     y_axes: list[str] | None = None,
     x_lims: tuple[float, float] | None = None,
