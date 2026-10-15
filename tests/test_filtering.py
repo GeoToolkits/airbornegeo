@@ -411,6 +411,26 @@ def test_filter_line_short_segment_passes_through():
     assert result.to_numpy()[:3] == pytest.approx(values[:3])
 
 
+def test_filter_line_repeated_coords():
+    """Mostly-duplicated coords (e.g. repeated timestamps) should still filter."""
+    # each coord repeated 10 times, so the median step between rows is 0
+    x = np.repeat(np.arange(300, dtype=float), 10)
+    signal = np.sin(2 * np.pi * x / 300)
+    noise = 0.3 * np.sin(2 * np.pi * x / 5)
+    data = pd.DataFrame({"time": x, "val": signal + noise})
+
+    result = filter_line(
+        data,
+        filter_width=30,
+        data_column="val",
+        filter_by_column="time",
+        progressbar=False,
+    ).to_numpy()
+
+    inside = (x > 30) & (x < 270)
+    assert np.max(np.abs((result - signal)[inside])) < 0.05
+
+
 def test_filter_line_unsorted_filter_by_column_raises_valueerror():
     """An unsorted filter_by_column should raise ValueError for engine='scipy'."""
     data = pd.DataFrame({"dist": [0.0, 2.0, 1.0], "val": [0.0, 0.0, 0.0]})
