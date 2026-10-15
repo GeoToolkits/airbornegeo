@@ -36,16 +36,49 @@ def test_split_into_segments_missing_column_raises():
         split_into_segments(data, threshold=5, column_name="val")
 
 
-@pytest.mark.parametrize("segment_column", ["seg", "anything", "even_missing_col"])
-def test_split_into_segments_segment_column_not_none_raises_not_implemented(
-    segment_column,
-):
-    """Any non-None segment_column should raise NotImplementedError before other validation runs."""
-    data = pd.DataFrame({"val": [0, 1, 2], "seg": [1.0, 1.0, 1.0]})
-    with pytest.raises(NotImplementedError):
-        split_into_segments(
-            data, threshold=5, column_name="val", segment_column=segment_column
-        )
+def test_split_into_segments_segment_column_missing_raises():
+    """A segment_column not in the dataframe should raise AssertionError."""
+    data = pd.DataFrame({"val": [0, 1, 2]})
+    with pytest.raises(AssertionError, match="nope"):
+        split_into_segments(data, threshold=5, column_name="val", segment_column="nope")
+
+
+def test_split_into_segments_segment_column_names_sublines():
+    """The first piece keeps the line name, later pieces extend it."""
+    data = pd.DataFrame(
+        {
+            "val": [0, 1, 10, 11, 20, 0, 1, 2, 0, 1, 10],
+            "line": [12] * 5 + [13] * 3 + ["14_1"] * 3,
+        }
+    )
+    result = split_into_segments(
+        data, threshold=5, column_name="val", segment_column="line"
+    )
+    expected = ["12", "12", "12_1", "12_1", "12_2", "13", "13", "13", "14_1"]
+    assert list(result) == [*expected, "14_1", "14_2"]
+
+
+def test_split_into_segments_segment_column_skips_taken_names():
+    """New names never collide with an existing line name."""
+    data = pd.DataFrame({"val": [0, 10, 0], "line": ["12", "12", "12_1"]})
+    result = split_into_segments(
+        data, threshold=5, column_name="val", segment_column="line"
+    )
+    assert list(result) == ["12", "12_2", "12_1"]
+
+
+def test_split_into_segments_segment_column_small_segments_nan():
+    """Small pieces are NaN and the first kept piece keeps the line name."""
+    data = pd.DataFrame({"val": [0, 10, 11, 12], "line": [5, 5, 5, 5]})
+    result = split_into_segments(
+        data,
+        threshold=5,
+        column_name="val",
+        segment_column="line",
+        min_points_per_segment=2,
+    )
+    assert pd.isna(result.iloc[0])
+    assert list(result.iloc[1:]) == ["5", "5", "5"]
 
 
 def test_split_into_segments_angular_difference_wraps_large_jump():
@@ -323,3 +356,12 @@ def test_detect_outliers_boolean_column_raises_typeerror():
     data = pd.DataFrame({"boolean": [True, False, True, False, True]})
     with pytest.raises(TypeError):
         detect_outliers(data)
+
+
+def test_split_into_segments_absolute():
+    """`absolute=True` splits on decreases as well as increases."""
+    data = pd.DataFrame({"val": [0, 1, 2, -10, -9, -8]})
+    one_sided = split_into_segments(data, threshold=5, column_name="val")
+    two_sided = split_into_segments(data, threshold=5, column_name="val", absolute=True)
+    assert one_sided.nunique() == 1
+    assert two_sided.nunique() == 2

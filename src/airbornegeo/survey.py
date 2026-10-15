@@ -1341,11 +1341,15 @@ class Survey:
         Split the survey into segments where ``column_name`` (default the
         survey's time column) jumps by more than ``threshold``, writing the
         segment names to ``result_column`` (default the survey's line
-        column). See :func:`airbornegeo.split_into_segments` for all
-        parameters.
+        column). If the line column exists, each line is split on its own and
+        the new names extend it (``12`` -> ``12``, ``12_1``); pass
+        ``segment_column=None`` to renumber the whole survey instead. See
+        :func:`airbornegeo.split_into_segments` for all parameters.
         """
         column_name = column_name or self.time_column
         self._require(column_name)
+        if self._line_column is not None and self._line_column in self._data:
+            kwargs.setdefault("segment_column", self._line_column)
         self._data[result_column or self.line_column] = split_into_segments(
             self._data,
             threshold,

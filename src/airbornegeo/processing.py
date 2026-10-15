@@ -1,3 +1,5 @@
+import typing
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -16,16 +18,18 @@ def split_into_segments(
     angular_difference: bool = False,
     segment_column: str | None = None,
     smoothing_window: int | None = None,
+    absolute: bool = False,
 ) -> pd.Series:
     """
     Split dataframe into segments where there is a gap in the supplied values greater
     than the threshold. Data are sorted by the column given by column_name which can be
     quantities such as time in seconds, cumulative distances, or aircraft heading or
     track. By default, a series of sequential segments names as integers starting at 1
-    will be returned. Alternatively, existing segments can be divided into new segments.
-    These existing segment ID's should be provided as floats, via the column given by
-    segment_column. New sub-segments will have a decimal added (i.e., 210 -> 210.0 and
-    210.1) or the decimal will be incremented (210.1 -> 210.1 and 210.2).
+    will be returned. Alternatively, existing segments can be divided into new segments,
+    via the column given by segment_column. The first sub-segment keeps the existing
+    name and later ones have a suffix added (i.e., 210 -> 210 and 210_1) or the
+    suffix will be incremented (210_1 -> 210_1 and 210_2). Names are returned as
+    strings.
 
     Parameters
     ----------
@@ -42,17 +46,24 @@ def split_into_segments(
         differences are the shorted, for example the difference between 0 and 350
         degrees will be -10 instead of 340.
     segment_column: str or None
-        The segment ID's, as floats.
+        Column of existing segment or line names to split within, by default None
     smoothing_window : int, optional
         Window size in number of data points for smoothing each difference after it's
-        been calculated, by default None
+        been calculated, by default None. Note this averages the SIGNED difference, so
+        it suppresses noise on an isolated break but cancels a change spread over many
+        points. It is not a way to detect a sustained change such as a turn: use
+        :func:`airbornegeo.split_at_turns` for that.
+    absolute : bool
+        if True, compare the magnitude of each difference against the threshold, so
+        that decreases split the data as well as increases. Needed when the values can
+        step either way, such as a track angle turning left or right, by default False
 
     Returns
     -------
     pd.Series
         A series with new segments identified with sequential integers starting with 1,
-        or if segment_column is provided, existing segment ID numbers will be
-        incremented by 0.1 if the segment is split (i.e. 210 -> 210.0 and 210.1).
+        or if segment_column is provided, string names extending the existing
+        segment names (i.e. 210 -> 210 and 210_1).
     """
     df = data.copy()
 
@@ -75,7 +86,8 @@ def split_into_segments(
             df["dif"] = df.dif.rolling(window=smoothing_window, min_periods=1).mean()
 
         # Create new segment when gap > threshold
-        df["segment"] = (df.dif > threshold).cumsum()
+        difference = df.dif.abs() if absolute else df.dif
+        df["segment"] = (difference > threshold).cumsum()
 
         # remove segments which are less than specified number of points
         if min_points_per_segment > 0:
@@ -93,58 +105,55 @@ def split_into_segments(
 
         return df.segment
 
-    raise NotImplementedError
+    assert segment_column in df.columns, (
+        f"dataframe must contain column '{segment_column}'"
+    )
+    names = pd.Series(np.nan, index=df.index, dtype=object)
+    taken = set(df[segment_column].dropna().astype(str))
+    for name, group in df.groupby(segment_column, sort=False):
+        pieces = split_into_segments(
+            group,
+            threshold,
+            column_name,
+            min_points_per_segment=min_points_per_segment,
+            angular_difference=angular_difference,
+            smoothing_window=smoothing_window,
+            absolute=absolute,
+        )
+        names.loc[group.index] = _subline_names(name, pieces, taken)
+    return names
 
-    # col_list = [column_name, segment_column]
 
-    # assert all(x in df.columns for x in col_list), (
-    #     f"dataframe must contain columns {col_list} "
-    # )
+def _subline_names(
+    name: typing.Any,
+    pieces: pd.Series,
+    taken: set[str],
+) -> list[str | float]:
+    """
+    Name the pieces a line was split into. The first piece keeps the line's
+    name, and later pieces add a suffix (``12`` -> ``12_1``, ``12_2``) or, if
+    the name already has one, continue counting from it (``12_1`` -> ``12_2``).
+    Names already in ``taken`` are skipped, and new names are added to it.
+    NaN pieces stay NaN.
+    """
+    name = str(name)
+    base, _, suffix = name.rpartition("_")
+    if base and suffix.isdigit():
+        count = int(suffix)
+    else:
+        base, count = name, 0
 
-    # # check segment_column is right dtype
-    # assert isinstance(df[segment_column], float)
-
-    # # save index, sort by time and reset index
-    # segments = []
-    # for _segment_name, segment_data in df.groupby(segment_column):
-    #     segment_data = segment_data.reset_index(names="tmp_index")
-    #     segment_data = segment_data.sort_values(by=column_name).reset_index(drop=True)
-
-    #     # Calculate difference between each point
-    #     segment_data["diff"] = segment_data[column_name].diff()
-
-    #     # Create new segment when difference >threshold
-    #     segment_data["segment"] = (segment_data["diff"] > threshold).cumsum()
-
-    #     # remove segments which are less than specified number of points
-    #     if min_points_per_segment > 0:
-    #         groups = segment_data.groupby("segment")
-    #         prior_len = len(segment_data.segment.unique())
-    #         # make segment ID nan for small segments
-    #         small_segments = groups.filter(lambda x: len(x) < min_points_per_segment)
-    #         segment_data.loc[small_segments.index, "segment"] = np.nan
-    #         post_len = len(segment_data.segment.unique())
-    #         logger.info(
-    #             "dropped %s segments which contained less than %s points.",
-    #             prior_len - post_len,
-    #             min_points_per_segment,
-    #         )
-
-    #     # Reset index and sort
-    #     segment_data = segment_data.set_index("tmp_index").sort_values("tmp_index")
-
-    #     # if segment has been split, increment the decimal of the provided ID
-    #     if len(segment_data.segment.unique() > 1):
-    #         increment = 0.1
-    #         for _subsegment_name, subsegment_data in segment_data.groupby("segment"):
-    #             segment_data["segment"] = subsegment_data[segment_column] + increment
-    #             increment += 0.1
-    #     else:
-    #         segment_data["segment"] = segment_data[segment_column]
-
-    # df = pd.concat(segments)
-
-    # return df.segment
+    lookup: dict[typing.Any, str] = {}
+    for piece in pd.unique(pieces.dropna()):
+        if not lookup:
+            lookup[piece] = name
+            continue
+        count += 1
+        while f"{base}_{count}" in taken:
+            count += 1
+        lookup[piece] = f"{base}_{count}"
+        taken.add(lookup[piece])
+    return [np.nan if pd.isna(p) else lookup[p] for p in pieces]
 
 
 def unique_line_id(

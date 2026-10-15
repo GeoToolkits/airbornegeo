@@ -187,12 +187,25 @@ def test_unique_line_id_overwrites_line_column():
 
 
 def test_split_into_segments_writes_line_column():
-    data = _synthetic_survey().drop(columns=["line", "line_type"])
+    data = _synthetic_survey()
+    data["line"] = "all"
     data["unixtime"] = np.arange(len(data), dtype=float)
     data.loc[11:, "unixtime"] += 100
     data.loc[22:, "unixtime"] += 100
-    survey = Survey(data, **_BINDINGS).split_into_segments(50.0)
+    survey = Survey(data, **{**_BINDINGS, "distance_column": None})
+    survey.split_into_segments(50.0, segment_column=None)
     assert survey.data["line"].nunique() == 3
+
+
+def test_split_into_segments_extends_existing_lines():
+    data = _synthetic_survey()
+    data["unixtime"] = np.arange(len(data), dtype=float)
+    first = data.index[data["line"] == data["line"].iloc[0]]
+    data.loc[first[len(first) // 2] :, "unixtime"] += 100
+    survey = Survey(data, **{**_BINDINGS, "distance_column": None})
+    survey.split_into_segments(50.0)
+    name = str(data["line"].iloc[0])
+    assert survey.data.loc[first, "line"].unique().tolist() == [name, f"{name}_1"]
 
 
 def test_track_requires_geographic_columns():
