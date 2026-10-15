@@ -922,6 +922,17 @@ def alternating_iterative_line_levelling(
     plot_dynamic_convergence: bool = False,
     progressbar: bool = True,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Level a two-group survey by alternating between the groups: each iteration first
+    levels the tie lines (`line_type == 1`) onto the flight lines (`line_type == 0`),
+    then levels the flight lines onto the now-levelled ties.
+
+    Levelling the ties first follows standard practice (Saul and Pearson, 1998;
+    Seequent's Oasis montaj `Iterative Levelling`): the ties are the reference surface
+    the flight lines are levelled onto, but each tie is flown over a long time span and
+    carries its own drift, so it is corrected first against the many flight lines it
+    crosses, where the flight lines' own (still unlevelled) errors largely average out.
+    """
     data = data.copy()
     inters = inters.copy()
 
@@ -936,12 +947,14 @@ def alternating_iterative_line_levelling(
     cols = [line_column, "line_type", distance_column, data_col]
     assert all(col in data.columns for col in cols), f"{cols} must be in the dataframe"
 
-    lines1_to_level = data[data.line_type == 0][line_column].unique()
-    lines2_to_level = data[data.line_type == 1][line_column].unique()
+    flight_lines_to_level = data[data.line_type == 0][line_column].unique()
+    tie_lines_to_level = data[data.line_type == 1][line_column].unique()
 
     if lines_to_level is not None:
-        lines1_to_level = [x for x in lines1_to_level if x in lines_to_level]
-        lines2_to_level = [x for x in lines2_to_level if x in lines_to_level]
+        flight_lines_to_level = [
+            x for x in flight_lines_to_level if x in lines_to_level
+        ]
+        tie_lines_to_level = [x for x in tie_lines_to_level if x in lines_to_level]
 
     progressbar, pbar_iterations = _init_iteration_progressbar(
         max_iterations, progressbar
@@ -962,12 +975,12 @@ def alternating_iterative_line_levelling(
         if progressbar:
             pbar_iterations.set_description(f"Iteration: {iteration}")
 
-        # level lines1 to lines2
+        # level the tie lines to the flight lines
         original_values = data[data_col]
         data, inters = crossover_pair_levelling(
             data,
             inters,
-            lines_to_level=lines1_to_level,
+            lines_to_level=tie_lines_to_level,
             degree=degree,
             filter_kwargs=filter_kwargs,
             data_col=data_col,
@@ -978,11 +991,11 @@ def alternating_iterative_line_levelling(
             crossover_error_interp_method=crossover_error_interp_method,
             max_iterations=1,
         )
-        # level lines2 to lines1
+        # level the flight lines to the now-levelled tie lines
         data, inters = crossover_pair_levelling(
             data,
             inters,
-            lines_to_level=lines2_to_level,
+            lines_to_level=flight_lines_to_level,
             degree=degree,
             filter_kwargs=filter_kwargs,
             data_col=levelled_col,

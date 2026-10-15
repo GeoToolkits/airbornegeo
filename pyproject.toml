@@ -208,7 +208,7 @@ messages_control.disable = [
 ]
 
 [tool.codespell]
-ignore-words-list = ["words-to-ignore"]
+ignore-words-list = ["words-to-ignore", "montaj"]
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
