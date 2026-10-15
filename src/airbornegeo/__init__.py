@@ -100,6 +100,7 @@ from .nav import (  # noqa: E402
     ground_speed,
     relative_distance,
     track,
+    turn_rate,
     vertical_acceleration,
 )
 from .plotting import (  # noqa: E402
@@ -118,6 +119,7 @@ from .potential_fields import (  # noqa: E402
 )
 from .processing import (  # noqa: E402
     # detect_outliers,
+    split_at_turns,
     split_into_segments,
     unique_line_id,
 )

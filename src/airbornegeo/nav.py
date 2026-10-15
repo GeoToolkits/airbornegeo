@@ -420,6 +420,94 @@ def track(
     )
 
 
+def turn_rate(
+    data: pd.DataFrame,
+    *,
+    track_column: str,
+    distance_column: str,
+    groupby_column: str | None = None,
+    smoothing_distance: float = 10e3,
+) -> NDArray:
+    """
+    Calculate how fast the aircraft is turning, in degrees per kilometre.
+
+    The track angle between two successive points is dominated by navigation
+    noise at typical survey sampling rates, so the track is smoothed over
+    ``smoothing_distance`` of along-track distance before it is
+    differentiated. The smoothing is circular, so a track wandering either
+    side of north does not average to south, and the window is given as a
+    distance rather than a number of points, so the same value means the same
+    thing whatever the sampling rate.
+
+    Straight survey flight holds well below 0.5 degrees per kilometre; a turn
+    is an order of magnitude above that.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Dataframe containing the data points, which must have the columns
+        given by ``track_column`` and ``distance_column``.
+    track_column : str
+        Name of the column holding the track angle in degrees clockwise from
+        north, for example as calculated by :func:`airbornegeo.track`.
+    distance_column : str
+        Name of the column holding the cumulative along-track distance in
+        metres, for example as calculated by
+        :func:`airbornegeo.along_track_distance`.
+    groupby_column : str | None, optional
+        Column name to group by before calculating, typically the flight or
+        line column, by default None
+    smoothing_distance : float, optional
+        The along-track distance, in metres, over which the track is smoothed
+        before differentiating, by default 10e3
+
+    Returns
+    -------
+    NDArray
+        The unsigned turn rate in degrees per kilometre, one value per row.
+
+    See Also
+    --------
+    airbornegeo.split_at_turns : cut flights into lines wherever they turn.
+    """
+    if groupby_column is not None:
+        rates = np.full(len(data), np.nan)
+        for _, group in data.groupby(groupby_column, sort=False):
+            rates[data.index.get_indexer(group.index)] = turn_rate(
+                group,
+                track_column=track_column,
+                distance_column=distance_column,
+                smoothing_distance=smoothing_distance,
+            )
+        return rates
+
+    distance = data[distance_column].to_numpy(dtype=float)
+    if len(distance) < 3:  # nothing to differentiate
+        return np.zeros(len(distance))
+
+    step = np.median(np.diff(distance))
+    window = max(3, int(smoothing_distance / max(abs(step), 1e-9)))
+
+    radians = np.radians(data[track_column].to_numpy(dtype=float))
+    sin = pd.Series(np.sin(radians)).rolling(window, center=True, min_periods=1).mean()
+    cos = pd.Series(np.cos(radians)).rolling(window, center=True, min_periods=1).mean()
+    smoothed = np.degrees(np.arctan2(sin.to_numpy(), cos.to_numpy()))
+
+    # shortest turn between successive smoothed tracks, per km travelled
+    turned = (np.r_[0.0, np.diff(smoothed)] + 180.0) % 360.0 - 180.0
+    travelled = np.r_[np.nan, np.diff(distance)] / 1e3
+    # a position held between samples, as when navigation is logged more
+    # slowly than the field, gives a step of zero or near zero that would
+    # divide to a huge rate. Such steps carry no information about the turn,
+    # so anything well below the typical sampling is dropped and the rolling
+    # median below reads across them.
+    travelled[travelled < 0.1 * abs(step) / 1e3] = np.nan
+    with np.errstate(invalid="ignore", divide="ignore"):
+        rate = np.abs(turned) / travelled
+    rate = pd.Series(rate).rolling(window, center=True, min_periods=1).median()
+    return rate.bfill().ffill().fillna(0.0).to_numpy()
+
+
 def _relative_distance(
     x: NDArray,
     y: NDArray,

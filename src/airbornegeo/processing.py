@@ -6,6 +6,7 @@ import pandas as pd
 import seaborn as sns
 
 from airbornegeo import logger
+from airbornegeo.nav import turn_rate
 
 sns.set_theme()
 
@@ -154,6 +155,114 @@ def _subline_names(
         lookup[piece] = f"{base}_{count}"
         taken.add(lookup[piece])
     return [np.nan if pd.isna(p) else lookup[p] for p in pieces]
+
+
+def split_at_turns(
+    data: pd.DataFrame,
+    *,
+    track_column: str,
+    distance_column: str,
+    groupby_column: str | None = None,
+    max_turn_rate: float = 0.5,
+    smoothing_distance: float = 10e3,
+    min_length: float | None = None,
+    keep_turns: bool = True,
+) -> pd.Series:
+    """
+    Split flights into lines wherever the aircraft turns.
+
+    A released survey often gives a whole flight one line number, so an
+    out-and-back flight is a single line that doubles back on itself. Anything
+    defined along the line -- a filter, a trend, a levelling correction --
+    then treats the two legs as far apart when on the ground they are side by
+    side. This cuts each flight into the straight runs between its turns.
+
+    Unlike :func:`split_into_segments`, which cuts at an isolated jump in one
+    column, turning is a condition sustained over many points, so it is found
+    from the smoothed turn rate rather than from a single difference. See
+    :func:`airbornegeo.turn_rate`.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Dataframe containing the data points, which must have the columns
+        given by ``track_column`` and ``distance_column``.
+    track_column : str
+        Name of the column holding the track angle in degrees clockwise from
+        north, for example as calculated by :func:`airbornegeo.track`.
+    distance_column : str
+        Name of the column holding the cumulative along-track distance in
+        metres.
+    groupby_column : str | None, optional
+        The existing flight or line column. The first line of each flight
+        keeps its name and later ones extend it, so flight ``12`` becomes
+        ``12``, ``12_1``, ``12_2`` and so on, by default None
+    max_turn_rate : float, optional
+        Degrees per kilometre above which the aircraft counts as turning.
+        Straight survey flight holds well below 0.5, by default 0.5
+    smoothing_distance : float, optional
+        Passed to :func:`airbornegeo.turn_rate`, by default 10e3
+    min_length : float | None, optional
+        Runs shorter than this, in metres, are given a line name of NaN, by
+        default None which keeps them all
+    keep_turns : bool, optional
+        If True each turn becomes a line of its own, so an out-and-back
+        flight gives an outward leg, a turn, and a return leg. If False the
+        turns are given NaN and only the straight runs are named, by default
+        True
+
+    Returns
+    -------
+    pd.Series
+        The new line name for each row, NaN where a row belongs to no line.
+
+    See Also
+    --------
+    airbornegeo.turn_rate : the turn rate this thresholds.
+    airbornegeo.split_into_segments : split at a gap in time, distance or angle.
+    """
+    if groupby_column is not None:
+        names = pd.Series(np.nan, index=data.index, dtype=object)
+        taken = set(data[groupby_column].dropna().astype(str))
+        for name, group in data.groupby(groupby_column, sort=False):
+            part = split_at_turns(
+                group,
+                track_column=track_column,
+                distance_column=distance_column,
+                max_turn_rate=max_turn_rate,
+                smoothing_distance=smoothing_distance,
+                min_length=min_length,
+                keep_turns=keep_turns,
+            )
+            names.loc[group.index] = _subline_names(name, part, taken)
+        logger.info(
+            "split %s flights into %s lines at their turns.",
+            data[groupby_column].nunique(),
+            names.nunique(),
+        )
+        return names
+
+    rate = turn_rate(
+        data,
+        track_column=track_column,
+        distance_column=distance_column,
+        smoothing_distance=smoothing_distance,
+    )
+    turning = rate > max_turn_rate
+    # a new line begins wherever the aircraft starts, or stops, turning
+    segment = np.cumsum(np.r_[False, turning[1:] != turning[:-1]])
+
+    names = pd.Series(segment, index=data.index, dtype=float)
+    if not keep_turns:
+        names[turning] = np.nan
+    if min_length is not None:
+        distance = data[distance_column].to_numpy(dtype=float)
+        named = names.notna().to_numpy()
+        for value in np.unique(segment):
+            mask = (segment == value) & named
+            if mask.any() and np.ptp(distance[mask]) < min_length:
+                names[mask] = np.nan
+    return names
 
 
 def unique_line_id(

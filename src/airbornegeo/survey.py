@@ -64,6 +64,7 @@ from airbornegeo.nav import (
     ground_speed,
     relative_distance,
     track,
+    turn_rate,
     vertical_acceleration,
 )
 from airbornegeo.plotting import (
@@ -80,7 +81,11 @@ from airbornegeo.potential_fields import (
     igrf,
     upward_continue_by_line,
 )
-from airbornegeo.processing import split_into_segments, unique_line_id
+from airbornegeo.processing import (
+    split_at_turns,
+    split_into_segments,
+    unique_line_id,
+)
 from airbornegeo.reproject import reproject
 from airbornegeo.resample import resample, resample_as
 from airbornegeo.utils import (
@@ -1357,6 +1362,58 @@ class Survey:
             **kwargs,
         )
         self._invalidate_stats()
+        return self
+
+    def split_at_turns(
+        self,
+        *,
+        track_column: str | None = None,
+        distance_column: str | None = None,
+        result_column: str | None = None,
+        **kwargs: typing.Any,
+    ) -> typing.Self:
+        """
+        Split each flight into lines wherever the aircraft turns, writing the
+        new line names to ``result_column`` (default the survey's line
+        column). The existing line column is used to group, so the new names
+        extend it. ``track_column`` must already hold the track angle, which
+        :func:`airbornegeo.track` calculates from latitude and longitude. See
+        :func:`airbornegeo.split_at_turns` for all parameters.
+        """
+        distance_column = distance_column or self.distance_column
+        track_column = track_column or "track"
+        self._require(track_column, distance_column, self.line_column)
+        self._data[result_column or self.line_column] = split_at_turns(
+            self._data,
+            track_column=track_column,
+            distance_column=distance_column,
+            groupby_column=self.line_column,
+            **kwargs,
+        )
+        self._invalidate_stats()
+        return self
+
+    def turn_rate(
+        self,
+        *,
+        track_column: str = "track",
+        distance_column: str | None = None,
+        result_column: str = "turn_rate",
+        **kwargs: typing.Any,
+    ) -> typing.Self:
+        """
+        Calculate the turn rate in degrees per kilometre along each line,
+        written to ``result_column``. See :func:`airbornegeo.turn_rate`.
+        """
+        distance_column = distance_column or self.distance_column
+        self._require(track_column, distance_column, self.line_column)
+        self._data[result_column] = turn_rate(
+            self._data,
+            track_column=track_column,
+            distance_column=distance_column,
+            groupby_column=self.line_column,
+            **kwargs,
+        )
         return self
 
     def unique_line_id(self) -> typing.Self:
