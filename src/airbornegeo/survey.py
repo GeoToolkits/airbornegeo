@@ -965,6 +965,7 @@ class Survey:
         self,
         *,
         ax: mpl.axes.Axes | None = None,
+        line: typing.Any = None,
         color_by: str | None = None,
         categorical: bool = False,
         coarsen: int | None = None,
@@ -989,6 +990,8 @@ class Survey:
         ----------
         ax : mpl.axes.Axes | None, optional
             Axes to plot into. A new figure and axes are created if not given.
+        line : typing.Any, optional
+            Only plot the points of this line, by default None (plot all lines).
         color_by : str | None, optional
             Column to color the points by. If None, all points are drawn in a
             single color.
@@ -1040,7 +1043,15 @@ class Survey:
             msg = "categorical=True requires a color_by column"
             raise ValueError(msg)
 
-        data = self._data if coarsen is None else self._data[::coarsen]
+        data = self._data
+        if line is not None:
+            self._require(self.line_column)
+            data = data[data[self.line_column] == line]
+            if data.empty:
+                msg = f"No rows found for line {line!r}"
+                raise ValueError(msg)
+        if coarsen is not None:
+            data = data[::coarsen]
 
         if ax is None:
             _fig, ax = plt.subplots()
@@ -1090,6 +1101,8 @@ class Survey:
         if title is None:
             survey_name = self.metadata.get("survey")
             title = None if survey_name is None else f"Survey: {survey_name}"
+            if line is not None:
+                title = f"Line {line}" if title is None else f"{title}, line {line}"
         if title is not None:
             ax.set_title(title)
 
@@ -1114,19 +1127,22 @@ class Survey:
 
     def plot_profiles(
         self,
+        line: typing.Any,
         *,
         y: list[str] | str,
         x: str | None = None,
         **kwargs: typing.Any,
     ) -> None:
         """
-        Plot data profiles with matplotlib, against ``x`` (default the
-        survey's distance column). See :func:`airbornegeo.plot_profiles` for
-        all parameters.
+        Plot data profiles for a single ``line`` with matplotlib, against
+        ``x`` (default the survey's distance column). See
+        :func:`airbornegeo.plot_profiles` for all parameters.
         """
         x = x or self.distance_column
-        self._require(x, *([y] if isinstance(y, str) else y))
-        return plot_profiles(self._data, y=y, x=x, **kwargs)
+        self._require(x, self.line_column, *([y] if isinstance(y, str) else y))
+        data = self._data[self._data[self.line_column] == line]
+        assert not data.empty, f"No rows found for line {line!r}"
+        return plot_profiles(data, y=y, x=x, **kwargs)
 
     def plotly_profiles(
         self,

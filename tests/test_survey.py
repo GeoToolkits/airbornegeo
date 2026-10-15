@@ -643,6 +643,23 @@ def test_plot_coarsen_reduces_plotted_points():
     assert len(ax.collections[0].get_offsets()) == len(survey.data[::3])
 
 
+def test_plot_single_line_only_plots_that_line():
+    survey = _plot_survey()
+    survey.line_column = "line"
+    line = survey.data.line.iloc[0]
+    ax = survey.plot(line=line, color_by="mag", scalebar=False)
+    n_points = (survey.data.line == line).sum()
+    assert len(ax.collections[0].get_offsets()) == n_points
+    assert ax.get_title() == f"Survey: demo, line {line}"
+
+
+def test_plot_unknown_line_raises():
+    survey = _plot_survey()
+    survey.line_column = "line"
+    with pytest.raises(ValueError, match="No rows found for line"):
+        survey.plot(line="nope")
+
+
 # ---------------------------------------------------------------------------
 # to_parquet / from_parquet
 # ---------------------------------------------------------------------------
@@ -911,8 +928,14 @@ def test_profile_wrappers_default_x_to_the_distance_column():
 
 def test_plot_profiles_runs_with_default_x():
     survey = _survey().along_track_distance(progressbar=False)
-    survey.plot_profiles(y="value")
+    survey.plot_profiles("L1", y="value")
     plt.close("all")
+
+
+def test_plot_profiles_unknown_line_raises():
+    survey = _survey().along_track_distance(progressbar=False)
+    with pytest.raises(AssertionError, match="No rows found for line"):
+        survey.plot_profiles("nope", y="value")
 
 
 def test_plot_line_and_crosses_returns_figure_for_one_line():
