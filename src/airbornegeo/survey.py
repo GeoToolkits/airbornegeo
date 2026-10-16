@@ -233,7 +233,7 @@ class Survey:
             latitude_column,
             longitude_column,
         ]
-        cols = [c for c in cols if c != None]  # noqa: E711
+        cols = [c for c in cols if c != None]  # noqa: E711 # pylint: disable=singleton-comparison
         # warn rather than raise, since some bound columns (e.g. distance) are
         # only created later by survey methods; methods needing a missing
         # column raise when called
