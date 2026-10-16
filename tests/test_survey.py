@@ -948,3 +948,75 @@ def test_profile_wrappers_unknown_column_raises():
     survey = _survey().along_track_distance(progressbar=False)
     with pytest.raises(ValueError, match=r"not found in survey\.data"):
         survey.plotly_profiles(y="nope")
+
+
+# ---------------------------------------------------------------------------
+# estimate_error_wavelength
+# ---------------------------------------------------------------------------
+
+
+def _wavy_survey(error_kind, wavelength=500.0):
+    """
+    Eight parallel 2 km E-W flight lines (100 m spacing, points every 10 m)
+    over a smooth linear background field; every other line carries a known
+    line-coherent error: a sinusoid of the given along-line wavelength, or a
+    random constant DC shift.
+    """
+    rng = np.random.default_rng(0)
+    along = np.arange(0.0, 2001.0, 10.0)
+    frames = []
+    for i in range(8):
+        northing = np.full_like(along, 100.0 * i)
+        background = 0.001 * along + 0.002 * northing
+        error = np.zeros_like(along)
+        if i % 2 == 0:
+            if error_kind == "wave":
+                phase = rng.uniform(0, 2 * np.pi)
+                error = np.sin(2 * np.pi * along / wavelength + phase)
+            else:  # "dc"
+                error = np.full_like(along, rng.normal(0, 1.0))
+        frame = pd.DataFrame(
+            {
+                "easting": along,
+                "northing": northing,
+                "distance_along_line": along,
+                "height": 1000.0,
+                "value": background + error,
+            }
+        )
+        frame["line"] = f"L{i}"
+        frame["line_type"] = 0
+        frames.append(frame)
+    return Survey(
+        pd.concat(frames, ignore_index=True),
+        line_column="line",
+        line_type_column="line_type",
+        distance_column="distance_along_line",
+        height_column="height",
+    )
+
+
+def test_estimate_error_wavelength_recovers_sinusoid():
+    survey = _wavy_survey("wave", wavelength=500.0)
+    result = survey.estimate_error_wavelength("value")
+    assert not result["trend_like"]
+    # lines are 2000 m, so the injected 500 m wave is ratio 0.25; the default
+    # grid is log-spaced (~10% steps), so allow one grid step of slack
+    assert result["wavelength"] == pytest.approx(500.0, rel=0.15)
+    assert result["wavelength_ratio"] == pytest.approx(0.25, rel=0.15)
+
+
+def test_estimate_error_wavelength_flags_dc_shift_as_trend():
+    survey = _wavy_survey("dc")
+    result = survey.estimate_error_wavelength("value")
+    assert result["trend_like"]
+    assert np.isinf(result["wavelength"])
+    assert result["trend_fraction"] > 0.5
+
+
+def test_estimate_error_wavelength_grid_must_resolve_below_line_length():
+    survey = _wavy_survey("wave")
+    with pytest.raises(ValueError, match="below 1"):
+        survey.estimate_error_wavelength(
+            "value", wavelength_ratios=np.array([1.5, 2.0])
+        )
