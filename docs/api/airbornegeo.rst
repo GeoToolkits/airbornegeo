@@ -33,6 +33,7 @@ Functions for calculating trajectory or navigation related fields
     directional_velocity
     vertical_acceleration
     track
+    turn_rate
 
 
 Geospatial data operations
@@ -63,6 +64,7 @@ Functions for working with and organizing survey data.
     :toctree: generated/
 
     split_into_segments
+    split_at_turns
     unique_line_id
     median_line_spacing
     largest_line_dimensions

@@ -396,6 +396,10 @@ def plot_levelling_convergence(
         ax1.set_ylim(min(rms_values), max(rms_values))
 
     finite_delta_rms_values = np.array(delta_rms_values)[np.isfinite(delta_rms_values)]
+    if finite_delta_rms_values.size == 0:
+        # a run that converged on its first iteration has no change to show:
+        # leave the axis on autoscale rather than reduce over an empty array
+        return
     delta_rms_range = np.nanmax(finite_delta_rms_values) - np.nanmin(
         finite_delta_rms_values
     )
@@ -721,14 +725,17 @@ def plot_profiles(
     title: str | None = None,
     y_label: list[str] | None = None,
     x_title: str | None = None,
-    y_title: str | None = None,
+    y_title: list[str] | str | None = None,
     marker_sizes: typing.Any = None,
     marker_symbols: typing.Any = None,
     marker_scale=6,
 ):
     """
     plot data profiles with matplotlib
-    currently only allows 3 separate y axes, set with "y_axes", starting with 1
+    currently only allows 4 separate y axes, set with "y_axes", starting with 1.
+    y_title can be a single string or a list of titles, one per y axis. With
+    multiple y axes, an axis holding a single series has its spine, ticks and
+    title colored to match that series.
     """
     df = data.copy()
 
@@ -760,18 +767,29 @@ def plot_profiles(
 
     palette = sns.color_palette(None, len(y)).as_hex()
 
-    axs = [ax] if len(pd.Series(y_axes).unique()) == 1 else [ax, ax.twinx()]
+    if max(y_axes) > 4:
+        msg = "Only 4 unique y axes supported"
+        raise NotImplementedError(msg)
+    axs = [ax] + [ax.twinx() for _ in range(max(y_axes) - 1)]
+    # side of the plot each y axis sits on
+    sides = ["left", "right", "right", "left"][: len(axs)]
+    if len(axs) >= 3:
+        # offset the 3rd axis to the right of the 2nd and make room for it
+        axs[2].spines["right"].set_position(("axes", 1.12))
+        fig.subplots_adjust(right=0.8)
+    if len(axs) == 4:
+        # move the 4th axis to the left, offset outside of the 1st
+        axs[3].spines["left"].set_position(("axes", -0.12))
+        axs[3].spines["left"].set_visible(True)
+        axs[3].spines["right"].set_visible(False)
+        axs[3].yaxis.set_ticks_position("left")
+        axs[3].yaxis.set_label_position("left")
+        fig.subplots_adjust(left=0.2)
 
     # iterate through data columns
     elements = []
     for i, col in enumerate(y):
-        if y_axes[i] == 1:
-            axis = axs[0]
-        elif y_axes[i] == 2:
-            axis = axs[1]
-        else:
-            msg = "Only 2 unique y axes support"
-            raise NotImplementedError(msg)
+        axis = axs[y_axes[i] - 1]
         element = axis.scatter(
             df[x],
             df[col],
@@ -782,24 +800,56 @@ def plot_profiles(
         )
         elements.append(element)
         axis.set_xlabel(x_title)
-        axis.set_ylabel(y_title)
 
         if y_axes[i] > 1:
             axis.grid(False)
 
+    # one title per y axis
+    if isinstance(y_title, list):
+        assert len(y_title) == len(axs), "y_title must have one title per y axis"
+        y_titles = y_title
+    else:
+        y_titles = [y_title for _ in axs]
+    for axis, axis_title in zip(axs, y_titles, strict=True):
+        axis.set_ylabel(axis_title)
+
+    # with multiple y axes, color each axis like its series if it only has one
+    if len(axs) > 1:
+        for n, (axis, side) in enumerate(zip(axs, sides, strict=True)):
+            colors = [palette[i] for i, j in enumerate(y_axes) if j == n + 1]
+            if len(colors) != 1:
+                continue
+            axis.spines[side].set_color(colors[0])
+            axis.tick_params(axis="y", colors=colors[0])
+            axis.yaxis.label.set_color(colors[0])
+
     if x_lims is not None:
         ax.set_xlim(x_lims)
-    for i, j in enumerate(y_axes):
-        if y_lims is not None:
-            if j == 1:
-                axis = axs[0]
-            elif j == 2:
-                axis = axs[1]
-            axis.set_ylim(y_lims[i])
+    if y_lims is not None:
+        for i, j in enumerate(y_axes):
+            axs[j - 1].set_ylim(y_lims[i])
 
     labs = [i.get_label() for i in elements]
-    ax.legend(elements, labs, loc=0, markerscale=marker_scale)
-
     plt.title(title)
+
+    # a legend is drawn as a single artist, so to get the box behind the data but
+    # the text above it, draw the legend twice: a box-only copy on the bottom axis
+    # (above the grid, below the data), and a text-only copy on the top axis
+    # placed exactly over it
+    background = ax.legend(elements, labs, loc=0, markerscale=marker_scale)
+    background.set_zorder(0.9)
+    for artist in [*background.get_texts(), *background.legend_handles]:
+        artist.set_alpha(0)
+    fig.canvas.draw()
+    box = background.get_window_extent().transformed(ax.transAxes.inverted())
+    axs[-1].legend(
+        elements,
+        labs,
+        loc="lower left",
+        bbox_to_anchor=box.bounds,
+        borderaxespad=0,
+        frameon=False,
+        markerscale=marker_scale,
+    )
 
     return fig

@@ -187,12 +187,25 @@ def test_unique_line_id_overwrites_line_column():
 
 
 def test_split_into_segments_writes_line_column():
-    data = _synthetic_survey().drop(columns=["line", "line_type"])
+    data = _synthetic_survey()
+    data["line"] = "all"
     data["unixtime"] = np.arange(len(data), dtype=float)
     data.loc[11:, "unixtime"] += 100
     data.loc[22:, "unixtime"] += 100
-    survey = Survey(data, **_BINDINGS).split_into_segments(50.0)
+    survey = Survey(data, **{**_BINDINGS, "distance_column": None})
+    survey.split_into_segments(50.0, segment_column=None)
     assert survey.data["line"].nunique() == 3
+
+
+def test_split_into_segments_extends_existing_lines():
+    data = _synthetic_survey()
+    data["unixtime"] = np.arange(len(data), dtype=float)
+    first = data.index[data["line"] == data["line"].iloc[0]]
+    data.loc[first[len(first) // 2] :, "unixtime"] += 100
+    survey = Survey(data, **{**_BINDINGS, "distance_column": None})
+    survey.split_into_segments(50.0)
+    name = str(data["line"].iloc[0])
+    assert survey.data.loc[first, "line"].unique().tolist() == [name, f"{name}_1"]
 
 
 def test_track_requires_geographic_columns():
@@ -310,7 +323,8 @@ def test_mean_line_azimuths_wraparound():
 
 def test_median_line_spacings():
     spacings = _survey().median_line_spacings
-    assert spacings["flight"] == pytest.approx(100.0)
+    # spacings are computed on every 2nd point, so are only approximate
+    assert spacings["flight"] == pytest.approx(100.0, rel=0.01)
     # only one tie line, so no tie spacing can be computed
     assert "tie" not in spacings
 
@@ -324,6 +338,16 @@ def test_line_point_spacings():
     # each line has points every 10 m
     spacings = _survey().line_point_spacings
     assert spacings.to_numpy() == pytest.approx([10.0] * 3)
+
+
+def test_median_sampling_rates():
+    # each line has points every 1 s
+    survey = _survey()
+    assert survey.line_sampling_rates.to_numpy() == pytest.approx([1.0] * 3)
+    assert survey.median_sampling_rates == {
+        "flight": pytest.approx(1.0),
+        "tie": pytest.approx(1.0),
+    }
 
 
 def test_median_point_spacings():
@@ -619,6 +643,23 @@ def test_plot_coarsen_reduces_plotted_points():
     assert len(ax.collections[0].get_offsets()) == len(survey.data[::3])
 
 
+def test_plot_single_line_only_plots_that_line():
+    survey = _plot_survey()
+    survey.line_column = "line"
+    line = survey.data.line.iloc[0]
+    ax = survey.plot(line=line, color_by="mag", scalebar=False)
+    n_points = (survey.data.line == line).sum()
+    assert len(ax.collections[0].get_offsets()) == n_points
+    assert ax.get_title() == f"Survey: demo, line {line}"
+
+
+def test_plot_unknown_line_raises():
+    survey = _plot_survey()
+    survey.line_column = "line"
+    with pytest.raises(ValueError, match="No rows found for line"):
+        survey.plot(line="nope")
+
+
 # ---------------------------------------------------------------------------
 # to_parquet / from_parquet
 # ---------------------------------------------------------------------------
@@ -887,8 +928,14 @@ def test_profile_wrappers_default_x_to_the_distance_column():
 
 def test_plot_profiles_runs_with_default_x():
     survey = _survey().along_track_distance(progressbar=False)
-    survey.plot_profiles(y="value")
+    survey.plot_profiles("L1", y="value")
     plt.close("all")
+
+
+def test_plot_profiles_unknown_line_raises():
+    survey = _survey().along_track_distance(progressbar=False)
+    with pytest.raises(AssertionError, match="No rows found for line"):
+        survey.plot_profiles("nope", y="value")
 
 
 def test_plot_line_and_crosses_returns_figure_for_one_line():
@@ -901,3 +948,75 @@ def test_profile_wrappers_unknown_column_raises():
     survey = _survey().along_track_distance(progressbar=False)
     with pytest.raises(ValueError, match=r"not found in survey\.data"):
         survey.plotly_profiles(y="nope")
+
+
+# ---------------------------------------------------------------------------
+# estimate_error_wavelength
+# ---------------------------------------------------------------------------
+
+
+def _wavy_survey(error_kind, wavelength=500.0):
+    """
+    Eight parallel 2 km E-W flight lines (100 m spacing, points every 10 m)
+    over a smooth linear background field; every other line carries a known
+    line-coherent error: a sinusoid of the given along-line wavelength, or a
+    random constant DC shift.
+    """
+    rng = np.random.default_rng(0)
+    along = np.arange(0.0, 2001.0, 10.0)
+    frames = []
+    for i in range(8):
+        northing = np.full_like(along, 100.0 * i)
+        background = 0.001 * along + 0.002 * northing
+        error = np.zeros_like(along)
+        if i % 2 == 0:
+            if error_kind == "wave":
+                phase = rng.uniform(0, 2 * np.pi)
+                error = np.sin(2 * np.pi * along / wavelength + phase)
+            else:  # "dc"
+                error = np.full_like(along, rng.normal(0, 1.0))
+        frame = pd.DataFrame(
+            {
+                "easting": along,
+                "northing": northing,
+                "distance_along_line": along,
+                "height": 1000.0,
+                "value": background + error,
+            }
+        )
+        frame["line"] = f"L{i}"
+        frame["line_type"] = 0
+        frames.append(frame)
+    return Survey(
+        pd.concat(frames, ignore_index=True),
+        line_column="line",
+        line_type_column="line_type",
+        distance_column="distance_along_line",
+        height_column="height",
+    )
+
+
+def test_estimate_error_wavelength_recovers_sinusoid():
+    survey = _wavy_survey("wave", wavelength=500.0)
+    result = survey.estimate_error_wavelength("value")
+    assert not result["trend_like"]
+    # lines are 2000 m, so the injected 500 m wave is ratio 0.25; the default
+    # grid is log-spaced (~10% steps), so allow one grid step of slack
+    assert result["wavelength"] == pytest.approx(500.0, rel=0.15)
+    assert result["wavelength_ratio"] == pytest.approx(0.25, rel=0.15)
+
+
+def test_estimate_error_wavelength_flags_dc_shift_as_trend():
+    survey = _wavy_survey("dc")
+    result = survey.estimate_error_wavelength("value")
+    assert result["trend_like"]
+    assert np.isinf(result["wavelength"])
+    assert result["trend_fraction"] > 0.5
+
+
+def test_estimate_error_wavelength_grid_must_resolve_below_line_length():
+    survey = _wavy_survey("wave")
+    with pytest.raises(ValueError, match="below 1"):
+        survey.estimate_error_wavelength(
+            "value", wavelength_ratios=np.array([1.5, 2.0])
+        )

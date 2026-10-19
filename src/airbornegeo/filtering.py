@@ -424,17 +424,16 @@ def _fft_filter_segment(
     Low-pass filter of a single gap-free segment. Returns the low-pass filtered values
     at the original (possibly irregular) coords.
     """
-    # too few points to estimate anything below the segment scale; the best available
-    # low-pass is the data itself
-    if len(values) < 4:
+    # too few distinct points to estimate anything below the segment scale; the best
+    # available low-pass is the data itself
+    unique_coords = np.unique(coords)
+    if len(unique_coords) < 4:
         return values.copy()
 
     # resample onto a regular grid at the median spacing, since the FFT (and the
-    # median window filter) require evenly spaced data
-    spacing = np.median(np.diff(coords))
-    if spacing <= 0:
-        msg = "coords must be strictly increasing within a segment"
-        raise ValueError(msg)
+    # median window filter) require evenly spaced data. Use the distinct coords so
+    # repeated values (e.g. duplicated timestamps) don't collapse the spacing to 0
+    spacing = np.median(np.diff(unique_coords))
     n_grid = round(float((coords[-1] - coords[0]) / spacing)) + 1
     grid = np.linspace(coords[0], coords[-1], n_grid)
     grid_values = np.interp(grid, coords, values)
@@ -528,7 +527,9 @@ def _filter_values_scipy(
     # find gaps larger than max_gap and filter each segment separately
     if len(values) > 1:
         if max_gap is None:
-            max_gap = 10 * np.median(steps)
+            # ignore repeated coords so they don't collapse the typical step to 0
+            positive_steps = steps[steps > 0]
+            max_gap = 10 * np.median(positive_steps) if positive_steps.size else 0
         segment_starts = np.flatnonzero(steps > max_gap) + 1
     else:
         segment_starts = np.array([], dtype=int)

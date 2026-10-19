@@ -544,3 +544,76 @@ def test_azimuth_long_axis1():
         exterior=SimpleNamespace(coords=[(0, 0), (0, 1), (5, 1), (5, 0)])
     )
     assert nav.azimuth(fake_rect) == pytest.approx(180.0)
+
+
+def _arc(radius, step=500.0):
+    """A quarter circle of the given radius, plus a straight lead-in."""
+    straight_n = np.arange(0, 100e3, step)
+    angle = np.linspace(0, np.pi / 2, max(3, int(np.pi / 2 * radius / step)))
+    easting = np.r_[np.zeros_like(straight_n), radius * (1 - np.cos(angle))]
+    northing = np.r_[straight_n, 100e3 + radius * np.sin(angle)]
+    distance = np.r_[0.0, np.cumsum(np.hypot(np.diff(easting), np.diff(northing)))]
+    track = np.degrees(np.arctan2(np.gradient(easting), np.gradient(northing))) % 360
+    return pd.DataFrame({"distance": distance, "track": track})
+
+
+def test_turn_rate_matches_the_geometry():
+    """On a circle of radius r the turn rate is 180/(pi*r) degrees per km."""
+    radius = 20e3
+    data = _arc(radius)
+    rate = nav.turn_rate(
+        data,
+        track_column="track",
+        distance_column="distance",
+        smoothing_distance=2e3,
+    )
+    expected = 180.0 / (np.pi * radius / 1e3)
+    in_arc = data.distance > 110e3
+    assert np.median(rate[in_arc]) == pytest.approx(expected, rel=0.15)
+
+
+def test_turn_rate_is_zero_on_a_straight_line():
+    """Straight flight turns at essentially zero degrees per km."""
+    data = _arc(20e3)
+    rate = nav.turn_rate(
+        data,
+        track_column="track",
+        distance_column="distance",
+        smoothing_distance=2e3,
+    )
+    straight = data.distance < 90e3
+    assert np.max(rate[straight]) < 0.01
+
+
+def test_turn_rate_does_not_wrap_at_north():
+    """A track wandering either side of north must not read as a turn."""
+    distance = np.arange(0, 100e3, 500.0)
+    track = np.where(np.arange(len(distance)) % 2, 359.5, 0.5)
+    data = pd.DataFrame({"distance": distance, "track": track})
+    rate = nav.turn_rate(
+        data,
+        track_column="track",
+        distance_column="distance",
+        smoothing_distance=5e3,
+    )
+    # the interior is exactly straight; the ends see a truncated smoothing
+    # window, which still leaves them far below the default turn threshold
+    interior = slice(20, -20)
+    assert np.max(rate[interior]) < 0.01
+    assert np.max(rate) < 0.5
+
+
+def test_turn_rate_ignores_repeated_coordinates():
+    """A repeated coordinate gives a zero step, which must not divide to inf."""
+    data = _arc(20e3)
+    doubled = pd.concat(
+        [data.iloc[:50], data.iloc[49:50], data.iloc[50:]], ignore_index=True
+    )
+    rate = nav.turn_rate(
+        doubled,
+        track_column="track",
+        distance_column="distance",
+        smoothing_distance=2e3,
+    )
+    assert np.isfinite(rate).all()
+    assert np.max(rate[doubled.distance < 90e3]) < 0.01

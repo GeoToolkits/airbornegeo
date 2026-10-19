@@ -9,7 +9,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from airbornegeo.processing import detect_outliers, split_into_segments, unique_line_id
+from airbornegeo.processing import (
+    detect_outliers,
+    split_at_turns,
+    split_into_segments,
+    unique_line_id,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -36,16 +41,49 @@ def test_split_into_segments_missing_column_raises():
         split_into_segments(data, threshold=5, column_name="val")
 
 
-@pytest.mark.parametrize("segment_column", ["seg", "anything", "even_missing_col"])
-def test_split_into_segments_segment_column_not_none_raises_not_implemented(
-    segment_column,
-):
-    """Any non-None segment_column should raise NotImplementedError before other validation runs."""
-    data = pd.DataFrame({"val": [0, 1, 2], "seg": [1.0, 1.0, 1.0]})
-    with pytest.raises(NotImplementedError):
-        split_into_segments(
-            data, threshold=5, column_name="val", segment_column=segment_column
-        )
+def test_split_into_segments_segment_column_missing_raises():
+    """A segment_column not in the dataframe should raise AssertionError."""
+    data = pd.DataFrame({"val": [0, 1, 2]})
+    with pytest.raises(AssertionError, match="nope"):
+        split_into_segments(data, threshold=5, column_name="val", segment_column="nope")
+
+
+def test_split_into_segments_segment_column_names_sublines():
+    """The first piece keeps the line name, later pieces extend it."""
+    data = pd.DataFrame(
+        {
+            "val": [0, 1, 10, 11, 20, 0, 1, 2, 0, 1, 10],
+            "line": [12] * 5 + [13] * 3 + ["14_1"] * 3,
+        }
+    )
+    result = split_into_segments(
+        data, threshold=5, column_name="val", segment_column="line"
+    )
+    expected = ["12", "12", "12_1", "12_1", "12_2", "13", "13", "13", "14_1"]
+    assert list(result) == [*expected, "14_1", "14_2"]
+
+
+def test_split_into_segments_segment_column_skips_taken_names():
+    """New names never collide with an existing line name."""
+    data = pd.DataFrame({"val": [0, 10, 0], "line": ["12", "12", "12_1"]})
+    result = split_into_segments(
+        data, threshold=5, column_name="val", segment_column="line"
+    )
+    assert list(result) == ["12", "12_2", "12_1"]
+
+
+def test_split_into_segments_segment_column_small_segments_nan():
+    """Small pieces are NaN and the first kept piece keeps the line name."""
+    data = pd.DataFrame({"val": [0, 10, 11, 12], "line": [5, 5, 5, 5]})
+    result = split_into_segments(
+        data,
+        threshold=5,
+        column_name="val",
+        segment_column="line",
+        min_points_per_segment=2,
+    )
+    assert pd.isna(result.iloc[0])
+    assert list(result.iloc[1:]) == ["5", "5", "5"]
 
 
 def test_split_into_segments_angular_difference_wraps_large_jump():
@@ -323,3 +361,97 @@ def test_detect_outliers_boolean_column_raises_typeerror():
     data = pd.DataFrame({"boolean": [True, False, True, False, True]})
     with pytest.raises(TypeError):
         detect_outliers(data)
+
+
+def _racetrack(radius=20e3, leg=200e3, step=500.0, left=False, flight="1"):
+    """Two straight legs joined by a half circle, sampled every `step` metres."""
+    out_n = np.arange(0, leg, step)
+    arc_angle = np.linspace(0, np.pi, max(3, int(np.pi * radius / step)))
+    sign = -1.0 if left else 1.0
+    arc_e = sign * radius * (1 - np.cos(arc_angle))
+    arc_n = leg + radius * np.sin(arc_angle)
+    back_n = np.arange(leg, 0, -step)
+    easting = np.r_[
+        np.zeros_like(out_n), arc_e, np.full_like(back_n, sign * 2 * radius)
+    ]
+    northing = np.r_[out_n, arc_n, back_n]
+    distance = np.r_[0.0, np.cumsum(np.hypot(np.diff(easting), np.diff(northing)))]
+    track = np.degrees(np.arctan2(np.gradient(easting), np.gradient(northing))) % 360
+    return pd.DataFrame(
+        {
+            "easting": easting,
+            "northing": northing,
+            "distance": distance,
+            "track": track,
+            "flight": flight,
+        }
+    )
+
+
+@pytest.mark.parametrize("left", [False, True])
+def test_split_at_turns_racetrack(left):
+    """An out-and-back flight becomes an outward leg, a turn, and a return leg."""
+    data = _racetrack(left=left)
+    names = split_at_turns(data, track_column="track", distance_column="distance")
+    assert names.nunique() == 3
+    # the turn is the short middle line, the two legs are long and similar
+    lengths = data.groupby(names).distance.agg(lambda v: v.max() - v.min())
+    assert lengths.iloc[1] < lengths.iloc[0] / 2
+    assert lengths.iloc[2] == pytest.approx(lengths.iloc[0], rel=0.2)
+
+
+def test_split_at_turns_drops_turns():
+    """`keep_turns=False` names only the straight runs."""
+    data = _racetrack()
+    names = split_at_turns(
+        data, track_column="track", distance_column="distance", keep_turns=False
+    )
+    assert names.nunique() == 2
+    assert names.isna().any()
+
+
+def test_split_at_turns_min_length():
+    """Runs shorter than `min_length` are unnamed."""
+    data = _racetrack()
+    names = split_at_turns(
+        data,
+        track_column="track",
+        distance_column="distance",
+        min_length=100e3,
+    )
+    assert names.nunique() == 2  # the turn is far shorter than 100 km
+
+
+def test_split_at_turns_groups_extend_names():
+    """New names extend the group they came from."""
+    data = pd.concat(
+        [_racetrack(flight="7"), _racetrack(flight="8", left=True)],
+        ignore_index=True,
+    )
+    names = split_at_turns(
+        data,
+        track_column="track",
+        distance_column="distance",
+        groupby_column="flight",
+    )
+    assert set(names.unique()) == {"7", "7_1", "7_2", "8", "8_1", "8_2"}
+
+
+def test_split_at_turns_sampling_rate_invariant():
+    """The same flight sampled coarsely gives the same number of lines."""
+    fine = split_at_turns(
+        _racetrack(step=250.0), track_column="track", distance_column="distance"
+    )
+    coarse = split_at_turns(
+        _racetrack(step=2500.0), track_column="track", distance_column="distance"
+    )
+    assert fine.nunique() == coarse.nunique() == 3
+
+
+def test_split_into_segments_absolute():
+    """`absolute=True` splits on decreases as well as increases."""
+    data = pd.DataFrame({"val": [0, 1, 2, -10, -9, -8]})
+    one_sided = split_into_segments(data, threshold=5, column_name="val")
+    two_sided = split_into_segments(data, threshold=5, column_name="val", absolute=True)
+    assert len(one_sided.unique()) == 1
+    assert two_sided.nunique() == 2

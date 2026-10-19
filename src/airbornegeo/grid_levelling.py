@@ -116,6 +116,8 @@ def level_to_grid(
                 **filter_kwargs,
             )
         # add correction values to the main dataframe
-        data.loc[data.line == _segment_name, "levelling_correction"] = correction
+        data.loc[data[groupby_column] == _segment_name, "levelling_correction"] = (
+            correction
+        )
 
     return data[data_column] - data.levelling_correction

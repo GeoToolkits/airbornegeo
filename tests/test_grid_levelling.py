@@ -194,3 +194,18 @@ def test_level_to_grid_drops_nan_grid_rows():
         groupby_column="line",
     )
     assert len(result) == len(data) - 1
+
+
+def test_level_to_grid_groupby_column_not_named_line():
+    """Per-line corrections should use groupby_column, not a column named 'line'."""
+    data = _survey_with_lines().rename(columns={"line": "flight"})
+    result = level_to_grid(
+        data,
+        data_column="data",
+        grid_column="grid",
+        fit_by_column="distance_along_line",
+        degree=0,
+        groupby_column="flight",
+    )
+    assert not result.isna().any()
+    assert result.to_numpy() == pytest.approx(data.grid.to_numpy(), abs=5)
